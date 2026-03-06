@@ -1,11 +1,13 @@
-/**
- * Legacy Index page - redirects to Home
- * Kept for backward compatibility
- */
-import Home from './Home';
+import Header from "@/components/Header";
+import StockTable from "@/components/StockTable";
 
 const Index = () => {
-  return <Home />;
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <StockTable />
+    </div>
+  );
 };
 
 export default Index;

@@ -1,0 +1,121 @@
+import { useState, useMemo } from "react";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { useStocks } from "@/contexts/StockContext";
+import StockRow from "@/components/StockRow";
+import AddStockDialog from "@/components/AddStockDialog";
+import { motion, AnimatePresence } from "framer-motion";
+
+type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event";
+type SortDir = "asc" | "desc";
+
+const StockTable = () => {
+  const { stocks, events } = useStocks();
+  const [sortKey, setSortKey] = useState<SortKey>("ticker");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) setSortDir(prev => prev === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDir(key === "ticker" ? "asc" : "desc"); }
+  };
+
+  const sorted = useMemo(() => {
+    return [...stocks].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "ticker": cmp = a.ticker.localeCompare(b.ticker); break;
+        case "price": cmp = a.price - b.price; break;
+        case "change": cmp = a.change - b.change; break;
+        case "changePercent": cmp = a.changePercent - b.changePercent; break;
+        case "volume": cmp = a.volume - b.volume; break;
+        case "marketCap": cmp = a.marketCap - b.marketCap; break;
+        case "event": {
+          const aEvent = events.find(e => e.ticker === a.ticker)?.tags?.join(",") || "";
+          const bEvent = events.find(e => e.ticker === b.ticker)?.tags?.join(",") || "";
+          cmp = aEvent.localeCompare(bEvent);
+          break;
+        }
+      }
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [stocks, sortKey, sortDir, events]);
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
+    return sortDir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />;
+  };
+
+  const headerClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="container mx-auto px-4 py-6"
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-lg font-bold">Live Watchlist</h2>
+          <p className="text-xs text-muted-foreground">
+            {stocks.length} stocks · Auto-refreshing every 2s
+          </p>
+        </div>
+        <AddStockDialog />
+      </div>
+
+      <div className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/50">
+                <th className={headerClass} onClick={() => toggleSort("ticker")}>
+                  <div className="flex items-center gap-1">Ticker <SortIcon col="ticker" /></div>
+                </th>
+                <th className={`${headerClass}`}>Exchange</th>
+                <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
+                  <div className="flex items-center justify-end gap-1">Price <SortIcon col="price" /></div>
+                </th>
+                <th className={`${headerClass} text-right`} onClick={() => toggleSort("changePercent")}>
+                  <div className="flex items-center justify-end gap-1">Change <SortIcon col="changePercent" /></div>
+                </th>
+                <th className={`${headerClass} text-right hidden lg:table-cell`}>High</th>
+                <th className={`${headerClass} text-right hidden lg:table-cell`}>Low</th>
+                <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
+                  <div className="flex items-center justify-end gap-1">Volume <SortIcon col="volume" /></div>
+                </th>
+                <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
+                  <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
+                </th>
+                <th className={headerClass} onClick={() => toggleSort("event")}>
+                  <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>
+                </th>
+                <th className={headerClass}>Notes</th>
+                <th className={`${headerClass} w-10`}></th>
+              </tr>
+            </thead>
+            <tbody>
+              <AnimatePresence>
+                {sorted.map((stock, i) => (
+                  <StockRow key={stock.ticker} stock={stock} index={i} />
+                ))}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
+
+        {stocks.length === 0 && (
+          <div className="py-16 text-center text-muted-foreground">
+            <p className="text-sm">No stocks in your watchlist</p>
+            <p className="text-xs mt-1">Click "Add Stock" to get started</p>
+          </div>
+        )}
+      </div>
+
+      <p className="text-xs text-muted-foreground mt-3 text-center">
+        Data is simulated for demonstration · Prices update every 2 seconds · Preferences are encrypted and stored locally
+      </p>
+    </motion.div>
+  );
+};
+
+export default StockTable;
