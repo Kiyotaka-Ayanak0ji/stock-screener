@@ -10,7 +10,7 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { stocks, events, columnVisibility, customColumns } = useStocks();
+  const { stocks, events, columnVisibility, customColumns, customColumnData } = useStocks();
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
