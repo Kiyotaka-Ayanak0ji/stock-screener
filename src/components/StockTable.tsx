@@ -3,15 +3,18 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
+import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import { motion, AnimatePresence } from "framer-motion";
 
-type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event";
+type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event" | string;
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { stocks, events } = useStocks();
+  const { stocks, events, columnVisibility, customColumns } = useStocks();
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const isVisible = (key: string) => columnVisibility[key] !== false;
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir(prev => prev === "asc" ? "desc" : "asc");
@@ -46,6 +49,8 @@ const StockTable = () => {
 
   const headerClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors";
 
+  const visibleCustomColumns = customColumns.filter(c => isVisible(`custom_${c.id}`));
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -60,7 +65,10 @@ const StockTable = () => {
             {stocks.length} stocks · Auto-refreshing every 2s
           </p>
         </div>
-        <AddStockDialog />
+        <div className="flex items-center gap-2">
+          <ColumnVisibilityDropdown />
+          <AddStockDialog />
+        </div>
       </div>
 
       <div className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
@@ -71,32 +79,55 @@ const StockTable = () => {
                 <th className={headerClass} onClick={() => toggleSort("ticker")}>
                   <div className="flex items-center gap-1">Ticker <SortIcon col="ticker" /></div>
                 </th>
-                <th className={`${headerClass}`}>Exchange</th>
-                <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
-                  <div className="flex items-center justify-end gap-1">Price <SortIcon col="price" /></div>
-                </th>
-                <th className={`${headerClass} text-right`} onClick={() => toggleSort("changePercent")}>
-                  <div className="flex items-center justify-end gap-1">Change <SortIcon col="changePercent" /></div>
-                </th>
-                <th className={`${headerClass} text-right hidden lg:table-cell`}>High</th>
-                <th className={`${headerClass} text-right hidden lg:table-cell`}>Low</th>
-                <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
-                  <div className="flex items-center justify-end gap-1">Volume <SortIcon col="volume" /></div>
-                </th>
-                <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
-                  <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
-                </th>
-                <th className={headerClass} onClick={() => toggleSort("event")}>
-                  <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>
-                </th>
-                <th className={headerClass}>Notes</th>
+                {isVisible("exchange") && (
+                  <th className={headerClass}>Exchange</th>
+                )}
+                {isVisible("price") && (
+                  <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
+                    <div className="flex items-center justify-end gap-1">Price <SortIcon col="price" /></div>
+                  </th>
+                )}
+                {isVisible("change") && (
+                  <th className={`${headerClass} text-right`} onClick={() => toggleSort("changePercent")}>
+                    <div className="flex items-center justify-end gap-1">Change <SortIcon col="changePercent" /></div>
+                  </th>
+                )}
+                {isVisible("high") && (
+                  <th className={`${headerClass} text-right hidden lg:table-cell`}>High</th>
+                )}
+                {isVisible("low") && (
+                  <th className={`${headerClass} text-right hidden lg:table-cell`}>Low</th>
+                )}
+                {isVisible("volume") && (
+                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
+                    <div className="flex items-center justify-end gap-1">Volume <SortIcon col="volume" /></div>
+                  </th>
+                )}
+                {isVisible("marketCap") && (
+                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
+                    <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
+                  </th>
+                )}
+                {visibleCustomColumns.map(col => (
+                  <th key={col.id} className={`${headerClass} text-right`}>
+                    {col.name}
+                  </th>
+                ))}
+                {isVisible("event") && (
+                  <th className={headerClass} onClick={() => toggleSort("event")}>
+                    <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>
+                  </th>
+                )}
+                {isVisible("notes") && (
+                  <th className={headerClass}>Notes</th>
+                )}
                 <th className={`${headerClass} w-10`}></th>
               </tr>
             </thead>
             <tbody>
               <AnimatePresence>
                 {sorted.map((stock, i) => (
-                  <StockRow key={stock.ticker} stock={stock} index={i} />
+                  <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
                 ))}
               </AnimatePresence>
             </tbody>
