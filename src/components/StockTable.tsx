@@ -37,6 +37,15 @@ const StockTable = () => {
           cmp = aEvent.localeCompare(bEvent);
           break;
         }
+        default: {
+          if (sortKey.startsWith("custom_")) {
+            const colId = sortKey.replace("custom_", "");
+            const aVal = customColumnData[a.ticker]?.[colId] ?? -Infinity;
+            const bVal = customColumnData[b.ticker]?.[colId] ?? -Infinity;
+            cmp = (aVal as number) - (bVal as number);
+          }
+          break;
+        }
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
