@@ -10,7 +10,7 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { stocks, events, columnVisibility, customColumns } = useStocks();
+  const { stocks, events, columnVisibility, customColumns, customColumnData } = useStocks();
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -37,10 +37,19 @@ const StockTable = () => {
           cmp = aEvent.localeCompare(bEvent);
           break;
         }
+        default: {
+          if (sortKey.startsWith("custom_")) {
+            const colId = sortKey.replace("custom_", "");
+            const aVal = customColumnData[a.ticker]?.[colId] ?? -Infinity;
+            const bVal = customColumnData[b.ticker]?.[colId] ?? -Infinity;
+            cmp = (aVal as number) - (bVal as number);
+          }
+          break;
+        }
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [stocks, sortKey, sortDir, events]);
+  }, [stocks, sortKey, sortDir, events, customColumnData]);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
@@ -109,8 +118,8 @@ const StockTable = () => {
                   </th>
                 )}
                 {visibleCustomColumns.map(col => (
-                  <th key={col.id} className={`${headerClass} text-right`}>
-                    {col.name}
+                  <th key={col.id} className={`${headerClass} text-right`} onClick={() => toggleSort(`custom_${col.id}`)}>
+                    <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
                   </th>
                 ))}
                 {isVisible("event") && (
