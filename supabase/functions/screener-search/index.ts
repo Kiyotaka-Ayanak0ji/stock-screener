@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error('Search error:', error);
-    return new Response(JSON.stringify({ results: [], error: error.message }), {
+    return new Response(JSON.stringify({ results: [], error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
