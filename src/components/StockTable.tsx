@@ -49,7 +49,7 @@ const StockTable = () => {
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [stocks, sortKey, sortDir, events]);
+  }, [stocks, sortKey, sortDir, events, customColumnData]);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 opacity-30" />;
