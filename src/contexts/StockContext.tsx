@@ -2,6 +2,11 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, generateStockData, ALL_AVAILABLE_STOCKS, encrypt, decrypt } from "@/lib/stockData";
 import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 
+export interface CustomColumn {
+  id: string;
+  name: string;
+}
+
 interface StockContextType {
   stocks: Stock[];
   notes: StockNote[];
@@ -13,6 +18,13 @@ interface StockContextType {
   updateEvent: (ticker: string, tags: string[]) => void;
   isMarketOpen: boolean;
   lastFlash: Record<string, "up" | "down" | null>;
+  columnVisibility: Record<string, boolean>;
+  toggleColumnVisibility: (key: string) => void;
+  customColumns: CustomColumn[];
+  addCustomColumn: (name: string) => void;
+  removeCustomColumn: (id: string) => void;
+  customColumnData: Record<string, Record<string, number | null>>;
+  updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
@@ -42,10 +54,28 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [lastFlash, setLastFlash] = useState<Record<string, "up" | "down" | null>>({});
   const prevPrices = useRef<Record<string, number>>({});
 
+  // Column visibility
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() =>
+    loadEncrypted("st_col_vis", {})
+  );
+
+  // Custom columns
+  const [customColumns, setCustomColumns] = useState<CustomColumn[]>(() =>
+    loadEncrypted("st_custom_cols", [])
+  );
+
+  // Custom column data: { [ticker]: { [columnId]: number | null } }
+  const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>(() =>
+    loadEncrypted("st_custom_data", {})
+  );
+
   // Save preferences encrypted
   useEffect(() => { saveEncrypted("st_notes", notes); }, [notes]);
   useEffect(() => { saveEncrypted("st_events", events); }, [events]);
   useEffect(() => { saveEncrypted("st_watchlist", watchlist); }, [watchlist]);
+  useEffect(() => { saveEncrypted("st_col_vis", columnVisibility); }, [columnVisibility]);
+  useEffect(() => { saveEncrypted("st_custom_cols", customColumns); }, [customColumns]);
+  useEffect(() => { saveEncrypted("st_custom_data", customColumnData); }, [customColumnData]);
 
   const [useLiveData, setUseLiveData] = useState(true);
   const liveDataFailed = useRef(false);
@@ -56,7 +86,6 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     const fetchLive = async () => {
       if (liveDataFailed.current) {
-        // Fallback to simulation
         setStocks(prev => {
           const updated = prev.map(s => simulatePriceUpdate(s));
           const flashes: Record<string, "up" | "down" | null> = {};
@@ -112,8 +141,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     };
 
-    fetchLive(); // Initial fetch
-    const interval = setInterval(fetchLive, 5000); // Poll every 5s
+    fetchLive();
+    const interval = setInterval(fetchLive, 5000);
     return () => clearInterval(interval);
   }, [isMarketOpen, watchlist]);
 
@@ -157,10 +186,61 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, []);
 
+  const toggleColumnVisibility = useCallback((key: string) => {
+    setColumnVisibility(prev => ({
+      ...prev,
+      [key]: prev[key] === false ? true : false,
+    }));
+  }, []);
+
+  const addCustomColumn = useCallback((name: string) => {
+    const id = `col_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+    setCustomColumns(prev => [...prev, { id, name }]);
+    // Default visible
+    setColumnVisibility(prev => ({ ...prev, [`custom_${id}`]: true }));
+  }, []);
+
+  const removeCustomColumn = useCallback((id: string) => {
+    setCustomColumns(prev => prev.filter(c => c.id !== id));
+    setColumnVisibility(prev => {
+      const next = { ...prev };
+      delete next[`custom_${id}`];
+      return next;
+    });
+    setCustomColumnData(prev => {
+      const next = { ...prev };
+      for (const ticker of Object.keys(next)) {
+        if (next[ticker]?.[id] !== undefined) {
+          const tickerData = { ...next[ticker] };
+          delete tickerData[id];
+          next[ticker] = tickerData;
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const updateCustomColumnData = useCallback((ticker: string, columnId: string, value: number | null) => {
+    setCustomColumnData(prev => ({
+      ...prev,
+      [ticker]: {
+        ...(prev[ticker] || {}),
+        [columnId]: value,
+      },
+    }));
+  }, []);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
-    <StockContext.Provider value={{ stocks: filteredStocks, notes, events, watchlist, addStock, removeStock, updateNote, updateEvent, isMarketOpen, lastFlash }}>
+    <StockContext.Provider value={{
+      stocks: filteredStocks, notes, events, watchlist,
+      addStock, removeStock, updateNote, updateEvent,
+      isMarketOpen, lastFlash,
+      columnVisibility, toggleColumnVisibility,
+      customColumns, addCustomColumn, removeCustomColumn,
+      customColumnData, updateCustomColumnData,
+    }}>
       {children}
     </StockContext.Provider>
   );
