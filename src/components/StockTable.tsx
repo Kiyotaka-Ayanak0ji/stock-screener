@@ -118,8 +118,8 @@ const StockTable = () => {
                   </th>
                 )}
                 {visibleCustomColumns.map(col => (
-                  <th key={col.id} className={`${headerClass} text-right`}>
-                    {col.name}
+                  <th key={col.id} className={`${headerClass} text-right`} onClick={() => toggleSort(`custom_${col.id}`)}>
+                    <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
                   </th>
                 ))}
                 {isVisible("event") && (
