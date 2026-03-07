@@ -3,6 +3,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Cache crumb + cookie for reuse across requests
+let cachedCrumb: string | null = null;
+let cachedCookie: string | null = null;
+let crumbExpiry = 0;
+
+async function getCrumbAndCookie(): Promise<{ crumb: string; cookie: string }> {
+  if (cachedCrumb && cachedCookie && Date.now() < crumbExpiry) {
+    return { crumb: cachedCrumb, cookie: cachedCookie };
+  }
+
+  // Step 1: Get cookie from Yahoo Finance
+  const initRes = await fetch('https://fc.yahoo.com', {
+    redirect: 'manual',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    },
+  });
+  await initRes.text(); // consume body
+
+  const setCookieHeader = initRes.headers.get('set-cookie') || '';
+  const cookieMatch = setCookieHeader.match(/A3=([^;]+)/);
+  const cookie = cookieMatch ? `A3=${cookieMatch[1]}` : '';
+
+  // Step 2: Get crumb using the cookie
+  const crumbRes = await fetch('https://query2.finance.yahoo.com/v1/test/getcrumb', {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Cookie': cookie,
+    },
+  });
+  const crumb = await crumbRes.text();
+
+  cachedCrumb = crumb;
+  cachedCookie = cookie;
+  crumbExpiry = Date.now() + 10 * 60 * 1000; // 10 min
+
+  return { crumb, cookie };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -18,23 +57,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Convert to Yahoo Finance format: RELIANCE -> RELIANCE.NS, BSE -> .BO
     const yahooSymbols = symbols.map((s: { ticker: string; exchange: string }) => {
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
     }).join(',');
 
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}`;
+    const { crumb, cookie } = await getCrumbAndCookie();
+
+    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
 
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Cookie': cookie,
       },
     });
 
     if (!response.ok) {
       const text = await response.text();
       console.error('Yahoo Finance error:', response.status, text);
+      // Invalidate cache on auth error
+      if (response.status === 401) {
+        cachedCrumb = null;
+        cachedCookie = null;
+        crumbExpiry = 0;
+      }
       return new Response(JSON.stringify({ error: 'Yahoo Finance error', status: response.status }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
