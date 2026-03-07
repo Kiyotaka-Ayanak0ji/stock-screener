@@ -4,6 +4,17 @@ import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+function checkMarketOpen(): boolean {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(now.getTime() + istOffset + now.getTimezoneOffset() * 60 * 1000);
+  const day = ist.getDay();
+  if (day === 0 || day === 6) return false;
+  const minutes = ist.getHours() * 60 + ist.getMinutes();
+  return minutes >= 555 && minutes <= 930; // 9:15 AM - 3:30 PM IST
+}
+
+
 export interface CustomColumn {
   id: string;
   name: string;
