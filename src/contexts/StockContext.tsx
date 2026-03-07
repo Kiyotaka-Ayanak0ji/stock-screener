@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, generateStockData, ALL_AVAILABLE_STOCKS, encrypt, decrypt } from "@/lib/stockData";
 import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface CustomColumn {
   id: string;
@@ -25,10 +27,12 @@ interface StockContextType {
   removeCustomColumn: (id: string) => void;
   customColumnData: Record<string, Record<string, number | null>>;
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
+  prefsLoaded: boolean;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
 
+// --- localStorage helpers (guest mode) ---
 function loadEncrypted<T>(key: string, fallback: T): T {
   try {
     const stored = localStorage.getItem(key);
@@ -44,45 +48,117 @@ function saveEncrypted(key: string, data: unknown) {
 }
 
 export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, isLoading: authLoading } = useAuth();
+
+  const defaultWatchlist = SAMPLE_STOCKS.map(s => s.ticker);
+
   const [stocks, setStocks] = useState<Stock[]>(SAMPLE_STOCKS);
-  const [notes, setNotes] = useState<StockNote[]>(() => loadEncrypted("st_notes", []));
-  const [events, setEvents] = useState<StockEvent[]>(() => loadEncrypted("st_events", []));
-  const [watchlist, setWatchlist] = useState<string[]>(() =>
-    loadEncrypted("st_watchlist", SAMPLE_STOCKS.map(s => s.ticker))
-  );
+  const [notes, setNotes] = useState<StockNote[]>([]);
+  const [events, setEvents] = useState<StockEvent[]>([]);
+  const [watchlist, setWatchlist] = useState<string[]>(defaultWatchlist);
   const [isMarketOpen] = useState(true);
   const [lastFlash, setLastFlash] = useState<Record<string, "up" | "down" | null>>({});
   const prevPrices = useRef<Record<string, number>>({});
+  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
+  const [customColumns, setCustomColumns] = useState<CustomColumn[]>([]);
+  const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Column visibility
-  const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>(() =>
-    loadEncrypted("st_col_vis", {})
-  );
+  // Load preferences based on auth state
+  useEffect(() => {
+    if (authLoading) return;
 
-  // Custom columns
-  const [customColumns, setCustomColumns] = useState<CustomColumn[]>(() =>
-    loadEncrypted("st_custom_cols", [])
-  );
+    if (user) {
+      loadFromDatabase();
+    } else {
+      loadFromLocalStorage();
+    }
+  }, [user, authLoading]);
 
-  // Custom column data: { [ticker]: { [columnId]: number | null } }
-  const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>(() =>
-    loadEncrypted("st_custom_data", {})
-  );
+  const loadFromLocalStorage = () => {
+    setNotes(loadEncrypted("st_notes", []));
+    setEvents(loadEncrypted("st_events", []));
+    setWatchlist(loadEncrypted("st_watchlist", defaultWatchlist));
+    setColumnVisibility(loadEncrypted("st_col_vis", {}));
+    setCustomColumns(loadEncrypted("st_custom_cols", []));
+    setCustomColumnData(loadEncrypted("st_custom_data", {}));
+    setPrefsLoaded(true);
+  };
 
-  // Save preferences encrypted
-  useEffect(() => { saveEncrypted("st_notes", notes); }, [notes]);
-  useEffect(() => { saveEncrypted("st_events", events); }, [events]);
-  useEffect(() => { saveEncrypted("st_watchlist", watchlist); }, [watchlist]);
-  useEffect(() => { saveEncrypted("st_col_vis", columnVisibility); }, [columnVisibility]);
-  useEffect(() => { saveEncrypted("st_custom_cols", customColumns); }, [customColumns]);
-  useEffect(() => { saveEncrypted("st_custom_data", customColumnData); }, [customColumnData]);
+  const loadFromDatabase = async () => {
+    try {
+      const { data } = await supabase
+        .from("user_preferences")
+        .select("*")
+        .eq("user_id", user!.id)
+        .single();
 
-  const [useLiveData, setUseLiveData] = useState(true);
+      if (data) {
+        setWatchlist(data.watchlist ? JSON.parse(decrypt(data.watchlist)) : defaultWatchlist);
+        setNotes(data.notes ? JSON.parse(decrypt(data.notes)) : []);
+        setEvents(data.events ? JSON.parse(decrypt(data.events)) : []);
+        setColumnVisibility(data.column_visibility ? JSON.parse(decrypt(data.column_visibility)) : {});
+        setCustomColumns(data.custom_columns ? JSON.parse(decrypt(data.custom_columns)) : []);
+        setCustomColumnData(data.custom_column_data ? JSON.parse(decrypt(data.custom_column_data)) : {});
+      }
+    } catch (err) {
+      console.error("Failed to load preferences from database:", err);
+      loadFromLocalStorage(); // fallback
+    }
+    setPrefsLoaded(true);
+  };
+
+  // Save preferences with debounce
+  const savePreferences = useCallback(() => {
+    if (!prefsLoaded) return;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      if (user) {
+        saveToDatabase();
+      } else {
+        saveToLocalStorage();
+      }
+    }, 500);
+  }, [user, prefsLoaded]);
+
+  const saveToLocalStorage = () => {
+    saveEncrypted("st_notes", notes);
+    saveEncrypted("st_events", events);
+    saveEncrypted("st_watchlist", watchlist);
+    saveEncrypted("st_col_vis", columnVisibility);
+    saveEncrypted("st_custom_cols", customColumns);
+    saveEncrypted("st_custom_data", customColumnData);
+  };
+
+  const saveToDatabase = async () => {
+    if (!user) return;
+    try {
+      await supabase
+        .from("user_preferences")
+        .update({
+          watchlist: encrypt(JSON.stringify(watchlist)),
+          notes: encrypt(JSON.stringify(notes)),
+          events: encrypt(JSON.stringify(events)),
+          column_visibility: encrypt(JSON.stringify(columnVisibility)),
+          custom_columns: encrypt(JSON.stringify(customColumns)),
+          custom_column_data: encrypt(JSON.stringify(customColumnData)),
+        })
+        .eq("user_id", user.id);
+    } catch (err) {
+      console.error("Failed to save preferences to database:", err);
+    }
+  };
+
+  // Trigger save when preferences change
+  useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+
   const liveDataFailed = useRef(false);
 
   // Fetch live data from Groww API
   useEffect(() => {
-    if (!isMarketOpen) return;
+    if (!isMarketOpen || !prefsLoaded) return;
 
     const fetchLive = async () => {
       if (liveDataFailed.current) {
@@ -108,7 +184,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
 
         const liveData = await fetchLivePrices(tickerInfo);
-        
+
         if (!liveData || Object.keys(liveData).length === 0) {
           console.warn("No live data received, falling back to simulation");
           liveDataFailed.current = true;
@@ -119,9 +195,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const updated = prev.map(s => {
             const key = `${s.exchange}_${s.ticker}`;
             const live = liveData[key];
-            if (live) {
-              return applyLiveData(s, live);
-            }
+            if (live) return applyLiveData(s, live);
             return simulatePriceUpdate(s);
           });
           const flashes: Record<string, "up" | "down" | null> = {};
@@ -144,7 +218,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     fetchLive();
     const interval = setInterval(fetchLive, 5000);
     return () => clearInterval(interval);
-  }, [isMarketOpen, watchlist]);
+  }, [isMarketOpen, watchlist, prefsLoaded]);
 
   const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
     if (watchlist.includes(ticker)) return;
@@ -196,7 +270,6 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addCustomColumn = useCallback((name: string) => {
     const id = `col_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
     setCustomColumns(prev => [...prev, { id, name }]);
-    // Default visible
     setColumnVisibility(prev => ({ ...prev, [`custom_${id}`]: true }));
   }, []);
 
@@ -240,6 +313,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       columnVisibility, toggleColumnVisibility,
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
+      prefsLoaded,
     }}>
       {children}
     </StockContext.Provider>

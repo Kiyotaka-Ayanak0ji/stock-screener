@@ -152,7 +152,7 @@ const StockTable = () => {
       </div>
 
       <p className="text-xs text-muted-foreground mt-3 text-center">
-        Data is simulated for demonstration · Prices update every 2 seconds · Preferences are encrypted and stored locally
+        Live data via Groww API · Prices refresh every 5 seconds · Preferences encrypted &amp; synced
       </p>
     </motion.div>
   );
