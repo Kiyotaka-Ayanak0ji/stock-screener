@@ -19,11 +19,8 @@ export interface StockEvent {
   tags: string[];
 }
 
-export function getStockUrl(ticker: string, exchange: "NSE" | "BSE"): string {
-  if (exchange === "NSE") {
-    return `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(ticker)}`;
-  }
-  return `https://www.bseindia.com/stock-share-price/${encodeURIComponent(ticker.toLowerCase())}`;
+export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE"): string {
+  return `https://www.screener.in/company/${encodeURIComponent(ticker)}/consolidated/`;
 }
 
 export interface StockNote {
