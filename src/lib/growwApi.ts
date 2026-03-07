@@ -8,9 +8,6 @@ interface StockQuote {
   low?: number;
   close?: number;
   volume?: number;
-  change?: number;
-  changePercent?: number;
-  marketCap?: number;
 }
 
 export async function fetchLivePrices(
@@ -41,20 +38,19 @@ export function applyLiveData(
 ): Stock {
   const previousClose = liveData.close ?? stock.previousClose;
   const price = liveData.ltp;
-  const change = liveData.change ?? Math.round((price - previousClose) * 100) / 100;
-  const changePercent = liveData.changePercent ?? Math.round((change / previousClose) * 10000) / 100;
+  const change = Math.round((price - previousClose) * 100) / 100;
+  const changePercent = previousClose > 0 ? Math.round((change / previousClose) * 10000) / 100 : 0;
 
   return {
     ...stock,
     price,
     previousClose,
-    change: Math.round(change * 100) / 100,
-    changePercent: Math.round(changePercent * 100) / 100,
+    change,
+    changePercent,
     high: liveData.high ?? stock.high,
     low: liveData.low ?? stock.low,
     open: liveData.open ?? stock.open,
     volume: liveData.volume ?? stock.volume,
-    marketCap: liveData.marketCap ? Math.round(liveData.marketCap / 10000000) : stock.marketCap, // Convert to Cr
     lastUpdated: new Date(),
   };
 }
