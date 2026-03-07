@@ -1,7 +1,1 @@
-project_id = "crcflhgsdcwnzvczixrm"
-
-[functions.groww-proxy]
-verify_jwt = false
-
-[functions.screener-search]
-verify_jwt = false
+project_id = "szkezahvdumeiqmnlugj"
