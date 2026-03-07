@@ -3,6 +3,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+const BASE_URL = 'https://military-jobye-haiqstudios-14f59639.koyeb.app';
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -18,53 +20,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Convert tickers to Yahoo Finance format: RELIANCE -> RELIANCE.NS, BSE tickers -> TICKER.BO
-    const yahooSymbols = symbols.map((s: { ticker: string; exchange: string }) => {
+    // Build comma-separated symbols: RELIANCE.NS, ADANIPOWER.BO
+    const symbolList = symbols.map((s: { ticker: string; exchange: string }) => {
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
     }).join(',');
 
-    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketOpen,regularMarketDayHigh,regularMarketDayLow,regularMarketVolume,regularMarketPreviousClose,marketCap`;
+    const url = `${BASE_URL}/stock/${symbolList}`;
 
     const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
-      },
+      headers: { 'Accept': 'application/json' },
     });
 
     if (!response.ok) {
       const text = await response.text();
-      console.error('Yahoo Finance error:', response.status, text);
-      return new Response(JSON.stringify({ error: 'Yahoo Finance API error', status: response.status }), {
+      console.error('Stock API error:', response.status, text);
+      return new Response(JSON.stringify({ error: 'Stock API error', status: response.status }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const data = await response.json();
-    const quotes = data?.quoteResponse?.result || [];
 
-    // Transform to our format keyed by original exchange_ticker
-    const result: Record<string, any> = {};
-    for (const quote of quotes) {
-      const symbol = quote.symbol as string;
-      // Convert back: RELIANCE.NS -> NSE_RELIANCE, ADANIPOWER.BO -> BSE_ADANIPOWER
+    // The API returns an array of stock objects or a single object
+    const stocksArray = Array.isArray(data) ? data : [data];
+
+    // Transform to our keyed format: { "NSE_RELIANCE": { ltp, open, high, low, close, volume } }
+    const result: Record<string, Record<string, number>> = {};
+
+    for (const stock of stocksArray) {
+      if (!stock || stock.error) continue;
+
+      const symbol = stock.symbol || '';
       const isBSE = symbol.endsWith('.BO');
       const ticker = symbol.replace(/\.(NS|BO)$/, '');
       const exchange = isBSE ? 'BSE' : 'NSE';
       const key = `${exchange}_${ticker}`;
 
       result[key] = {
-        ltp: quote.regularMarketPrice ?? 0,
-        open: quote.regularMarketOpen ?? 0,
-        high: quote.regularMarketDayHigh ?? 0,
-        low: quote.regularMarketDayLow ?? 0,
-        close: quote.regularMarketPreviousClose ?? 0,
-        volume: quote.regularMarketVolume ?? 0,
-        change: quote.regularMarketChange ?? 0,
-        changePercent: quote.regularMarketChangePercent ?? 0,
-        marketCap: quote.marketCap ?? 0,
+        ltp: parseFloat(stock.price) || parseFloat(stock.current_price) || parseFloat(stock.ltp) || 0,
+        open: parseFloat(stock.open) || 0,
+        high: parseFloat(stock.high) || parseFloat(stock.day_high) || 0,
+        low: parseFloat(stock.low) || parseFloat(stock.day_low) || 0,
+        close: parseFloat(stock.previous_close) || parseFloat(stock.prev_close) || 0,
+        volume: parseInt(stock.volume) || 0,
       };
     }
 
