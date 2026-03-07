@@ -4,6 +4,17 @@ import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+function checkMarketOpen(): boolean {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const ist = new Date(now.getTime() + istOffset + now.getTimezoneOffset() * 60 * 1000);
+  const day = ist.getDay();
+  if (day === 0 || day === 6) return false;
+  const minutes = ist.getHours() * 60 + ist.getMinutes();
+  return minutes >= 555 && minutes <= 930; // 9:15 AM - 3:30 PM IST
+}
+
+
 export interface CustomColumn {
   id: string;
   name: string;
@@ -56,7 +67,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [notes, setNotes] = useState<StockNote[]>([]);
   const [events, setEvents] = useState<StockEvent[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>(defaultWatchlist);
-  const [isMarketOpen] = useState(true);
+  const [isMarketOpen, setIsMarketOpen] = useState(() => checkMarketOpen());
+
+  // Update market status every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => setIsMarketOpen(checkMarketOpen()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [lastFlash, setLastFlash] = useState<Record<string, "up" | "down" | null>>({});
   const prevPrices = useRef<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
