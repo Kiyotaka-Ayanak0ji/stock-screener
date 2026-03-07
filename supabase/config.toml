@@ -1,1 +1,10 @@
 project_id = "szkezahvdumeiqmnlugj"
+
+[functions.groww-proxy]
+verify_jwt = false
+
+[functions.stock-proxy]
+verify_jwt = false
+
+[functions.screener-search]
+verify_jwt = false
