@@ -68,6 +68,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [events, setEvents] = useState<StockEvent[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>(defaultWatchlist);
   const [isMarketOpen, setIsMarketOpen] = useState(() => checkMarketOpen());
+
+  // Update market status every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => setIsMarketOpen(checkMarketOpen()), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const [lastFlash, setLastFlash] = useState<Record<string, "up" | "down" | null>>({});
   const prevPrices = useRef<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
