@@ -56,7 +56,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [notes, setNotes] = useState<StockNote[]>([]);
   const [events, setEvents] = useState<StockEvent[]>([]);
   const [watchlist, setWatchlist] = useState<string[]>(defaultWatchlist);
-  const [isMarketOpen] = useState(true);
+  const [isMarketOpen, setIsMarketOpen] = useState(() => checkMarketOpen());
   const [lastFlash, setLastFlash] = useState<Record<string, "up" | "down" | null>>({});
   const prevPrices = useRef<Record<string, number>>({});
   const [columnVisibility, setColumnVisibility] = useState<Record<string, boolean>>({});
