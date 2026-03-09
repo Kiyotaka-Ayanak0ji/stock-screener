@@ -83,6 +83,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Refs to hold latest state for debounced save (avoids stale closures)
+  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData });
+  useEffect(() => {
+    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
+  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+
   // Load preferences based on auth state
   useEffect(() => {
     if (authLoading) return;
@@ -133,41 +139,34 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
+      const s = latestState.current;
       if (user) {
-        saveToDatabase();
+        // Save to database
+        supabase
+          .from("user_preferences")
+          .update({
+            watchlist: encrypt(JSON.stringify(s.watchlist)),
+            notes: encrypt(JSON.stringify(s.notes)),
+            events: encrypt(JSON.stringify(s.events)),
+            column_visibility: encrypt(JSON.stringify(s.columnVisibility)),
+            custom_columns: encrypt(JSON.stringify(s.customColumns)),
+            custom_column_data: encrypt(JSON.stringify(s.customColumnData)),
+          })
+          .eq("user_id", user.id)
+          .then(({ error }) => {
+            if (error) console.error("Failed to save preferences to database:", error);
+          });
       } else {
-        saveToLocalStorage();
+        // Save to localStorage
+        saveEncrypted("st_notes", s.notes);
+        saveEncrypted("st_events", s.events);
+        saveEncrypted("st_watchlist", s.watchlist);
+        saveEncrypted("st_col_vis", s.columnVisibility);
+        saveEncrypted("st_custom_cols", s.customColumns);
+        saveEncrypted("st_custom_data", s.customColumnData);
       }
     }, 500);
   }, [user, prefsLoaded]);
-
-  const saveToLocalStorage = () => {
-    saveEncrypted("st_notes", notes);
-    saveEncrypted("st_events", events);
-    saveEncrypted("st_watchlist", watchlist);
-    saveEncrypted("st_col_vis", columnVisibility);
-    saveEncrypted("st_custom_cols", customColumns);
-    saveEncrypted("st_custom_data", customColumnData);
-  };
-
-  const saveToDatabase = async () => {
-    if (!user) return;
-    try {
-      await supabase
-        .from("user_preferences")
-        .update({
-          watchlist: encrypt(JSON.stringify(watchlist)),
-          notes: encrypt(JSON.stringify(notes)),
-          events: encrypt(JSON.stringify(events)),
-          column_visibility: encrypt(JSON.stringify(columnVisibility)),
-          custom_columns: encrypt(JSON.stringify(customColumns)),
-          custom_column_data: encrypt(JSON.stringify(customColumnData)),
-        })
-        .eq("user_id", user.id);
-    } catch (err) {
-      console.error("Failed to save preferences to database:", err);
-    }
-  };
 
   // Trigger save when preferences change
   useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
