@@ -172,10 +172,19 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
 
   const liveDataFailed = useRef(false);
+  const stocksRef = useRef(stocks);
+  const watchlistRef = useRef(watchlist);
 
-  // Fetch live data from Groww API
+  // Keep refs in sync
+  useEffect(() => { stocksRef.current = stocks; }, [stocks]);
+  useEffect(() => { watchlistRef.current = watchlist; }, [watchlist]);
+
+  // Fetch live data from Yahoo Finance via proxy
   useEffect(() => {
     if (!isMarketOpen || !prefsLoaded) return;
+
+    let consecutiveFailures = 0;
+    const MAX_FAILURES = 3;
 
     const fetchLive = async () => {
       if (liveDataFailed.current) {
@@ -196,24 +205,35 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       try {
-        const tickerInfo = stocks
-          .filter(s => watchlist.includes(s.ticker))
+        // Use refs to always get latest stocks & watchlist (avoids stale closure)
+        const currentStocks = stocksRef.current;
+        const currentWatchlist = watchlistRef.current;
+        const tickerInfo = currentStocks
+          .filter(s => currentWatchlist.includes(s.ticker))
           .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
+
+        if (tickerInfo.length === 0) return;
 
         const liveData = await fetchLivePrices(tickerInfo);
 
         if (!liveData || Object.keys(liveData).length === 0) {
-          console.warn("No live data received, falling back to simulation");
-          liveDataFailed.current = true;
+          consecutiveFailures++;
+          console.warn(`No live data received (attempt ${consecutiveFailures}/${MAX_FAILURES})`);
+          if (consecutiveFailures >= MAX_FAILURES) {
+            console.warn("Too many failures, falling back to simulation");
+            liveDataFailed.current = true;
+          }
           return;
         }
+
+        consecutiveFailures = 0; // Reset on success
 
         setStocks(prev => {
           const updated = prev.map(s => {
             const key = `${s.exchange}_${s.ticker}`;
             const live = liveData[key];
             if (live) return applyLiveData(s, live);
-            return simulatePriceUpdate(s);
+            return s; // Keep existing data instead of simulating
           });
           const flashes: Record<string, "up" | "down" | null> = {};
           updated.forEach(s => {
@@ -228,14 +248,17 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
       } catch (err) {
         console.error("Live data fetch failed:", err);
-        liveDataFailed.current = true;
+        consecutiveFailures++;
+        if (consecutiveFailures >= MAX_FAILURES) {
+          liveDataFailed.current = true;
+        }
       }
     };
 
     fetchLive();
     const interval = setInterval(fetchLive, 5000);
     return () => clearInterval(interval);
-  }, [isMarketOpen, watchlist, prefsLoaded]);
+  }, [isMarketOpen, prefsLoaded]);
 
   const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
     if (watchlist.includes(ticker)) return;

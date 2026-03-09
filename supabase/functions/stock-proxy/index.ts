@@ -62,33 +62,48 @@ Deno.serve(async (req) => {
       return `${s.ticker}${suffix}`;
     }).join(',');
 
-    const { crumb, cookie } = await getCrumbAndCookie();
+    // Fetch with automatic retry on 401
+    let data: any;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { crumb, cookie } = await getCrumbAndCookie();
 
-    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
+      const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Cookie': cookie,
-      },
-    });
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Cookie': cookie,
+        },
+      });
 
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('Yahoo Finance error:', response.status, text);
-      // Invalidate cache on auth error
-      if (response.status === 401) {
+      if (response.status === 401 && attempt === 0) {
+        await response.text(); // consume body
+        console.warn('Yahoo Finance 401 - refreshing crumb and retrying');
         cachedCrumb = null;
         cachedCookie = null;
         crumbExpiry = 0;
+        continue;
       }
-      return new Response(JSON.stringify({ error: 'Yahoo Finance error', status: response.status }), {
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error('Yahoo Finance error:', response.status, text);
+        return new Response(JSON.stringify({ error: 'Yahoo Finance error', status: response.status }), {
+          status: 502,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      data = await response.json();
+      break;
+    }
+
+    if (!data) {
+      return new Response(JSON.stringify({ error: 'Failed after retries' }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-
-    const data = await response.json();
     const quotes = data?.quoteResponse?.result || [];
 
     const result: Record<string, Record<string, number>> = {};
