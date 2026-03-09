@@ -83,6 +83,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Refs to hold latest state for debounced save (avoids stale closures)
+  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData });
+  useEffect(() => {
+    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
+  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+
   // Load preferences based on auth state
   useEffect(() => {
     if (authLoading) return;
