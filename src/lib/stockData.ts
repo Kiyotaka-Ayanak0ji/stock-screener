@@ -30,7 +30,7 @@ export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE"): string {
   const slug = SCREENER_SLUG_MAP[ticker] || ticker;
   // Don't double-encode if already mapped; only encode unmapped tickers
   const encodedSlug = SCREENER_SLUG_MAP[ticker] ? slug : encodeURIComponent(ticker);
-  return `https://www.screener.in/company/${encodedSlug}/consolidated/`;
+  return `https://www.screener.in/company/${encodedSlug}/`;
 }
 
 export interface StockNote {
