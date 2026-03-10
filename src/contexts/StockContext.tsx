@@ -39,6 +39,8 @@ interface StockContextType {
   customColumnData: Record<string, Record<string, number | null>>;
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
+  refreshPrices: () => Promise<void>;
+  isRefreshing: boolean;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
@@ -81,6 +83,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumns, setCustomColumns] = useState<CustomColumn[]>([]);
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs to hold latest state for debounced save (avoids stale closures)
@@ -343,6 +346,47 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   }, []);
 
+  // Manual refresh: fetches live prices regardless of market status
+  const refreshPrices = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const currentStocks = stocksRef.current;
+      const currentWatchlist = watchlistRef.current;
+      const tickerInfo = currentStocks
+        .filter(s => currentWatchlist.includes(s.ticker))
+        .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
+
+      if (tickerInfo.length === 0) return;
+
+      const liveData = await fetchLivePrices(tickerInfo);
+
+      if (liveData && Object.keys(liveData).length > 0) {
+        setStocks(prev => {
+          const updated = prev.map(s => {
+            const key = `${s.exchange}_${s.ticker}`;
+            const live = liveData[key];
+            if (live) return applyLiveData(s, live);
+            return s;
+          });
+          const flashes: Record<string, "up" | "down" | null> = {};
+          updated.forEach(s => {
+            const prevPrice = prevPrices.current[s.ticker] || s.price;
+            if (s.price > prevPrice) flashes[s.ticker] = "up";
+            else if (s.price < prevPrice) flashes[s.ticker] = "down";
+            else flashes[s.ticker] = null;
+            prevPrices.current[s.ticker] = s.price;
+          });
+          setLastFlash(flashes);
+          return updated;
+        });
+      }
+    } catch (err) {
+      console.error("Manual refresh failed:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
@@ -353,7 +397,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       columnVisibility, toggleColumnVisibility,
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
-      prefsLoaded,
+      prefsLoaded, refreshPrices, isRefreshing,
     }}>
       {children}
     </StockContext.Provider>
