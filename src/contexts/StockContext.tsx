@@ -3,6 +3,7 @@ import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, gener
 import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 function checkMarketOpen(): boolean {
   const now = new Date();
