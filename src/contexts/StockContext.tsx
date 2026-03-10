@@ -3,6 +3,7 @@ import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, gener
 import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 function checkMarketOpen(): boolean {
   const now = new Date();
@@ -92,6 +93,70 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
   }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
 
+  // --- Cached price helpers ---
+  const saveCachedPrices = useCallback(async (stocksToCache: Stock[]) => {
+    try {
+      const rows = stocksToCache.map(s => ({
+        ticker: s.ticker,
+        exchange: s.exchange,
+        name: s.name,
+        price: s.price,
+        previous_close: s.previousClose,
+        change: s.change,
+        change_percent: s.changePercent,
+        high: s.high,
+        low: s.low,
+        open_price: s.open,
+        volume: s.volume,
+        market_cap: s.marketCap,
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from("cached_stock_prices")
+        .upsert(rows, { onConflict: "ticker,exchange" });
+
+      if (error) console.error("Failed to cache prices:", error);
+    } catch (err) {
+      console.error("Error saving cached prices:", err);
+    }
+  }, []);
+
+  const loadCachedPrices = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cached_stock_prices")
+        .select("*");
+
+      if (error || !data || data.length === 0) return;
+
+      setStocks(prev => {
+        const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
+        return prev.map(s => {
+          const cached = cacheMap.get(s.ticker);
+          if (cached) {
+            return {
+              ...s,
+              price: Number(cached.price),
+              previousClose: Number(cached.previous_close),
+              change: Number(cached.change),
+              changePercent: Number(cached.change_percent),
+              high: Number(cached.high),
+              low: Number(cached.low),
+              open: Number(cached.open_price),
+              volume: Number(cached.volume),
+              marketCap: Number(cached.market_cap),
+              lastUpdated: new Date(cached.updated_at),
+            };
+          }
+          return s;
+        });
+      });
+    } catch (err) {
+      console.error("Error loading cached prices:", err);
+    }
+  }, []);
+
   // Load preferences based on auth state
   useEffect(() => {
     if (authLoading) return;
@@ -101,6 +166,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       loadFromLocalStorage();
     }
+
+    // Load cached prices for all users
+    loadCachedPrices();
   }, [user, authLoading]);
 
   const loadFromLocalStorage = () => {
@@ -361,6 +429,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const liveData = await fetchLivePrices(tickerInfo);
 
       if (liveData && Object.keys(liveData).length > 0) {
+        let updatedStocks: Stock[] = [];
         setStocks(prev => {
           const updated = prev.map(s => {
             const key = `${s.exchange}_${s.ticker}`;
@@ -377,15 +446,24 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             prevPrices.current[s.ticker] = s.price;
           });
           setLastFlash(flashes);
+          updatedStocks = updated;
           return updated;
         });
+
+        // Persist refreshed prices to the database cache
+        if (updatedStocks.length > 0) {
+          const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+          await saveCachedPrices(watchlistStocks);
+          toast.success("Prices refreshed and saved");
+        }
       }
     } catch (err) {
       console.error("Manual refresh failed:", err);
+      toast.error("Failed to refresh prices");
     } finally {
       setIsRefreshing(false);
     }
-  }, []);
+  }, [saveCachedPrices]);
 
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
