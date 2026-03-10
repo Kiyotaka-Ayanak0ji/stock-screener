@@ -83,6 +83,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumns, setCustomColumns] = useState<CustomColumn[]>([]);
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs to hold latest state for debounced save (avoids stale closures)
