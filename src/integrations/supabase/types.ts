@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      cached_stock_prices: {
+        Row: {
+          change: number
+          change_percent: number
+          exchange: string
+          high: number
+          low: number
+          market_cap: number
+          name: string
+          open_price: number
+          previous_close: number
+          price: number
+          ticker: string
+          updated_at: string
+          volume: number
+        }
+        Insert: {
+          change: number
+          change_percent: number
+          exchange: string
+          high: number
+          low: number
+          market_cap: number
+          name: string
+          open_price: number
+          previous_close: number
+          price: number
+          ticker: string
+          updated_at?: string
+          volume: number
+        }
+        Update: {
+          change?: number
+          change_percent?: number
+          exchange?: string
+          high?: number
+          low?: number
+          market_cap?: number
+          name?: string
+          open_price?: number
+          previous_close?: number
+          price?: number
+          ticker?: string
+          updated_at?: string
+          volume?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
