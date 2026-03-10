@@ -93,6 +93,70 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
   }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
 
+  // --- Cached price helpers ---
+  const saveCachedPrices = useCallback(async (stocksToCache: Stock[]) => {
+    try {
+      const rows = stocksToCache.map(s => ({
+        ticker: s.ticker,
+        exchange: s.exchange,
+        name: s.name,
+        price: s.price,
+        previous_close: s.previousClose,
+        change: s.change,
+        change_percent: s.changePercent,
+        high: s.high,
+        low: s.low,
+        open_price: s.open,
+        volume: s.volume,
+        market_cap: s.marketCap,
+        updated_at: new Date().toISOString(),
+      }));
+
+      const { error } = await supabase
+        .from("cached_stock_prices")
+        .upsert(rows, { onConflict: "ticker,exchange" });
+
+      if (error) console.error("Failed to cache prices:", error);
+    } catch (err) {
+      console.error("Error saving cached prices:", err);
+    }
+  }, []);
+
+  const loadCachedPrices = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cached_stock_prices")
+        .select("*");
+
+      if (error || !data || data.length === 0) return;
+
+      setStocks(prev => {
+        const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
+        return prev.map(s => {
+          const cached = cacheMap.get(s.ticker);
+          if (cached) {
+            return {
+              ...s,
+              price: Number(cached.price),
+              previousClose: Number(cached.previous_close),
+              change: Number(cached.change),
+              changePercent: Number(cached.change_percent),
+              high: Number(cached.high),
+              low: Number(cached.low),
+              open: Number(cached.open_price),
+              volume: Number(cached.volume),
+              marketCap: Number(cached.market_cap),
+              lastUpdated: new Date(cached.updated_at),
+            };
+          }
+          return s;
+        });
+      });
+    } catch (err) {
+      console.error("Error loading cached prices:", err);
+    }
+  }, []);
+
   // Load preferences based on auth state
   useEffect(() => {
     if (authLoading) return;
@@ -102,6 +166,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       loadFromLocalStorage();
     }
+
+    // Load cached prices for all users
+    loadCachedPrices();
   }, [user, authLoading]);
 
   const loadFromLocalStorage = () => {
