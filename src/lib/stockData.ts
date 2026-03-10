@@ -19,8 +19,18 @@ export interface StockEvent {
   tags: string[];
 }
 
+// Screener.in ticker mapping for stocks whose URL slug differs from the trading symbol
+const SCREENER_SLUG_MAP: Record<string, string> = {
+  "M&M": "M%26M",
+  "NAM-INDIA": "NAM-INDIA",
+  "BAJAJ-AUTO": "BAJAJ-AUTO",
+};
+
 export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE"): string {
-  return `https://www.screener.in/company/${encodeURIComponent(ticker)}/consolidated/`;
+  const slug = SCREENER_SLUG_MAP[ticker] || ticker;
+  // Don't double-encode if already mapped; only encode unmapped tickers
+  const encodedSlug = SCREENER_SLUG_MAP[ticker] ? slug : encodeURIComponent(ticker);
+  return `https://www.screener.in/company/${encodedSlug}/consolidated/`;
 }
 
 export interface StockNote {

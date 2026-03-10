@@ -39,6 +39,8 @@ interface StockContextType {
   customColumnData: Record<string, Record<string, number | null>>;
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
+  refreshPrices: () => Promise<void>;
+  isRefreshing: boolean;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
