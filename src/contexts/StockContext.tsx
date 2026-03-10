@@ -429,6 +429,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const liveData = await fetchLivePrices(tickerInfo);
 
       if (liveData && Object.keys(liveData).length > 0) {
+        let updatedStocks: Stock[] = [];
         setStocks(prev => {
           const updated = prev.map(s => {
             const key = `${s.exchange}_${s.ticker}`;
@@ -445,15 +446,24 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             prevPrices.current[s.ticker] = s.price;
           });
           setLastFlash(flashes);
+          updatedStocks = updated;
           return updated;
         });
+
+        // Persist refreshed prices to the database cache
+        if (updatedStocks.length > 0) {
+          const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+          await saveCachedPrices(watchlistStocks);
+          toast.success("Prices refreshed and saved");
+        }
       }
     } catch (err) {
       console.error("Manual refresh failed:", err);
+      toast.error("Failed to refresh prices");
     } finally {
       setIsRefreshing(false);
     }
-  }, []);
+  }, [saveCachedPrices]);
 
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
