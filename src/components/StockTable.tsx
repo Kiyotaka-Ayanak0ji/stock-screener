@@ -76,6 +76,21 @@ const StockTable = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={refreshPrices}
+                disabled={isRefreshing}
+                className="gap-1.5"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
+          </Tooltip>
           <ColumnVisibilityDropdown />
           <AddStockDialog />
         </div>
