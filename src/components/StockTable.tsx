@@ -5,7 +5,8 @@ import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event" | string;
 type SortDir = "asc" | "desc";
 
