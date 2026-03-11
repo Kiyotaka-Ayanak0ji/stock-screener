@@ -4,6 +4,7 @@ import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
+import WatchlistManager from "@/components/WatchlistManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,7 +12,12 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { stocks, events, columnVisibility, customColumns, customColumnData, refreshPrices, isRefreshing } = useStocks();
+  const {
+    stocks, events, columnVisibility, customColumns, customColumnData,
+    refreshPrices, isRefreshing,
+    userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
+    createWatchlist, renameWatchlist, deleteWatchlist,
+  } = useStocks();
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -70,12 +76,22 @@ const StockTable = () => {
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold">Live Watchlist</h2>
+          <h2 className="text-lg font-bold">
+            {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
+          </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks · Auto-refreshing every 2s
+            {stocks.length} stocks · Auto-refreshing every 5s
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <WatchlistManager
+            watchlists={userWatchlists}
+            activeWatchlistId={activeWatchlistId}
+            onSelect={setActiveWatchlistId}
+            onCreate={createWatchlist}
+            onRename={renameWatchlist}
+            onDelete={deleteWatchlist}
+          />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

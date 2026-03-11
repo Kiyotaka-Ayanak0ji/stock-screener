@@ -4,6 +4,7 @@ import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useWatchlists, Watchlist } from "@/hooks/useWatchlists";
 
 function checkMarketOpen(): boolean {
   const now = new Date();
@@ -42,6 +43,14 @@ interface StockContextType {
   prefsLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  // Multi-watchlist support
+  userWatchlists: Watchlist[];
+  activeWatchlist: Watchlist | null;
+  activeWatchlistId: string | null;
+  setActiveWatchlistId: (id: string) => void;
+  createWatchlist: (name: string) => Promise<Watchlist | null>;
+  renameWatchlist: (id: string, name: string) => Promise<void>;
+  deleteWatchlist: (id: string) => Promise<void>;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
@@ -63,6 +72,17 @@ function saveEncrypted(key: string, data: unknown) {
 
 export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
+  const {
+    watchlists: userWatchlists,
+    activeWatchlist,
+    activeWatchlistId,
+    setActiveWatchlistId,
+    createWatchlist: createWl,
+    updateWatchlistTickers,
+    renameWatchlist,
+    deleteWatchlist,
+    loaded: watchlistsLoaded,
+  } = useWatchlists();
 
   const defaultWatchlist = SAMPLE_STOCKS.map(s => s.ticker);
 
@@ -331,6 +351,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [isMarketOpen, prefsLoaded]);
 
+  // Sync active watchlist tickers → local watchlist state (for logged-in users)
+  useEffect(() => {
+    if (user && activeWatchlist) {
+      setWatchlist(activeWatchlist.tickers);
+    }
+  }, [user, activeWatchlist]);
+
   const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
     if (watchlist.includes(ticker)) return;
     const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
@@ -340,12 +367,22 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!existing) {
       setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange)]);
     }
-    setWatchlist(prev => [...prev, ticker]);
-  }, [watchlist, stocks]);
+    const newWatchlist = [...watchlist, ticker];
+    setWatchlist(newWatchlist);
+    // Persist to active watchlist in DB
+    if (user && activeWatchlistId) {
+      updateWatchlistTickers(activeWatchlistId, newWatchlist);
+    }
+  }, [watchlist, stocks, user, activeWatchlistId, updateWatchlistTickers]);
 
   const removeStock = useCallback((ticker: string) => {
-    setWatchlist(prev => prev.filter(t => t !== ticker));
-  }, []);
+    const newWatchlist = watchlist.filter(t => t !== ticker);
+    setWatchlist(newWatchlist);
+    // Persist to active watchlist in DB
+    if (user && activeWatchlistId) {
+      updateWatchlistTickers(activeWatchlistId, newWatchlist);
+    }
+  }, [watchlist, user, activeWatchlistId, updateWatchlistTickers]);
 
   const updateNote = useCallback((ticker: string, note: string) => {
     setNotes(prev => {
@@ -465,6 +502,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [saveCachedPrices]);
 
+  // Wrapper for createWatchlist that copies current watchlist tickers
+  const createWatchlist = useCallback(async (name: string) => {
+    return createWl(name, []);
+  }, [createWl]);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
@@ -476,6 +518,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
       prefsLoaded, refreshPrices, isRefreshing,
+      userWatchlists, activeWatchlist, activeWatchlistId,
+      setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
     }}>
       {children}
     </StockContext.Provider>
