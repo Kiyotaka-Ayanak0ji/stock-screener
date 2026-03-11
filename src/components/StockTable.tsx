@@ -4,6 +4,7 @@ import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
+import WatchlistManager from "@/components/WatchlistManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,7 +12,12 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { stocks, events, columnVisibility, customColumns, customColumnData, refreshPrices, isRefreshing } = useStocks();
+  const {
+    stocks, events, columnVisibility, customColumns, customColumnData,
+    refreshPrices, isRefreshing,
+    userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
+    createWatchlist, renameWatchlist, deleteWatchlist,
+  } = useStocks();
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
