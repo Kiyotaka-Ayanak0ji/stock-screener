@@ -351,6 +351,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [isMarketOpen, prefsLoaded]);
 
+  // Sync active watchlist tickers → local watchlist state (for logged-in users)
+  useEffect(() => {
+    if (user && activeWatchlist) {
+      setWatchlist(activeWatchlist.tickers);
+    }
+  }, [user, activeWatchlist]);
+
   const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
     if (watchlist.includes(ticker)) return;
     const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
@@ -360,12 +367,22 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!existing) {
       setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange)]);
     }
-    setWatchlist(prev => [...prev, ticker]);
-  }, [watchlist, stocks]);
+    const newWatchlist = [...watchlist, ticker];
+    setWatchlist(newWatchlist);
+    // Persist to active watchlist in DB
+    if (user && activeWatchlistId) {
+      updateWatchlistTickers(activeWatchlistId, newWatchlist);
+    }
+  }, [watchlist, stocks, user, activeWatchlistId, updateWatchlistTickers]);
 
   const removeStock = useCallback((ticker: string) => {
-    setWatchlist(prev => prev.filter(t => t !== ticker));
-  }, []);
+    const newWatchlist = watchlist.filter(t => t !== ticker);
+    setWatchlist(newWatchlist);
+    // Persist to active watchlist in DB
+    if (user && activeWatchlistId) {
+      updateWatchlistTickers(activeWatchlistId, newWatchlist);
+    }
+  }, [watchlist, user, activeWatchlistId, updateWatchlistTickers]);
 
   const updateNote = useCallback((ticker: string, note: string) => {
     setNotes(prev => {
