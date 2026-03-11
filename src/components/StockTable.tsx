@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import WatchlistManager from "@/components/WatchlistManager";
+import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,6 +19,7 @@ const StockTable = () => {
     userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
     createWatchlist, renameWatchlist, deleteWatchlist,
   } = useStocks();
+  const tableRef = useRef<HTMLDivElement>(null);
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
@@ -107,12 +109,13 @@ const StockTable = () => {
             </TooltipTrigger>
             <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
           </Tooltip>
+          <ShareExportButton tableRef={tableRef} />
           <ColumnVisibilityDropdown />
           <AddStockDialog />
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
+      <div ref={tableRef} className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
