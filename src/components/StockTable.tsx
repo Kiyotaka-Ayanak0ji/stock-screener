@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import WatchlistManager from "@/components/WatchlistManager";
+import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
