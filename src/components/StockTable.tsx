@@ -19,6 +19,7 @@ const StockTable = () => {
     userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
     createWatchlist, renameWatchlist, deleteWatchlist,
   } = useStocks();
+  const tableRef = useRef<HTMLDivElement>(null);
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
 
