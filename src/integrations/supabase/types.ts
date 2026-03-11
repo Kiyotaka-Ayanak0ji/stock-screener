@@ -89,6 +89,39 @@ export type Database = {
         }
         Relationships: []
       }
+      shared_watchlists: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          owner_id: string
+          share_token: string
+          stock_data: Json | null
+          tickers: string
+          watchlist_name: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id: string
+          share_token: string
+          stock_data?: Json | null
+          tickers: string
+          watchlist_name: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          owner_id?: string
+          share_token?: string
+          stock_data?: Json | null
+          tickers?: string
+          watchlist_name?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           column_visibility: string | null
