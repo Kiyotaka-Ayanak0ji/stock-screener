@@ -115,7 +115,7 @@ const StockTable = () => {
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
+      <div ref={tableRef} className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
