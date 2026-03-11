@@ -82,6 +82,14 @@ const StockTable = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <WatchlistManager
+            watchlists={userWatchlists}
+            activeWatchlistId={activeWatchlistId}
+            onSelect={setActiveWatchlistId}
+            onCreate={createWatchlist}
+            onRename={renameWatchlist}
+            onDelete={deleteWatchlist}
+          />
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
