@@ -109,6 +109,7 @@ const StockTable = () => {
             </TooltipTrigger>
             <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
           </Tooltip>
+          <ShareExportButton tableRef={tableRef} />
           <ColumnVisibilityDropdown />
           <AddStockDialog />
         </div>
