@@ -76,9 +76,11 @@ const StockTable = () => {
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-lg font-bold">Live Watchlist</h2>
+          <h2 className="text-lg font-bold">
+            {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
+          </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks · Auto-refreshing every 2s
+            {stocks.length} stocks · Auto-refreshing every 5s
           </p>
         </div>
         <div className="flex items-center gap-2">
