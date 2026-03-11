@@ -502,6 +502,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [saveCachedPrices]);
 
+  // Wrapper for createWatchlist that copies current watchlist tickers
+  const createWatchlist = useCallback(async (name: string) => {
+    return createWl(name, []);
+  }, [createWl]);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
@@ -513,6 +518,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
       prefsLoaded, refreshPrices, isRefreshing,
+      userWatchlists, activeWatchlist, activeWatchlistId,
+      setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
     }}>
       {children}
     </StockContext.Provider>
