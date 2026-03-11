@@ -43,6 +43,14 @@ interface StockContextType {
   prefsLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  // Multi-watchlist support
+  userWatchlists: Watchlist[];
+  activeWatchlist: Watchlist | null;
+  activeWatchlistId: string | null;
+  setActiveWatchlistId: (id: string) => void;
+  createWatchlist: (name: string) => Promise<Watchlist | null>;
+  renameWatchlist: (id: string, name: string) => Promise<void>;
+  deleteWatchlist: (id: string) => Promise<void>;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
