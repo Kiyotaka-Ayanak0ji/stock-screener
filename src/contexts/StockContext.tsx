@@ -72,6 +72,17 @@ function saveEncrypted(key: string, data: unknown) {
 
 export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
+  const {
+    watchlists: userWatchlists,
+    activeWatchlist,
+    activeWatchlistId,
+    setActiveWatchlistId,
+    createWatchlist: createWl,
+    updateWatchlistTickers,
+    renameWatchlist,
+    deleteWatchlist,
+    loaded: watchlistsLoaded,
+  } = useWatchlists();
 
   const defaultWatchlist = SAMPLE_STOCKS.map(s => s.ticker);
 
