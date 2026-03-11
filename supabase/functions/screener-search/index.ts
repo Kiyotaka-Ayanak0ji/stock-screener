@@ -55,6 +55,11 @@ Deno.serve(async (req) => {
         name = name.split(' - NSE:')[0].trim();
       }
 
+      // Numeric tickers are always BSE codes (e.g., 513119, 500325)
+      if (/^\d+$/.test(ticker)) {
+        exchange = 'BSE';
+      }
+
       return {
         ticker,
         name,
