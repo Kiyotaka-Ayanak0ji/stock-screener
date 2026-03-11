@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { StockProvider } from "@/contexts/StockContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import SharedWatchlist from "./pages/SharedWatchlist";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
