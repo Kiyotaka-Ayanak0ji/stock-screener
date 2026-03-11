@@ -60,7 +60,7 @@ const SharedWatchlist = () => {
 
       setData({
         watchlist_name: row.watchlist_name,
-        stock_data: (row.stock_data as SharedStock[]) || [],
+        stock_data: (row.stock_data as unknown as SharedStock[]) || [],
         created_at: row.created_at,
       });
       setLoading(false);
