@@ -4,6 +4,7 @@ import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useWatchlists, Watchlist } from "@/hooks/useWatchlists";
 
 function checkMarketOpen(): boolean {
   const now = new Date();
