@@ -12,6 +12,9 @@ interface SearchResult {
   ticker: string;
   name: string;
   exchange: "NSE" | "BSE";
+  isIndex?: boolean;
+  yahooSymbol?: string;
+  screenerCode?: string;
 }
 
 const AddStockDialog = () => {
