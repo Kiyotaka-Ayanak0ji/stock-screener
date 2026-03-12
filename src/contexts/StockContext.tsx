@@ -119,13 +119,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
+  const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs to hold latest state for debounced save (avoids stale closures)
-  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData });
+  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers });
   useEffect(() => {
-    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
-  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers };
+  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers]);
 
   // --- Cached price helpers ---
   const saveCachedPrices = useCallback(async (stocksToCache: Stock[]) => {
