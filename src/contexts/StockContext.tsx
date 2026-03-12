@@ -35,7 +35,7 @@ interface StockContextType {
   notes: StockNote[];
   events: StockEvent[];
   watchlist: string[];
-  addStock: (ticker: string, name?: string, exchange?: "NSE" | "BSE") => void;
+  addStock: (ticker: string, name?: string, exchange?: "NSE" | "BSE", options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }) => void;
   removeStock: (ticker: string) => void;
   updateNote: (ticker: string, note: string) => void;
   updateEvent: (ticker: string, tags: string[]) => void;
