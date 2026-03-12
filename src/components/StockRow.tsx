@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag } from "lucide-react";
+import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { CustomColumn } from "@/contexts/StockContext";
@@ -19,14 +19,17 @@ interface StockRowProps {
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
 
 const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
-  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData } = useStocks();
+  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger } = useStocks();
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");
   const [editingCustomCol, setEditingCustomCol] = useState<string | null>(null);
   const [customColValue, setCustomColValue] = useState("");
+  const [editingTrigger, setEditingTrigger] = useState(false);
+  const [triggerValue, setTriggerValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const customInputRef = useRef<HTMLInputElement>(null);
+  const triggerInputRef = useRef<HTMLInputElement>(null);
   const [flashClass, setFlashClass] = useState("");
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
@@ -34,6 +37,7 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
   const note = notes.find(n => n.ticker === stock.ticker)?.note || "";
   const stockEvents = events.find(e => e.ticker === stock.ticker)?.tags || [];
   const flash = lastFlash[stock.ticker];
+  const trigger = priceTriggers[stock.ticker];
 
   useEffect(() => {
     if (flash === "up") setFlashClass("price-flash-up");
@@ -79,6 +83,18 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
     const val = customColValue.trim();
     updateCustomColumnData(stock.ticker, colId, val === "" ? null : parseFloat(val));
     setEditingCustomCol(null);
+  };
+
+  const startEditTrigger = () => {
+    setTriggerValue(trigger ? String(trigger.price) : "");
+    setEditingTrigger(true);
+    setTimeout(() => triggerInputRef.current?.focus(), 50);
+  };
+
+  const saveTrigger = () => {
+    const val = triggerValue.trim();
+    setPriceTrigger(stock.ticker, val === "" ? null : parseFloat(val));
+    setEditingTrigger(false);
   };
 
   const isPositive = stock.change > 0;
@@ -193,6 +209,47 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
           </td>
         );
       })}
+      {isVisible("priceTrigger") && (
+        <td className="px-4 py-3 text-right font-mono text-xs min-w-[120px]">
+          {editingTrigger ? (
+            <div className="flex items-center gap-1 justify-end">
+              <Input
+                ref={triggerInputRef}
+                value={triggerValue}
+                onChange={e => setTriggerValue(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter") saveTrigger(); if (e.key === "Escape") setEditingTrigger(false); }}
+                className="h-6 text-xs w-20 text-right"
+                type="number"
+                step="any"
+                placeholder="₹ price"
+              />
+              <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={saveTrigger}>
+                <Check className="h-3 w-3 text-gain" />
+              </Button>
+              <Button size="icon" variant="ghost" className="h-6 w-6 shrink-0" onClick={() => setEditingTrigger(false)}>
+                <X className="h-3 w-3 text-loss" />
+              </Button>
+            </div>
+          ) : (
+            <button
+              onClick={startEditTrigger}
+              className={`hover:text-foreground transition-colors w-full text-right inline-flex items-center justify-end gap-1 ${trigger ? "text-primary" : "text-muted-foreground"}`}
+            >
+              {trigger ? (
+                <>
+                  <Bell className="h-3 w-3" />
+                  ₹{trigger.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </>
+              ) : (
+                <>
+                  <BellOff className="h-3 w-3 opacity-50" />
+                  Set trigger
+                </>
+              )}
+            </button>
+          )}
+        </td>
+      )}
       {isVisible("event") && (
         <td className="px-4 py-3 min-w-[160px]">
           <div className="flex items-center gap-1 flex-wrap">

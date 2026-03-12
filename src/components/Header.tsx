@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import AlertsPanel from "@/components/AlertsPanel";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
@@ -44,6 +45,8 @@ const Header = () => {
             <span className="text-loss">{losers} ▼</span>
             <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
           </div>
+
+          <AlertsPanel />
 
           {user ? (
             <div className="flex items-center gap-2">

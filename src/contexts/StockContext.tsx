@@ -22,6 +22,14 @@ export interface CustomColumn {
   name: string;
 }
 
+export interface TriggeredAlert {
+  id: string;
+  ticker: string;
+  triggerPrice: number;
+  hitPrice: number;
+  timestamp: Date;
+}
+
 interface StockContextType {
   stocks: Stock[];
   notes: StockNote[];
@@ -43,6 +51,12 @@ interface StockContextType {
   prefsLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  // Price triggers
+  priceTriggers: Record<string, { price: number; createdAt: number }>;
+  setPriceTrigger: (ticker: string, price: number | null) => void;
+  triggeredAlerts: TriggeredAlert[];
+  clearAlert: (id: string) => void;
+  clearAllAlerts: () => void;
   // Multi-watchlist support
   userWatchlists: Watchlist[];
   activeWatchlist: Watchlist | null;
@@ -105,13 +119,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
+  const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Refs to hold latest state for debounced save (avoids stale closures)
-  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData });
+  const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers });
   useEffect(() => {
-    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData };
-  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+    latestState.current = { notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers };
+  }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers]);
 
   // --- Cached price helpers ---
   const saveCachedPrices = useCallback(async (stocksToCache: Stock[]) => {
@@ -198,6 +214,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setColumnVisibility(loadEncrypted("st_col_vis", {}));
     setCustomColumns(loadEncrypted("st_custom_cols", []));
     setCustomColumnData(loadEncrypted("st_custom_data", {}));
+    setPriceTriggers(loadEncrypted("st_price_triggers", {}));
+    setTriggeredAlerts(loadEncrypted<TriggeredAlert[]>("st_triggered_alerts", []).map(a => ({ ...a, timestamp: new Date(a.timestamp) })));
     setPrefsLoaded(true);
   };
 
@@ -247,6 +265,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .then(({ error }) => {
             if (error) console.error("Failed to save preferences to database:", error);
           });
+        // Price triggers stored in localStorage for all users
+        saveEncrypted("st_price_triggers", s.priceTriggers);
       } else {
         // Save to localStorage
         saveEncrypted("st_notes", s.notes);
@@ -255,12 +275,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         saveEncrypted("st_col_vis", s.columnVisibility);
         saveEncrypted("st_custom_cols", s.customColumns);
         saveEncrypted("st_custom_data", s.customColumnData);
+        saveEncrypted("st_price_triggers", s.priceTriggers);
       }
     }, 500);
   }, [user, prefsLoaded]);
 
   // Trigger save when preferences change
-  useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+  useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers]);
 
   const liveDataFailed = useRef(false);
   const stocksRef = useRef(stocks);
@@ -522,6 +543,77 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
+  // --- Price Trigger logic ---
+  const priceTriggersRef = useRef(priceTriggers);
+  useEffect(() => { priceTriggersRef.current = priceTriggers; }, [priceTriggers]);
+
+  const setPriceTrigger = useCallback((ticker: string, price: number | null) => {
+    setPriceTriggers(prev => {
+      if (price === null) {
+        const next = { ...prev };
+        delete next[ticker];
+        return next;
+      }
+      return { ...prev, [ticker]: { price, createdAt: Date.now() } };
+    });
+  }, []);
+
+  const clearAlert = useCallback((id: string) => {
+    setTriggeredAlerts(prev => {
+      const next = prev.filter(a => a.id !== id);
+      saveEncrypted("st_triggered_alerts", next);
+      return next;
+    });
+  }, []);
+
+  const clearAllAlerts = useCallback(() => {
+    setTriggeredAlerts([]);
+    saveEncrypted("st_triggered_alerts", []);
+  }, []);
+
+  // Check triggers on every stock price update & auto-delete after 20 min
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    const triggers = priceTriggersRef.current;
+    const now = Date.now();
+    const TWENTY_MINUTES = 20 * 60 * 1000;
+    let changed = false;
+    const nextTriggers = { ...triggers };
+
+    for (const [ticker, trigger] of Object.entries(triggers)) {
+      // Auto-delete after 20 minutes
+      if (now - trigger.createdAt >= TWENTY_MINUTES) {
+        delete nextTriggers[ticker];
+        changed = true;
+        continue;
+      }
+      // Check if current price matches trigger price
+      const stock = stocks.find(s => s.ticker === ticker);
+      if (stock && Math.abs(stock.price - trigger.price) < 0.01) {
+        const alert: TriggeredAlert = {
+          id: `${ticker}_${now}_${Math.random().toString(36).slice(2, 6)}`,
+          ticker,
+          triggerPrice: trigger.price,
+          hitPrice: stock.price,
+          timestamp: new Date(),
+        };
+        setTriggeredAlerts(prev => {
+          const next = [alert, ...prev];
+          saveEncrypted("st_triggered_alerts", next);
+          return next;
+        });
+        toast.success(`🔔 Price trigger hit! ${ticker} reached ₹${stock.price.toFixed(2)}`);
+        // Remove the trigger after it fires
+        delete nextTriggers[ticker];
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      setPriceTriggers(nextTriggers);
+    }
+  }, [stocks, prefsLoaded]);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
@@ -533,6 +625,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
       prefsLoaded, refreshPrices, isRefreshing,
+      priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
     }}>
