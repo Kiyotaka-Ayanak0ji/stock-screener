@@ -11,7 +11,7 @@ interface StockQuote {
 }
 
 export async function fetchLivePrices(
-  tickers: { ticker: string; exchange: "NSE" | "BSE" }[]
+  tickers: { ticker: string; exchange: "NSE" | "BSE"; yahooSymbol?: string }[]
 ): Promise<Partial<Record<string, StockQuote>>> {
   if (tickers.length === 0) return {};
 

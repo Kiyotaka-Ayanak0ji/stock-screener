@@ -126,7 +126,7 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
       <td className="px-4 py-3">
         <div className="flex flex-col">
           <a
-            href={getStockUrl(stock.ticker, stock.exchange)}
+            href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono font-bold text-sm text-primary hover:underline inline-flex items-center gap-1 group w-fit"
