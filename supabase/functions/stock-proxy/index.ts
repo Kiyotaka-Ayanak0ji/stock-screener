@@ -110,8 +110,31 @@ Deno.serve(async (req) => {
 
     const result: Record<string, Record<string, number>> = {};
 
+    // Build a reverse map from Yahoo symbol back to our key
+    const yahooToKey = new Map<string, string>();
+    symbols.forEach((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+      if (s.yahooSymbol) {
+        yahooToKey.set(s.yahooSymbol, `${s.exchange}_${s.ticker}`);
+      }
+    });
+
     for (const q of quotes) {
       const symbol = q.symbol || '';
+      
+      // Check if this is a custom-mapped symbol (index, etc.)
+      const mappedKey = yahooToKey.get(symbol);
+      if (mappedKey) {
+        result[mappedKey] = {
+          ltp: q.regularMarketPrice ?? 0,
+          open: q.regularMarketOpen ?? 0,
+          high: q.regularMarketDayHigh ?? 0,
+          low: q.regularMarketDayLow ?? 0,
+          close: q.regularMarketPreviousClose ?? 0,
+          volume: q.regularMarketVolume ?? 0,
+        };
+        continue;
+      }
+
       const isBSE = symbol.endsWith('.BO');
       const ticker = symbol.replace(/\.(NS|BO)$/, '');
       const exchange = isBSE ? 'BSE' : 'NSE';
