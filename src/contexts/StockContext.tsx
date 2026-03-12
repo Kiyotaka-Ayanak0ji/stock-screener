@@ -265,6 +265,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .then(({ error }) => {
             if (error) console.error("Failed to save preferences to database:", error);
           });
+        // Price triggers stored in localStorage for all users
+        saveEncrypted("st_price_triggers", s.priceTriggers);
       } else {
         // Save to localStorage
         saveEncrypted("st_notes", s.notes);
@@ -273,6 +275,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         saveEncrypted("st_col_vis", s.columnVisibility);
         saveEncrypted("st_custom_cols", s.customColumns);
         saveEncrypted("st_custom_data", s.customColumnData);
+        saveEncrypted("st_price_triggers", s.priceTriggers);
       }
     }, 500);
   }, [user, prefsLoaded]);
