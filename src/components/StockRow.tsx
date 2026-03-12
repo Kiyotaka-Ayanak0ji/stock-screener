@@ -139,8 +139,8 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
       </td>
       {isVisible("exchange") && (
         <td className="px-3 py-3 text-xs font-medium">
-          <span className="px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
-            {stock.exchange}
+          <span className={`px-2 py-0.5 rounded ${stock.isIndex ? 'bg-primary/10 text-primary' : 'bg-secondary text-secondary-foreground'}`}>
+            {stock.isIndex ? "INDEX" : stock.exchange}
           </span>
         </td>
       )}
