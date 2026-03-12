@@ -12,6 +12,9 @@ export interface Stock {
   volume: number;
   marketCap: number;
   lastUpdated: Date;
+  yahooSymbol?: string; // For indices/special symbols where ticker != Yahoo symbol
+  isIndex?: boolean;
+  screenerCode?: string; // Original Screener numeric code for valid links
 }
 
 export interface StockEvent {
@@ -26,9 +29,12 @@ const SCREENER_SLUG_MAP: Record<string, string> = {
   "BAJAJ-AUTO": "BAJAJ-AUTO",
 };
 
-export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE"): string {
+export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE", screenerCode?: string): string {
+  // If we have a Screener numeric code (for indices), use that
+  if (screenerCode) {
+    return `https://www.screener.in/company/${screenerCode}/`;
+  }
   const slug = SCREENER_SLUG_MAP[ticker] || ticker;
-  // Don't double-encode if already mapped; only encode unmapped tickers
   const encodedSlug = SCREENER_SLUG_MAP[ticker] ? slug : encodeURIComponent(ticker);
   return `https://www.screener.in/company/${encodedSlug}/`;
 }
@@ -343,7 +349,12 @@ export function simulatePriceUpdate(stock: Stock): Stock {
   };
 }
 
-export function generateStockData(ticker: string, name: string, exchange: "NSE" | "BSE"): Stock {
+export function generateStockData(
+  ticker: string,
+  name: string,
+  exchange: "NSE" | "BSE",
+  options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }
+): Stock {
   const basePrice = 500 + Math.random() * 3000;
   const change = (Math.random() - 0.5) * basePrice * 0.03;
   const price = Math.round((basePrice + change) * 100) / 100;
@@ -363,5 +374,8 @@ export function generateStockData(ticker: string, name: string, exchange: "NSE" 
     volume: Math.floor(Math.random() * 10000000),
     marketCap: getMarketCap(ticker, price),
     lastUpdated: new Date(),
+    ...(options?.yahooSymbol && { yahooSymbol: options.yahooSymbol }),
+    ...(options?.isIndex && { isIndex: true }),
+    ...(options?.screenerCode && { screenerCode: options.screenerCode }),
   };
 }

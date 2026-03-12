@@ -126,7 +126,7 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
       <td className="px-4 py-3">
         <div className="flex flex-col">
           <a
-            href={getStockUrl(stock.ticker, stock.exchange)}
+            href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono font-bold text-sm text-primary hover:underline inline-flex items-center gap-1 group w-fit"
@@ -139,8 +139,8 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
       </td>
       {isVisible("exchange") && (
         <td className="px-3 py-3 text-xs font-medium">
-          <span className="px-2 py-0.5 rounded bg-secondary text-secondary-foreground">
-            {stock.exchange}
+          <span className={`px-2 py-0.5 rounded ${stock.isIndex ? 'bg-primary/10 text-primary' : 'bg-secondary text-secondary-foreground'}`}>
+            {stock.isIndex ? "INDEX" : stock.exchange}
           </span>
         </td>
       )}

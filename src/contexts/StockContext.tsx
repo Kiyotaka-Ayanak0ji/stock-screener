@@ -35,7 +35,7 @@ interface StockContextType {
   notes: StockNote[];
   events: StockEvent[];
   watchlist: string[];
-  addStock: (ticker: string, name?: string, exchange?: "NSE" | "BSE") => void;
+  addStock: (ticker: string, name?: string, exchange?: "NSE" | "BSE", options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }) => void;
   removeStock: (ticker: string) => void;
   updateNote: (ticker: string, note: string) => void;
   updateEvent: (ticker: string, tags: string[]) => void;
@@ -322,7 +322,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const currentWatchlist = watchlistRef.current;
         const tickerInfo = currentStocks
           .filter(s => currentWatchlist.includes(s.ticker))
-          .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
+          .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
 
         if (tickerInfo.length === 0) return;
 
@@ -398,11 +398,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           });
           if (error || !data?.results?.length) continue;
 
-          // Find the resolved result (non-numeric ticker)
-          const resolved = data.results.find((r: any) => !/^\d+$/.test(r.ticker));
+          // Find the resolved result (non-numeric ticker, or an index with yahooSymbol)
+          const resolved = data.results.find((r: any) => !/^\d+$/.test(r.ticker) || (r.isIndex && r.yahooSymbol));
           if (!resolved) continue;
 
-          console.log(`Auto-resolved numeric ticker ${numTicker} → ${resolved.ticker} (${resolved.exchange})`);
+          console.log(`Auto-resolved numeric ticker ${numTicker} → ${resolved.ticker} (${resolved.exchange})${resolved.isIndex ? ' [INDEX]' : ''}`);
 
           // Replace in watchlist
           setWatchlist(prev => {
@@ -419,7 +419,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const filtered = prev.filter(s => s.ticker !== numTicker);
             const exists = filtered.some(s => s.ticker === resolved.ticker);
             if (!exists) {
-              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange));
+              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
+                yahooSymbol: resolved.yahooSymbol,
+                isIndex: resolved.isIndex,
+                screenerCode: resolved.screenerCode,
+              }));
             }
             return filtered;
           });
@@ -465,14 +469,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, [watchlist, prefsLoaded]);
 
-  const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
+  const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE", options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }) => {
     if (watchlist.includes(ticker)) return;
     const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
     const stockName = info?.name || name || ticker;
     const stockExchange = info?.exchange || exchange || "NSE";
     const existing = stocks.find(s => s.ticker === ticker);
     if (!existing) {
-      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange)]);
+      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
     }
     const newWatchlist = [...watchlist, ticker];
     setWatchlist(newWatchlist);
@@ -566,7 +570,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const currentWatchlist = watchlistRef.current;
       const tickerInfo = currentStocks
         .filter(s => currentWatchlist.includes(s.ticker))
-        .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
+        .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
 
       if (tickerInfo.length === 0) return;
 

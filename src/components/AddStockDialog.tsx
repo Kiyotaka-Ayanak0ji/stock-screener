@@ -12,6 +12,9 @@ interface SearchResult {
   ticker: string;
   name: string;
   exchange: "NSE" | "BSE";
+  isIndex?: boolean;
+  yahooSymbol?: string;
+  screenerCode?: string;
 }
 
 const AddStockDialog = () => {
@@ -82,7 +85,11 @@ const AddStockDialog = () => {
   }, [search]);
 
   const handleAdd = (stock: SearchResult) => {
-    addStock(stock.ticker, stock.name, stock.exchange);
+    addStock(stock.ticker, stock.name, stock.exchange, {
+      yahooSymbol: stock.yahooSymbol,
+      isIndex: stock.isIndex,
+      screenerCode: stock.screenerCode,
+    });
     setSearch("");
   };
 
@@ -130,7 +137,7 @@ const AddStockDialog = () => {
                     <span className="text-muted-foreground text-xs ml-2">{stock.name}</span>
                   </div>
                   <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    {stock.exchange}
+                    {stock.isIndex ? "INDEX" : stock.exchange}
                   </span>
                 </motion.button>
               ))
