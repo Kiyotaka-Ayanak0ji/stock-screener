@@ -379,6 +379,77 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [user, activeWatchlist]);
 
+  // Auto-resolve numeric BSE tickers to their trading symbols
+  const resolvedNumericTickers = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!prefsLoaded) return;
+
+    const numericTickers = watchlist.filter(t => /^\d+$/.test(t) && !resolvedNumericTickers.current.has(t));
+    if (numericTickers.length === 0) return;
+
+    // Mark as being resolved to prevent re-runs
+    numericTickers.forEach(t => resolvedNumericTickers.current.add(t));
+
+    const resolveAll = async () => {
+      for (const numTicker of numericTickers) {
+        try {
+          const { data, error } = await supabase.functions.invoke("screener-search", {
+            body: { query: numTicker },
+          });
+          if (error || !data?.results?.length) continue;
+
+          // Find the resolved result (non-numeric ticker)
+          const resolved = data.results.find((r: any) => !/^\d+$/.test(r.ticker));
+          if (!resolved) continue;
+
+          console.log(`Auto-resolved numeric ticker ${numTicker} → ${resolved.ticker} (${resolved.exchange})`);
+
+          // Replace in watchlist
+          setWatchlist(prev => {
+            const updated = prev.map(t => t === numTicker ? resolved.ticker : t);
+            // Persist
+            if (user && activeWatchlistId) {
+              updateWatchlistTickers(activeWatchlistId, updated);
+            }
+            return updated;
+          });
+
+          // Replace in stocks array
+          setStocks(prev => {
+            const filtered = prev.filter(s => s.ticker !== numTicker);
+            const exists = filtered.some(s => s.ticker === resolved.ticker);
+            if (!exists) {
+              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange));
+            }
+            return filtered;
+          });
+
+          // Migrate notes/events from old ticker to new
+          setNotes(prev => prev.map(n => n.ticker === numTicker ? { ...n, ticker: resolved.ticker } : n));
+          setEvents(prev => prev.map(e => e.ticker === numTicker ? { ...e, ticker: resolved.ticker } : e));
+          setCustomColumnData(prev => {
+            if (!prev[numTicker]) return prev;
+            const next = { ...prev, [resolved.ticker]: prev[numTicker] };
+            delete next[numTicker];
+            return next;
+          });
+          setPriceTriggers(prev => {
+            if (!prev[numTicker]) return prev;
+            const next = { ...prev, [resolved.ticker]: prev[numTicker] };
+            delete next[numTicker];
+            return next;
+          });
+
+          toast.success(`Resolved ${numTicker} → ${resolved.ticker}`, { description: resolved.name });
+        } catch (err) {
+          console.error(`Failed to resolve numeric ticker ${numTicker}:`, err);
+        }
+      }
+    };
+
+    resolveAll();
+  }, [watchlist, prefsLoaded, user, activeWatchlistId, updateWatchlistTickers]);
+
   // Ensure all watchlist tickers have corresponding stock entries
   useEffect(() => {
     if (!prefsLoaded) return;
