@@ -157,6 +157,11 @@ const StockTable = () => {
                     <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
                   </th>
                 ))}
+                {isVisible("priceTrigger") && (
+                  <th className={`${headerClass} text-right`}>
+                    <div className="flex items-center justify-end gap-1">Price Trigger</div>
+                  </th>
+                )}
                 {isVisible("event") && (
                   <th className={headerClass} onClick={() => toggleSort("event")}>
                     <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>

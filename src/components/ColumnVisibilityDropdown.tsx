@@ -20,6 +20,7 @@ const ColumnVisibilityDropdown = () => {
     { key: "low", label: "Low" },
     { key: "volume", label: "Volume" },
     { key: "marketCap", label: "Market Cap" },
+    { key: "priceTrigger", label: "Price Trigger" },
     { key: "event", label: "Event" },
     { key: "notes", label: "Notes" },
   ];

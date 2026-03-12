@@ -46,6 +46,8 @@ const Header = () => {
             <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
           </div>
 
+          <AlertsPanel />
+
           {user ? (
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs">
