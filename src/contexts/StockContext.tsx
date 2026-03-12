@@ -214,6 +214,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setColumnVisibility(loadEncrypted("st_col_vis", {}));
     setCustomColumns(loadEncrypted("st_custom_cols", []));
     setCustomColumnData(loadEncrypted("st_custom_data", {}));
+    setPriceTriggers(loadEncrypted("st_price_triggers", {}));
+    setTriggeredAlerts(loadEncrypted<TriggeredAlert[]>("st_triggered_alerts", []).map(a => ({ ...a, timestamp: new Date(a.timestamp) })));
     setPrefsLoaded(true);
   };
 
