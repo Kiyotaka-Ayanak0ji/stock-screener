@@ -398,11 +398,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           });
           if (error || !data?.results?.length) continue;
 
-          // Find the resolved result (non-numeric ticker)
-          const resolved = data.results.find((r: any) => !/^\d+$/.test(r.ticker));
+          // Find the resolved result (non-numeric ticker, or an index with yahooSymbol)
+          const resolved = data.results.find((r: any) => !/^\d+$/.test(r.ticker) || (r.isIndex && r.yahooSymbol));
           if (!resolved) continue;
 
-          console.log(`Auto-resolved numeric ticker ${numTicker} → ${resolved.ticker} (${resolved.exchange})`);
+          console.log(`Auto-resolved numeric ticker ${numTicker} → ${resolved.ticker} (${resolved.exchange})${resolved.isIndex ? ' [INDEX]' : ''}`);
 
           // Replace in watchlist
           setWatchlist(prev => {
@@ -419,7 +419,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const filtered = prev.filter(s => s.ticker !== numTicker);
             const exists = filtered.some(s => s.ticker === resolved.ticker);
             if (!exists) {
-              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange));
+              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
+                yahooSymbol: resolved.yahooSymbol,
+                isIndex: resolved.isIndex,
+                screenerCode: resolved.screenerCode,
+              }));
             }
             return filtered;
           });
