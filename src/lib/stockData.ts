@@ -12,6 +12,9 @@ export interface Stock {
   volume: number;
   marketCap: number;
   lastUpdated: Date;
+  yahooSymbol?: string; // For indices/special symbols where ticker != Yahoo symbol
+  isIndex?: boolean;
+  screenerCode?: string; // Original Screener numeric code for valid links
 }
 
 export interface StockEvent {
