@@ -543,6 +543,77 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
+  // --- Price Trigger logic ---
+  const priceTriggersRef = useRef(priceTriggers);
+  useEffect(() => { priceTriggersRef.current = priceTriggers; }, [priceTriggers]);
+
+  const setPriceTrigger = useCallback((ticker: string, price: number | null) => {
+    setPriceTriggers(prev => {
+      if (price === null) {
+        const next = { ...prev };
+        delete next[ticker];
+        return next;
+      }
+      return { ...prev, [ticker]: { price, createdAt: Date.now() } };
+    });
+  }, []);
+
+  const clearAlert = useCallback((id: string) => {
+    setTriggeredAlerts(prev => {
+      const next = prev.filter(a => a.id !== id);
+      saveEncrypted("st_triggered_alerts", next);
+      return next;
+    });
+  }, []);
+
+  const clearAllAlerts = useCallback(() => {
+    setTriggeredAlerts([]);
+    saveEncrypted("st_triggered_alerts", []);
+  }, []);
+
+  // Check triggers on every stock price update & auto-delete after 20 min
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    const triggers = priceTriggersRef.current;
+    const now = Date.now();
+    const TWENTY_MINUTES = 20 * 60 * 1000;
+    let changed = false;
+    const nextTriggers = { ...triggers };
+
+    for (const [ticker, trigger] of Object.entries(triggers)) {
+      // Auto-delete after 20 minutes
+      if (now - trigger.createdAt >= TWENTY_MINUTES) {
+        delete nextTriggers[ticker];
+        changed = true;
+        continue;
+      }
+      // Check if current price matches trigger price
+      const stock = stocks.find(s => s.ticker === ticker);
+      if (stock && Math.abs(stock.price - trigger.price) < 0.01) {
+        const alert: TriggeredAlert = {
+          id: `${ticker}_${now}_${Math.random().toString(36).slice(2, 6)}`,
+          ticker,
+          triggerPrice: trigger.price,
+          hitPrice: stock.price,
+          timestamp: new Date(),
+        };
+        setTriggeredAlerts(prev => {
+          const next = [alert, ...prev];
+          saveEncrypted("st_triggered_alerts", next);
+          return next;
+        });
+        toast.success(`🔔 Price trigger hit! ${ticker} reached ₹${stock.price.toFixed(2)}`);
+        // Remove the trigger after it fires
+        delete nextTriggers[ticker];
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      setPriceTriggers(nextTriggers);
+    }
+  }, [stocks, prefsLoaded]);
+
   const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
 
   return (
@@ -554,6 +625,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
       prefsLoaded, refreshPrices, isRefreshing,
+      priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
     }}>
