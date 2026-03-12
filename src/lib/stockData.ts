@@ -29,9 +29,12 @@ const SCREENER_SLUG_MAP: Record<string, string> = {
   "BAJAJ-AUTO": "BAJAJ-AUTO",
 };
 
-export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE"): string {
+export function getStockUrl(ticker: string, _exchange: "NSE" | "BSE", screenerCode?: string): string {
+  // If we have a Screener numeric code (for indices), use that
+  if (screenerCode) {
+    return `https://www.screener.in/company/${screenerCode}/`;
+  }
   const slug = SCREENER_SLUG_MAP[ticker] || ticker;
-  // Don't double-encode if already mapped; only encode unmapped tickers
   const encodedSlug = SCREENER_SLUG_MAP[ticker] ? slug : encodeURIComponent(ticker);
   return `https://www.screener.in/company/${encodedSlug}/`;
 }
