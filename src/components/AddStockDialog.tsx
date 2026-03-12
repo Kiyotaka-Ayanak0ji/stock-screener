@@ -137,7 +137,7 @@ const AddStockDialog = () => {
                     <span className="text-muted-foreground text-xs ml-2">{stock.name}</span>
                   </div>
                   <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">
-                    {stock.exchange}
+                    {stock.isIndex ? "INDEX" : stock.exchange}
                   </span>
                 </motion.button>
               ))
