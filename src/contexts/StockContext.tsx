@@ -322,7 +322,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const currentWatchlist = watchlistRef.current;
         const tickerInfo = currentStocks
           .filter(s => currentWatchlist.includes(s.ticker))
-          .map(s => ({ ticker: s.ticker, exchange: s.exchange }));
+          .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
 
         if (tickerInfo.length === 0) return;
 
