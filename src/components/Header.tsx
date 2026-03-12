@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import AlertsPanel from "@/components/AlertsPanel";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
