@@ -57,7 +57,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const yahooSymbols = symbols.map((s: { ticker: string; exchange: string }) => {
+    const yahooSymbols = symbols.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+      // If a Yahoo symbol is explicitly provided (e.g., for indices), use it directly
+      if (s.yahooSymbol) return s.yahooSymbol;
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
     }).join(',');

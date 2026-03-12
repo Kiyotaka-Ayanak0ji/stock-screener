@@ -4,7 +4,7 @@ const corsHeaders = {
 };
 
 // For numeric BSE codes, fetch the Screener company page to extract the BSE trading symbol
-async function resolveBseTradingSymbol(bseCode: string): Promise<string | null> {
+async function resolveBseTradingSymbol(bseCode: string): Promise<{ tradingSymbol: string | null; isIndex: boolean; yahooSymbol: string | null }> {
   try {
     const res = await fetch(`https://www.screener.in/company/${bseCode}/`, {
       headers: {
@@ -12,18 +12,73 @@ async function resolveBseTradingSymbol(bseCode: string): Promise<string | null> 
         'Accept': 'text/html',
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { tradingSymbol: null, isIndex: false, yahooSymbol: null };
     const html = await res.text();
+
+    // Check if this is an index page (has "Constituents" section or "Index" in title)
+    const isIndex = /class="sub-heading"[^>]*>.*Index/i.test(html) || 
+                    /id="constituents"/i.test(html) ||
+                    /<title>[^<]*Index[^<]*<\/title>/i.test(html);
+
+    if (isIndex) {
+      // Try to find the Yahoo Finance symbol by searching Yahoo
+      const yahooSymbol = await resolveYahooIndexSymbol(bseCode, html);
+      // Extract the index name from the page title
+      const titleMatch = html.match(/<title>\s*([^<]+?)\s*-/);
+      const indexName = titleMatch ? titleMatch[1].trim() : null;
+      console.log(`Detected index: ${bseCode} → Yahoo: ${yahooSymbol}, Name: ${indexName}`);
+      return { tradingSymbol: null, isIndex: true, yahooSymbol };
+    }
     
     // Look for BSE link pattern: bseindia.com/stock-share-price/.../TRADINGSYMBOL/CODE/
     const bseMatch = html.match(/bseindia\.com\/stock-share-price\/[^/]+\/([A-Z0-9]+)\/\d+/);
     if (bseMatch && bseMatch[1]) {
       console.log(`Resolved BSE code ${bseCode} to trading symbol: ${bseMatch[1]}`);
-      return bseMatch[1];
+      return { tradingSymbol: bseMatch[1], isIndex: false, yahooSymbol: null };
     }
-    return null;
+    return { tradingSymbol: null, isIndex: false, yahooSymbol: null };
   } catch (err) {
     console.error(`Failed to resolve BSE trading symbol for ${bseCode}:`, err);
+    return { tradingSymbol: null, isIndex: false, yahooSymbol: null };
+  }
+}
+
+// Resolve a Yahoo Finance symbol for a BSE/NSE index
+async function resolveYahooIndexSymbol(screenerCode: string, html: string): Promise<string | null> {
+  try {
+    // Extract the index name from the HTML
+    const titleMatch = html.match(/<h1[^>]*>\s*([^<]+?)\s*<\/h1>/);
+    const indexName = titleMatch ? titleMatch[1].trim() : '';
+    
+    if (!indexName) return null;
+
+    // Search Yahoo Finance for this index
+    const searchUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(indexName)}&quotesCount=5&newsCount=0&enableFuzzyQuery=false&quotesQueryId=tss_match_phrase_query&multiQuoteQueryId=multi_quote_single_token_query&enableCb=false&enableNavLinks=false`;
+    
+    const searchRes = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    });
+
+    if (!searchRes.ok) return null;
+    const searchData = await searchRes.json();
+    
+    // Look for an index result (.BO or ^-prefixed)
+    const quotes = searchData.quotes || [];
+    const indexResult = quotes.find((q: any) => 
+      q.quoteType === 'INDEX' || 
+      (q.symbol && (q.symbol.endsWith('.BO') || q.symbol.startsWith('^')))
+    );
+
+    if (indexResult) {
+      console.log(`Yahoo Finance resolved index "${indexName}" → ${indexResult.symbol}`);
+      return indexResult.symbol;
+    }
+
+    return null;
+  } catch (err) {
+    console.error(`Failed to resolve Yahoo index symbol for ${screenerCode}:`, err);
     return null;
   }
 }
@@ -83,19 +138,40 @@ Deno.serve(async (req) => {
         exchange = 'BSE';
       }
 
-      return { ticker, name, exchange, bseCode: /^\d+$/.test(ticker) ? ticker : null };
+      // Detect index by name
+      const isLikelyIndex = /\bindex\b/i.test(name);
+
+      return { ticker, name, exchange, bseCode: /^\d+$/.test(ticker) ? ticker : null, isLikelyIndex };
     }).filter((item: any) => item.ticker && item.name);
 
-    // Resolve BSE numeric codes to trading symbols in parallel
+    // Resolve BSE numeric codes to trading symbols (or index info) in parallel
     const results = await Promise.all(
       parsed.map(async (item: any) => {
         if (item.bseCode) {
-          const tradingSymbol = await resolveBseTradingSymbol(item.bseCode);
-          if (tradingSymbol) {
-            return { ticker: tradingSymbol, name: item.name, exchange: 'BSE' as const };
+          const resolved = await resolveBseTradingSymbol(item.bseCode);
+          
+          if (resolved.isIndex && resolved.yahooSymbol) {
+            // It's an index with a valid Yahoo symbol
+            return {
+              ticker: item.name.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_').toUpperCase().slice(0, 30),
+              name: item.name,
+              exchange: 'BSE' as const,
+              isIndex: true,
+              yahooSymbol: resolved.yahooSymbol,
+              screenerCode: item.bseCode,
+            };
+          }
+          
+          if (resolved.tradingSymbol) {
+            return { ticker: resolved.tradingSymbol, name: item.name, exchange: 'BSE' as const };
           }
         }
-        return { ticker: item.ticker, name: item.name, exchange: item.exchange };
+        
+        const result: any = { ticker: item.ticker, name: item.name, exchange: item.exchange };
+        if (item.isLikelyIndex) {
+          result.isIndex = true;
+        }
+        return result;
       })
     );
 
