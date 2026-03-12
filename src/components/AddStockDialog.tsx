@@ -85,7 +85,11 @@ const AddStockDialog = () => {
   }, [search]);
 
   const handleAdd = (stock: SearchResult) => {
-    addStock(stock.ticker, stock.name, stock.exchange);
+    addStock(stock.ticker, stock.name, stock.exchange, {
+      yahooSymbol: stock.yahooSymbol,
+      isIndex: stock.isIndex,
+      screenerCode: stock.screenerCode,
+    });
     setSearch("");
   };
 
