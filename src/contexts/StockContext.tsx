@@ -358,6 +358,21 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [user, activeWatchlist]);
 
+  // Ensure all watchlist tickers have corresponding stock entries
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    setStocks(prev => {
+      const existingTickers = new Set(prev.map(s => s.ticker));
+      const missing = watchlist.filter(t => !existingTickers.has(t));
+      if (missing.length === 0) return prev;
+      const newStocks = missing.map(ticker => {
+        const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
+        return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE");
+      });
+      return [...prev, ...newStocks];
+    });
+  }, [watchlist, prefsLoaded]);
+
   const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
     if (watchlist.includes(ticker)) return;
     const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
