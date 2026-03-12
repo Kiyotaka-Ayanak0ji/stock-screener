@@ -281,7 +281,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [user, prefsLoaded]);
 
   // Trigger save when preferences change
-  useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData]);
+  useEffect(() => { savePreferences(); }, [notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers]);
 
   const liveDataFailed = useRef(false);
   const stocksRef = useRef(stocks);
