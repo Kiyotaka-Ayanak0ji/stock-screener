@@ -465,14 +465,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, [watchlist, prefsLoaded]);
 
-  const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE") => {
+  const addStock = useCallback((ticker: string, name?: string, exchange?: "NSE" | "BSE", options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }) => {
     if (watchlist.includes(ticker)) return;
     const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
     const stockName = info?.name || name || ticker;
     const stockExchange = info?.exchange || exchange || "NSE";
     const existing = stocks.find(s => s.ticker === ticker);
     if (!existing) {
-      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange)]);
+      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
     }
     const newWatchlist = [...watchlist, ticker];
     setWatchlist(newWatchlist);
