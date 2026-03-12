@@ -22,6 +22,14 @@ export interface CustomColumn {
   name: string;
 }
 
+export interface TriggeredAlert {
+  id: string;
+  ticker: string;
+  triggerPrice: number;
+  hitPrice: number;
+  timestamp: Date;
+}
+
 interface StockContextType {
   stocks: Stock[];
   notes: StockNote[];
@@ -43,6 +51,12 @@ interface StockContextType {
   prefsLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  // Price triggers
+  priceTriggers: Record<string, { price: number; createdAt: number }>;
+  setPriceTrigger: (ticker: string, price: number | null) => void;
+  triggeredAlerts: TriggeredAlert[];
+  clearAlert: (id: string) => void;
+  clearAllAlerts: () => void;
   // Multi-watchlist support
   userWatchlists: Watchlist[];
   activeWatchlist: Watchlist | null;
