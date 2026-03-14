@@ -123,6 +123,16 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Persistent ticker metadata (screenerCode, yahooSymbol, isIndex) — survives reloads
+  const tickerMetaRef = useRef<Record<string, { screenerCode?: string; yahooSymbol?: string; isIndex?: boolean }>>(
+    loadEncrypted("st_ticker_meta", {})
+  );
+  const saveTickerMeta = (ticker: string, meta: { screenerCode?: string; yahooSymbol?: string; isIndex?: boolean }) => {
+    tickerMetaRef.current = { ...tickerMetaRef.current, [ticker]: meta };
+    saveEncrypted("st_ticker_meta", tickerMetaRef.current);
+  };
+  const getTickerMeta = (ticker: string) => tickerMetaRef.current[ticker];
+
   // Refs to hold latest state for debounced save (avoids stale closures)
   const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers });
   useEffect(() => {
@@ -419,13 +429,20 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const filtered = prev.filter(s => s.ticker !== numTicker);
             const exists = filtered.some(s => s.ticker === resolved.ticker);
             if (!exists) {
-              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
+               filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
                 yahooSymbol: resolved.yahooSymbol,
                 isIndex: resolved.isIndex,
                 screenerCode: resolved.screenerCode,
               }));
             }
             return filtered;
+          });
+
+          // Persist ticker metadata for reload
+          saveTickerMeta(resolved.ticker, {
+            screenerCode: resolved.screenerCode,
+            yahooSymbol: resolved.yahooSymbol,
+            isIndex: resolved.isIndex,
           });
 
           // Migrate notes/events from old ticker to new
@@ -463,7 +480,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (missing.length === 0) return prev;
       const newStocks = missing.map(ticker => {
         const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
-        return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE");
+        const meta = getTickerMeta(ticker);
+        return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE", meta);
       });
       return [...prev, ...newStocks];
     });
@@ -477,6 +495,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const existing = stocks.find(s => s.ticker === ticker);
     if (!existing) {
       setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
+    }
+    // Persist ticker metadata
+    if (options?.screenerCode || options?.yahooSymbol || options?.isIndex) {
+      saveTickerMeta(ticker, { screenerCode: options.screenerCode, yahooSymbol: options.yahooSymbol, isIndex: options.isIndex });
     }
     const newWatchlist = [...watchlist, ticker];
     setWatchlist(newWatchlist);
