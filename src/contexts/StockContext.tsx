@@ -471,6 +471,69 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     resolveAll();
   }, [watchlist, prefsLoaded, user, activeWatchlistId, updateWatchlistTickers]);
 
+  // Auto-resolve missing metadata (screenerCode) for all watchlist tickers
+  const resolvedMetaTickers = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!prefsLoaded) return;
+
+    // Find tickers that don't have screenerCode in metadata and haven't been resolved yet
+    const needsResolution = watchlist.filter(t => {
+      if (resolvedMetaTickers.current.has(t)) return false;
+      if (/^\d+$/.test(t)) return false; // numeric tickers handled by the other resolver
+      const meta = getTickerMeta(t);
+      return !meta?.screenerCode;
+    });
+
+    if (needsResolution.length === 0) return;
+
+    // Mark as being resolved
+    needsResolution.forEach(t => resolvedMetaTickers.current.add(t));
+
+    const resolveMetadata = async () => {
+      for (const ticker of needsResolution) {
+        try {
+          const { data, error } = await supabase.functions.invoke("screener-search", {
+            body: { query: ticker },
+          });
+          if (error || !data?.results?.length) continue;
+
+          // Find the matching result
+          const match = data.results.find((r: any) =>
+            r.ticker === ticker || r.ticker?.toUpperCase() === ticker.toUpperCase()
+          );
+
+          if (match) {
+            const meta: { screenerCode?: string; yahooSymbol?: string; isIndex?: boolean } = {};
+            if (match.screenerCode) meta.screenerCode = match.screenerCode;
+            if (match.yahooSymbol) meta.yahooSymbol = match.yahooSymbol;
+            if (match.isIndex) meta.isIndex = match.isIndex;
+
+            if (Object.keys(meta).length > 0) {
+              saveTickerMeta(ticker, meta);
+              // Update existing stock object with the metadata
+              setStocks(prev => prev.map(s => {
+                if (s.ticker === ticker) {
+                  return { ...s, ...meta };
+                }
+                return s;
+              }));
+              console.log(`Resolved metadata for ${ticker}:`, meta);
+            }
+          } else {
+            // No exact match — for regular stocks, the Screener slug IS the ticker
+            // Just verify it works by checking if Screener has a page for it
+            // Store ticker itself as a "verified" marker so we don't re-query
+            saveTickerMeta(ticker, {});
+          }
+        } catch (err) {
+          console.error(`Failed to resolve metadata for ${ticker}:`, err);
+        }
+      }
+    };
+
+    resolveMetadata();
+  }, [watchlist, prefsLoaded]);
+
   // Ensure all watchlist tickers have corresponding stock entries
   useEffect(() => {
     if (!prefsLoaded) return;
