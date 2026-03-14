@@ -355,24 +355,20 @@ export function generateStockData(
   exchange: "NSE" | "BSE",
   options?: { yahooSymbol?: string; isIndex?: boolean; screenerCode?: string }
 ): Stock {
-  const basePrice = 500 + Math.random() * 3000;
-  const change = (Math.random() - 0.5) * basePrice * 0.03;
-  const price = Math.round((basePrice + change) * 100) / 100;
-  const previousClose = Math.round(basePrice * 100) / 100;
-
+  // Use zero/placeholder prices — cached or live data will override
   return {
     ticker,
     name,
     exchange,
-    price,
-    previousClose,
-    change: Math.round(change * 100) / 100,
-    changePercent: Math.round((change / basePrice) * 10000) / 100,
-    high: Math.round((price + Math.random() * 20) * 100) / 100,
-    low: Math.round((price - Math.random() * 20) * 100) / 100,
-    open: previousClose,
-    volume: Math.floor(Math.random() * 10000000),
-    marketCap: getMarketCap(ticker, price),
+    price: 0,
+    previousClose: 0,
+    change: 0,
+    changePercent: 0,
+    high: 0,
+    low: 0,
+    open: 0,
+    volume: 0,
+    marketCap: MARKET_CAP_MAP[ticker] || 0,
     lastUpdated: new Date(),
     ...(options?.yahooSymbol && { yahooSymbol: options.yahooSymbol }),
     ...(options?.isIndex && { isIndex: true }),

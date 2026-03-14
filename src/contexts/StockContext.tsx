@@ -618,6 +618,58 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
+  // Auto-refresh for registered users every 10 seconds
+  useEffect(() => {
+    if (!user || !prefsLoaded) return;
+
+    const autoRefresh = async () => {
+      try {
+        const currentStocks = stocksRef.current;
+        const currentWatchlist = watchlistRef.current;
+        const tickerInfo = currentStocks
+          .filter(s => currentWatchlist.includes(s.ticker))
+          .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
+
+        if (tickerInfo.length === 0) return;
+
+        const liveData = await fetchLivePrices(tickerInfo);
+
+        if (liveData && Object.keys(liveData).length > 0) {
+          setStocks(prev => {
+            const updated = prev.map(s => {
+              const key = `${s.exchange}_${s.ticker}`;
+              const live = liveData[key];
+              if (live) return applyLiveData(s, live);
+              return s;
+            });
+            const flashes: Record<string, "up" | "down" | null> = {};
+            updated.forEach(s => {
+              const prevPrice = prevPrices.current[s.ticker] || s.price;
+              if (s.price > prevPrice) flashes[s.ticker] = "up";
+              else if (s.price < prevPrice) flashes[s.ticker] = "down";
+              else flashes[s.ticker] = null;
+              prevPrices.current[s.ticker] = s.price;
+            });
+            setLastFlash(flashes);
+
+            // Save to cache
+            const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
+            saveCachedPrices(watchlistStocks);
+
+            return updated;
+          });
+        }
+      } catch (err) {
+        console.error("Auto-refresh failed:", err);
+      }
+    };
+
+    // Initial fetch
+    autoRefresh();
+    const interval = setInterval(autoRefresh, 10000);
+    return () => clearInterval(interval);
+  }, [user, prefsLoaded, saveCachedPrices]);
+
   // --- Price Trigger logic ---
   const priceTriggersRef = useRef(priceTriggers);
   useEffect(() => { priceTriggersRef.current = priceTriggers; }, [priceTriggers]);
