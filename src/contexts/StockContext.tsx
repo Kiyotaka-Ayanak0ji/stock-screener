@@ -480,7 +480,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (missing.length === 0) return prev;
       const newStocks = missing.map(ticker => {
         const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
-        return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE");
+        const meta = getTickerMeta(ticker);
+        return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE", meta);
       });
       return [...prev, ...newStocks];
     });
