@@ -123,6 +123,16 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Persistent ticker metadata (screenerCode, yahooSymbol, isIndex) — survives reloads
+  const tickerMetaRef = useRef<Record<string, { screenerCode?: string; yahooSymbol?: string; isIndex?: boolean }>>(
+    loadEncrypted("st_ticker_meta", {})
+  );
+  const saveTickerMeta = (ticker: string, meta: { screenerCode?: string; yahooSymbol?: string; isIndex?: boolean }) => {
+    tickerMetaRef.current = { ...tickerMetaRef.current, [ticker]: meta };
+    saveEncrypted("st_ticker_meta", tickerMetaRef.current);
+  };
+  const getTickerMeta = (ticker: string) => tickerMetaRef.current[ticker];
+
   // Refs to hold latest state for debounced save (avoids stale closures)
   const latestState = useRef({ notes, events, watchlist, columnVisibility, customColumns, customColumnData, priceTriggers });
   useEffect(() => {
