@@ -14,6 +14,7 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
+  const { user } = useAuth();
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing,
