@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
@@ -13,6 +14,7 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
+  const { user } = useAuth();
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing,
@@ -82,7 +84,7 @@ const StockTable = () => {
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks · Auto-refreshing every 5s
+            {stocks.length} stocks · {user ? "Auto-refreshing every 10s" : "Showing cached prices"}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -192,7 +194,7 @@ const StockTable = () => {
       </div>
 
       <p className="text-xs text-muted-foreground mt-3 text-center">
-        Live data via Groww API · Prices refresh every 5 seconds · Preferences encrypted &amp; synced
+        Live data via Groww API · {user ? "Prices auto-refresh every 10 seconds" : "Cached prices · Use Refresh for latest"} · Preferences encrypted &amp; synced
       </p>
     </motion.div>
   );
