@@ -495,6 +495,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!existing) {
       setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
     }
+    // Persist ticker metadata
+    if (options?.screenerCode || options?.yahooSymbol || options?.isIndex) {
+      saveTickerMeta(ticker, { screenerCode: options.screenerCode, yahooSymbol: options.yahooSymbol, isIndex: options.isIndex });
+    }
     const newWatchlist = [...watchlist, ticker];
     setWatchlist(newWatchlist);
     // Persist to active watchlist in DB
