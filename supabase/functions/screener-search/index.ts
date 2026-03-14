@@ -163,11 +163,11 @@ Deno.serve(async (req) => {
           }
           
           if (resolved.tradingSymbol) {
-            return { ticker: resolved.tradingSymbol, name: item.name, exchange: 'BSE' as const };
+            return { ticker: resolved.tradingSymbol, name: item.name, exchange: 'BSE' as const, screenerCode: item.bseCode };
           }
         }
         
-        const result: any = { ticker: item.ticker, name: item.name, exchange: item.exchange };
+        const result: any = { ticker: item.ticker, name: item.name, exchange: item.exchange, screenerCode: item.ticker };
         if (item.isLikelyIndex) {
           result.isIndex = true;
         }
