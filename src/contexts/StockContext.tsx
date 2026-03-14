@@ -429,13 +429,20 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const filtered = prev.filter(s => s.ticker !== numTicker);
             const exists = filtered.some(s => s.ticker === resolved.ticker);
             if (!exists) {
-              filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
+               filtered.push(generateStockData(resolved.ticker, resolved.name, resolved.exchange, {
                 yahooSymbol: resolved.yahooSymbol,
                 isIndex: resolved.isIndex,
                 screenerCode: resolved.screenerCode,
               }));
             }
             return filtered;
+          });
+
+          // Persist ticker metadata for reload
+          saveTickerMeta(resolved.ticker, {
+            screenerCode: resolved.screenerCode,
+            yahooSymbol: resolved.yahooSymbol,
+            isIndex: resolved.isIndex,
           });
 
           // Migrate notes/events from old ticker to new
