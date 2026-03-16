@@ -657,38 +657,42 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .filter(s => currentWatchlist.includes(s.ticker))
         .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
 
-      if (tickerInfo.length === 0) return;
+      if (tickerInfo.length === 0) {
+        setIsRefreshing(false);
+        return;
+      }
 
       const liveData = await fetchLivePrices(tickerInfo);
 
       if (liveData && Object.keys(liveData).length > 0) {
-        let updatedStocks: Stock[] = [];
-        setStocks(prev => {
-          const updated = prev.map(s => {
-            const key = `${s.exchange}_${s.ticker}`;
-            const live = liveData[key];
-            if (live) return applyLiveData(s, live);
-            return s;
-          });
-          const flashes: Record<string, "up" | "down" | null> = {};
-          updated.forEach(s => {
-            const prevPrice = prevPrices.current[s.ticker] || s.price;
-            if (s.price > prevPrice) flashes[s.ticker] = "up";
-            else if (s.price < prevPrice) flashes[s.ticker] = "down";
-            else flashes[s.ticker] = null;
-            prevPrices.current[s.ticker] = s.price;
-          });
-          setLastFlash(flashes);
-          updatedStocks = updated;
-          return updated;
+        // Compute updated stocks synchronously from current ref
+        const updatedStocks = currentStocks.map(s => {
+          const key = `${s.exchange}_${s.ticker}`;
+          const live = liveData[key];
+          if (live) return applyLiveData(s, live);
+          return s;
         });
 
+        // Update flash indicators
+        const flashes: Record<string, "up" | "down" | null> = {};
+        updatedStocks.forEach(s => {
+          const prevPrice = prevPrices.current[s.ticker] || s.price;
+          if (s.price > prevPrice) flashes[s.ticker] = "up";
+          else if (s.price < prevPrice) flashes[s.ticker] = "down";
+          else flashes[s.ticker] = null;
+          prevPrices.current[s.ticker] = s.price;
+        });
+        setLastFlash(flashes);
+        setStocks(updatedStocks);
+
         // Persist refreshed prices to the database cache
-        if (updatedStocks.length > 0) {
-          const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+        const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+        if (watchlistStocks.length > 0) {
           await saveCachedPrices(watchlistStocks);
-          toast.success("Prices refreshed and saved");
         }
+        toast.success("Prices refreshed and saved");
+      } else {
+        toast.info("No live data available right now");
       }
     } catch (err) {
       console.error("Manual refresh failed:", err);
