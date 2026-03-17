@@ -22,12 +22,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [profile, setProfile] = useState<{ display_name: string | null; avatar_url: string | null } | null>(null);
 
+  const welcomeEmailSent = useRef<Set<string>>(new Set());
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         setTimeout(() => fetchProfile(session.user.id), 0);
+
+        // Send welcome email on first email confirmation
+        if (event === 'USER_UPDATED' && session.user.email_confirmed_at && !welcomeEmailSent.current.has(session.user.id)) {
+          welcomeEmailSent.current.add(session.user.id);
+          sendWelcomeEmail(session);
+        }
       } else {
         setProfile(null);
       }
