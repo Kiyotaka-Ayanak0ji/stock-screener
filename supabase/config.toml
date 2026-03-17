@@ -9,5 +9,7 @@ project_id = "szkezahvdumeiqmnlugj"
     verify_jwt = true
   [functions.screener-search]
     verify_jwt = false
+  [functions.send-transactional-email]
+    verify_jwt = false
   [functions.stock-proxy]
     verify_jwt = false

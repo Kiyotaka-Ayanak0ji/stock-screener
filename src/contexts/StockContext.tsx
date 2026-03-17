@@ -819,6 +819,28 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return next;
         });
         toast.success(`🔔 Price trigger hit! ${ticker} reached ₹${stock.price.toFixed(2)}`);
+        
+        // Send price trigger email digest for authenticated users
+        if (user?.email) {
+          supabase.functions.invoke('send-transactional-email', {
+            body: {
+              template: 'price_trigger_digest',
+              props: {
+                displayName: user.user_metadata?.display_name || user.email,
+                alerts: [{
+                  ticker,
+                  triggerPrice: trigger.price,
+                  hitPrice: stock.price,
+                  timestamp: new Date().toLocaleString('en-IN', {
+                    day: '2-digit', month: 'short', hour: '2-digit',
+                    minute: '2-digit', hour12: true,
+                  }),
+                }],
+              },
+            },
+          }).catch(err => console.error('Failed to send price trigger email:', err));
+        }
+        
         // Remove the trigger after it fires
         delete nextTriggers[ticker];
         changed = true;
