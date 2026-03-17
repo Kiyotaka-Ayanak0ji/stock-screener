@@ -53,6 +53,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  const sendWelcomeEmail = async (session: Session) => {
+    try {
+      const displayName = session.user.user_metadata?.display_name || session.user.email || 'there';
+      await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          template: 'welcome',
+          props: { displayName },
+        },
+      });
+    } catch (err) {
+      console.error('Failed to send welcome email:', err);
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
