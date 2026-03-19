@@ -177,11 +177,24 @@ const StockTable = () => {
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence>
-                {sorted.map((stock, i) => (
-                  <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
-                ))}
-              </AnimatePresence>
+              {!pricesLoaded ? (
+                <>
+                  {Array.from({ length: stocks.length || 4 }).map((_, i) => (
+                    <StockRowSkeleton
+                      key={`skeleton-${i}`}
+                      index={i}
+                      columnVisibility={columnVisibility}
+                      customColumnCount={visibleCustomColumns.length}
+                    />
+                  ))}
+                </>
+              ) : (
+                <AnimatePresence>
+                  {sorted.map((stock, i) => (
+                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
+                  ))}
+                </AnimatePresence>
+              )}
             </tbody>
           </table>
         </div>
