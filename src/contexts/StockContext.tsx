@@ -176,7 +176,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .from("cached_stock_prices")
         .select("*");
 
-      if (error || !data || data.length === 0) return;
+      if (error || !data || data.length === 0) {
+        setPricesLoaded(true);
+        return;
+      }
 
       setStocks(prev => {
         const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
@@ -202,6 +205,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
     } catch (err) {
       console.error("Error loading cached prices:", err);
+    } finally {
+      setPricesLoaded(true);
     }
   }, []);
 
