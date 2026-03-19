@@ -4,6 +4,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
+import StockRowSkeleton from "@/components/StockRowSkeleton";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import WatchlistManager from "@/components/WatchlistManager";
 import ShareExportButton from "@/components/ShareExportButton";
