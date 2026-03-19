@@ -84,7 +84,7 @@ const StockTable = () => {
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks · {user ? "Auto-refreshing every 10s" : "Showing cached prices"}
+            {stocks.length} stocks
           </p>
         </div>
         <div className="flex items-center gap-2">
