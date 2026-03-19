@@ -49,6 +49,7 @@ interface StockContextType {
   customColumnData: Record<string, Record<string, number | null>>;
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
+  pricesLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
   // Price triggers
