@@ -120,6 +120,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pricesLoaded, setPricesLoaded] = useState(false);
   const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
