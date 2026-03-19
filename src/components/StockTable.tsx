@@ -4,6 +4,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
+import StockRowSkeleton from "@/components/StockRowSkeleton";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import WatchlistManager from "@/components/WatchlistManager";
 import ShareExportButton from "@/components/ShareExportButton";
@@ -17,7 +18,7 @@ const StockTable = () => {
   const { user } = useAuth();
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
-    refreshPrices, isRefreshing,
+    refreshPrices, isRefreshing, pricesLoaded,
     userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
     createWatchlist, renameWatchlist, deleteWatchlist,
   } = useStocks();
@@ -176,11 +177,24 @@ const StockTable = () => {
               </tr>
             </thead>
             <tbody>
-              <AnimatePresence>
-                {sorted.map((stock, i) => (
-                  <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
-                ))}
-              </AnimatePresence>
+              {!pricesLoaded ? (
+                <>
+                  {Array.from({ length: stocks.length || 4 }).map((_, i) => (
+                    <StockRowSkeleton
+                      key={`skeleton-${i}`}
+                      index={i}
+                      columnVisibility={columnVisibility}
+                      customColumnCount={visibleCustomColumns.length}
+                    />
+                  ))}
+                </>
+              ) : (
+                <AnimatePresence>
+                  {sorted.map((stock, i) => (
+                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
+                  ))}
+                </AnimatePresence>
+              )}
             </tbody>
           </table>
         </div>

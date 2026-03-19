@@ -49,6 +49,7 @@ interface StockContextType {
   customColumnData: Record<string, Record<string, number | null>>;
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
+  pricesLoaded: boolean;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
   // Price triggers
@@ -119,6 +120,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [customColumnData, setCustomColumnData] = useState<Record<string, Record<string, number | null>>>({});
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [pricesLoaded, setPricesLoaded] = useState(false);
   const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -174,7 +176,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         .from("cached_stock_prices")
         .select("*");
 
-      if (error || !data || data.length === 0) return;
+      if (error || !data || data.length === 0) {
+        setPricesLoaded(true);
+        return;
+      }
 
       setStocks(prev => {
         const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
@@ -200,6 +205,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       });
     } catch (err) {
       console.error("Error loading cached prices:", err);
+    } finally {
+      setPricesLoaded(true);
     }
   }, []);
 
@@ -862,7 +869,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       columnVisibility, toggleColumnVisibility,
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
-      prefsLoaded, refreshPrices, isRefreshing,
+      prefsLoaded, pricesLoaded, refreshPrices, isRefreshing,
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
