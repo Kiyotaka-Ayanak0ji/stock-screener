@@ -194,7 +194,7 @@ const StockTable = () => {
       </div>
 
       <p className="text-xs text-muted-foreground mt-3 text-center">
-        Live data via Groww API · {user ? "Prices auto-refresh every 10 seconds" : "Cached prices · Use Refresh for latest"} · Preferences encrypted &amp; synced
+        · Preferences encrypted &amp; synced
       </p>
     </motion.div>
   );
