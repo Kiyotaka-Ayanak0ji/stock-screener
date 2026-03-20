@@ -50,6 +50,7 @@ interface StockContextType {
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
   pricesLoaded: boolean;
+  loadedTickers: Set<string>;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
   // Price triggers
