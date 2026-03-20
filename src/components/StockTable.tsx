@@ -18,7 +18,7 @@ const StockTable = () => {
   const { user } = useAuth();
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
-    refreshPrices, isRefreshing, pricesLoaded,
+    refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
     userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
     createWatchlist, renameWatchlist, deleteWatchlist,
   } = useStocks();
