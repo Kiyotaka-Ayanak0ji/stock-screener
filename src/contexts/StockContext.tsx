@@ -184,9 +184,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       setStocks(prev => {
         const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
-        return prev.map(s => {
+        const tickersWithData = new Set<string>();
+        const updated = prev.map(s => {
           const cached = cacheMap.get(s.ticker);
           if (cached) {
+            tickersWithData.add(s.ticker);
             return {
               ...s,
               price: Number(cached.price),
@@ -203,6 +205,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
           return s;
         });
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          tickersWithData.forEach(t => next.add(t));
+          return next;
+        });
+        return updated;
       });
     } catch (err) {
       console.error("Error loading cached prices:", err);
