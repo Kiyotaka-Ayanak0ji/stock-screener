@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
