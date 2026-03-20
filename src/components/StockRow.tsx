@@ -99,6 +99,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
     setEditingTrigger(false);
   };
 
+  const isPriceAvailable = !priceLoading || stock.price !== 0;
   const isPositive = stock.change > 0;
   const isNegative = stock.change < 0;
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-unchanged";
