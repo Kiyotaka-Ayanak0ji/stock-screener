@@ -890,7 +890,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       columnVisibility, toggleColumnVisibility,
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
-      prefsLoaded, pricesLoaded, refreshPrices, isRefreshing,
+      prefsLoaded, pricesLoaded, loadedTickers, refreshPrices, isRefreshing,
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
