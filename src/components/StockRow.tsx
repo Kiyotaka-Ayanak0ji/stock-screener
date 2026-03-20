@@ -158,12 +158,16 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
       )}
       {isVisible("change") && (
         <td className={`px-4 py-3 text-right font-mono text-sm ${changeColor}`}>
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${changeBg}`}>
-            {isPositive ? "+" : ""}{stock.change.toFixed(2)}
-            <span className="text-xs">
-              ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
+          {isPriceAvailable ? (
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${changeBg}`}>
+              {isPositive ? "+" : ""}{stock.change.toFixed(2)}
+              <span className="text-xs">
+                ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
+              </span>
             </span>
-          </span>
+          ) : (
+            <Skeleton className="h-5 w-24 ml-auto rounded" />
+          )}
         </td>
       )}
       {isVisible("high") && (
