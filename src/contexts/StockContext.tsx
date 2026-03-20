@@ -172,11 +172,16 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
-  const loadCachedPrices = useCallback(async () => {
+  const loadCachedPrices = useCallback(async (tickers?: string[]) => {
     try {
-      const { data, error } = await supabase
-        .from("cached_stock_prices")
-        .select("*");
+      let query = supabase.from("cached_stock_prices").select("*");
+      
+      // Filter by specific tickers if provided, to avoid fetching all rows
+      if (tickers && tickers.length > 0) {
+        query = query.in("ticker", tickers);
+      }
+
+      const { data, error } = await query;
 
       if (error || !data || data.length === 0) {
         setPricesLoaded(true);
@@ -229,10 +234,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       loadFromLocalStorage();
     }
-
-    // Load cached prices for all users
-    loadCachedPrices();
   }, [user, authLoading]);
+
+  // Load cached prices once preferences (and watchlist) are loaded
+  const cachedPricesFetched = useRef(false);
+  useEffect(() => {
+    if (!prefsLoaded || cachedPricesFetched.current) return;
+    cachedPricesFetched.current = true;
+    loadCachedPrices(watchlist);
+  }, [prefsLoaded, watchlist, loadCachedPrices]);
 
   const loadFromLocalStorage = () => {
     setNotes(loadEncrypted("st_notes", []));
