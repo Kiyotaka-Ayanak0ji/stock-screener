@@ -234,10 +234,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       loadFromLocalStorage();
     }
-
-    // Load cached prices for all users
-    loadCachedPrices();
   }, [user, authLoading]);
+
+  // Load cached prices once preferences (and watchlist) are loaded
+  const cachedPricesFetched = useRef(false);
+  useEffect(() => {
+    if (!prefsLoaded || cachedPricesFetched.current) return;
+    cachedPricesFetched.current = true;
+    loadCachedPrices(watchlist);
+  }, [prefsLoaded, watchlist, loadCachedPrices]);
 
   const loadFromLocalStorage = () => {
     setNotes(loadEncrypted("st_notes", []));
