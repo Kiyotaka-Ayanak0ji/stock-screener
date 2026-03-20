@@ -14,6 +14,7 @@ interface StockRowProps {
   stock: Stock;
   index: number;
   visibleCustomColumns: CustomColumn[];
+  priceLoading?: boolean;
 }
 
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
