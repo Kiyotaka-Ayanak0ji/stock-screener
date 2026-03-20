@@ -338,6 +338,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             prevPrices.current[s.ticker] = s.price;
           });
           setLastFlash(flashes);
+          setLoadedTickers(prev => {
+            const next = new Set(prev);
+            updated.forEach(s => next.add(s.ticker));
+            return next;
+          });
           return updated;
         });
         return;
