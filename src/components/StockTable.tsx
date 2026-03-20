@@ -191,7 +191,7 @@ const StockTable = () => {
               ) : (
                 <AnimatePresence>
                   {sorted.map((stock, i) => (
-                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} />
+                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} priceLoading={!pricesLoaded} />
                   ))}
                 </AnimatePresence>
               )}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
@@ -14,11 +15,12 @@ interface StockRowProps {
   stock: Stock;
   index: number;
   visibleCustomColumns: CustomColumn[];
+  priceLoading?: boolean;
 }
 
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
 
-const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
+const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger } = useStocks();
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
@@ -97,6 +99,7 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
     setEditingTrigger(false);
   };
 
+  const isPriceAvailable = !priceLoading || stock.price !== 0;
   const isPositive = stock.change > 0;
   const isNegative = stock.change < 0;
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-unchanged";
@@ -146,37 +149,53 @@ const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
       )}
       {isVisible("price") && (
         <td className="px-4 py-3 text-right font-mono font-semibold text-sm">
-          ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+          {isPriceAvailable ? (
+            <>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</>
+          ) : (
+            <Skeleton className="h-4 w-20 ml-auto" />
+          )}
         </td>
       )}
       {isVisible("change") && (
         <td className={`px-4 py-3 text-right font-mono text-sm ${changeColor}`}>
-          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${changeBg}`}>
-            {isPositive ? "+" : ""}{stock.change.toFixed(2)}
-            <span className="text-xs">
-              ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
+          {isPriceAvailable ? (
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded ${changeBg}`}>
+              {isPositive ? "+" : ""}{stock.change.toFixed(2)}
+              <span className="text-xs">
+                ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
+              </span>
             </span>
-          </span>
+          ) : (
+            <Skeleton className="h-5 w-24 ml-auto rounded" />
+          )}
         </td>
       )}
       {isVisible("high") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden lg:table-cell">
-          ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+          {isPriceAvailable ? (
+            <>₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</>
+          ) : (
+            <Skeleton className="h-3 w-16 ml-auto" />
+          )}
         </td>
       )}
       {isVisible("low") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden lg:table-cell">
-          ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+          {isPriceAvailable ? (
+            <>₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</>
+          ) : (
+            <Skeleton className="h-3 w-16 ml-auto" />
+          )}
         </td>
       )}
       {isVisible("volume") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-          {formatVolume(stock.volume)}
+          {isPriceAvailable ? formatVolume(stock.volume) : <Skeleton className="h-3 w-14 ml-auto" />}
         </td>
       )}
       {isVisible("marketCap") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-          ₹{formatMarketCap(stock.marketCap)}
+          {isPriceAvailable ? <>₹{formatMarketCap(stock.marketCap)}</> : <Skeleton className="h-3 w-18 ml-auto" />}
         </td>
       )}
       {visibleCustomColumns.map(col => {
