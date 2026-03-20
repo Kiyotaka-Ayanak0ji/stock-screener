@@ -172,7 +172,11 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
       )}
       {isVisible("high") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden lg:table-cell">
-          ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+          {isPriceAvailable ? (
+            <>₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</>
+          ) : (
+            <Skeleton className="h-3 w-16 ml-auto" />
+          )}
         </td>
       )}
       {isVisible("low") && (
