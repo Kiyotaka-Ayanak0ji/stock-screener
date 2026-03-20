@@ -50,6 +50,7 @@ interface StockContextType {
   updateCustomColumnData: (ticker: string, columnId: string, value: number | null) => void;
   prefsLoaded: boolean;
   pricesLoaded: boolean;
+  loadedTickers: Set<string>;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
   // Price triggers
@@ -121,6 +122,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pricesLoaded, setPricesLoaded] = useState(false);
+  const [loadedTickers, setLoadedTickers] = useState<Set<string>>(new Set());
   const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -183,9 +185,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       setStocks(prev => {
         const cacheMap = new Map(data.map((d: any) => [d.ticker, d]));
-        return prev.map(s => {
+        const tickersWithData = new Set<string>();
+        const updated = prev.map(s => {
           const cached = cacheMap.get(s.ticker);
           if (cached) {
+            tickersWithData.add(s.ticker);
             return {
               ...s,
               price: Number(cached.price),
@@ -202,6 +206,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           }
           return s;
         });
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          tickersWithData.forEach(t => next.add(t));
+          return next;
+        });
+        return updated;
       });
     } catch (err) {
       console.error("Error loading cached prices:", err);
@@ -328,6 +338,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             prevPrices.current[s.ticker] = s.price;
           });
           setLastFlash(flashes);
+          setLoadedTickers(prev => {
+            const next = new Set(prev);
+            updated.forEach(s => next.add(s.ticker));
+            return next;
+          });
           return updated;
         });
         return;
@@ -358,10 +373,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         consecutiveFailures = 0; // Reset on success
 
         setStocks(prev => {
+          const newlyLoaded = new Set<string>();
           const updated = prev.map(s => {
             const key = `${s.exchange}_${s.ticker}`;
             const live = liveData[key];
-            if (live) return applyLiveData(s, live);
+            if (live) {
+              newlyLoaded.add(s.ticker);
+              return applyLiveData(s, live);
+            }
             return s; // Keep existing data instead of simulating
           });
           const flashes: Record<string, "up" | "down" | null> = {};
@@ -373,6 +392,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             prevPrices.current[s.ticker] = s.price;
           });
           setLastFlash(flashes);
+          if (newlyLoaded.size > 0) {
+            setLoadedTickers(prev => {
+              const next = new Set(prev);
+              newlyLoaded.forEach(t => next.add(t));
+              return next;
+            });
+          }
           return updated;
         });
       } catch (err) {
@@ -869,7 +895,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       columnVisibility, toggleColumnVisibility,
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
-      prefsLoaded, pricesLoaded, refreshPrices, isRefreshing,
+      prefsLoaded, pricesLoaded, loadedTickers, refreshPrices, isRefreshing,
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,

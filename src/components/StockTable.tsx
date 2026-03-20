@@ -18,7 +18,7 @@ const StockTable = () => {
   const { user } = useAuth();
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
-    refreshPrices, isRefreshing, pricesLoaded,
+    refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
     userWatchlists, activeWatchlist, activeWatchlistId, setActiveWatchlistId,
     createWatchlist, renameWatchlist, deleteWatchlist,
   } = useStocks();
@@ -191,7 +191,7 @@ const StockTable = () => {
               ) : (
                 <AnimatePresence>
                   {sorted.map((stock, i) => (
-                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} priceLoading={!pricesLoaded} />
+                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} priceLoading={!loadedTickers.has(stock.ticker)} />
                   ))}
                 </AnimatePresence>
               )}
