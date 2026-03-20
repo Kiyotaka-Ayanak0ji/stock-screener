@@ -190,7 +190,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
       )}
       {isVisible("volume") && (
         <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-          {formatVolume(stock.volume)}
+          {isPriceAvailable ? formatVolume(stock.volume) : <Skeleton className="h-3 w-14 ml-auto" />}
         </td>
       )}
       {isVisible("marketCap") && (
