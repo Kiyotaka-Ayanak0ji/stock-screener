@@ -19,7 +19,7 @@ interface StockRowProps {
 
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
 
-const StockRow = ({ stock, index, visibleCustomColumns }: StockRowProps) => {
+const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger } = useStocks();
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
