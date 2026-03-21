@@ -114,6 +114,8 @@ Deno.serve(async (req) => {
     status: 'pending',
   })
 
+  const idempotencyKey = body.idempotencyKey || `${template}-${messageId}`
+
   // Enqueue for async sending
   const { error: enqueueError } = await supabaseAuth.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
@@ -127,6 +129,7 @@ Deno.serve(async (req) => {
       text,
       purpose: 'transactional',
       label: template,
+      idempotency_key: idempotencyKey,
       queued_at: new Date().toISOString(),
     },
   })
