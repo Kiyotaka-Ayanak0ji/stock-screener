@@ -106,6 +106,26 @@ Deno.serve(async (req) => {
 
   const messageId = crypto.randomUUID()
 
+  // Get or create unsubscribe token for this recipient
+  let unsubscribeToken: string | null = null
+  const { data: existingToken } = await supabaseAuth
+    .from('email_unsubscribe_tokens')
+    .select('token')
+    .eq('email', recipientEmail)
+    .maybeSingle()
+
+  if (existingToken) {
+    unsubscribeToken = existingToken.token
+  } else {
+    const newToken = crypto.randomUUID()
+    const { error: tokenError } = await supabaseAuth
+      .from('email_unsubscribe_tokens')
+      .insert({ email: recipientEmail, token: newToken })
+    if (!tokenError) {
+      unsubscribeToken = newToken
+    }
+  }
+
   // Log pending
   await supabaseAuth.from('email_send_log').insert({
     message_id: messageId,
@@ -113,6 +133,8 @@ Deno.serve(async (req) => {
     recipient_email: recipientEmail,
     status: 'pending',
   })
+
+  const idempotencyKey = body.idempotencyKey || `${template}-${messageId}`
 
   // Enqueue for async sending
   const { error: enqueueError } = await supabaseAuth.rpc('enqueue_email', {
@@ -127,6 +149,8 @@ Deno.serve(async (req) => {
       text,
       purpose: 'transactional',
       label: template,
+      idempotency_key: idempotencyKey,
+      unsubscribe_token: unsubscribeToken,
       queued_at: new Date().toISOString(),
     },
   })
