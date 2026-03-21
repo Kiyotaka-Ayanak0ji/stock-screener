@@ -194,7 +194,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const updated = prev.map(s => {
           const cached = cacheMap.get(s.ticker);
           if (cached) {
-            tickersWithData.add(s.ticker);
+            // Only mark as loaded if the cached price is non-zero
+            if (Number(cached.price) !== 0) {
+              tickersWithData.add(s.ticker);
+            }
             return {
               ...s,
               price: Number(cached.price),
