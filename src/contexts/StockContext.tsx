@@ -755,9 +755,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
-  // Auto-refresh for registered users every 10 seconds
+  // Auto-refresh for all users — 5s for registered, 10s for guests
   useEffect(() => {
-    if (!user || !prefsLoaded) return;
+    if (!prefsLoaded) return;
 
     const autoRefresh = async () => {
       try {
@@ -773,10 +773,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (liveData && Object.keys(liveData).length > 0) {
           setStocks(prev => {
+            const newlyLoaded = new Set<string>();
             const updated = prev.map(s => {
               const key = `${s.exchange}_${s.ticker}`;
               const live = liveData[key];
-              if (live) return applyLiveData(s, live);
+              if (live) {
+                newlyLoaded.add(s.ticker);
+                return applyLiveData(s, live);
+              }
               return s;
             });
             const flashes: Record<string, "up" | "down" | null> = {};
@@ -788,6 +792,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               prevPrices.current[s.ticker] = s.price;
             });
             setLastFlash(flashes);
+
+            // Mark newly loaded tickers
+            if (newlyLoaded.size > 0) {
+              setLoadedTickers(prev => {
+                const next = new Set(prev);
+                newlyLoaded.forEach(t => next.add(t));
+                return next;
+              });
+            }
 
             // Save to cache
             const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
@@ -803,7 +816,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Initial fetch
     autoRefresh();
-    const interval = setInterval(autoRefresh, 10000);
+    const refreshInterval = user ? 5000 : 10000;
+    const interval = setInterval(autoRefresh, refreshInterval);
     return () => clearInterval(interval);
   }, [user, prefsLoaded, saveCachedPrices]);
 
