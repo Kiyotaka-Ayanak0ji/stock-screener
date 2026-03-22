@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { MailCheck, RefreshCw, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,12 +11,30 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
   const { toast } = useToast();
+  const autoSentRef = useRef<string | null>(null);
 
-  // Guest users or loading state — let them through (guest mode uses localStorage)
+  const isVerified = user?.email_confirmed_at != null;
+
+  // Auto-send verification email once when an unverified user is detected
+  useEffect(() => {
+    if (!user?.email || isVerified || isLoading || isGuest) return;
+    // Only send once per user per session
+    if (autoSentRef.current === user.id) return;
+    autoSentRef.current = user.id;
+
+    supabase.auth.resend({ type: "signup", email: user.email }).then(({ error }) => {
+      if (error) {
+        console.error("Auto-resend verification failed:", error.message);
+      } else {
+        toast({ title: "Verification email sent!", description: "Check your inbox and spam folder." });
+      }
+    });
+  }, [user, isVerified, isLoading, isGuest]);
+
+  // Guest users or loading state — let them through
   if (isLoading || isGuest) return <>{children}</>;
 
-  // Authenticated user with confirmed email — let them through
-  const isVerified = user?.email_confirmed_at != null;
+  // Verified user — let them through
   if (isVerified) return <>{children}</>;
 
   // Unverified user — block access
@@ -43,7 +61,6 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else if (data.user?.email_confirmed_at) {
       toast({ title: "Email verified!", description: "Welcome to StockPulse." });
-      // The auth state change listener will update the UI automatically
     } else {
       toast({ title: "Not yet verified", description: "Please check your inbox and click the verification link.", variant: "destructive" });
     }
