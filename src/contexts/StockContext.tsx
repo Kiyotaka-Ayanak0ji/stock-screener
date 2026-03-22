@@ -867,7 +867,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast.success(`🔔 Price trigger hit! ${ticker} reached ₹${stock.price.toFixed(2)}`);
         
         // Send price trigger email digest for authenticated users
-        if (user?.email) {
+        if (user?.email && user.email_confirmed_at) {
           supabase.functions.invoke('send-transactional-email', {
             body: {
               template: 'price_trigger_digest',
