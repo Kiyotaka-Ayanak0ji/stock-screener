@@ -239,12 +239,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [user, authLoading]);
 
-  // Load cached prices once preferences (and watchlist) are loaded
-  const cachedPricesFetched = useRef(false);
+  // Load cached prices for any new tickers added to watchlist
+  const cachedPricesFetched = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (!prefsLoaded || cachedPricesFetched.current) return;
-    cachedPricesFetched.current = true;
-    loadCachedPrices(watchlist);
+    if (!prefsLoaded) return;
+    const uncached = watchlist.filter(t => !cachedPricesFetched.current.has(t));
+    if (uncached.length === 0) return;
+    uncached.forEach(t => cachedPricesFetched.current.add(t));
+    loadCachedPrices(uncached);
   }, [prefsLoaded, watchlist, loadCachedPrices]);
 
   const loadFromLocalStorage = () => {
@@ -602,8 +604,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const stockName = info?.name || name || ticker;
     const stockExchange = info?.exchange || exchange || "NSE";
     const existing = stocks.find(s => s.ticker === ticker);
+    const newStock = existing || generateStockData(ticker, stockName, stockExchange, options);
     if (!existing) {
-      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
+      setStocks(prev => [...prev, newStock]);
     }
     // Persist ticker metadata
     if (options?.screenerCode || options?.yahooSymbol || options?.isIndex) {
@@ -615,6 +618,24 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (user && activeWatchlistId) {
       updateWatchlistTickers(activeWatchlistId, newWatchlist);
     }
+
+    // Immediately fetch live price for the new stock
+    const tickerInfo = [{ ticker, exchange: stockExchange, yahooSymbol: options?.yahooSymbol || newStock.yahooSymbol }];
+    fetchLivePrices(tickerInfo).then(liveData => {
+      if (liveData && Object.keys(liveData).length > 0) {
+        setStocks(prev => prev.map(s => {
+          const key = `${s.exchange}_${s.ticker}`;
+          const live = liveData[key];
+          if (live) return applyLiveData(s, live);
+          return s;
+        }));
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          next.add(ticker);
+          return next;
+        });
+      }
+    }).catch(err => console.error("Immediate fetch for new stock failed:", err));
   }, [watchlist, stocks, user, activeWatchlistId, updateWatchlistTickers]);
 
   const removeStock = useCallback((ticker: string) => {
@@ -753,9 +774,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
-  // Auto-refresh for registered users every 10 seconds
+  // Auto-refresh for all users — 5s for registered, 10s for guests
   useEffect(() => {
-    if (!user || !prefsLoaded) return;
+    if (!prefsLoaded) return;
 
     const autoRefresh = async () => {
       try {
@@ -771,10 +792,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (liveData && Object.keys(liveData).length > 0) {
           setStocks(prev => {
+            const newlyLoaded = new Set<string>();
             const updated = prev.map(s => {
               const key = `${s.exchange}_${s.ticker}`;
               const live = liveData[key];
-              if (live) return applyLiveData(s, live);
+              if (live) {
+                newlyLoaded.add(s.ticker);
+                return applyLiveData(s, live);
+              }
               return s;
             });
             const flashes: Record<string, "up" | "down" | null> = {};
@@ -786,6 +811,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               prevPrices.current[s.ticker] = s.price;
             });
             setLastFlash(flashes);
+
+            // Mark newly loaded tickers
+            if (newlyLoaded.size > 0) {
+              setLoadedTickers(prev => {
+                const next = new Set(prev);
+                newlyLoaded.forEach(t => next.add(t));
+                return next;
+              });
+            }
 
             // Save to cache
             const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
@@ -801,7 +835,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     // Initial fetch
     autoRefresh();
-    const interval = setInterval(autoRefresh, 10000);
+    const refreshInterval = user ? 5000 : 10000;
+    const interval = setInterval(autoRefresh, refreshInterval);
     return () => clearInterval(interval);
   }, [user, prefsLoaded, saveCachedPrices]);
 
