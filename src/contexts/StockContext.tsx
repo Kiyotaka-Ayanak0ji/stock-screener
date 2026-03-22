@@ -239,12 +239,14 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [user, authLoading]);
 
-  // Load cached prices once preferences (and watchlist) are loaded
-  const cachedPricesFetched = useRef(false);
+  // Load cached prices for any new tickers added to watchlist
+  const cachedPricesFetched = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (!prefsLoaded || cachedPricesFetched.current) return;
-    cachedPricesFetched.current = true;
-    loadCachedPrices(watchlist);
+    if (!prefsLoaded) return;
+    const uncached = watchlist.filter(t => !cachedPricesFetched.current.has(t));
+    if (uncached.length === 0) return;
+    uncached.forEach(t => cachedPricesFetched.current.add(t));
+    loadCachedPrices(uncached);
   }, [prefsLoaded, watchlist, loadCachedPrices]);
 
   const loadFromLocalStorage = () => {
