@@ -604,8 +604,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const stockName = info?.name || name || ticker;
     const stockExchange = info?.exchange || exchange || "NSE";
     const existing = stocks.find(s => s.ticker === ticker);
+    const newStock = existing || generateStockData(ticker, stockName, stockExchange, options);
     if (!existing) {
-      setStocks(prev => [...prev, generateStockData(ticker, stockName, stockExchange, options)]);
+      setStocks(prev => [...prev, newStock]);
     }
     // Persist ticker metadata
     if (options?.screenerCode || options?.yahooSymbol || options?.isIndex) {
@@ -617,6 +618,24 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (user && activeWatchlistId) {
       updateWatchlistTickers(activeWatchlistId, newWatchlist);
     }
+
+    // Immediately fetch live price for the new stock
+    const tickerInfo = [{ ticker, exchange: stockExchange, yahooSymbol: options?.yahooSymbol || newStock.yahooSymbol }];
+    fetchLivePrices(tickerInfo).then(liveData => {
+      if (liveData && Object.keys(liveData).length > 0) {
+        setStocks(prev => prev.map(s => {
+          const key = `${s.exchange}_${s.ticker}`;
+          const live = liveData[key];
+          if (live) return applyLiveData(s, live);
+          return s;
+        }));
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          next.add(ticker);
+          return next;
+        });
+      }
+    }).catch(err => console.error("Immediate fetch for new stock failed:", err));
   }, [watchlist, stocks, user, activeWatchlistId, updateWatchlistTickers]);
 
   const removeStock = useCallback((ticker: string) => {
