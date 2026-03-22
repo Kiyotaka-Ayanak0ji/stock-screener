@@ -333,15 +333,18 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => { stocksRef.current = stocks; }, [stocks]);
   useEffect(() => { watchlistRef.current = watchlist; }, [watchlist]);
 
-  // Fetch live data from Yahoo Finance via proxy
+  // Unified live data fetcher — replaces cached prices with fresh data automatically
+  // Cached prices are loaded first (via loadCachedPrices effect above), then this
+  // effect kicks in to fetch live prices and seamlessly update the UI.
   useEffect(() => {
-    if (!isMarketOpen || !prefsLoaded) return;
+    if (!prefsLoaded) return;
 
     let consecutiveFailures = 0;
     const MAX_FAILURES = 3;
 
     const fetchLive = async () => {
-      if (liveDataFailed.current) {
+      if (liveDataFailed.current && isMarketOpen) {
+        // Fallback to simulation only during market hours
         setStocks(prev => {
           const updated = prev.map(s => simulatePriceUpdate(s));
           const flashes: Record<string, "up" | "down" | null> = {};
@@ -364,7 +367,6 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       try {
-        // Use refs to always get latest stocks & watchlist (avoids stale closure)
         const currentStocks = stocksRef.current;
         const currentWatchlist = watchlistRef.current;
         const tickerInfo = currentStocks
@@ -377,15 +379,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (!liveData || Object.keys(liveData).length === 0) {
           consecutiveFailures++;
-          console.warn(`No live data received (attempt ${consecutiveFailures}/${MAX_FAILURES})`);
-          if (consecutiveFailures >= MAX_FAILURES) {
-            console.warn("Too many failures, falling back to simulation");
+          if (consecutiveFailures >= MAX_FAILURES && isMarketOpen) {
             liveDataFailed.current = true;
           }
           return;
         }
 
-        consecutiveFailures = 0; // Reset on success
+        consecutiveFailures = 0;
 
         setStocks(prev => {
           const newlyLoaded = new Set<string>();
@@ -396,7 +396,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               newlyLoaded.add(s.ticker);
               return applyLiveData(s, live);
             }
-            return s; // Keep existing data instead of simulating
+            return s;
           });
           const flashes: Record<string, "up" | "down" | null> = {};
           updated.forEach(s => {
@@ -414,19 +414,25 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               return next;
             });
           }
+
+          // Cache the updated prices
+          const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
+          if (watchlistStocks.length > 0) saveCachedPrices(watchlistStocks);
+
           return updated;
         });
       } catch (err) {
         console.error("Live data fetch failed:", err);
         consecutiveFailures++;
-        if (consecutiveFailures >= MAX_FAILURES) {
+        if (consecutiveFailures >= MAX_FAILURES && isMarketOpen) {
           liveDataFailed.current = true;
         }
       }
     };
 
+    // Fetch immediately, then poll — faster when market is open
     fetchLive();
-    const interval = setInterval(fetchLive, 5000);
+    const interval = setInterval(fetchLive, isMarketOpen ? 5000 : 15000);
     return () => clearInterval(interval);
   }, [isMarketOpen, prefsLoaded]);
 
@@ -774,71 +780,6 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return createWl(name, []);
   }, [createWl]);
 
-  // Auto-refresh for all users — 5s for registered, 10s for guests
-  useEffect(() => {
-    if (!prefsLoaded) return;
-
-    const autoRefresh = async () => {
-      try {
-        const currentStocks = stocksRef.current;
-        const currentWatchlist = watchlistRef.current;
-        const tickerInfo = currentStocks
-          .filter(s => currentWatchlist.includes(s.ticker))
-          .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
-
-        if (tickerInfo.length === 0) return;
-
-        const liveData = await fetchLivePrices(tickerInfo);
-
-        if (liveData && Object.keys(liveData).length > 0) {
-          setStocks(prev => {
-            const newlyLoaded = new Set<string>();
-            const updated = prev.map(s => {
-              const key = `${s.exchange}_${s.ticker}`;
-              const live = liveData[key];
-              if (live) {
-                newlyLoaded.add(s.ticker);
-                return applyLiveData(s, live);
-              }
-              return s;
-            });
-            const flashes: Record<string, "up" | "down" | null> = {};
-            updated.forEach(s => {
-              const prevPrice = prevPrices.current[s.ticker] || s.price;
-              if (s.price > prevPrice) flashes[s.ticker] = "up";
-              else if (s.price < prevPrice) flashes[s.ticker] = "down";
-              else flashes[s.ticker] = null;
-              prevPrices.current[s.ticker] = s.price;
-            });
-            setLastFlash(flashes);
-
-            // Mark newly loaded tickers
-            if (newlyLoaded.size > 0) {
-              setLoadedTickers(prev => {
-                const next = new Set(prev);
-                newlyLoaded.forEach(t => next.add(t));
-                return next;
-              });
-            }
-
-            // Save to cache
-            const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
-            saveCachedPrices(watchlistStocks);
-
-            return updated;
-          });
-        }
-      } catch (err) {
-        console.error("Auto-refresh failed:", err);
-      }
-    };
-
-    // Initial fetch
-    autoRefresh();
-    const refreshInterval = user ? 5000 : 10000;
-    const interval = setInterval(autoRefresh, refreshInterval);
-    return () => clearInterval(interval);
-  }, [user, prefsLoaded, saveCachedPrices]);
 
   // --- Price Trigger logic ---
   const priceTriggersRef = useRef(priceTriggers);
