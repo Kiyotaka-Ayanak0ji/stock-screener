@@ -121,10 +121,11 @@ const Subscribe = () => {
     }
   };
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  useEffect(() => {
+    if (!user) navigate("/auth");
+  }, [user, navigate]);
+
+  if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
     return (
