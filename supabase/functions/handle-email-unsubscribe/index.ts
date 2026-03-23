@@ -40,8 +40,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    // GET-like validation: check if already used
-    if (req.method === "GET" || (body && !body.confirm && body.token)) {
+    // Validation only (no confirm flag)
+    if (!body.confirm) {
       return new Response(
         JSON.stringify({
           valid: true,
