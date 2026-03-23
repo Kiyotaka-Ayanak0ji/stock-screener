@@ -30,7 +30,7 @@ export const PriceTriggerDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on StockPulse
+      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on StockSense
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -68,7 +68,7 @@ export const PriceTriggerDigestEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you set price triggers on StockPulse.
+          You're receiving this because you set price triggers on StockSense.
         </Text>
       </Container>
     </Body>

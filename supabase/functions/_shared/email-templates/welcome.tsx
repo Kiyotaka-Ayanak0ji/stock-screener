@@ -25,7 +25,7 @@ export const WelcomeEmail = ({
 }: WelcomeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to StockPulse — your stock watchlist is ready!</Preview>
+    <Preview>Welcome to StockSense — your stock watchlist is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
@@ -35,7 +35,7 @@ export const WelcomeEmail = ({
           Hey {displayName}! 👋
         </Text>
         <Text style={text}>
-          Thanks for joining StockPulse. Your account is set up and ready to go.
+          Thanks for joining StockSense. Your account is set up and ready to go.
           Here's what you can do:
         </Text>
         <Text style={featureText}>
@@ -49,7 +49,7 @@ export const WelcomeEmail = ({
         </Button>
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you signed up on StockPulse.
+          You're receiving this because you signed up on StockSense.
           If you didn't create this account, please ignore this email.
         </Text>
       </Container>

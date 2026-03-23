@@ -24,12 +24,12 @@ export const MagicLinkEmail = ({
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your StockPulse login link</Preview>
+    <Preview>Your StockSense login link</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Your login link</Heading>
         <Text style={text}>
-          Click the button below to log in to StockPulse. This link will expire
+          Click the button below to log in to StockSense. This link will expire
           shortly.
         </Text>
         <Button style={button} href={confirmationUrl}>

@@ -28,7 +28,7 @@ const Header = () => {
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold tracking-tight">
-              Stock<span className="text-primary">Pulse</span>
+              Stock<span className="text-primary">Sense</span>
             </h1>
           </div>
           <div className="hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 rounded-full bg-secondary text-xs font-medium">
