@@ -37,58 +37,35 @@ async function getCrumbAndCookie(): Promise<{ crumb: string; cookie: string }> {
 // Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
-    const url = `https://www.screener.in/company/${ticker}/`;
+    const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html',
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) { console.log(`Screener returned ${res.status} for ${ticker}`); return null; }
     const html = await res.text();
 
-    // Extract current price from the page - look for the price in the top section
-    // Screener uses a specific pattern: <span class="number">₹ 330</span> or similar
-    const priceMatch = html.match(/Current Price[^₹]*₹\s*([\d,.]+)/i)
-      || html.match(/<span[^>]*class="[^"]*number[^"]*"[^>]*>\s*₹?\s*([\d,.]+)/i)
-      || html.match(/id="top"[\s\S]*?₹\s*([\d,.]+)/i);
-
-    if (!priceMatch) {
-      // Try alternate pattern - the top-level price
-      const altMatch = html.match(/<h1[\s\S]*?<\/h1>[\s\S]*?₹\s*([\d,.]+)/i);
-      if (!altMatch) return null;
-      const price = parseFloat(altMatch[1].replace(/,/g, ''));
-      if (price <= 0 || isNaN(price)) return null;
-      return { ltp: price, open: price, high: price, low: price, close: price, volume: 0, marketCap: 0 };
-    }
+    // Extract first price: <span>₹ 330</span>
+    const priceMatch = html.match(/₹\s*([\d,]+(?:\.\d+)?)/);
+    if (!priceMatch) { console.log(`Screener: no price found for ${ticker}`); return null; }
 
     const price = parseFloat(priceMatch[1].replace(/,/g, ''));
     if (price <= 0 || isNaN(price)) return null;
 
-    // Try to extract market cap
-    const mcMatch = html.match(/Market Cap[^₹]*₹\s*([\d,.]+)\s*Cr/i);
-    const marketCap = mcMatch ? parseFloat(mcMatch[1].replace(/,/g, '')) * 10000000 : 0; // Convert Cr to raw
+    // Extract market cap value (appears after "Market Cap" label)
+    let marketCap = 0;
+    const mcSection = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    if (mcSection) {
+      marketCap = parseFloat(mcSection[1].replace(/,/g, '')) * 10000000; // Cr to raw
+    }
 
-    // Try to extract high/low
-    const highMatch = html.match(/High[^₹]*₹\s*([\d,.]+)/i);
-    const lowMatch = html.match(/Low[^₹]*₹\s*([\d,.]+)/i);
+    console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}`);
 
-    const high = highMatch ? parseFloat(highMatch[1].replace(/,/g, '')) : price;
-    const low = lowMatch ? parseFloat(lowMatch[1].replace(/,/g, '')) : price;
-
-    console.log(`Screener fallback succeeded for ${ticker}: ₹${price}`);
-
-    return {
-      ltp: price,
-      open: price,
-      high,
-      low,
-      close: price, // Screener doesn't easily expose previous close
-      volume: 0,
-      marketCap,
-    };
+    return { ltp: price, open: price, high: price, low: price, close: price, volume: 0, marketCap };
   } catch (err) {
-    console.error(`Screener fallback failed for ${ticker}:`, err);
+    console.error(`Screener fallback error for ${ticker}:`, err);
     return null;
   }
 }
