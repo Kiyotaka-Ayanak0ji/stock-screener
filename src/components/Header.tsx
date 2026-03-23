@@ -49,6 +49,23 @@ const Header = () => {
             <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
           </div>
 
+          {user && subscription?.status === 'trial' && trialDaysLeft > 0 && (
+            <button
+              onClick={() => navigate("/subscribe")}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+            >
+              <Clock className="h-3 w-3" />
+              {trialDaysLeft}d trial left
+            </button>
+          )}
+
+          {user && subscription?.plan === 'lifetime' && (
+            <Badge variant="secondary" className="hidden sm:flex items-center gap-1 text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0">
+              <Crown className="h-3 w-3" />
+              Lifetime
+            </Badge>
+          )}
+
           <AlertsPanel />
 
           {user ? (
