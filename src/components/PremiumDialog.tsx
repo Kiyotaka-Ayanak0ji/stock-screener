@@ -95,11 +95,11 @@ const PremiumDialog = ({ open, onOpenChange, featureName }: PremiumDialogProps) 
             className="w-full gap-2"
             onClick={() => {
               onOpenChange(false);
-              navigate("/auth");
+              navigate("/subscribe");
             }}
           >
             <Sparkles className="h-4 w-4" />
-            Sign Up & Subscribe
+            Subscribe Now
           </Button>
           <Button
             variant="ghost"

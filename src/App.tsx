@@ -9,6 +9,7 @@ import { StockProvider } from "@/contexts/StockContext";
 import Index from "./pages/Index";
 import DevNoticeDialog from "./components/DevNoticeDialog";
 import Auth from "./pages/Auth";
+import Subscribe from "./pages/Subscribe";
 import SharedWatchlist from "./pages/SharedWatchlist";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
