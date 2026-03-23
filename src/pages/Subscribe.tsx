@@ -18,11 +18,11 @@ declare global {
 
 const BANK_DETAILS = {
   bankName: "State Bank of India",
-  accountName: "StockSense Premium",
-  accountNumber: "XXXXXXXXXXXX",
-  ifscCode: "SBIN0XXXXXX",
-  upiId: "stocksense@upi",
-  note: "After payment, email your transaction ID to support@stocksense.app for activation.",
+  accountName: "ANSIK ARYAN SAMAL",
+  accountNumber: "39972895973",
+  ifscCode: "SBIN0005321",
+  upiId: "aryanansik@oksbi",
+  note: "After payment, email your transaction ID to aryanansik69@gmail.com for activation.",
 };
 
 const Subscribe = () => {
