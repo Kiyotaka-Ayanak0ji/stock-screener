@@ -45,10 +45,10 @@ const Unsubscribe = () => {
     if (!token) return;
     setProcessing(true);
     try {
-      const { error } = await supabase.functions.invoke("handle-email-unsubscribe", {
-        body: { token },
+      const { data, error } = await supabase.functions.invoke("handle-email-unsubscribe", {
+        body: { token, confirm: true },
       });
-      if (error) {
+      if (error || data?.error) {
         setStatus("error");
       } else {
         setStatus("success");
