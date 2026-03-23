@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { StockProvider } from "@/contexts/StockContext";
 import Index from "./pages/Index";
+import DevNoticeDialog from "./components/DevNoticeDialog";
 import Auth from "./pages/Auth";
 import SharedWatchlist from "./pages/SharedWatchlist";
 import NotFound from "./pages/NotFound";
@@ -21,6 +22,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <DevNoticeDialog />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
