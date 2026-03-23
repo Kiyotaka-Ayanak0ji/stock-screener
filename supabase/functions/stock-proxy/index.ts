@@ -120,18 +120,25 @@ Deno.serve(async (req) => {
 
     for (const q of quotes) {
       const symbol = q.symbol || '';
+      const ltp = q.regularMarketPrice ?? 0;
+
+      // Skip stocks where Yahoo returns no data (ltp === 0 means not tracked)
+      if (ltp === 0) continue;
+
+      const quoteData = {
+        ltp,
+        open: q.regularMarketOpen ?? 0,
+        high: q.regularMarketDayHigh ?? 0,
+        low: q.regularMarketDayLow ?? 0,
+        close: q.regularMarketPreviousClose ?? 0,
+        volume: q.regularMarketVolume ?? 0,
+        marketCap: q.marketCap ?? 0,
+      };
       
       // Check if this is a custom-mapped symbol (index, etc.)
       const mappedKey = yahooToKey.get(symbol);
       if (mappedKey) {
-        result[mappedKey] = {
-          ltp: q.regularMarketPrice ?? 0,
-          open: q.regularMarketOpen ?? 0,
-          high: q.regularMarketDayHigh ?? 0,
-          low: q.regularMarketDayLow ?? 0,
-          close: q.regularMarketPreviousClose ?? 0,
-          volume: q.regularMarketVolume ?? 0,
-        };
+        result[mappedKey] = quoteData;
         continue;
       }
 
@@ -140,14 +147,7 @@ Deno.serve(async (req) => {
       const exchange = isBSE ? 'BSE' : 'NSE';
       const key = `${exchange}_${ticker}`;
 
-      result[key] = {
-        ltp: q.regularMarketPrice ?? 0,
-        open: q.regularMarketOpen ?? 0,
-        high: q.regularMarketDayHigh ?? 0,
-        low: q.regularMarketDayLow ?? 0,
-        close: q.regularMarketPreviousClose ?? 0,
-        volume: q.regularMarketVolume ?? 0,
-      };
+      result[key] = quoteData;
     }
 
     return new Response(JSON.stringify(result), {
