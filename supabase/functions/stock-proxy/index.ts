@@ -172,6 +172,8 @@ Deno.serve(async (req) => {
       return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
     });
 
+    console.log(`Resolved: ${resolvedKeys.size}, Missing: ${missingSymbols.length}`, missingSymbols.map((s: any) => s.ticker));
+
     if (missingSymbols.length > 0) {
       await Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
         const fallback = await fetchScreenerFallback(s.ticker);
