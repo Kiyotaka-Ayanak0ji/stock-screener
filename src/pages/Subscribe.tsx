@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,10 +121,11 @@ const Subscribe = () => {
     }
   };
 
-  if (!user) {
-    navigate("/auth");
-    return null;
-  }
+  useEffect(() => {
+    if (!user) navigate("/auth");
+  }, [user, navigate]);
+
+  if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
     return (
