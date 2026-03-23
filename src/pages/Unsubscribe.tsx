@@ -25,11 +25,9 @@ const Unsubscribe = () => {
   const validateToken = async () => {
     try {
       const { data, error } = await supabase.functions.invoke("handle-email-unsubscribe", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
         body: { token },
       });
-      if (error) {
+      if (error || data?.error) {
         setStatus("invalid");
         return;
       }
