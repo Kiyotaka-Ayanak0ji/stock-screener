@@ -146,6 +146,8 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // --- Cached price helpers ---
   const saveCachedPrices = useCallback(async (stocksToCache: Stock[]) => {
     try {
+      // Filter out stocks with no valid price data to avoid overwriting good cache
+      const validStocks = stocksToCache.filter(s => s.price > 0);
       const rows = stocksToCache.map(s => ({
         ticker: s.ticker,
         exchange: s.exchange,
