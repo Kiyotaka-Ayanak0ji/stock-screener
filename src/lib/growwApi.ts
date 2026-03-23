@@ -37,6 +37,9 @@ export function applyLiveData(
   stock: Stock,
   liveData: StockQuote
 ): Stock {
+  // Skip if Yahoo returned no real data
+  if (liveData.ltp === 0) return stock;
+
   const previousClose = liveData.close ?? stock.previousClose;
   const price = liveData.ltp;
   const change = Math.round((price - previousClose) * 100) / 100;
@@ -52,6 +55,9 @@ export function applyLiveData(
     low: liveData.low ?? stock.low,
     open: liveData.open ?? stock.open,
     volume: liveData.volume ?? stock.volume,
+    marketCap: liveData.marketCap && liveData.marketCap > 0
+      ? Math.round(liveData.marketCap / 10000000) // Convert from raw to Crores
+      : stock.marketCap,
     lastUpdated: new Date(),
   };
 }
