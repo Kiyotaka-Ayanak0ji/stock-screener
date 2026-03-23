@@ -9,6 +9,7 @@ import { StockProvider } from "@/contexts/StockContext";
 import Index from "./pages/Index";
 import DevNoticeDialog from "./components/DevNoticeDialog";
 import Auth from "./pages/Auth";
+import Subscribe from "./pages/Subscribe";
 import SharedWatchlist from "./pages/SharedWatchlist";
 import NotFound from "./pages/NotFound";
 
