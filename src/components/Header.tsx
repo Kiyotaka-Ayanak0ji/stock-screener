@@ -1,8 +1,10 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AlertsPanel from "@/components/AlertsPanel";
@@ -11,6 +13,7 @@ const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const { stocks, isMarketOpen } = useStocks();
   const { user, profile, signOut, isGuest } = useAuth();
+  const { subscription, trialDaysLeft, isActive } = useSubscription();
   const navigate = useNavigate();
 
   const gainers = stocks.filter(s => s.change > 0).length;
