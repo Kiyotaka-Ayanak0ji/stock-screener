@@ -17,3 +17,5 @@ project_id = "szkezahvdumeiqmnlugj"
     verify_jwt = false
   [functions.razorpay-verify-payment]
     verify_jwt = false
+  [functions.handle-email-unsubscribe]
+    verify_jwt = false
