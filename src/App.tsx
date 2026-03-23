@@ -28,6 +28,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
