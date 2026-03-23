@@ -8,6 +8,7 @@ interface StockQuote {
   low?: number;
   close?: number;
   volume?: number;
+  marketCap?: number;
 }
 
 export async function fetchLivePrices(
