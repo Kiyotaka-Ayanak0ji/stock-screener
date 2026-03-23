@@ -104,7 +104,7 @@ const SharedWatchlist = () => {
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold tracking-tight">
-              Stock<span className="text-primary">Pulse</span>
+              Stock<span className="text-primary">Sense</span>
             </h1>
           </div>
           <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-1.5">
