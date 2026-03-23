@@ -18,7 +18,7 @@ const SITE_URL = 'https://calm-white-cloud.lovable.app'
 const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; subject: (props: any) => string }> = {
   welcome: {
     component: WelcomeEmail,
-    subject: () => 'Welcome to StockPulse! 📈',
+    subject: () => 'Welcome to StockSense! 📈',
   },
   price_trigger_digest: {
     component: PriceTriggerDigestEmail,

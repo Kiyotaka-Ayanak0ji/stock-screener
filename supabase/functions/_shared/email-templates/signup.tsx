@@ -29,7 +29,7 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email for StockPulse</Preview>
+    <Preview>Confirm your email for StockSense</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Welcome to Stock<span style={{ color: '#148a9e' }}>Pulse</span> 📈</Heading>
@@ -48,7 +48,7 @@ export const SignupEmail = ({
           Verify Email
         </Button>
         <Text style={footer}>
-          If you didn't create an account on StockPulse, you can safely ignore this email.
+          If you didn't create an account on StockSense, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
