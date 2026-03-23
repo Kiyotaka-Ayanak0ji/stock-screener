@@ -11,6 +11,8 @@ import DevNoticeDialog from "./components/DevNoticeDialog";
 import Auth from "./pages/Auth";
 import Subscribe from "./pages/Subscribe";
 import SharedWatchlist from "./pages/SharedWatchlist";
+import Profile from "./pages/Profile";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

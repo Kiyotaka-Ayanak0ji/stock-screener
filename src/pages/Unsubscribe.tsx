@@ -1,0 +1,130 @@
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, Loader2, MailX } from "lucide-react";
+import { motion } from "framer-motion";
+
+type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
+
+const Unsubscribe = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const [status, setStatus] = useState<Status>("loading");
+  const [processing, setProcessing] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      setStatus("invalid");
+      return;
+    }
+    validateToken();
+  }, [token]);
+
+  const validateToken = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("handle-email-unsubscribe", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: { token },
+      });
+      if (error) {
+        setStatus("invalid");
+        return;
+      }
+      if (data?.alreadyUnsubscribed) {
+        setStatus("already");
+      } else {
+        setStatus("valid");
+      }
+    } catch {
+      setStatus("invalid");
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    if (!token) return;
+    setProcessing(true);
+    try {
+      const { error } = await supabase.functions.invoke("handle-email-unsubscribe", {
+        body: { token },
+      });
+      if (error) {
+        setStatus("error");
+      } else {
+        setStatus("success");
+      }
+    } catch {
+      setStatus("error");
+    }
+    setProcessing(false);
+  };
+
+  const content: Record<Status, { icon: React.ReactNode; title: string; desc: string }> = {
+    loading: {
+      icon: <Loader2 className="h-12 w-12 animate-spin text-primary" />,
+      title: "Verifying...",
+      desc: "Please wait while we verify your unsubscribe request.",
+    },
+    valid: {
+      icon: <MailX className="h-12 w-12 text-primary" />,
+      title: "Unsubscribe from Emails",
+      desc: "Click the button below to unsubscribe from all email communications.",
+    },
+    already: {
+      icon: <CheckCircle className="h-12 w-12 text-green-500" />,
+      title: "Already Unsubscribed",
+      desc: "You have already unsubscribed from our emails. No further action is needed.",
+    },
+    success: {
+      icon: <CheckCircle className="h-12 w-12 text-green-500" />,
+      title: "Successfully Unsubscribed",
+      desc: "You have been successfully unsubscribed from all email communications. You will no longer receive emails from us.",
+    },
+    invalid: {
+      icon: <XCircle className="h-12 w-12 text-destructive" />,
+      title: "Invalid Link",
+      desc: "This unsubscribe link is invalid or has expired. Please contact support if you need help.",
+    },
+    error: {
+      icon: <XCircle className="h-12 w-12 text-destructive" />,
+      title: "Something Went Wrong",
+      desc: "We couldn't process your request. Please try again later.",
+    },
+  };
+
+  const c = content[status];
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md"
+      >
+        <Card className="border-border">
+          <CardContent className="pt-8 pb-8 text-center space-y-4">
+            <div className="flex justify-center">{c.icon}</div>
+            <h1 className="text-2xl font-bold text-foreground">{c.title}</h1>
+            <p className="text-muted-foreground text-sm">{c.desc}</p>
+            {status === "valid" && (
+              <Button
+                onClick={handleUnsubscribe}
+                disabled={processing}
+                variant="destructive"
+                className="mt-4"
+              >
+                {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Confirm Unsubscribe
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Unsubscribe;
