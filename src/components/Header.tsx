@@ -70,7 +70,11 @@ const Header = () => {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs">
+              <div
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary text-xs cursor-pointer hover:bg-secondary/80 transition-colors"
+                onClick={() => navigate("/profile")}
+                title="View Profile"
+              >
                 <User className="h-3 w-3 text-primary" />
                 <span className="text-secondary-foreground font-medium truncate max-w-[120px]">
                   {profile?.display_name || user.email}
