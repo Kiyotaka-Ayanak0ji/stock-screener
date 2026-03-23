@@ -47,7 +47,7 @@ export interface StockNote {
 // Market cap in Crores (approximate)
 const MARKET_CAP_MAP: Record<string, number> = {
   RELIANCE: 1680000, TCS: 1400000, INFY: 650000, HDFCBANK: 1250000, ICICIBANK: 870000,
-  WIPRO: 250000, SBIN: 710000, TATAMOTORS: 350000, BHARTIARTL: 780000, SUNPHARMA: 285000,
+  WIPRO: 250000, SBIN: 710000, TMCV: 180000, TMPV: 170000, BHARTIARTL: 780000, SUNPHARMA: 285000,
 };
 
 function getMarketCap(ticker: string, price: number): number {
