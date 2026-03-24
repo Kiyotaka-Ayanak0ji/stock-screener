@@ -283,6 +283,7 @@ Deno.serve(async (req) => {
       needsEnrichment.length > 0
         ? Promise.all(needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
             const key = `${s.exchange}_${s.ticker}`;
+            // Try Screener first
             const enrichment = await fetchScreenerEnrichment(s.ticker);
             if (enrichment) {
               if (result[key].marketCap === 0 && enrichment.marketCap) {
@@ -292,6 +293,20 @@ Deno.serve(async (req) => {
               if (result[key].volume === 0 && enrichment.volume) {
                 result[key].volume = enrichment.volume;
                 console.log(`Enriched ${s.ticker} volume from Screener: ${enrichment.volume}`);
+              }
+            }
+            // If still missing, try Google Finance
+            if (result[key].marketCap === 0 || result[key].volume === 0) {
+              const gfData = await fetchGoogleFinanceMarketCap(s.ticker, s.exchange);
+              if (gfData) {
+                if (result[key].marketCap === 0 && gfData.marketCap) {
+                  result[key].marketCap = gfData.marketCap;
+                  console.log(`Enriched ${s.ticker} marketCap from Google Finance: ${gfData.marketCap}`);
+                }
+                if (result[key].volume === 0 && gfData.volume) {
+                  result[key].volume = gfData.volume;
+                  console.log(`Enriched ${s.ticker} volume from Google Finance: ${gfData.volume}`);
+                }
               }
             }
           }))
