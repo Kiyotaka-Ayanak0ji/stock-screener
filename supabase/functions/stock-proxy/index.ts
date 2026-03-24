@@ -34,84 +34,7 @@ async function getCrumbAndCookie(): Promise<{ crumb: string; cookie: string }> {
   return { crumb, cookie };
 }
 
-// Fallback 3: scrape Google Finance for SME stocks missing from both Yahoo and Screener
-async function fetchGoogleFinanceFallback(ticker: string, exchange: string): Promise<Record<string, number> | null> {
-  try {
-    // Google Finance uses exchange:TICKER format (e.g., NSE:BCCFUBA or BOM:BCCFUBA)
-    const gExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
-    const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gExchange}`;
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-    });
-    if (!res.ok) { console.log(`Google Finance returned ${res.status} for ${ticker}:${gExchange}`); return null; }
-    const html = await res.text();
-
-    // Extract price from data-last-price attribute
-    const priceAttr = html.match(/data-last-price="([\d.]+)"/);
-    if (!priceAttr) {
-      console.log(`Google Finance: no price found for ${ticker}:${gExchange}`);
-      // Try alternate exchange
-      if (exchange === 'NSE') {
-        return fetchGoogleFinanceFallback(ticker, 'BSE');
-      }
-      return null;
-    }
-
-    const price = parseFloat(priceAttr[1]);
-    if (price <= 0 || isNaN(price)) return null;
-
-    // Extract previous close
-    let close = price;
-    const prevCloseMatch = html.match(/Previous close[\s\S]*?>([\d,]+\.\d+)</);
-    if (prevCloseMatch) {
-      close = parseFloat(prevCloseMatch[1].replace(/,/g, ''));
-    }
-
-    // Extract open, high, low from the "Today's range" or individual fields
-    let open = price, high = price, low = price;
-    const openMatch = html.match(/Open[\s\S]*?>([\d,]+\.\d+)</);
-    if (openMatch) open = parseFloat(openMatch[1].replace(/,/g, ''));
-    const highMatch = html.match(/High[\s\S]*?>([\d,]+\.\d+)</);
-    if (highMatch) high = parseFloat(highMatch[1].replace(/,/g, ''));
-    const lowMatch = html.match(/Low[\s\S]*?>([\d,]+\.\d+)</);
-    if (lowMatch) low = parseFloat(lowMatch[1].replace(/,/g, ''));
-
-    // Extract volume
-    let volume = 0;
-    const volMatch = html.match(/Avg volume[\s\S]*?>([\d,]+(?:\.\d+)?[MBK]?)</i) || html.match(/Volume[\s\S]*?>([\d,]+(?:\.\d+)?[MBK]?)</i);
-    if (volMatch) {
-      let volStr = volMatch[1].replace(/,/g, '');
-      if (volStr.endsWith('M')) volume = parseFloat(volStr) * 1_000_000;
-      else if (volStr.endsWith('B')) volume = parseFloat(volStr) * 1_000_000_000;
-      else if (volStr.endsWith('K')) volume = parseFloat(volStr) * 1_000;
-      else volume = Math.round(parseFloat(volStr));
-    }
-
-    // Extract market cap
-    let marketCap = 0;
-    const mcMatch = html.match(/Market cap[\s\S]*?>([\d,.]+[TBMK]?\s*[A-Z]{3}?)</i);
-    if (mcMatch) {
-      let mcStr = mcMatch[1].replace(/[A-Z]{3}$/i, '').trim().replace(/,/g, '');
-      if (mcStr.endsWith('T')) marketCap = parseFloat(mcStr) * 1_000_000_000_000;
-      else if (mcStr.endsWith('B')) marketCap = parseFloat(mcStr) * 1_000_000_000;
-      else if (mcStr.endsWith('M')) marketCap = parseFloat(mcStr) * 1_000_000;
-      else if (mcStr.endsWith('K')) marketCap = parseFloat(mcStr) * 1_000;
-      else marketCap = parseFloat(mcStr) || 0;
-    }
-
-    console.log(`Google Finance fallback: ${ticker}:${gExchange} = ₹${price}, MCap=${marketCap}, Vol=${volume}`);
-    return { ltp: price, open, high, low, close, volume, marketCap };
-  } catch (err) {
-    console.error(`Google Finance fallback error for ${ticker}:`, err);
-    return null;
-  }
-}
-
-// Fallback 1: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
+// Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
     const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
@@ -297,20 +220,12 @@ Deno.serve(async (req) => {
 
     // Run both fallback and enrichment in parallel
     const [, ] = await Promise.all([
-      // Full fallback for missing stocks: Screener first, then Google Finance
+      // Full fallback for missing stocks
       missingSymbols.length > 0
         ? Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
-            const screenerData = await fetchScreenerFallback(s.ticker);
-            if (screenerData) {
-              result[`${s.exchange}_${s.ticker}`] = screenerData;
-              return;
-            }
-            // Fallback 2: Google Finance
-            const googleData = await fetchGoogleFinanceFallback(s.ticker, s.exchange);
-            if (googleData) {
-              result[`${s.exchange}_${s.ticker}`] = googleData;
-            } else {
-              console.log(`All fallbacks failed for ${s.ticker} (${s.exchange})`);
+            const fallback = await fetchScreenerFallback(s.ticker);
+            if (fallback) {
+              result[`${s.exchange}_${s.ticker}`] = fallback;
             }
           }))
         : Promise.resolve(),

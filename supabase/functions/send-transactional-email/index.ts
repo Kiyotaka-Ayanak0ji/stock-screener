@@ -97,20 +97,6 @@ Deno.serve(async (req) => {
     })
   }
 
-  // Check user's email_opt_in preference
-  const { data: profile } = await supabaseAuth
-    .from('profiles')
-    .select('email_opt_in')
-    .eq('user_id', user.id)
-    .maybeSingle()
-
-  if (profile && profile.email_opt_in === false) {
-    return new Response(JSON.stringify({ skipped: true, reason: 'user_opted_out' }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
-  }
-
   const { component: EmailComponent, subject: getSubject } = EMAIL_TEMPLATES[template]
   const templateProps = { ...props, siteUrl: SITE_URL }
 
