@@ -97,6 +97,27 @@ Deno.serve(async (req) => {
     })
   }
 
+  // For non-critical templates (e.g. price alerts, digests), respect email_opt_in preference
+  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest']
+  if (NON_CRITICAL_TEMPLATES.includes(template)) {
+    // Find the user by email and check their opt-in preference
+    const { data: authUsers } = await supabaseAuth.auth.admin.listUsers()
+    const matchingUser = authUsers?.users?.find((u: any) => u.email === recipientEmail)
+    if (matchingUser) {
+      const { data: profileData } = await supabaseAuth
+        .from('profiles')
+        .select('email_opt_in')
+        .eq('user_id', matchingUser.id)
+        .maybeSingle()
+      if (profileData && profileData.email_opt_in === false) {
+        return new Response(JSON.stringify({ skipped: true, reason: 'opted_out' }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+  }
+
   const { component: EmailComponent, subject: getSubject } = EMAIL_TEMPLATES[template]
   const templateProps = { ...props, siteUrl: SITE_URL }
 
