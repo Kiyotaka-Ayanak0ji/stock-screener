@@ -245,6 +245,7 @@ export type Database = {
           events: string | null
           id: string
           notes: string | null
+          price_triggers: string | null
           updated_at: string
           user_id: string
           watchlist: string | null
@@ -257,6 +258,7 @@ export type Database = {
           events?: string | null
           id?: string
           notes?: string | null
+          price_triggers?: string | null
           updated_at?: string
           user_id: string
           watchlist?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           events?: string | null
           id?: string
           notes?: string | null
+          price_triggers?: string | null
           updated_at?: string
           user_id?: string
           watchlist?: string | null

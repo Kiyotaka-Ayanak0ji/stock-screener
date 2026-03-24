@@ -1,0 +1,1 @@
+ALTER TABLE public.user_preferences ADD COLUMN price_triggers text DEFAULT NULL;
