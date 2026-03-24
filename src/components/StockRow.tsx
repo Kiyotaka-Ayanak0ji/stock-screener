@@ -197,7 +197,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         )}
         {isVisible("marketCap") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-            {isPriceAvailable ? (stock.marketCap > 0 ? <>₹{formatMarketCap(stock.marketCap)}</> : <span className="opacity-50">N/A</span>) : <Skeleton className="h-3 w-18 ml-auto" />}
+            {isPriceAvailable ? (stock.marketCap > 0 ? <>₹{formatMarketCap(stock.marketCap)}</> : <Tooltip><TooltipTrigger asChild><span className="opacity-50 cursor-help">N/A</span></TooltipTrigger><TooltipContent>Market cap unavailable from data providers</TooltipContent></Tooltip>) : <Skeleton className="h-3 w-18 ml-auto" />}
           </td>
         )}
         {visibleCustomColumns.map(col => {
