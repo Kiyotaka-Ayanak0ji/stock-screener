@@ -108,6 +108,56 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
   }
 }
 
+// Fallback: scrape Google Finance for market cap when Screener is unavailable
+async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number } | null> {
+  try {
+    const gfExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
+    const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html',
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    const result: { marketCap?: number; volume?: number } = {};
+
+    // Market cap pattern: data-source="...Market cap..." followed by value like "1.07T INR" or "214.00Cr INR"
+    const mcMatch = html.match(/Market cap[\s\S]*?([\d,.]+)\s*(T|B|Cr|M|K)?\s*INR/i);
+    if (mcMatch) {
+      let val = parseFloat(mcMatch[1].replace(/,/g, ''));
+      const unit = (mcMatch[2] || '').toUpperCase();
+      // Convert to raw value then to Crores in the caller
+      if (unit === 'T') val = val * 1e12;
+      else if (unit === 'B') val = val * 1e9;
+      else if (unit === 'CR') val = val * 1e7;
+      else if (unit === 'M') val = val * 1e6;
+      else if (unit === 'K') val = val * 1e3;
+      result.marketCap = val;
+      console.log(`Google Finance enrichment: ${ticker} marketCap=${val}`);
+    }
+
+    // Avg Volume pattern
+    const volMatch = html.match(/Avg Volume[\s\S]*?([\d,.]+)\s*(K|M|B)?/i);
+    if (volMatch) {
+      let vol = parseFloat(volMatch[1].replace(/,/g, ''));
+      const unit = (volMatch[2] || '').toUpperCase();
+      if (unit === 'K') vol *= 1000;
+      else if (unit === 'M') vol *= 1e6;
+      else if (unit === 'B') vol *= 1e9;
+      result.volume = Math.round(vol);
+    }
+
+    return Object.keys(result).length > 0 ? result : null;
+  } catch (err) {
+    console.error(`Google Finance fallback error for ${ticker}:`, err);
+    return null;
+  }
+}
+
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -233,6 +283,7 @@ Deno.serve(async (req) => {
       needsEnrichment.length > 0
         ? Promise.all(needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
             const key = `${s.exchange}_${s.ticker}`;
+            // Try Screener first
             const enrichment = await fetchScreenerEnrichment(s.ticker);
             if (enrichment) {
               if (result[key].marketCap === 0 && enrichment.marketCap) {
@@ -242,6 +293,20 @@ Deno.serve(async (req) => {
               if (result[key].volume === 0 && enrichment.volume) {
                 result[key].volume = enrichment.volume;
                 console.log(`Enriched ${s.ticker} volume from Screener: ${enrichment.volume}`);
+              }
+            }
+            // If still missing, try Google Finance
+            if (result[key].marketCap === 0 || result[key].volume === 0) {
+              const gfData = await fetchGoogleFinanceMarketCap(s.ticker, s.exchange);
+              if (gfData) {
+                if (result[key].marketCap === 0 && gfData.marketCap) {
+                  result[key].marketCap = gfData.marketCap;
+                  console.log(`Enriched ${s.ticker} marketCap from Google Finance: ${gfData.marketCap}`);
+                }
+                if (result[key].volume === 0 && gfData.volume) {
+                  result[key].volume = gfData.volume;
+                  console.log(`Enriched ${s.ticker} volume from Google Finance: ${gfData.volume}`);
+                }
               }
             }
           }))
