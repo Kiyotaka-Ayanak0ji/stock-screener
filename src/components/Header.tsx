@@ -49,13 +49,19 @@ const Header = () => {
             <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
           </div>
 
-          {user && subscription?.status === 'trial' && trialDaysLeft > 0 && (
+          {user && subscription?.status === 'trial' && (
             <button
               onClick={() => navigate("/subscribe")}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 transition-colors"
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                trialDaysLeft <= 3
+                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20 animate-pulse"
+                  : trialDaysLeft <= 7
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+                  : "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
+              }`}
             >
               <Clock className="h-3 w-3" />
-              {trialDaysLeft}d trial left
+              {trialDaysLeft > 0 ? `${trialDaysLeft}d trial left` : "Trial expired"}
             </button>
           )}
 
