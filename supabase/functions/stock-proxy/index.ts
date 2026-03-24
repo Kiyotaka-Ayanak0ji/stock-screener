@@ -61,11 +61,49 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
       marketCap = parseFloat(mcSection[1].replace(/,/g, '')) * 10000000; // Cr to raw
     }
 
-    console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}`);
+    // Extract volume from "Volume" row in the top ratios section
+    let volume = 0;
+    const volMatch = html.match(/Volume[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    if (volMatch) {
+      volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
+    }
 
-    return { ltp: price, open: price, high: price, low: price, close: price, volume: 0, marketCap };
+    console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}, Vol=${volume}`);
+
+    return { ltp: price, open: price, high: price, low: price, close: price, volume, marketCap };
   } catch (err) {
     console.error(`Screener fallback error for ${ticker}:`, err);
+    return null;
+  }
+}
+
+// Fetch only market cap and volume from Screener for enrichment
+async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: number; volume?: number } | null> {
+  try {
+    const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html',
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    const result: { marketCap?: number; volume?: number } = {};
+
+    const mcSection = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    if (mcSection) {
+      result.marketCap = parseFloat(mcSection[1].replace(/,/g, '')) * 10000000;
+    }
+
+    const volMatch = html.match(/Volume[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    if (volMatch) {
+      result.volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
+    }
+
+    return result;
+  } catch {
     return null;
   }
 }
@@ -167,21 +205,48 @@ Deno.serve(async (req) => {
       resolvedKeys.add(key);
     }
 
-    // Fallback via Screener.in for unresolved tickers
+    // Fallback via Screener.in for completely unresolved tickers
     const missingSymbols = symbols.filter((s: { ticker: string; exchange: string }) => {
       return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
     });
 
-    
+    // Identify resolved tickers that need enrichment (marketCap=0 or volume=0)
+    const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
+      const key = `${s.exchange}_${s.ticker}`;
+      if (!resolvedKeys.has(key)) return false;
+      const d = result[key];
+      return (d.marketCap === 0 || d.volume === 0);
+    });
 
-    if (missingSymbols.length > 0) {
-      await Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
-        const fallback = await fetchScreenerFallback(s.ticker);
-        if (fallback) {
-          result[`${s.exchange}_${s.ticker}`] = fallback;
-        }
-      }));
-    }
+    // Run both fallback and enrichment in parallel
+    const [, ] = await Promise.all([
+      // Full fallback for missing stocks
+      missingSymbols.length > 0
+        ? Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
+            const fallback = await fetchScreenerFallback(s.ticker);
+            if (fallback) {
+              result[`${s.exchange}_${s.ticker}`] = fallback;
+            }
+          }))
+        : Promise.resolve(),
+      // Enrichment for stocks with missing marketCap or volume
+      needsEnrichment.length > 0
+        ? Promise.all(needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
+            const key = `${s.exchange}_${s.ticker}`;
+            const enrichment = await fetchScreenerEnrichment(s.ticker);
+            if (enrichment) {
+              if (result[key].marketCap === 0 && enrichment.marketCap) {
+                result[key].marketCap = enrichment.marketCap;
+                console.log(`Enriched ${s.ticker} marketCap from Screener: ${enrichment.marketCap}`);
+              }
+              if (result[key].volume === 0 && enrichment.volume) {
+                result[key].volume = enrichment.volume;
+                console.log(`Enriched ${s.ticker} volume from Screener: ${enrichment.volume}`);
+              }
+            }
+          }))
+        : Promise.resolve(),
+    ]);
 
     return new Response(JSON.stringify(result), {
       status: 200,
