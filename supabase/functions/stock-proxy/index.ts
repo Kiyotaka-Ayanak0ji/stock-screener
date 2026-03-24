@@ -297,12 +297,20 @@ Deno.serve(async (req) => {
 
     // Run both fallback and enrichment in parallel
     const [, ] = await Promise.all([
-      // Full fallback for missing stocks
+      // Full fallback for missing stocks: Screener first, then Google Finance
       missingSymbols.length > 0
         ? Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
-            const fallback = await fetchScreenerFallback(s.ticker);
-            if (fallback) {
-              result[`${s.exchange}_${s.ticker}`] = fallback;
+            const screenerData = await fetchScreenerFallback(s.ticker);
+            if (screenerData) {
+              result[`${s.exchange}_${s.ticker}`] = screenerData;
+              return;
+            }
+            // Fallback 2: Google Finance
+            const googleData = await fetchGoogleFinanceFallback(s.ticker, s.exchange);
+            if (googleData) {
+              result[`${s.exchange}_${s.ticker}`] = googleData;
+            } else {
+              console.log(`All fallbacks failed for ${s.ticker} (${s.exchange})`);
             }
           }))
         : Promise.resolve(),
