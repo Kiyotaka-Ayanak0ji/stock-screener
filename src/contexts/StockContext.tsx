@@ -279,6 +279,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setColumnVisibility(data.column_visibility ? JSON.parse(decrypt(data.column_visibility)) : {});
         setCustomColumns(data.custom_columns ? JSON.parse(decrypt(data.custom_columns)) : []);
         setCustomColumnData(data.custom_column_data ? JSON.parse(decrypt(data.custom_column_data)) : {});
+        setPriceTriggers(data.price_triggers ? JSON.parse(decrypt(data.price_triggers)) : {});
       }
     } catch (err) {
       console.error("Failed to load preferences from database:", err);
