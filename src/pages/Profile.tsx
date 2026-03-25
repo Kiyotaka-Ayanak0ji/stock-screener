@@ -52,6 +52,18 @@ const Profile = () => {
       setDisplayName(data.display_name || "");
       setEmailOptIn(data.email_opt_in ?? false);
     }
+    // Fetch existing review
+    const { data: review } = await supabase
+      .from("app_reviews")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (review) {
+      setExistingReview(review);
+      setReviewRating(review.rating);
+      setReviewText(review.review);
+      setReviewDesignation(review.designation || "");
+    }
     setLoading(false);
   };
 
