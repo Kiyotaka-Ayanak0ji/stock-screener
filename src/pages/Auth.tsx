@@ -41,7 +41,7 @@ const Auth = () => {
       toast({ title: "Error", description: result.error, variant: "destructive" });
     } else {
       if (isLogin) {
-        navigate("/");
+        navigate("/dashboard");
       } else {
         toast({
           title: "Account created!",
