@@ -49,7 +49,7 @@ export const WelcomeEmail = ({
         </Button>
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you signed up on StockSense.
+          You're receiving this because you signed up on EquityIQ.
           If you didn't create this account, please ignore this email.
         </Text>
       </Container>

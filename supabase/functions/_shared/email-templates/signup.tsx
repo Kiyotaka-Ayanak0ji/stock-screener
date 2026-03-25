@@ -48,7 +48,7 @@ export const SignupEmail = ({
           Verify Email
         </Button>
         <Text style={footer}>
-          If you didn't create an account on StockSense, you can safely ignore this email.
+          If you didn't create an account on EquityIQ, you can safely ignore this email.
         </Text>
       </Container>
     </Body>

@@ -68,7 +68,7 @@ export const PriceTriggerDigestEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you set price triggers on StockSense.
+          You're receiving this because you set price triggers on EquityIQ.
         </Text>
       </Container>
     </Body>

@@ -34,7 +34,7 @@ export const InviteEmail = ({
         <Text style={text}>
           You've been invited to join{' '}
           <Link href={siteUrl} style={link}>
-            <strong>StockSense</strong>
+            <strong>EquityIQ</strong>
           </Link>
           . Click the button below to accept the invitation and create your
           account.

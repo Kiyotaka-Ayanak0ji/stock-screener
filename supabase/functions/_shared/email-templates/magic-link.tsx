@@ -29,7 +29,7 @@ export const MagicLinkEmail = ({
       <Container style={container}>
         <Heading style={h1}>Your login link</Heading>
         <Text style={text}>
-          Click the button below to log in to StockSense. This link will expire
+          Click the button below to log in to EquityIQ. This link will expire
           shortly.
         </Text>
         <Button style={button} href={confirmationUrl}>
