@@ -78,7 +78,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [roleLoading, isAdmin, navigate]);
 

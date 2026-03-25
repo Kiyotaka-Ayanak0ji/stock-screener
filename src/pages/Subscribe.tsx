@@ -311,7 +311,7 @@ const Subscribe = () => {
             <Button
               variant="ghost"
               className="w-full text-muted-foreground"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {isActive ? "Back to Dashboard" : "Continue with limited access"}

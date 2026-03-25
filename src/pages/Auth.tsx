@@ -138,7 +138,7 @@ const Auth = () => {
               <Button
                 variant="ghost"
                 className="w-full gap-2"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
               >
                 <ArrowLeft className="h-4 w-4" />
                 Continue as Guest

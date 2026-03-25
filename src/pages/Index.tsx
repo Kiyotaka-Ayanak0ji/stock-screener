@@ -12,6 +12,14 @@ const Index = () => {
   const { isActive, loading: subLoading, subscription } = useSubscription();
   const navigate = useNavigate();
 
+   // Redirect unauthenticated users to landing
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/", { replace: true });
+      return;
+    }
+  }, [authLoading, user, navigate]);
+
   // Block expired trial / expired subscription users
   useEffect(() => {
     if (authLoading || subLoading) return;
