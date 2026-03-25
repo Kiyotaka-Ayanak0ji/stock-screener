@@ -41,7 +41,7 @@ const Auth = () => {
       toast({ title: "Error", description: result.error, variant: "destructive" });
     } else {
       if (isLogin) {
-        navigate("/");
+        navigate("/dashboard");
       } else {
         toast({
           title: "Account created!",
@@ -138,7 +138,7 @@ const Auth = () => {
               <Button
                 variant="ghost"
                 className="w-full gap-2"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/dashboard")}
               >
                 <ArrowLeft className="h-4 w-4" />
                 Continue as Guest

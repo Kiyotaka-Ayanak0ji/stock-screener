@@ -96,7 +96,7 @@ const Subscribe = () => {
             } else {
               toast.success("Subscription activated! Welcome to Premium.");
               await refetch();
-              navigate("/");
+              navigate("/dashboard");
             }
           }
         },
@@ -142,7 +142,7 @@ const Subscribe = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" onClick={() => navigate("/")}>
+            <Button className="w-full" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
             </Button>
           </CardContent>
@@ -311,7 +311,7 @@ const Subscribe = () => {
             <Button
               variant="ghost"
               className="w-full text-muted-foreground"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {isActive ? "Back to Dashboard" : "Continue with limited access"}

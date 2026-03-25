@@ -81,7 +81,7 @@ const SharedWatchlist = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">{error}</p>
-        <Button variant="outline" onClick={() => navigate("/")} className="gap-2">
+        <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Go Home
         </Button>
@@ -107,7 +107,7 @@ const SharedWatchlist = () => {
               Equity<span className="text-primary">IQ</span>
             </h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" />
             Home
           </Button>

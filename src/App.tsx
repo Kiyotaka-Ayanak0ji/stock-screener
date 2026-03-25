@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { StockProvider } from "@/contexts/StockContext";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import DevNoticeDialog from "./components/DevNoticeDialog";
 import Auth from "./pages/Auth";
 import Subscribe from "./pages/Subscribe";
@@ -29,7 +30,8 @@ const App = () => (
             <DevNoticeDialog />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/dashboard" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/profile" element={<Profile />} />
