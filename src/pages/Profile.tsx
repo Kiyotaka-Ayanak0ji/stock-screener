@@ -4,10 +4,11 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -23,6 +24,13 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
+  // Review state
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewHover, setReviewHover] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewDesignation, setReviewDesignation] = useState("");
+  const [existingReview, setExistingReview] = useState<any>(null);
+  const [savingReview, setSavingReview] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -42,6 +50,18 @@ const Profile = () => {
     if (data) {
       setDisplayName(data.display_name || "");
       setEmailOptIn(data.email_opt_in ?? false);
+    }
+    // Fetch existing review
+    const { data: review } = await supabase
+      .from("app_reviews")
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (review) {
+      setExistingReview(review);
+      setReviewRating(review.rating);
+      setReviewText(review.review);
+      setReviewDesignation(review.designation || "");
     }
     setLoading(false);
   };
@@ -84,6 +104,35 @@ const Profile = () => {
       setNewPassword("");
       setConfirmPassword("");
     }
+  };
+
+  const handleSaveReview = async () => {
+    if (!user || reviewRating === 0 || !reviewText.trim()) {
+      toast.error("Please provide a rating and review.");
+      return;
+    }
+    setSavingReview(true);
+    const reviewData = {
+      user_id: user.id,
+      display_name: displayName.trim() || user.email?.split("@")[0] || "User",
+      designation: reviewDesignation.trim() || null,
+      rating: reviewRating,
+      review: reviewText.trim(),
+    };
+
+    let error;
+    if (existingReview) {
+      ({ error } = await supabase.from("app_reviews").update(reviewData).eq("id", existingReview.id));
+    } else {
+      ({ error } = await supabase.from("app_reviews").insert(reviewData));
+    }
+    setSavingReview(false);
+    if (error) {
+      toast.error("Failed to save review.");
+      return;
+    }
+    toast.success(existingReview ? "Review updated!" : "Review submitted! Thank you!");
+    setExistingReview({ ...existingReview, ...reviewData });
   };
 
   if (loading) {
@@ -221,7 +270,82 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Admin Panel - only visible to admins */}
+          {/* Review Section - hidden for admins */}
+          {!isAdmin && (
+            <Card className="mb-6 border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  {existingReview ? "Your Review" : "Leave a Review"}
+                </CardTitle>
+                <CardDescription>
+                  {existingReview
+                    ? "Update your review — it's displayed on our landing page"
+                    : "Share your experience to help other investors discover EquityIQ"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Rating</Label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        className="transition-transform hover:scale-110"
+                        onMouseEnter={() => setReviewHover(star)}
+                        onMouseLeave={() => setReviewHover(0)}
+                        onClick={() => setReviewRating(star)}
+                      >
+                        <Star
+                          className={`h-7 w-7 transition-colors ${
+                            star <= (reviewHover || reviewRating)
+                              ? "fill-primary text-primary"
+                              : "text-muted-foreground/40"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile-review-designation">Designation (optional)</Label>
+                  <Input
+                    id="profile-review-designation"
+                    value={reviewDesignation}
+                    onChange={(e) => setReviewDesignation(e.target.value)}
+                    placeholder="e.g. Swing Trader, Long-term Investor"
+                    maxLength={60}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile-review-text">Your Review</Label>
+                  <Textarea
+                    id="profile-review-text"
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Tell us what you love about EquityIQ..."
+                    rows={3}
+                    maxLength={500}
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveReview}
+                  disabled={savingReview || reviewRating === 0 || !reviewText.trim()}
+                  className="w-full"
+                  variant="secondary"
+                >
+                  {savingReview ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Star className="mr-2 h-4 w-4" />
+                  )}
+                  {existingReview ? "Update Review" : "Submit Review"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {isAdmin && (
             <Card className="mb-6 border-primary/30 bg-primary/5">
               <CardHeader>
