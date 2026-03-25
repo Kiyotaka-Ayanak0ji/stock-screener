@@ -29,12 +29,12 @@ export const EmailChangeEmail = ({
 }: EmailChangeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email change for StockSense</Preview>
+    <Preview>Confirm your email change for EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
-          You requested to change your StockSense email from{' '}
+          You requested to change your EquityIQ email from{' '}
           <Link href={`mailto:${email}`} style={link}>
             {email}
           </Link>{' '}

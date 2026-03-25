@@ -32,7 +32,7 @@ const PremiumDialog = ({ open, onOpenChange, featureName }: PremiumDialogProps) 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Crown className="h-5 w-5 text-amber-500" />
-            Upgrade to StockSense Premium
+            Upgrade to EquityIQ Premium
           </DialogTitle>
           <DialogDescription>
             {featureName

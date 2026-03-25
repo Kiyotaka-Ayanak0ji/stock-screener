@@ -72,7 +72,7 @@ const Subscribe = () => {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: "StockSense Premium",
+        name: "EquityIQ Premium",
         description: isTest ? "Test Payment (1 cent)" : `${billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {

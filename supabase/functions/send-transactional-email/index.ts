@@ -10,7 +10,7 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const SITE_NAME = 'StockSense'
+const SITE_NAME = 'EquityIQ'
 const SENDER_DOMAIN = 'notify.stockscreener.sbs'
 const FROM_DOMAIN = 'stockscreener.sbs'
 const SITE_URL = 'https://calm-white-cloud.lovable.app'
@@ -18,7 +18,7 @@ const SITE_URL = 'https://calm-white-cloud.lovable.app'
 const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; subject: (props: any) => string }> = {
   welcome: {
     component: WelcomeEmail,
-    subject: () => 'Welcome to StockSense! 📈',
+    subject: () => 'Welcome to EquityIQ! 📈',
   },
   price_trigger_digest: {
     component: PriceTriggerDigestEmail,
