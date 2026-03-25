@@ -221,6 +221,25 @@ const Profile = () => {
             </CardContent>
           </Card>
 
+          {/* Admin Panel - only visible to admins */}
+          {isAdmin && (
+            <Card className="mb-6 border-primary/30 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Admin Panel
+                </CardTitle>
+                <CardDescription>You have administrator access</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate("/admin")} className="w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  View & Manage All Users
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="mb-8 border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-foreground">
