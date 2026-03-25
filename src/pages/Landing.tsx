@@ -406,6 +406,75 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section id="faq" className="py-20 px-4 bg-muted/30">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <Badge variant="secondary" className="mb-3">
+              <HelpCircle className="h-3 w-3 mr-1 text-primary" /> FAQ
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold">Frequently Asked Questions</h2>
+            <p className="mt-3 text-muted-foreground">Everything you need to know before getting started</p>
+          </div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
+            <Accordion type="single" collapsible className="space-y-3">
+              {[
+                {
+                  q: "Is EquityIQ free to use?",
+                  a: "Yes! You get a full 30-day free trial with every feature unlocked — no credit card required. After that, you can choose a monthly or yearly plan to continue.",
+                },
+                {
+                  q: "Which stock exchanges does EquityIQ support?",
+                  a: "EquityIQ tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
+                },
+                {
+                  q: "How accurate are the stock prices?",
+                  a: "We source data from multiple providers with real-time fallbacks to ensure 98–99% accuracy. Prices refresh in under a second during market hours.",
+                },
+                {
+                  q: "What are price triggers and how do they work?",
+                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target price, you'll receive an email notification so you never miss an entry or exit opportunity.",
+                },
+                {
+                  q: "Can I create multiple watchlists?",
+                  a: "Absolutely. You can create unlimited watchlists to organize stocks by strategy — one for swing trades, another for long-term holds, a separate one for IPO picks, and so on.",
+                },
+                {
+                  q: "What are event tags and labels?",
+                  a: "Event tags let you label stocks with custom tags like 'Earnings Soon', 'Breakout Watch', or 'Dividend Date'. You can then sort and filter your watchlist based on these labels for quick access.",
+                },
+                {
+                  q: "Can I share my watchlist with others?",
+                  a: "Yes! You can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
+                },
+                {
+                  q: "Is my data safe and private?",
+                  a: "All user data — including watchlists, notes, and custom columns — is encrypted before being stored. We use industry-standard security practices and your data is never shared with third parties.",
+                },
+                {
+                  q: "Can I cancel my subscription anytime?",
+                  a: "Yes, you can cancel anytime with no questions asked. You'll continue to have access until the end of your billing period.",
+                },
+                {
+                  q: "Do you support mobile devices?",
+                  a: "EquityIQ is fully responsive and works seamlessly on phones, tablets, and desktops. Access your watchlists and alerts from any device, anywhere.",
+                },
+              ].map((faq, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-lg px-4 data-[state=open]:bg-background">
+                  <AccordionTrigger className="text-left text-sm font-medium hover:no-underline">
+                    {faq.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                    {faq.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="max-w-3xl mx-auto text-center">
