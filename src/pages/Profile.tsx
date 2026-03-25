@@ -270,7 +270,82 @@ const Profile = () => {
             </CardContent>
           </Card>
 
-          {/* Admin Panel - only visible to admins */}
+          {/* Review Section - hidden for admins */}
+          {!isAdmin && (
+            <Card className="mb-6 border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  {existingReview ? "Your Review" : "Leave a Review"}
+                </CardTitle>
+                <CardDescription>
+                  {existingReview
+                    ? "Update your review — it's displayed on our landing page"
+                    : "Share your experience to help other investors discover EquityIQ"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Rating</Label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        className="transition-transform hover:scale-110"
+                        onMouseEnter={() => setReviewHover(star)}
+                        onMouseLeave={() => setReviewHover(0)}
+                        onClick={() => setReviewRating(star)}
+                      >
+                        <Star
+                          className={`h-7 w-7 transition-colors ${
+                            star <= (reviewHover || reviewRating)
+                              ? "fill-primary text-primary"
+                              : "text-muted-foreground/40"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile-review-designation">Designation (optional)</Label>
+                  <Input
+                    id="profile-review-designation"
+                    value={reviewDesignation}
+                    onChange={(e) => setReviewDesignation(e.target.value)}
+                    placeholder="e.g. Swing Trader, Long-term Investor"
+                    maxLength={60}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="profile-review-text">Your Review</Label>
+                  <Textarea
+                    id="profile-review-text"
+                    value={reviewText}
+                    onChange={(e) => setReviewText(e.target.value)}
+                    placeholder="Tell us what you love about EquityIQ..."
+                    rows={3}
+                    maxLength={500}
+                  />
+                </div>
+                <Button
+                  onClick={handleSaveReview}
+                  disabled={savingReview || reviewRating === 0 || !reviewText.trim()}
+                  className="w-full"
+                  variant="secondary"
+                >
+                  {savingReview ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Star className="mr-2 h-4 w-4" />
+                  )}
+                  {existingReview ? "Update Review" : "Submit Review"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {isAdmin && (
             <Card className="mb-6 border-primary/30 bg-primary/5">
               <CardHeader>
