@@ -1,0 +1,105 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    // Verify the caller is admin
+    const authHeader = req.headers.get("Authorization")!;
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Check admin role
+    const { data: roleData } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .single();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const url = new URL(req.url);
+    const action = url.searchParams.get("action");
+
+    if (req.method === "GET" && action === "list") {
+      // List all users from auth
+      const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+      if (error) throw error;
+
+      // Get profiles
+      const { data: profiles } = await supabaseAdmin.from("profiles").select("user_id, display_name, email_opt_in, created_at");
+      const { data: subscriptions } = await supabaseAdmin.from("user_subscriptions").select("user_id, plan, status, trial_ends_at, subscription_ends_at");
+      const { data: watchlists } = await supabaseAdmin.from("user_watchlists").select("user_id, id");
+      const { data: preferences } = await supabaseAdmin.from("user_preferences").select("user_id, updated_at");
+
+      const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+      const subMap = new Map((subscriptions || []).map(s => [s.user_id, s]));
+      const watchlistCounts = new Map<string, number>();
+      (watchlists || []).forEach(w => {
+        watchlistCounts.set(w.user_id, (watchlistCounts.get(w.user_id) || 0) + 1);
+      });
+      const prefMap = new Map((preferences || []).map(p => [p.user_id, p]));
+
+      const enrichedUsers = users.map(u => {
+        const profile = profileMap.get(u.id);
+        const sub = subMap.get(u.id);
+        const pref = prefMap.get(u.id);
+        return {
+          id: u.id,
+          email: u.email,
+          display_name: profile?.display_name || null,
+          email_confirmed_at: u.email_confirmed_at,
+          created_at: u.created_at,
+          last_sign_in_at: u.last_sign_in_at,
+          email_opt_in: profile?.email_opt_in ?? false,
+          subscription_plan: sub?.plan || "free",
+          subscription_status: sub?.status || "none",
+          trial_ends_at: sub?.trial_ends_at || null,
+          subscription_ends_at: sub?.subscription_ends_at || null,
+          watchlist_count: watchlistCounts.get(u.id) || 0,
+          last_active: pref?.updated_at || u.last_sign_in_at || u.created_at,
+        };
+      });
+
+      return new Response(JSON.stringify({ users: enrichedUsers }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (req.method === "POST" && action === "delete") {
+      const { userId } = await req.json();
+      if (!userId || userId === user.id) {
+        return new Response(JSON.stringify({ error: "Invalid user ID" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});

@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
+  const { isAdmin } = useAdminRole();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [emailOptIn, setEmailOptIn] = useState(false);
@@ -218,6 +220,25 @@ const Profile = () => {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Admin Panel - only visible to admins */}
+          {isAdmin && (
+            <Card className="mb-6 border-primary/30 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-foreground">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Admin Panel
+                </CardTitle>
+                <CardDescription>You have administrator access</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate("/admin")} className="w-full">
+                  <Shield className="mr-2 h-4 w-4" />
+                  View & Manage All Users
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="mb-8 border-border">
             <CardHeader>
