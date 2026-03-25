@@ -33,6 +33,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="*" element={<NotFound />} />
