@@ -34,6 +34,14 @@ async function getCrumbAndCookie(): Promise<{ crumb: string; cookie: string }> {
   return { crumb, cookie };
 }
 
+// Wrap any fetch with a timeout
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
+}
+
 // Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
