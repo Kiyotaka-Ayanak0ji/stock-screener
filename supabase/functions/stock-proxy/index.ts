@@ -34,6 +34,14 @@ async function getCrumbAndCookie(): Promise<{ crumb: string; cookie: string }> {
   return { crumb, cookie };
 }
 
+// Wrap any fetch with a timeout
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
+}
+
 // Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
@@ -103,6 +111,60 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
     }
 
     return result;
+  } catch {
+    return null;
+  }
+}
+
+// Fallback: scrape Google Finance for full price data
+async function fetchGoogleFinanceFull(ticker: string, exchange: string): Promise<Record<string, number> | null> {
+  try {
+    const gfExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
+    const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html',
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Price: data-last-price attribute or prominent price display
+    const priceMatch = html.match(/data-last-price="([\d.]+)"/);
+    if (!priceMatch) return null;
+    const price = parseFloat(priceMatch[1]);
+    if (price <= 0 || isNaN(price)) return null;
+
+    const prevMatch = html.match(/data-previous-close="([\d.]+)"/);
+    const close = prevMatch ? parseFloat(prevMatch[1]) : price;
+
+    let marketCap = 0;
+    const mcMatch = html.match(/Market cap[\s\S]*?([\d,.]+)\s*(T|B|Cr|M|K)?\s*INR/i);
+    if (mcMatch) {
+      let val = parseFloat(mcMatch[1].replace(/,/g, ''));
+      const unit = (mcMatch[2] || '').toUpperCase();
+      if (unit === 'T') val *= 1e12;
+      else if (unit === 'B') val *= 1e9;
+      else if (unit === 'CR') val *= 1e7;
+      else if (unit === 'M') val *= 1e6;
+      else if (unit === 'K') val *= 1e3;
+      marketCap = val;
+    }
+
+    let volume = 0;
+    const volMatch = html.match(/Avg Volume[\s\S]*?([\d,.]+)\s*(K|M|B)?/i);
+    if (volMatch) {
+      let vol = parseFloat(volMatch[1].replace(/,/g, ''));
+      const unit = (volMatch[2] || '').toUpperCase();
+      if (unit === 'K') vol *= 1000;
+      else if (unit === 'M') vol *= 1e6;
+      else if (unit === 'B') vol *= 1e9;
+      volume = Math.round(vol);
+    }
+
+    console.log(`Google Finance full fallback: ${ticker} = ₹${price}`);
+    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap };
   } catch {
     return null;
   }
@@ -268,49 +330,49 @@ Deno.serve(async (req) => {
       return (d.marketCap === 0 || d.volume === 0);
     });
 
+    const SCRAPE_TIMEOUT = 4000; // 4s timeout per scrape
+
     // Run both fallback and enrichment in parallel
-    const [, ] = await Promise.all([
-      // Full fallback for missing stocks
-      missingSymbols.length > 0
-        ? Promise.all(missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
-            const fallback = await fetchScreenerFallback(s.ticker);
-            if (fallback) {
-              result[`${s.exchange}_${s.ticker}`] = fallback;
+    await Promise.all([
+      // Full fallback for missing stocks — race Screener vs Google Finance
+      ...missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
+        try {
+          const [screener, gf] = await Promise.allSettled([
+            withTimeout(fetchScreenerFallback(s.ticker), SCRAPE_TIMEOUT),
+            withTimeout(fetchGoogleFinanceFull(s.ticker, s.exchange), SCRAPE_TIMEOUT),
+          ]);
+          const screenerData = screener.status === 'fulfilled' ? screener.value : null;
+          const gfData = gf.status === 'fulfilled' ? gf.value : null;
+          // Prefer Screener (more detailed), fill gaps from Google Finance
+          const fallback = screenerData || gfData;
+          if (fallback) {
+            if (screenerData && gfData) {
+              // Merge: use Screener base, fill zeros from GF
+              if (fallback.marketCap === 0 && gfData.marketCap) fallback.marketCap = gfData.marketCap;
+              if (fallback.volume === 0 && gfData.volume) fallback.volume = gfData.volume;
             }
-          }))
-        : Promise.resolve(),
-      // Enrichment for stocks with missing marketCap or volume
-      needsEnrichment.length > 0
-        ? Promise.all(needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
-            const key = `${s.exchange}_${s.ticker}`;
-            // Try Screener first
-            const enrichment = await fetchScreenerEnrichment(s.ticker);
-            if (enrichment) {
-              if (result[key].marketCap === 0 && enrichment.marketCap) {
-                result[key].marketCap = enrichment.marketCap;
-                console.log(`Enriched ${s.ticker} marketCap from Screener: ${enrichment.marketCap}`);
-              }
-              if (result[key].volume === 0 && enrichment.volume) {
-                result[key].volume = enrichment.volume;
-                console.log(`Enriched ${s.ticker} volume from Screener: ${enrichment.volume}`);
-              }
-            }
-            // If still missing, try Google Finance
-            if (result[key].marketCap === 0 || result[key].volume === 0) {
-              const gfData = await fetchGoogleFinanceMarketCap(s.ticker, s.exchange);
-              if (gfData) {
-                if (result[key].marketCap === 0 && gfData.marketCap) {
-                  result[key].marketCap = gfData.marketCap;
-                  console.log(`Enriched ${s.ticker} marketCap from Google Finance: ${gfData.marketCap}`);
-                }
-                if (result[key].volume === 0 && gfData.volume) {
-                  result[key].volume = gfData.volume;
-                  console.log(`Enriched ${s.ticker} volume from Google Finance: ${gfData.volume}`);
-                }
-              }
-            }
-          }))
-        : Promise.resolve(),
+            result[`${s.exchange}_${s.ticker}`] = fallback;
+          }
+        } catch { /* both timed out */ }
+      }),
+      // Enrichment for stocks with missing marketCap or volume — race both sources
+      ...needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
+        const key = `${s.exchange}_${s.ticker}`;
+        try {
+          const [screener, gf] = await Promise.allSettled([
+            withTimeout(fetchScreenerEnrichment(s.ticker), SCRAPE_TIMEOUT),
+            withTimeout(fetchGoogleFinanceMarketCap(s.ticker, s.exchange), SCRAPE_TIMEOUT),
+          ]);
+          const sData = screener.status === 'fulfilled' ? screener.value : null;
+          const gData = gf.status === 'fulfilled' ? gf.value : null;
+          if (result[key].marketCap === 0) {
+            result[key].marketCap = sData?.marketCap || gData?.marketCap || 0;
+          }
+          if (result[key].volume === 0) {
+            result[key].volume = sData?.volume || gData?.volume || 0;
+          }
+        } catch { /* both timed out */ }
+      }),
     ]);
 
     return new Response(JSON.stringify(result), {
