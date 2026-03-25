@@ -26,7 +26,7 @@ const Index = () => {
     if (!user) return; // guests can browse with limited features
     // If user has a subscription record and it's not active, redirect
     if (subscription && !isActive) {
-      navigate("/subscribe", { replace: true });
+       navigate("/subscribe", { replace: true });
     }
   }, [authLoading, subLoading, user, subscription, isActive, navigate]);
 

@@ -107,7 +107,7 @@ const SharedWatchlist = () => {
               Equity<span className="text-primary">IQ</span>
             </h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")} className="gap-1.5">
+          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")} className="gap-1.5">
             <ArrowLeft className="h-3.5 w-3.5" />
             Home
           </Button>

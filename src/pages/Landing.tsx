@@ -94,7 +94,7 @@ const Landing = () => {
           </div>
           <div className="flex items-center gap-3">
             {user ? (
-              <Button onClick={() => navigate("/")} size="sm">
+              <Button onClick={() => navigate("/dashboard")} size="sm">
                 Go to Dashboard <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
