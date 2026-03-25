@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { HelpCircle } from "lucide-react";
 import {
   ArrowRight, BarChart3, Bell, Eye, Layers, LineChart, Lock,
   Shield, Smartphone, Star, TrendingUp, Zap, Check, Crown,
