@@ -30,7 +30,7 @@ export const PriceTriggerDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on StockSense
+      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on EquityIQ
     </Preview>
     <Body style={main}>
       <Container style={container}>
