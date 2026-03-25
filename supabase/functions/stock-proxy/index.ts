@@ -116,6 +116,60 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
   }
 }
 
+// Fallback: scrape Google Finance for full price data
+async function fetchGoogleFinanceFull(ticker: string, exchange: string): Promise<Record<string, number> | null> {
+  try {
+    const gfExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
+    const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html',
+      },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Price: data-last-price attribute or prominent price display
+    const priceMatch = html.match(/data-last-price="([\d.]+)"/);
+    if (!priceMatch) return null;
+    const price = parseFloat(priceMatch[1]);
+    if (price <= 0 || isNaN(price)) return null;
+
+    const prevMatch = html.match(/data-previous-close="([\d.]+)"/);
+    const close = prevMatch ? parseFloat(prevMatch[1]) : price;
+
+    let marketCap = 0;
+    const mcMatch = html.match(/Market cap[\s\S]*?([\d,.]+)\s*(T|B|Cr|M|K)?\s*INR/i);
+    if (mcMatch) {
+      let val = parseFloat(mcMatch[1].replace(/,/g, ''));
+      const unit = (mcMatch[2] || '').toUpperCase();
+      if (unit === 'T') val *= 1e12;
+      else if (unit === 'B') val *= 1e9;
+      else if (unit === 'CR') val *= 1e7;
+      else if (unit === 'M') val *= 1e6;
+      else if (unit === 'K') val *= 1e3;
+      marketCap = val;
+    }
+
+    let volume = 0;
+    const volMatch = html.match(/Avg Volume[\s\S]*?([\d,.]+)\s*(K|M|B)?/i);
+    if (volMatch) {
+      let vol = parseFloat(volMatch[1].replace(/,/g, ''));
+      const unit = (volMatch[2] || '').toUpperCase();
+      if (unit === 'K') vol *= 1000;
+      else if (unit === 'M') vol *= 1e6;
+      else if (unit === 'B') vol *= 1e9;
+      volume = Math.round(vol);
+    }
+
+    console.log(`Google Finance full fallback: ${ticker} = ₹${price}`);
+    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap };
+  } catch {
+    return null;
+  }
+}
+
 // Fallback: scrape Google Finance for market cap when Screener is unavailable
 async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number } | null> {
   try {
