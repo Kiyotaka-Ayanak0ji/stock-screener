@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,27 +60,46 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const TESTIMONIALS = [
+const FALLBACK_TESTIMONIALS = [
   {
-    name: "Rahul M.",
-    role: "Swing Trader",
-    quote: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
+    display_name: "Rahul M.",
+    designation: "Swing Trader",
+    rating: 5,
+    review: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
   },
   {
-    name: "Priya S.",
-    role: "Long-term Investor",
-    quote: "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
+    display_name: "Priya S.",
+    designation: "Long-term Investor",
+    rating: 5,
+    review: "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
   },
   {
-    name: "Arjun K.",
-    role: "Portfolio Manager",
-    quote: "The ability to share watchlists with clients as clean PDF reports? Game changer. My clients think I hired a designer.",
+    display_name: "Arjun K.",
+    designation: "Portfolio Manager",
+    rating: 5,
+    review: "The ability to share watchlists with clients as clean PDF reports? Game changer. My clients think I hired a designer.",
   },
 ];
 
 const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data } = await supabase
+        .from("app_reviews")
+        .select("display_name, designation, rating, review")
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false })
+        .limit(6);
+      if (data && data.length > 0) {
+        setTestimonials(data);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -281,25 +301,30 @@ const Landing = () => {
             <p className="mt-3 text-muted-foreground">Here's what our users say</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+            {testimonials.map((t, i) => (
               <motion.div
-                key={t.name}
+                key={t.display_name + i}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
               >
                 <Card className="h-full">
                   <CardContent className="p-6">
                     <div className="flex gap-1 mb-4">
-                      {[...Array(5)].map((_, j) => (
+                      {[...Array(t.rating)].map((_, j) => (
                         <Star key={j} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                      {[...Array(5 - t.rating)].map((_, j) => (
+                        <Star key={`empty-${j}`} className="h-4 w-4 text-muted-foreground/30" />
                       ))}
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">
-                      "{t.quote}"
+                      "{t.review}"
                     </p>
                     <div>
-                      <p className="font-semibold text-sm">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                      <p className="font-semibold text-sm">{t.display_name}</p>
+                      {t.designation && (
+                        <p className="text-xs text-muted-foreground">{t.designation}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import StockTable from "@/components/StockTable";
 import EmailVerificationGate from "@/components/EmailVerificationGate";
+import ReviewDialog from "@/components/ReviewDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useEffect } from "react";
@@ -43,6 +44,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <StockTable />
+        <ReviewDialog />
       </div>
     </EmailVerificationGate>
   );
