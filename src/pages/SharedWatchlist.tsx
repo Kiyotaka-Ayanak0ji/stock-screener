@@ -81,7 +81,7 @@ const SharedWatchlist = () => {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">{error}</p>
-        <Button variant="outline" onClick={() => navigate("/")} className="gap-2">
+        <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Go Home
         </Button>
