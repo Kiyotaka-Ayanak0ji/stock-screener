@@ -60,21 +60,24 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const TESTIMONIALS = [
+const FALLBACK_TESTIMONIALS = [
   {
-    name: "Rahul M.",
-    role: "Swing Trader",
-    quote: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
+    display_name: "Rahul M.",
+    designation: "Swing Trader",
+    rating: 5,
+    review: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
   },
   {
-    name: "Priya S.",
-    role: "Long-term Investor",
-    quote: "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
+    display_name: "Priya S.",
+    designation: "Long-term Investor",
+    rating: 5,
+    review: "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
   },
   {
-    name: "Arjun K.",
-    role: "Portfolio Manager",
-    quote: "The ability to share watchlists with clients as clean PDF reports? Game changer. My clients think I hired a designer.",
+    display_name: "Arjun K.",
+    designation: "Portfolio Manager",
+    rating: 5,
+    review: "The ability to share watchlists with clients as clean PDF reports? Game changer. My clients think I hired a designer.",
   },
 ];
 
