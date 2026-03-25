@@ -31,7 +31,6 @@ const Profile = () => {
   const [reviewDesignation, setReviewDesignation] = useState("");
   const [existingReview, setExistingReview] = useState<any>(null);
   const [savingReview, setSavingReview] = useState(false);
-  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (!user) {
