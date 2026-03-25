@@ -32,7 +32,7 @@ export const SignupEmail = ({
     <Preview>Confirm your email for EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Welcome to Stock<span style={{ color: '#148a9e' }}>Sense</span> 📈</Heading>
+        <Heading style={h1}>Welcome to Equity<span style={{ color: '#148a9e' }}>IQ</span> 📈</Heading>
         <Text style={text}>
           Thanks for signing up! You're one step away from tracking your
           favorite stocks in real time.
