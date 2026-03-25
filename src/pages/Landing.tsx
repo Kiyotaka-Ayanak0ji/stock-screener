@@ -301,25 +301,30 @@ const Landing = () => {
             <p className="mt-3 text-muted-foreground">Here's what our users say</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+            {testimonials.map((t, i) => (
               <motion.div
-                key={t.name}
+                key={t.display_name + i}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
               >
                 <Card className="h-full">
                   <CardContent className="p-6">
                     <div className="flex gap-1 mb-4">
-                      {[...Array(5)].map((_, j) => (
+                      {[...Array(t.rating)].map((_, j) => (
                         <Star key={j} className="h-4 w-4 fill-primary text-primary" />
+                      ))}
+                      {[...Array(5 - t.rating)].map((_, j) => (
+                        <Star key={`empty-${j}`} className="h-4 w-4 text-muted-foreground/30" />
                       ))}
                     </div>
                     <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">
-                      "{t.quote}"
+                      "{t.review}"
                     </p>
                     <div>
-                      <p className="font-semibold text-sm">{t.name}</p>
-                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                      <p className="font-semibold text-sm">{t.display_name}</p>
+                      {t.designation && (
+                        <p className="text-xs text-muted-foreground">{t.designation}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
