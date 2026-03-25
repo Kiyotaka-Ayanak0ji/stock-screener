@@ -142,7 +142,7 @@ const Subscribe = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" onClick={() => navigate("/")}>
+            <Button className="w-full" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
             </Button>
           </CardContent>
