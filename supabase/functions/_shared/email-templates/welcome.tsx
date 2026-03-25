@@ -35,7 +35,7 @@ export const WelcomeEmail = ({
           Hey {displayName}! 👋
         </Text>
         <Text style={text}>
-          Thanks for joining StockSense. Your account is set up and ready to go.
+          Thanks for joining EquityIQ. Your account is set up and ready to go.
           Here's what you can do:
         </Text>
         <Text style={featureText}>
