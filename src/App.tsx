@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Subscribe from "./pages/Subscribe";
 import SharedWatchlist from "./pages/SharedWatchlist";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 
