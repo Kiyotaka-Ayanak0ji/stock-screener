@@ -29,7 +29,7 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email for StockSense</Preview>
+    <Preview>Confirm your email for EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Welcome to Stock<span style={{ color: '#148a9e' }}>Sense</span> 📈</Heading>
