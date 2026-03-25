@@ -82,6 +82,8 @@ const FALLBACK_TESTIMONIALS = [
 ];
 
 const Landing = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
 
   useEffect(() => {
