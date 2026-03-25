@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_reviews: {
+        Row: {
+          created_at: string
+          designation: string | null
+          display_name: string | null
+          id: string
+          is_approved: boolean
+          rating: number
+          review: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          designation?: string | null
+          display_name?: string | null
+          id?: string
+          is_approved?: boolean
+          rating: number
+          review: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          designation?: string | null
+          display_name?: string | null
+          id?: string
+          is_approved?: boolean
+          rating?: number
+          review?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cached_stock_prices: {
         Row: {
           change: number
