@@ -44,6 +44,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <StockTable />
+        <ReviewDialog />
       </div>
     </EmailVerificationGate>
   );
