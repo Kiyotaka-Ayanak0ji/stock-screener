@@ -96,7 +96,7 @@ const Subscribe = () => {
             } else {
               toast.success("Subscription activated! Welcome to Premium.");
               await refetch();
-              navigate("/");
+              navigate("/dashboard");
             }
           }
         },
