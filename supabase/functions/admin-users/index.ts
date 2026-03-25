@@ -98,6 +98,46 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (req.method === "POST" && action === "update-subscription") {
+      const { userId, plan, status } = await req.json();
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Invalid user ID" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const validPlans = ["free", "monthly", "yearly", "lifetime"];
+      const validStatuses = ["trial", "active", "expired", "cancelled"];
+      if (!validPlans.includes(plan) || !validStatuses.includes(status)) {
+        return new Response(JSON.stringify({ error: "Invalid plan or status" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      const updateData: Record<string, unknown> = { plan, status, updated_at: new Date().toISOString() };
+
+      if (status === "active" && plan !== "lifetime") {
+        const now = new Date();
+        updateData.subscription_starts_at = now.toISOString();
+        if (plan === "monthly") {
+          updateData.subscription_ends_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+        } else if (plan === "yearly") {
+          updateData.subscription_ends_at = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
+        }
+      }
+      if (plan === "lifetime") {
+        updateData.subscription_ends_at = null;
+        updateData.trial_ends_at = null;
+      }
+
+      const { error } = await supabaseAdmin
+        .from("user_subscriptions")
+        .update(updateData)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
