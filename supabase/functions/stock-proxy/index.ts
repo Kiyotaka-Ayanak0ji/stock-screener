@@ -322,6 +322,58 @@ Deno.serve(async (req) => {
       return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
     });
 
+    // FAST FALLBACK: Try alternate exchange on Yahoo first (NSE↔BSE swap)
+    if (missingSymbols.length > 0) {
+      const altSuffixSymbols = missingSymbols.map((s: { ticker: string; exchange: string }) => {
+        const altSuffix = s.exchange === 'BSE' ? '.NS' : '.BO';
+        return `${s.ticker}${altSuffix}`;
+      }).join(',');
+
+      try {
+        const { crumb, cookie } = await getCrumbAndCookie();
+        const altUrl = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(altSuffixSymbols)}&crumb=${encodeURIComponent(crumb)}`;
+        const altRes = await withTimeout(fetch(altUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Cookie': cookie,
+          },
+        }), 5000);
+
+        if (altRes.ok) {
+          const altData = await altRes.json();
+          const altQuotes = altData?.quoteResponse?.result || [];
+          for (const q of altQuotes) {
+            const ltp = q.regularMarketPrice ?? 0;
+            if (ltp === 0) continue;
+            const ticker = (q.symbol || '').replace(/\.(NS|BO)$/, '');
+            // Find the original request for this ticker
+            const orig = missingSymbols.find((s: { ticker: string }) => s.ticker === ticker);
+            if (!orig) continue;
+            const key = `${orig.exchange}_${orig.ticker}`;
+            if (resolvedKeys.has(key)) continue;
+            result[key] = {
+              ltp,
+              open: q.regularMarketOpen ?? 0,
+              high: q.regularMarketDayHigh ?? 0,
+              low: q.regularMarketDayLow ?? 0,
+              close: q.regularMarketPreviousClose ?? 0,
+              volume: q.regularMarketVolume ?? 0,
+              marketCap: q.marketCap ?? 0,
+            };
+            resolvedKeys.add(key);
+            console.log(`Alt-exchange resolved ${ticker} via ${q.symbol}`);
+          }
+        }
+      } catch (e) {
+        console.log('Alt-exchange Yahoo retry failed:', (e as Error).message);
+      }
+    }
+
+    // Remaining missing after alt-exchange retry
+    const stillMissing = symbols.filter((s: { ticker: string; exchange: string }) => {
+      return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
+    });
+
     // Identify resolved tickers that need enrichment (marketCap=0 or volume=0)
     const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
       const key = `${s.exchange}_${s.ticker}`;
@@ -334,8 +386,8 @@ Deno.serve(async (req) => {
 
     // Run both fallback and enrichment in parallel
     await Promise.all([
-      // Full fallback for missing stocks — race Screener vs Google Finance
-      ...missingSymbols.map(async (s: { ticker: string; exchange: string }) => {
+      // Full fallback for still-missing stocks — race Screener vs Google Finance
+      ...stillMissing.map(async (s: { ticker: string; exchange: string }) => {
         try {
           const [screener, gf] = await Promise.allSettled([
             withTimeout(fetchScreenerFallback(s.ticker), SCRAPE_TIMEOUT),
@@ -343,11 +395,9 @@ Deno.serve(async (req) => {
           ]);
           const screenerData = screener.status === 'fulfilled' ? screener.value : null;
           const gfData = gf.status === 'fulfilled' ? gf.value : null;
-          // Prefer Screener (more detailed), fill gaps from Google Finance
           const fallback = screenerData || gfData;
           if (fallback) {
             if (screenerData && gfData) {
-              // Merge: use Screener base, fill zeros from GF
               if (fallback.marketCap === 0 && gfData.marketCap) fallback.marketCap = gfData.marketCap;
               if (fallback.volume === 0 && gfData.volume) fallback.volume = gfData.volume;
             }
