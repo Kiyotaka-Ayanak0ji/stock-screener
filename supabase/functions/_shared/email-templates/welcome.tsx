@@ -25,7 +25,7 @@ export const WelcomeEmail = ({
 }: WelcomeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to StockSense — your stock watchlist is ready!</Preview>
+    <Preview>Welcome to EquityIQ — your stock watchlist is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
