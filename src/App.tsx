@@ -30,7 +30,8 @@ const App = () => (
             <DevNoticeDialog />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/dashboard" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/profile" element={<Profile />} />
