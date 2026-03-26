@@ -108,7 +108,7 @@ const CompareStocks = () => {
     setActiveSlot(null);
 
     try {
-      const liveData = await fetchLivePrices([stock.ticker]);
+      const liveData = await fetchLivePrices([{ ticker: stock.ticker, exchange: stock.exchange }]);
       const baseStock: Stock = {
         ticker: stock.ticker,
         name: stock.name,
