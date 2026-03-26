@@ -1,4 +1,4 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, BarChart3 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +42,17 @@ const Header = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/compare")}
+            className="gap-1.5 text-xs hidden sm:flex"
+            title="Compare Stocks"
+          >
+            <BarChart3 className="h-3.5 w-3.5" />
+            Compare
+          </Button>
           <div className="hidden md:flex items-center gap-4 text-sm font-mono">
             <span className="text-gain">{gainers} ▲</span>
             <span className="text-loss">{losers} ▼</span>
