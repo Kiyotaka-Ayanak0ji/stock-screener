@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 import {
   ArrowRight, BarChart3, Bell, Eye, Layers, LineChart, Lock,
   Shield, Smartphone, Star, TrendingUp, Zap, Check, Crown,
-  Tag, SlidersHorizontal, Share2, FileDown, Users
+  Tag, SlidersHorizontal, Share2, FileDown, Users, X, Briefcase, GitCompare
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -53,6 +53,18 @@ const FEATURES = [
     title: "Share & Export",
     description: "Share your watchlist with friends via a unique link, or export it as a high-quality image or PDF report.",
   },
+  {
+    icon: GitCompare,
+    title: "Stock Comparison Tool",
+    description: "Compare up to 3 stocks side-by-side with key metrics like price, market cap, volume, and percentage changes. Premium plan exclusive.",
+    badge: "Premium",
+  },
+  {
+    icon: Briefcase,
+    title: "Portfolio Dashboard",
+    description: "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, diversity score, and stock-wise performance.",
+    badge: "Premium",
+  },
 ];
 
 const STATS = [
@@ -79,8 +91,30 @@ const FALLBACK_TESTIMONIALS = [
     display_name: "Arjun K.",
     designation: "Portfolio Manager",
     rating: 5,
-    review: "The ability to share watchlists with clients as clean PDF reports? Game changer. My clients think I hired a designer.",
+    review: "The portfolio dashboard with sector allocation changed how I manage my investments. The diversity score keeps me balanced.",
   },
+];
+
+const PRO_FEATURES = [
+  "Unlimited stocks in watchlist",
+  "Column visibility customization",
+  "Price trigger alerts with email",
+  "Event tagging & tracking",
+  "Notes on stocks",
+  "Export as Image & PDF",
+  "Shareable watchlist links",
+  "Multiple watchlists",
+  "Real-time price updates",
+];
+
+const PREMIUM_EXTRAS = [
+  "Everything in Pro",
+  "Stock comparison tool (up to 3 stocks)",
+  "Portfolio performance dashboard",
+  "Sector allocation & diversity metrics",
+  "Stock-wise P&L charts",
+  "Priority email support",
+  "Early access to new features",
 ];
 
 const Landing = () => {
@@ -117,6 +151,9 @@ const Landing = () => {
           <div className="flex items-center gap-1 sm:gap-3">
             <Button variant="ghost" size="sm" onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}>
               Features
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}>
+              Pricing
             </Button>
             <Button variant="ghost" size="sm" onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}>
               FAQ
@@ -163,8 +200,8 @@ const Landing = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
             EquityIQ is the smarter way to manage and track all your stocks.
-            Set custom price triggers, tag events, build watchlists, and export
-            professional reports — all in one clean, powerful dashboard.
+            Set custom price triggers, tag events, build watchlists, compare stocks side-by-side,
+            track your portfolio performance — all in one clean, powerful dashboard.
           </motion.p>
 
           <motion.div
@@ -248,14 +285,20 @@ const Landing = () => {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
                 initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp} custom={i}
               >
-                <Card className="h-full border-border hover:border-primary/40 transition-colors group">
+                <Card className="h-full border-border hover:border-primary/40 transition-colors group relative">
+                  {(f as any).badge && (
+                    <Badge className="absolute top-3 right-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px]">
+                      <Crown className="h-2.5 w-2.5 mr-1" />
+                      {(f as any).badge}
+                    </Badge>
+                  )}
                   <CardContent className="p-6">
                     <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                       <f.icon className="h-5 w-5 text-primary" />
@@ -282,9 +325,9 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of full access — every feature unlocked." },
-              { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags." },
-              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. No more staring at screens all day." },
+              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
+              { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
+              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for stock comparison and portfolio tracking." },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -343,8 +386,8 @@ const Landing = () => {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
+      <section id="pricing" className="py-20 px-4">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <Badge variant="secondary" className="mb-3">
               <Crown className="h-3 w-3 mr-1 text-primary" /> Pricing
@@ -353,50 +396,87 @@ const Landing = () => {
               Simple pricing. Serious value.
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Start free for 30 days. Cancel anytime.
+              Start free for 30 days. Choose the plan that fits your trading style.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {/* Monthly */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Free / Guest */}
             <Card className="border-border">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg">Monthly</h3>
+                <h3 className="font-semibold text-lg">Guest</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-4xl font-extrabold">Free</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Limited access, no sign-up needed</p>
+                <ul className="mt-6 space-y-2.5">
+                  {["Up to 20 stocks in watchlist", "Basic price data (NSE & BSE)", "Single default watchlist", "Light & dark mode"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                  {["Price triggers & email alerts", "Export & sharing", "Stock comparison", "Portfolio dashboard"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/dashboard")}>
+                  Try as Guest
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Pro — Monthly */}
+            <Card className="border-border">
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg">Pro <span className="text-xs text-muted-foreground font-normal">Monthly</span></h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">$5</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Billed monthly in INR</p>
                 <ul className="mt-6 space-y-2.5">
-                  {["All premium features", "Email price alerts", "Unlimited watchlists", "Export & sharing"].map((f) => (
+                  {PRO_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary shrink-0" />
                       {f}
                     </li>
                   ))}
+                  {["Stock comparison tool", "Portfolio dashboard"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
                 </ul>
                 <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/subscribe")}>
-                  Get Started
+                  Get Pro
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Yearly */}
+            {/* Premium — Yearly */}
             <Card className="border-primary ring-2 ring-primary/20 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground text-xs px-3">
-                  SAVE 67%
+                  BEST VALUE
                 </Badge>
               </div>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg">Yearly</h3>
+                <h3 className="font-semibold text-lg flex items-center gap-1.5">
+                  Premium <Crown className="h-4 w-4 text-amber-500" />
+                  <span className="text-xs text-muted-foreground font-normal">Yearly</span>
+                </h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">$20</span>
                   <span className="text-muted-foreground text-sm">/year</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Just $1.67/month · Billed in INR</p>
+                <p className="text-xs text-muted-foreground mt-1">Just $1.67/month · Save 67%</p>
                 <ul className="mt-6 space-y-2.5">
-                  {["Everything in Monthly", "Best value — 67% off", "Priority email support", "Early access to new features"].map((f) => (
+                  {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary shrink-0" />
                       {f}
@@ -404,7 +484,7 @@ const Landing = () => {
                   ))}
                 </ul>
                 <Button className="w-full mt-6" onClick={() => navigate("/subscribe")}>
-                  Get Started <ArrowRight className="h-4 w-4 ml-1" />
+                  Get Premium <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
             </Card>
@@ -428,7 +508,15 @@ const Landing = () => {
               {[
                 {
                   q: "Is EquityIQ free to use?",
-                  a: "Yes! You get a full 30-day free trial with every feature unlocked — no credit card required. After that, you can choose a monthly or yearly plan to continue.",
+                  a: "You can browse as a guest with a limited 20-stock watchlist, or sign up for a full 30-day free trial with Pro-level access — no credit card required. After the trial, choose between Pro (monthly) or Premium (yearly) plans.",
+                },
+                {
+                  q: "What's the difference between Pro and Premium?",
+                  a: "Pro ($5/month) gives you unlimited watchlists, price triggers with email alerts, event tagging, notes, export/share, and column customization. Premium ($20/year) includes everything in Pro plus the stock comparison tool, portfolio performance dashboard with sector allocation, diversity metrics, and P&L charts.",
+                },
+                {
+                  q: "What do I get during the 30-day trial?",
+                  a: "During your trial you get access to all Pro features — unlimited stocks, price alerts, multiple watchlists, export, sharing, and more. Stock comparison and portfolio management are Premium-only and require a yearly subscription.",
                 },
                 {
                   q: "Which stock exchanges does EquityIQ support?",
@@ -440,15 +528,15 @@ const Landing = () => {
                 },
                 {
                   q: "What are price triggers and how do they work?",
-                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target price, you'll receive an email notification so you never miss an entry or exit opportunity.",
+                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target price, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Pro and Premium plans.",
                 },
                 {
-                  q: "Can I create multiple watchlists?",
-                  a: "Absolutely. You can create unlimited watchlists to organize stocks by strategy — one for swing trades, another for long-term holds, a separate one for IPO picks, and so on.",
+                  q: "What is the portfolio dashboard?",
+                  a: "The portfolio dashboard (Premium only) lets you track your actual holdings with buy prices and quantities. It shows real-time P&L, sector allocation via pie charts, stock-wise gain/loss bar charts, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
-                  q: "What are event tags and labels?",
-                  a: "Event tags let you label stocks with custom tags like 'Earnings Soon', 'Breakout Watch', or 'Dividend Date'. You can then sort and filter your watchlist based on these labels for quick access.",
+                  q: "Can I compare stocks side-by-side?",
+                  a: "Yes! The stock comparison tool (Premium only) lets you compare up to 3 stocks side-by-side with key metrics like price, market cap, volume, and percentage changes.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
@@ -461,10 +549,6 @@ const Landing = () => {
                 {
                   q: "Can I cancel my subscription anytime?",
                   a: "Yes, you can cancel anytime with no questions asked. You'll continue to have access until the end of your billing period.",
-                },
-                {
-                  q: "Do you support mobile devices?",
-                  a: "EquityIQ is fully responsive and works seamlessly on phones, tablets, and desktops. Access your watchlists and alerts from any device, anywhere.",
                 },
               ].map((faq, i) => (
                 <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-lg px-4 data-[state=open]:bg-background">
@@ -516,7 +600,7 @@ const Landing = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={3}
           >
-            No credit card required · Cancel anytime · Full access from day one
+            No credit card required · Cancel anytime · Pro access from day one
           </motion.p>
         </div>
       </section>
