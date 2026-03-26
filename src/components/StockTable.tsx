@@ -89,6 +89,11 @@ const StockTable = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2 text-xs font-mono px-2 py-1 rounded-md bg-secondary">
+            <span className="text-gain">{stocks.filter(s => s.change > 0).length} ▲</span>
+            <span className="text-loss">{stocks.filter(s => s.change < 0).length} ▼</span>
+            <span className="text-muted-foreground">{stocks.filter(s => s.change === 0).length} —</span>
+          </div>
           <WatchlistManager
             watchlists={userWatchlists}
             activeWatchlistId={activeWatchlistId}

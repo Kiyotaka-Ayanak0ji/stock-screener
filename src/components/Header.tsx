@@ -63,11 +63,6 @@ const Header = () => {
             <BarChart3 className="h-3.5 w-3.5" />
             Compare
           </Button>
-          <div className="hidden md:flex items-center gap-4 text-sm font-mono">
-            <span className="text-gain">{gainers} ▲</span>
-            <span className="text-loss">{losers} ▼</span>
-            <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
-          </div>
 
           {user && subscription?.status === 'trial' && (
             <button
