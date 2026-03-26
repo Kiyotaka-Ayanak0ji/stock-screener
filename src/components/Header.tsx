@@ -1,4 +1,4 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, BarChart3 } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, BarChart3, Briefcase } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,6 +43,16 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/portfolio")}
+            className="gap-1.5 text-xs hidden sm:flex"
+            title="Portfolio Dashboard"
+          >
+            <Briefcase className="h-3.5 w-3.5" />
+            Portfolio
+          </Button>
           <Button
             variant="ghost"
             size="sm"

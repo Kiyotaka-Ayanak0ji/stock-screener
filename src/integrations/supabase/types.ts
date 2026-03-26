@@ -182,6 +182,45 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolio_holdings: {
+        Row: {
+          buy_date: string
+          buy_price: number
+          created_at: string
+          exchange: string
+          id: string
+          quantity: number
+          sector: string | null
+          ticker: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          buy_date?: string
+          buy_price: number
+          created_at?: string
+          exchange?: string
+          id?: string
+          quantity: number
+          sector?: string | null
+          ticker: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          buy_date?: string
+          buy_price?: number
+          created_at?: string
+          exchange?: string
+          id?: string
+          quantity?: number
+          sector?: string | null
+          ticker?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
