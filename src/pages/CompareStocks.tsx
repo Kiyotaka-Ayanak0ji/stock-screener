@@ -422,9 +422,10 @@ const CompareStocks = () => {
         open={premiumOpen}
         onOpenChange={(open) => {
           setPremiumOpen(open);
-          if (!open && (isGuest || !isActive)) navigate("/dashboard");
+          if (!open && !isPremiumPlan) navigate("/dashboard");
         }}
         featureName="Stock Comparison"
+        requiresPremium
       />
     </div>
   );
