@@ -11,13 +11,10 @@ import AlertsPanel from "@/components/AlertsPanel";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
-  const { stocks, isMarketOpen } = useStocks();
+  const { isMarketOpen } = useStocks();
   const { user, profile, signOut, isGuest } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const navigate = useNavigate();
-
-  const gainers = stocks.filter(s => s.change > 0).length;
-  const losers = stocks.filter(s => s.change < 0).length;
 
   return (
     <motion.header
@@ -63,11 +60,6 @@ const Header = () => {
             <BarChart3 className="h-3.5 w-3.5" />
             Compare
           </Button>
-          <div className="hidden md:flex items-center gap-4 text-sm font-mono">
-            <span className="text-gain">{gainers} ▲</span>
-            <span className="text-loss">{losers} ▼</span>
-            <span className="text-muted-foreground">{stocks.length - gainers - losers} —</span>
-          </div>
 
           {user && subscription?.status === 'trial' && (
             <button
