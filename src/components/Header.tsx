@@ -11,13 +11,10 @@ import AlertsPanel from "@/components/AlertsPanel";
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
-  const { stocks, isMarketOpen } = useStocks();
+  const { isMarketOpen } = useStocks();
   const { user, profile, signOut, isGuest } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const navigate = useNavigate();
-
-  const gainers = stocks.filter(s => s.change > 0).length;
-  const losers = stocks.filter(s => s.change < 0).length;
 
   return (
     <motion.header
