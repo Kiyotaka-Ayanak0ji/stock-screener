@@ -37,7 +37,7 @@ const Portfolio = () => {
   const [form, setForm] = useState({ ticker: "", exchange: "NSE", buy_price: "", quantity: "", buy_date: new Date().toISOString().split("T")[0] });
 
   // Gate: only lifetime or annual plan
-  const isPremiumPlan = subscription?.plan === "lifetime" || subscription?.plan === "annual";
+  const isPremiumPlan = subscription?.plan === "lifetime" || subscription?.plan === "annual" || subscription?.plan === "yearly";
 
   if (!user) {
     return (

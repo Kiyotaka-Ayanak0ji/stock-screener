@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, CreditCard, Building2, Smartphone, Loader2, ArrowLeft, Zap } from "lucide-react";
+import { Check, Crown, CreditCard, Building2, Smartphone, Loader2, ArrowLeft, Zap, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,26 +25,35 @@ const BANK_DETAILS = {
   note: "After payment, email your transaction ID to aryanansik69@gmail.com for activation.",
 };
 
+const PRO_FEATURES = [
+  "Unlimited stocks in watchlist",
+  "Column visibility customization",
+  "Price trigger alerts with email",
+  "Event tagging & tracking",
+  "Notes on stocks",
+  "Export as Image & PDF",
+  "Shareable watchlist links",
+  "Multiple watchlists",
+  "Real-time price updates",
+];
+
+const PREMIUM_EXTRAS = [
+  "Stock comparison tool (up to 3)",
+  "Portfolio performance dashboard",
+  "Sector allocation & diversity metrics",
+  "Stock-wise P&L charts",
+  "Priority email support",
+  "Early access to new features",
+];
+
 const Subscribe = () => {
   const { user } = useAuth();
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "bank">("razorpay");
   const [processing, setProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const navigate = useNavigate();
-
-  const features = [
-    "Unlimited stocks in watchlist",
-    "Column visibility customization",
-    "Price trigger alerts with email notifications",
-    "Event tagging & tracking",
-    "Notes on stocks",
-    "Export as Image & PDF",
-    "Shareable watchlist links",
-    "Multiple watchlists",
-    "Real-time price updates",
-  ];
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -64,7 +73,7 @@ const Subscribe = () => {
       if (!loaded) { toast.error("Failed to load Razorpay SDK"); return; }
 
       const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
-        body: { plan: billingCycle, is_test: isTest },
+        body: { plan: selectedPlan, is_test: isTest },
       });
       if (error || !data) { toast.error("Failed to create order"); return; }
 
@@ -72,8 +81,8 @@ const Subscribe = () => {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: "EquityIQ Premium",
-        description: isTest ? "Test Payment (1 cent)" : `${billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} Subscription`,
+        name: selectedPlan === "yearly" ? "EquityIQ Premium" : "EquityIQ Pro",
+        description: isTest ? "Test Payment (1 cent)" : `${selectedPlan === 'yearly' ? 'Premium (Yearly)' : 'Pro (Monthly)'} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
           const { error: verifyError } = await supabase.functions.invoke("razorpay-verify-payment", {
@@ -81,7 +90,7 @@ const Subscribe = () => {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              plan: billingCycle,
+              plan: selectedPlan,
               amount_usd: data.amount_usd,
               amount_inr: data.amount_inr / 100,
               payment_method: "razorpay",
@@ -94,7 +103,7 @@ const Subscribe = () => {
             if (isTest) {
               toast.success("Test payment successful! Gateway is working.");
             } else {
-              toast.success("Subscription activated! Welcome to Premium.");
+              toast.success(`${selectedPlan === 'yearly' ? 'Premium' : 'Pro'} subscription activated!`);
               await refetch();
               navigate("/dashboard");
             }
@@ -133,9 +142,9 @@ const Subscribe = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a Premium Member!</CardTitle>
+            <CardTitle>You're a {subscription.plan === 'yearly' ? 'Premium' : 'Pro'} Member!</CardTitle>
             <CardDescription>
-              Your {subscription.plan} plan is active
+              Your {subscription.plan === 'yearly' ? 'Premium (Yearly)' : 'Pro (Monthly)'} plan is active
               {subscription.subscription_ends_at && (
                 <> until {new Date(subscription.subscription_ends_at).toLocaleDateString()}</>
               )}
@@ -156,11 +165,12 @@ const Subscribe = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg"
+        className="w-full max-w-3xl"
       >
         <div className="text-center mb-6">
           <Crown className="h-10 w-10 text-amber-500 mx-auto mb-2" />
-          <h1 className="text-2xl font-bold">Upgrade to Premium</h1>
+          <h1 className="text-2xl font-bold">Choose Your Plan</h1>
+          <p className="text-sm text-muted-foreground mt-1">Pick the plan that matches your investment style</p>
           {trialDaysLeft > 0 && (
             <Badge variant="secondary" className="mt-2">
               {trialDaysLeft} days left in your free trial
@@ -168,61 +178,81 @@ const Subscribe = () => {
           )}
         </div>
 
-        <Card>
-          <CardContent className="pt-6 space-y-6">
-            {/* Billing toggle */}
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
-              <button
-                onClick={() => setBillingCycle("monthly")}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === "monthly"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle("yearly")}
-                className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                  billingCycle === "yearly"
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Yearly
-                <span className="ml-1 text-[10px] text-green-500 font-bold">SAVE 67%</span>
-              </button>
+        {/* Plan Selection */}
+        <div className="grid md:grid-cols-2 gap-4 mb-6">
+          {/* Pro */}
+          <button
+            onClick={() => setSelectedPlan("monthly")}
+            className={`text-left p-5 rounded-xl border-2 transition-all ${
+              selectedPlan === "monthly"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/40"
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg">Pro</h3>
+              <Badge variant="outline" className="text-xs">Monthly</Badge>
             </div>
-
-            {/* Price */}
-            <div className="text-center">
-              <div className="flex items-baseline justify-center gap-1">
-                <span className="text-4xl font-bold">
-                  ${billingCycle === "monthly" ? "5" : "20"}
-                </span>
-                <span className="text-muted-foreground text-sm">
-                  /{billingCycle === "monthly" ? "month" : "year"}
-                </span>
-              </div>
-              {billingCycle === "yearly" && (
-                <p className="text-xs text-muted-foreground mt-1">That's just $1.67/month</p>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">
-                Charged in INR at current exchange rate
-              </p>
+            <div className="flex items-baseline gap-1 mb-3">
+              <span className="text-3xl font-bold">$5</span>
+              <span className="text-muted-foreground text-sm">/month</span>
             </div>
-
-            {/* Features */}
-            <div className="space-y-2">
-              {features.map((f) => (
-                <div key={f} className="flex items-center gap-2 text-sm">
-                  <Check className="h-4 w-4 text-green-500 shrink-0" />
-                  <span>{f}</span>
-                </div>
+            <ul className="space-y-1.5">
+              {PRO_FEATURES.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <Check className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-muted-foreground">{f}</span>
+                </li>
               ))}
-            </div>
+              {["Stock comparison", "Portfolio dashboard"].map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <X className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                  <span className="text-muted-foreground/60">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </button>
 
+          {/* Premium */}
+          <button
+            onClick={() => setSelectedPlan("yearly")}
+            className={`text-left p-5 rounded-xl border-2 transition-all relative ${
+              selectedPlan === "yearly"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/40"
+            }`}
+          >
+            <Badge className="absolute -top-2.5 right-3 bg-primary text-primary-foreground text-[10px] px-2">
+              SAVE 67%
+            </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg flex items-center gap-1.5">
+                Premium <Crown className="h-4 w-4 text-amber-500" />
+              </h3>
+              <Badge variant="outline" className="text-xs">Yearly</Badge>
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+              <span className="text-3xl font-bold">$20</span>
+              <span className="text-muted-foreground text-sm">/year</span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">Just $1.67/month</p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-xs">
+                <Check className="h-3 w-3 text-primary shrink-0" />
+                <span className="text-muted-foreground font-medium">Everything in Pro, plus:</span>
+              </li>
+              {PREMIUM_EXTRAS.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <Check className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-muted-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </button>
+        </div>
+
+        <Card>
+          <CardContent className="pt-6 space-y-4">
             {/* Payment method */}
             <div className="space-y-2">
               <p className="text-sm font-medium">Payment Method</p>
@@ -293,7 +323,7 @@ const Subscribe = () => {
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Subscribe Now
+                  Subscribe to {selectedPlan === "yearly" ? "Premium ($20/yr)" : "Pro ($5/mo)"}
                 </Button>
                 <Button
                   variant="outline"

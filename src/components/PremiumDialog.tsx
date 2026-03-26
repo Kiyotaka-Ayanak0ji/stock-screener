@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Crown, Check, Sparkles } from "lucide-react";
+import { Crown, Check, Sparkles, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface PremiumDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   featureName?: string;
+  requiresPremium?: boolean; // true = needs yearly/Premium plan specifically
 }
 
-const PremiumDialog = ({ open, onOpenChange, featureName }: PremiumDialogProps) => {
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+const PremiumDialog = ({ open, onOpenChange, featureName, requiresPremium }: PremiumDialogProps) => {
   const navigate = useNavigate();
 
-  const features = [
+  const proFeatures = [
     "Unlimited stocks in watchlist",
     "Column visibility customization",
     "Price trigger alerts with email notifications",
@@ -26,63 +26,39 @@ const PremiumDialog = ({ open, onOpenChange, featureName }: PremiumDialogProps) 
     "Real-time price updates",
   ];
 
+  const premiumExtras = [
+    "Stock comparison tool (up to 3 stocks)",
+    "Portfolio performance dashboard",
+    "Sector allocation & diversity metrics",
+    "Stock-wise P&L charts",
+  ];
+
+  const isPremiumFeature = requiresPremium || 
+    featureName?.toLowerCase().includes("compar") || 
+    featureName?.toLowerCase().includes("portfolio");
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Crown className="h-5 w-5 text-amber-500" />
-            Upgrade to EquityIQ Premium
+            {isPremiumFeature ? "Premium Feature" : "Upgrade to EquityIQ Pro"}
           </DialogTitle>
           <DialogDescription>
             {featureName
-              ? `"${featureName}" is a premium feature. Sign up to unlock all premium features.`
-              : "Unlock all premium features to supercharge your stock tracking."}
+              ? isPremiumFeature
+                ? `"${featureName}" requires the Premium (Yearly) plan at $20/year.`
+                : `"${featureName}" requires a Pro or Premium subscription.`
+              : "Unlock all features to supercharge your stock tracking."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex gap-2 p-1 bg-muted rounded-lg mt-2">
-          <button
-            onClick={() => setBillingCycle("monthly")}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-              billingCycle === "monthly"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBillingCycle("yearly")}
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-              billingCycle === "yearly"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Yearly
-            <span className="ml-1 text-[10px] text-green-500 font-bold">SAVE 67%</span>
-          </button>
-        </div>
-
-        <div className="text-center py-4">
-          <div className="flex items-baseline justify-center gap-1">
-            <span className="text-4xl font-bold text-foreground">
-              ${billingCycle === "monthly" ? "5" : "20"}
-            </span>
-            <span className="text-muted-foreground text-sm">
-              /{billingCycle === "monthly" ? "month" : "year"}
-            </span>
-          </div>
-          {billingCycle === "yearly" && (
-            <p className="text-xs text-muted-foreground mt-1">
-              That's just $1.67/month
-            </p>
-          )}
-        </div>
-
         <div className="space-y-2">
-          {features.map((feature) => (
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {isPremiumFeature ? "Premium plan includes:" : "Pro plan includes:"}
+          </p>
+          {(isPremiumFeature ? [...proFeatures, ...premiumExtras] : proFeatures).map((feature) => (
             <div key={feature} className="flex items-center gap-2 text-sm">
               <Check className="h-4 w-4 text-green-500 shrink-0" />
               <span className="text-foreground">{feature}</span>
@@ -99,7 +75,7 @@ const PremiumDialog = ({ open, onOpenChange, featureName }: PremiumDialogProps) 
             }}
           >
             <Sparkles className="h-4 w-4" />
-            Subscribe Now
+            {isPremiumFeature ? "Get Premium ($20/year)" : "View Plans"}
           </Button>
           <Button
             variant="ghost"
@@ -120,12 +96,14 @@ export default PremiumDialog;
 export function usePremiumGate() {
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [featureName, setFeatureName] = useState<string | undefined>();
+  const [requiresPremium, setRequiresPremium] = useState(false);
 
-  const requirePremium = (feature: string): boolean => {
+  const requirePremium = (feature: string, needsPremiumPlan = false): boolean => {
     setFeatureName(feature);
+    setRequiresPremium(needsPremiumPlan);
     setPremiumOpen(true);
     return false;
   };
 
-  return { premiumOpen, setPremiumOpen, featureName, requirePremium };
+  return { premiumOpen, setPremiumOpen, featureName, requirePremium, requiresPremium };
 }
