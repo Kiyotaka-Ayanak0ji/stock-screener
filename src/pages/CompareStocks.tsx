@@ -124,8 +124,8 @@ const CompareStocks = () => {
         marketCap: 0,
         lastUpdated: new Date(),
       };
-      const enriched = applyLiveData([baseStock], liveData);
-      const finalStock = enriched[0];
+      const quote = liveData[stock.ticker];
+      const finalStock = quote ? applyLiveData(baseStock, quote) : baseStock;
 
       setSelectedStocks(prev => {
         if (activeSlot !== null && activeSlot < prev.length) {
