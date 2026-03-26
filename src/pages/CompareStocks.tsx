@@ -52,17 +52,15 @@ const CompareStocks = () => {
   const [premiumOpen, setPremiumOpen] = useState(false);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Premium gate: redirect if not subscribed
+  const { subscription } = useSubscription();
+  const isPremiumPlan = subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime";
+
+  // Premium gate: only yearly/annual/lifetime can access comparison
   useEffect(() => {
-    if (!subLoading && !isActive && !isGuest) {
+    if (!subLoading && !isPremiumPlan) {
       setPremiumOpen(true);
     }
-  }, [subLoading, isActive, isGuest]);
-
-  // For guests, always show premium gate
-  useEffect(() => {
-    if (isGuest) setPremiumOpen(true);
-  }, [isGuest]);
+  }, [subLoading, isPremiumPlan]);
 
   const selectedTickers = useMemo(() => new Set(selectedStocks.map(s => s.ticker)), [selectedStocks]);
 
