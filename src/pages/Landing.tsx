@@ -423,8 +423,8 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/dashboard")}>
-                  Try as Guest
+                <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/auth")}>
+                  Try for Free
                 </Button>
               </CardContent>
             </Card>
