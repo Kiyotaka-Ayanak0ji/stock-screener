@@ -516,7 +516,7 @@ const Landing = () => {
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a yearly or lifetime subscription.",
+                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a yearly or subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
