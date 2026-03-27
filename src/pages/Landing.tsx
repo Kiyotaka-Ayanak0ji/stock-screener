@@ -512,7 +512,7 @@ const Landing = () => {
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Guest (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/year or Lifetime — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
+                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/year  — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
