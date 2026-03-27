@@ -508,15 +508,19 @@ const Landing = () => {
               {[
                 {
                   q: "Is EquityIQ free to use?",
-                  a: "You can browse as a guest with a limited 20-stock watchlist, or sign up for a full 30-day free trial with Pro-level access — no credit card required. After the trial, choose between Pro (monthly) or Premium (yearly) plans.",
+                  a: "Yes! You can start with a 30-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
                 },
                 {
-                  q: "What's the difference between Pro and Premium?",
-                  a: "Pro ($5/month) gives you unlimited watchlists, price triggers with email alerts, event tagging, notes, export/share, and column customization. Premium ($20/year) includes everything in Pro plus the stock comparison tool, portfolio performance dashboard with sector allocation, diversity metrics, and P&L charts.",
+                  q: "What are the available plans?",
+                  a: "EquityIQ has three tiers: Guest (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/year or Lifetime — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
                 },
                 {
-                  q: "What do I get during the 30-day trial?",
-                  a: "During your trial you get access to all Pro features — unlimited stocks, price alerts, multiple watchlists, export, sharing, and more. Stock comparison and portfolio management are Premium-only and require a yearly subscription.",
+                  q: "What do I get during the 30-day free trial?",
+                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a yearly or lifetime subscription.",
+                },
+                {
+                  q: "What Premium-only features are available?",
+                  a: "Premium subscribers (Yearly or Lifetime) unlock the stock comparison tool to compare up to 3 stocks side-by-side, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityIQ support?",
@@ -528,15 +532,7 @@ const Landing = () => {
                 },
                 {
                   q: "What are price triggers and how do they work?",
-                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target price, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Pro and Premium plans.",
-                },
-                {
-                  q: "What is the portfolio dashboard?",
-                  a: "The portfolio dashboard (Premium only) lets you track your actual holdings with buy prices and quantities. It shows real-time P&L, sector allocation via pie charts, stock-wise gain/loss bar charts, and a diversity score based on the Herfindahl-Hirschman Index.",
-                },
-                {
-                  q: "Can I compare stocks side-by-side?",
-                  a: "Yes! The stock comparison tool (Premium only) lets you compare up to 3 stocks side-by-side with key metrics like price, market cap, volume, and percentage changes.",
+                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Pro and Premium plans.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
