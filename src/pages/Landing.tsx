@@ -408,7 +408,7 @@ const Landing = () => {
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">Free</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Limited access, no sign-up needed</p>
+                <p className="text-xs text-muted-foreground mt-1">Limited access</p>
                 <ul className="mt-6 space-y-2.5">
                   {["Up to 20 stocks in watchlist", "Basic price data (NSE & BSE)", "Single default watchlist", "Light & dark mode"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
