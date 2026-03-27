@@ -53,9 +53,9 @@ const CompareStocks = () => {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { subscription } = useSubscription();
-  const isPremiumPlan = subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime";
+  const isPremiumPlan = subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime";
 
-  // Premium gate: only yearly/annual/lifetime can access comparison
+  // Premium gate: only premium_monthly/annual/lifetime can access comparison
   useEffect(() => {
     if (!subLoading && !isPremiumPlan) {
       setPremiumOpen(true);

@@ -49,7 +49,7 @@ const PREMIUM_EXTRAS = [
 const Subscribe = () => {
   const { user } = useAuth();
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "premium_monthly">("premium_monthly");
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "bank">("razorpay");
   const [processing, setProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
@@ -81,8 +81,8 @@ const Subscribe = () => {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: selectedPlan === "yearly" ? "EquityIQ Premium" : "EquityIQ Pro",
-        description: isTest ? "Test Payment (1 cent)" : `${selectedPlan === 'yearly' ? 'Premium (Yearly)' : 'Pro (Monthly)'} Subscription`,
+        name: selectedPlan === "premium_monthly" ? "EquityIQ Premium" : "EquityIQ Pro",
+        description: isTest ? "Test Payment (1 cent)" : `${selectedPlan === 'premium_monthly' ? 'Premium (Monthly)' : 'Pro (Monthly)'} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
           const { error: verifyError } = await supabase.functions.invoke("razorpay-verify-payment", {
@@ -103,7 +103,7 @@ const Subscribe = () => {
             if (isTest) {
               toast.success("Test payment successful! Gateway is working.");
             } else {
-              toast.success(`${selectedPlan === 'yearly' ? 'Premium' : 'Pro'} subscription activated!`);
+              toast.success(`${selectedPlan === 'premium_monthly' ? 'Premium' : 'Pro'} subscription activated!`);
               await refetch();
               navigate("/dashboard");
             }
@@ -137,14 +137,15 @@ const Subscribe = () => {
   if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
+    const isPremium = subscription.plan === 'premium_monthly' || subscription.plan === 'yearly';
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a {subscription.plan === 'yearly' ? 'Premium' : 'Pro'} Member!</CardTitle>
+            <CardTitle>You're a {isPremium ? 'Premium' : 'Pro'} Member!</CardTitle>
             <CardDescription>
-              Your {subscription.plan === 'yearly' ? 'Premium (Yearly)' : 'Pro (Monthly)'} plan is active
+              Your {isPremium ? 'Premium' : 'Pro'} plan is active
               {subscription.subscription_ends_at && (
                 <> until {new Date(subscription.subscription_ends_at).toLocaleDateString()}</>
               )}
@@ -215,9 +216,9 @@ const Subscribe = () => {
 
           {/* Premium */}
           <button
-            onClick={() => setSelectedPlan("yearly")}
+            onClick={() => setSelectedPlan("premium_monthly")}
             className={`text-left p-5 rounded-xl border-2 transition-all relative ${
-              selectedPlan === "yearly"
+              selectedPlan === "premium_monthly"
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/40"
             }`}
@@ -319,7 +320,7 @@ const Subscribe = () => {
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Subscribe to {selectedPlan === "yearly" ? "Premium ($20/mo)" : "Pro ($5/mo)"}
+                  Subscribe to {selectedPlan === "premium_monthly" ? "Premium ($20/mo)" : "Pro ($5/mo)"}
                 </Button>
                 <Button
                   variant="outline"

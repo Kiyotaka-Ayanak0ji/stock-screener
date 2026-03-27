@@ -458,7 +458,7 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            {/* Premium — Yearly */}
+            {/* Premium — Monthly */}
             <Card className="border-primary ring-2 ring-primary/20 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground text-xs px-3">
@@ -515,7 +515,7 @@ const Landing = () => {
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a yearly or subscription.",
+                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a Premium subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
