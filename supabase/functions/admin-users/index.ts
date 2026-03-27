@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ error: "Invalid user ID" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
-      const validPlans = ["free", "monthly", "yearly", "lifetime"];
+      const validPlans = ["free", "monthly", "premium_monthly", "yearly", "lifetime"];
       const validStatuses = ["trial", "active", "expired", "cancelled"];
       if (!validPlans.includes(plan) || !validStatuses.includes(status)) {
         return new Response(JSON.stringify({ error: "Invalid plan or status" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -115,10 +115,8 @@ Deno.serve(async (req) => {
       if (status === "active" && plan !== "lifetime") {
         const now = new Date();
         updateData.subscription_starts_at = now.toISOString();
-        if (plan === "monthly") {
+        if (plan === "monthly" || plan === "premium_monthly") {
           updateData.subscription_ends_at = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-        } else if (plan === "yearly") {
-          updateData.subscription_ends_at = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
         }
       }
       if (plan === "lifetime") {

@@ -51,8 +51,9 @@ interface AdminUser {
 
 const PLANS = [
   { value: "free", label: "Free" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
+  { value: "monthly", label: "Pro (Monthly)" },
+  { value: "premium_monthly", label: "Premium (Monthly)" },
+  { value: "yearly", label: "Yearly (Legacy)" },
   { value: "lifetime", label: "Lifetime" },
 ];
 

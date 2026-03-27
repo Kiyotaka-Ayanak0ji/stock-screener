@@ -59,7 +59,7 @@ serve(async (req) => {
       amountUsd = 0.01; // 1 cent test
     } else if (plan === 'monthly') {
       amountUsd = 5;
-    } else if (plan === 'yearly') {
+    } else if (plan === 'premium_monthly') {
       amountUsd = 20;
     } else {
       return new Response(JSON.stringify({ error: 'Invalid plan' }), {
