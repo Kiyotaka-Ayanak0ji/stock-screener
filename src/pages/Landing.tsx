@@ -520,7 +520,7 @@ const Landing = () => {
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers (Yearly or Lifetime) unlock the stock comparison tool to compare up to 3 stocks side-by-side, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
+                  a: "Premium subscribers (Yearly) unlock the stock comparison tool to compare up to 3 stocks side-by-side, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityIQ support?",
