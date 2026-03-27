@@ -222,20 +222,16 @@ const Subscribe = () => {
                 : "border-border hover:border-primary/40"
             }`}
           >
-            <Badge className="absolute -top-2.5 right-3 bg-primary text-primary-foreground text-[10px] px-2">
-              SAVE 67%
-            </Badge>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
                 Premium <Crown className="h-4 w-4 text-amber-500" />
               </h3>
-              <Badge variant="outline" className="text-xs">Yearly</Badge>
+              <Badge variant="outline" className="text-xs">Monthly</Badge>
             </div>
-            <div className="flex items-baseline gap-1 mb-1">
+            <div className="flex items-baseline gap-1 mb-3">
               <span className="text-3xl font-bold">$20</span>
-              <span className="text-muted-foreground text-sm">/year</span>
+              <span className="text-muted-foreground text-sm">/month</span>
             </div>
-            <p className="text-xs text-muted-foreground mb-3">Just $1.67/month</p>
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs">
                 <Check className="h-3 w-3 text-primary shrink-0" />
@@ -323,7 +319,7 @@ const Subscribe = () => {
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Subscribe to {selectedPlan === "yearly" ? "Premium ($20/yr)" : "Pro ($5/mo)"}
+                  Subscribe to {selectedPlan === "yearly" ? "Premium ($20/mo)" : "Pro ($5/mo)"}
                 </Button>
                 <Button
                   variant="outline"

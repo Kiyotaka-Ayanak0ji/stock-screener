@@ -468,13 +468,12 @@ const Landing = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg flex items-center gap-1.5">
                   Premium <Crown className="h-4 w-4 text-amber-500" />
-                  <span className="text-xs text-muted-foreground font-normal">Yearly</span>
+                  <span className="text-xs text-muted-foreground font-normal">Monthly</span>
                 </h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">$20</span>
-                  <span className="text-muted-foreground text-sm">/year</span>
+                  <span className="text-muted-foreground text-sm">/month</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Just $1.67/month · Save 67%</p>
                 <ul className="mt-6 space-y-2.5">
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -512,7 +511,7 @@ const Landing = () => {
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/year  — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
+                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/month — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
