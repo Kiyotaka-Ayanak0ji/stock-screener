@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 import {
   ArrowRight, BarChart3, Bell, Eye, Layers, LineChart, Lock,
   Shield, Smartphone, Star, TrendingUp, Zap, Check, Crown,
-  Tag, SlidersHorizontal, Share2, FileDown, Users, X, Briefcase, GitCompare
+  Tag, SlidersHorizontal, Share2, FileDown, Users, X, Briefcase
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -32,11 +32,13 @@ const FEATURES = [
     icon: Bell,
     title: "Custom Price Triggers",
     description: "Set upper and lower price alerts on any stock. Get notified via email the moment your target price is hit — never miss an entry or exit.",
+    badge: "Premium",
   },
   {
     icon: Tag,
     title: "Event Tagging & Labels",
     description: "Tag stocks with custom labels like 'Earnings Soon', 'Breakout Watch', or 'Long-term Hold'. Sort and filter your watchlist instantly.",
+    badge: "Premium",
   },
   {
     icon: Layers,
@@ -47,17 +49,12 @@ const FEATURES = [
     icon: SlidersHorizontal,
     title: "Custom Columns & Notes",
     description: "Add personal notes to any stock and toggle column visibility to see only the data that matters to you.",
+    badge: "Premium",
   },
   {
     icon: Share2,
     title: "Share & Export",
     description: "Share your watchlist with friends via a unique link, or export it as a high-quality image or PDF report.",
-  },
-  {
-    icon: GitCompare,
-    title: "Stock Comparison Tool",
-    description: "Compare up to 3 stocks side-by-side with key metrics like price, market cap, volume, and percentage changes. Premium plan exclusive.",
-    badge: "Premium",
   },
   {
     icon: Briefcase,
@@ -98,9 +95,6 @@ const FALLBACK_TESTIMONIALS = [
 const PRO_FEATURES = [
   "Unlimited stocks in watchlist",
   "Column visibility customization",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Multiple watchlists",
@@ -109,7 +103,9 @@ const PRO_FEATURES = [
 
 const PREMIUM_EXTRAS = [
   "Everything in Pro",
-  "Stock comparison tool (up to 3 stocks)",
+  "Price trigger alerts with email",
+  "Event tagging & tracking",
+  "Notes on stocks",
   "Portfolio performance dashboard",
   "Sector allocation & diversity metrics",
   "Stock-wise P&L charts",
@@ -200,7 +196,8 @@ const Landing = () => {
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
             EquityIQ is the smarter way to manage and track all your stocks.
-            Set custom price triggers, tag events, build watchlists, compare stocks side-by-side,
+            Set custom price triggers, tag events, build watchlists,
+            track your portfolio performance — all in one clean, powerful dashboard.
             track your portfolio performance — all in one clean, powerful dashboard.
           </motion.p>
 
@@ -327,7 +324,7 @@ const Landing = () => {
             {[
               { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
               { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
-              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for stock comparison and portfolio tracking." },
+              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -416,7 +413,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Price triggers & email alerts", "Export & sharing", "Stock comparison", "Portfolio dashboard"].map((f) => (
+                  {["Price triggers & email alerts", "Event tags & notes", "Export & sharing", "Portfolio dashboard"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
@@ -445,7 +442,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Stock comparison tool", "Portfolio dashboard"].map((f) => (
+                  {["Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
@@ -511,15 +508,15 @@ const Landing = () => {
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/month — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
+                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a Premium subscription.",
+                  a: "During your trial you get full Pro access — unlimited stocks, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like price triggers, event tags, notes, and portfolio management require a Premium subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers (Yearly) unlock the stock comparison tool to compare up to 3 stocks side-by-side, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityIQ support?",

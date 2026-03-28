@@ -28,9 +28,6 @@ const BANK_DETAILS = {
 const PRO_FEATURES = [
   "Unlimited stocks in watchlist",
   "Column visibility customization",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Multiple watchlists",
@@ -38,7 +35,9 @@ const PRO_FEATURES = [
 ];
 
 const PREMIUM_EXTRAS = [
-  "Stock comparison tool (up to 3)",
+  "Price trigger alerts with email",
+  "Event tagging & tracking",
+  "Notes on stocks",
   "Portfolio performance dashboard",
   "Sector allocation & diversity metrics",
   "Stock-wise P&L charts",
@@ -205,7 +204,7 @@ const Subscribe = () => {
                   <span className="text-muted-foreground">{f}</span>
                 </li>
               ))}
-              {["Stock comparison", "Portfolio dashboard"].map((f) => (
+              {["Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
                   <X className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                   <span className="text-muted-foreground/60">{f}</span>

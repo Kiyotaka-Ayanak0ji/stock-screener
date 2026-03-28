@@ -4,6 +4,7 @@ import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { CustomColumn } from "@/contexts/StockContext";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger } = useStocks();
   const { isGuest } = useAuth();
+  const { subscription } = useSubscription();
+  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");
@@ -59,7 +62,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   }, [flash, stock.price]);
 
   const startEdit = () => {
-    if (isGuest) { requirePremium("Notes"); return; }
+    if (!isPremium) { requirePremium("Notes"); return; }
     setNoteValue(note);
     setEditingNote(true);
     setTimeout(() => inputRef.current?.focus(), 50);
@@ -90,7 +93,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   };
 
   const startEditTrigger = () => {
-    if (isGuest) { requirePremium("Price Triggers"); return; }
+    if (!isPremium) { requirePremium("Price Triggers"); return; }
     setTriggerValue(trigger ? String(trigger.price) : "");
     setEditingTrigger(true);
     setTimeout(() => triggerInputRef.current?.focus(), 50);
@@ -240,7 +243,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
                 onClick={startEditTrigger}
                 className={`hover:text-foreground transition-colors w-full text-right inline-flex items-center justify-end gap-1 ${trigger ? "text-primary" : "text-muted-foreground"}`}
               >
-                {isGuest ? (
+                {!isPremium ? (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
                     <PremiumBadge /> Premium
                   </span>
@@ -261,7 +264,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         )}
         {isVisible("event") && (
           <td className="px-4 py-3 min-w-[160px]">
-            {isGuest ? (
+            {!isPremium ? (
               <button onClick={() => requirePremium("Event Tags")} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
                 <PremiumBadge /> Premium
               </button>
@@ -314,11 +317,11 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
                 <TooltipTrigger asChild>
                   <button onClick={startEdit}
                     className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors max-w-full">
-                    {isGuest ? <PremiumBadge /> : <MessageSquare className="h-3 w-3 shrink-0" />}
-                    <span className="truncate">{isGuest ? "Premium" : (note || "Add note...")}</span>
+                    {!isPremium ? <PremiumBadge /> : <MessageSquare className="h-3 w-3 shrink-0" />}
+                    <span className="truncate">{!isPremium ? "Premium" : (note || "Add note...")}</span>
                   </button>
                 </TooltipTrigger>
-                {note && !isGuest && <TooltipContent side="top"><p className="max-w-xs">{note}</p></TooltipContent>}
+                {note && isPremium && <TooltipContent side="top"><p className="max-w-xs">{note}</p></TooltipContent>}
               </Tooltip>
             )}
           </td>
