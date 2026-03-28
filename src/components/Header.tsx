@@ -1,4 +1,4 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, BarChart3, Briefcase } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,16 +49,6 @@ const Header = () => {
           >
             <Briefcase className="h-3.5 w-3.5" />
             Portfolio
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/compare")}
-            className="gap-1.5 text-xs hidden sm:flex"
-            title="Compare Stocks"
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            Compare
           </Button>
 
           {user && subscription?.status === 'trial' && (
