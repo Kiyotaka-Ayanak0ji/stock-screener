@@ -4,6 +4,7 @@ import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { CustomColumn } from "@/contexts/StockContext";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,8 @@ const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger } = useStocks();
   const { isGuest } = useAuth();
+  const { subscription } = useSubscription();
+  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");
