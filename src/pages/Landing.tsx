@@ -508,15 +508,15 @@ const Landing = () => {
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, price triggers, email alerts, notes, export/share, and column customization), and Premium ($20/month — everything in Pro plus the stock comparison tool and portfolio performance dashboard).",
+                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, price alerts with email notifications, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like stock comparison and portfolio management require a Premium subscription.",
+                  a: "During your trial you get full Pro access — unlimited stocks, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like price triggers, event tags, notes, and portfolio management require a Premium subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers (Yearly) unlock the stock comparison tool to compare up to 3 stocks side-by-side, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityIQ support?",
