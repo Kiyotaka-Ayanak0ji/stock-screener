@@ -413,7 +413,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Price triggers & email alerts", "Export & sharing", "Stock comparison", "Portfolio dashboard"].map((f) => (
+                  {["Price triggers & email alerts", "Event tags & notes", "Export & sharing", "Portfolio dashboard"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
@@ -442,7 +442,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Stock comparison tool", "Portfolio dashboard"].map((f) => (
+                  {["Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
