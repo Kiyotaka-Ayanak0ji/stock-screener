@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -14,8 +14,97 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Trash2, TrendingUp, TrendingDown, PieChartIcon, BarChart3, Shield, Lock, RefreshCw, ArrowLeft, Clock, Zap, Award, AlertTriangle, Activity } from "lucide-react";
+import { Plus, Trash2, TrendingUp, TrendingDown, PieChartIcon, BarChart3, Shield, Lock, RefreshCw, ArrowLeft, Clock, Zap, Award, AlertTriangle, Activity, Search, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+
+interface StockSearchResult {
+  ticker: string;
+  name: string;
+  exchange: "NSE" | "BSE";
+  isIndex?: boolean;
+}
+
+const StockAutocomplete = ({
+  value,
+  onSelect,
+}: {
+  value: string;
+  onSelect: (ticker: string, exchange: string) => void;
+}) => {
+  const [query, setQuery] = useState(value);
+  const [results, setResults] = useState<StockSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const search = useCallback((q: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (q.trim().length < 2) { setResults([]); setShowDropdown(false); return; }
+    debounceRef.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const { data, error } = await supabase.functions.invoke("screener-search", { body: { query: q.trim() } });
+        if (!error && data?.results) {
+          setResults(data.results.filter((r: StockSearchResult) => !r.isIndex).slice(0, 20));
+          setShowDropdown(true);
+        }
+      } catch (err) { console.error("Search failed:", err); }
+      finally { setIsSearching(false); }
+    }, 350);
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input
+          placeholder="Search stock name or ticker..."
+          value={query}
+          onChange={e => { setQuery(e.target.value); search(e.target.value); }}
+          onFocus={() => { if (results.length > 0) setShowDropdown(true); }}
+          className="pl-8 pr-8"
+        />
+        {isSearching && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground animate-spin" />}
+      </div>
+      {showDropdown && results.length > 0 && (
+        <div className="absolute z-50 top-full mt-1 w-full bg-popover border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+          {results.map(stock => (
+            <button
+              key={stock.ticker}
+              type="button"
+              onClick={() => {
+                setQuery(stock.ticker);
+                onSelect(stock.ticker, stock.exchange);
+                setShowDropdown(false);
+              }}
+              className="w-full flex items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent transition-colors"
+            >
+              <div className="truncate">
+                <span className="font-mono font-semibold">{stock.ticker}</span>
+                <span className="text-muted-foreground ml-2 text-xs">{stock.name}</span>
+              </div>
+              <Badge variant="outline" className="text-[10px] ml-2 shrink-0">{stock.exchange}</Badge>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SECTOR_COLORS = [
   "hsl(190, 80%, 42%)", "hsl(145, 63%, 42%)", "hsl(35, 90%, 55%)",
@@ -174,16 +263,10 @@ const Portfolio = () => {
                 <DialogContent>
                   <DialogHeader><DialogTitle>Add Stock Holding</DialogTitle></DialogHeader>
                   <div className="grid gap-4 py-2">
-                    <div className="grid grid-cols-2 gap-3">
-                      <Input placeholder="Ticker (e.g. RELIANCE)" value={form.ticker} onChange={e => setForm(f => ({ ...f, ticker: e.target.value }))} />
-                      <Select value={form.exchange} onValueChange={v => setForm(f => ({ ...f, exchange: v }))}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NSE">NSE</SelectItem>
-                          <SelectItem value="BSE">BSE</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <StockAutocomplete
+                      value={form.ticker}
+                      onSelect={(ticker, exchange) => setForm(f => ({ ...f, ticker, exchange }))}
+                    />
                     <div className="grid grid-cols-3 gap-3">
                       <Input type="number" placeholder="Buy Price" value={form.buy_price} onChange={e => setForm(f => ({ ...f, buy_price: e.target.value }))} />
                       <Input type="number" placeholder="Qty" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} />
