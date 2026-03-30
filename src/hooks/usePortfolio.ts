@@ -267,17 +267,11 @@ export function usePortfolio() {
       .sort((a, b) => b.value - a.value);
   })();
 
-  const diversityScore = (() => {
-    if (sectorAllocation.length === 0) return 0;
-    const hhi = sectorAllocation.reduce((sum, s) => sum + Math.pow(s.percentage / 100, 2), 0);
-    return Math.round((1 - hhi) * 100);
-  })();
-
   return {
     holdings, loading, enriching,
     addHolding, removeHolding, fetchHoldings, enrichWithLivePrices,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
     totalDayChange, topGainer, topLoser,
-    sectorAllocation, diversityScore,
+    sectorAllocation,
   };
 }
