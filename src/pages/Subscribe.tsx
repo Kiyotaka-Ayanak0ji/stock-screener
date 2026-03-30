@@ -39,20 +39,34 @@ const PREMIUM_EXTRAS = [
   "Event tagging & tracking",
   "Notes on stocks",
   "Portfolio performance dashboard",
-  "Sector allocation & diversity metrics",
+  "Sector allocation & fundamentals",
   "Stock-wise P&L charts",
   "Priority email support",
   "Early access to new features",
 ];
 
+type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly";
+
+const PLAN_PRICES: Record<PlanKey, { usd: number; label: string }> = {
+  monthly: { usd: 5, label: "Pro Monthly" },
+  yearly: { usd: 50, label: "Pro Yearly" },
+  premium_monthly: { usd: 20, label: "Premium Monthly" },
+  premium_yearly: { usd: 200, label: "Premium Yearly" },
+};
+
 const Subscribe = () => {
   const { user } = useAuth();
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "premium_monthly">("premium_monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [selectedTier, setSelectedTier] = useState<"pro" | "premium">("premium");
   const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "bank">("razorpay");
   const [processing, setProcessing] = useState(false);
   const [showBankDetails, setShowBankDetails] = useState(false);
   const navigate = useNavigate();
+
+  const selectedPlan: PlanKey = selectedTier === "pro"
+    ? (billingCycle === "yearly" ? "yearly" : "monthly")
+    : (billingCycle === "yearly" ? "premium_yearly" : "premium_monthly");
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -76,12 +90,13 @@ const Subscribe = () => {
       });
       if (error || !data) { toast.error("Failed to create order"); return; }
 
+      const planInfo = PLAN_PRICES[selectedPlan];
       const options = {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: selectedPlan === "premium_monthly" ? "EquityIQ Premium" : "EquityIQ Pro",
-        description: isTest ? "Test Payment (1 cent)" : `${selectedPlan === 'premium_monthly' ? 'Premium (Monthly)' : 'Pro (Monthly)'} Subscription`,
+        name: selectedTier === "premium" ? "EquityIQ Premium" : "EquityIQ Pro",
+        description: isTest ? "Test Payment (1 cent)" : `${planInfo.label} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
           const { error: verifyError } = await supabase.functions.invoke("razorpay-verify-payment", {
@@ -102,7 +117,7 @@ const Subscribe = () => {
             if (isTest) {
               toast.success("Test payment successful! Gateway is working.");
             } else {
-              toast.success(`${selectedPlan === 'premium_monthly' ? 'Premium' : 'Pro'} subscription activated!`);
+              toast.success(`${planInfo.label} subscription activated!`);
               await refetch();
               navigate("/dashboard");
             }
@@ -136,7 +151,7 @@ const Subscribe = () => {
   if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
-    const isPremium = subscription.plan === 'premium_monthly' || subscription.plan === 'yearly';
+    const isPremium = subscription.plan === 'premium_monthly' || subscription.plan === 'premium_yearly' || subscription.plan === 'yearly';
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
@@ -178,25 +193,55 @@ const Subscribe = () => {
           )}
         </div>
 
+        {/* Billing Cycle Toggle */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <button
+            onClick={() => setBillingCycle("monthly")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              billingCycle === "monthly"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingCycle("yearly")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+              billingCycle === "yearly"
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Yearly
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 dark:text-green-400 border-0">
+              Save 17%
+            </Badge>
+          </button>
+        </div>
+
         {/* Plan Selection */}
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           {/* Pro */}
           <button
-            onClick={() => setSelectedPlan("monthly")}
+            onClick={() => setSelectedTier("pro")}
             className={`text-left p-5 rounded-xl border-2 transition-all ${
-              selectedPlan === "monthly"
+              selectedTier === "pro"
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/40"
             }`}
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg">Pro</h3>
-              <Badge variant="outline" className="text-xs">Monthly</Badge>
+              <Badge variant="outline" className="text-xs">{billingCycle === "yearly" ? "Yearly" : "Monthly"}</Badge>
             </div>
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-3xl font-bold">$5</span>
-              <span className="text-muted-foreground text-sm">/month</span>
+              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "50" : "5"}</span>
+              <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
+            {billingCycle === "yearly" && (
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$4.17/mo — save $10/year</p>
+            )}
             <ul className="space-y-1.5">
               {PRO_FEATURES.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
@@ -215,9 +260,9 @@ const Subscribe = () => {
 
           {/* Premium */}
           <button
-            onClick={() => setSelectedPlan("premium_monthly")}
+            onClick={() => setSelectedTier("premium")}
             className={`text-left p-5 rounded-xl border-2 transition-all relative ${
-              selectedPlan === "premium_monthly"
+              selectedTier === "premium"
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/40"
             }`}
@@ -226,12 +271,15 @@ const Subscribe = () => {
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
                 Premium <Crown className="h-4 w-4 text-amber-500" />
               </h3>
-              <Badge variant="outline" className="text-xs">Monthly</Badge>
+              <Badge variant="outline" className="text-xs">{billingCycle === "yearly" ? "Yearly" : "Monthly"}</Badge>
             </div>
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-3xl font-bold">$20</span>
-              <span className="text-muted-foreground text-sm">/month</span>
+              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "200" : "20"}</span>
+              <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
+            {billingCycle === "yearly" && (
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$16.67/mo — save $40/year</p>
+            )}
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs">
                 <Check className="h-3 w-3 text-primary shrink-0" />
@@ -319,7 +367,7 @@ const Subscribe = () => {
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Crown className="h-4 w-4" />}
-                  Subscribe to {selectedPlan === "premium_monthly" ? "Premium ($20/mo)" : "Pro ($5/mo)"}
+                  Subscribe to {PLAN_PRICES[selectedPlan].label} (${PLAN_PRICES[selectedPlan].usd}/{billingCycle === "yearly" ? "yr" : "mo"})
                 </Button>
                 <Button
                   variant="outline"

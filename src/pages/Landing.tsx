@@ -426,15 +426,15 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            {/* Pro — Monthly */}
+            {/* Pro */}
             <Card className="border-border">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg">Pro <span className="text-xs text-muted-foreground font-normal">Monthly</span></h3>
+                <h3 className="font-semibold text-lg">Pro</h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">$5</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Billed monthly in INR</p>
+                <p className="text-xs text-muted-foreground mt-1">or <strong>$50/year</strong> (save 17%)</p>
                 <ul className="mt-6 space-y-2.5">
                   {PRO_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -455,7 +455,7 @@ const Landing = () => {
               </CardContent>
             </Card>
 
-            {/* Premium — Monthly */}
+            {/* Premium */}
             <Card className="border-primary ring-2 ring-primary/20 relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <Badge className="bg-primary text-primary-foreground text-xs px-3">
@@ -465,12 +465,12 @@ const Landing = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg flex items-center gap-1.5">
                   Premium <Crown className="h-4 w-4 text-amber-500" />
-                  <span className="text-xs text-muted-foreground font-normal">Monthly</span>
                 </h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold">$20</span>
                   <span className="text-muted-foreground text-sm">/month</span>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
                 <ul className="mt-6 space-y-2.5">
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -508,7 +508,7 @@ const Landing = () => {
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
+                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
