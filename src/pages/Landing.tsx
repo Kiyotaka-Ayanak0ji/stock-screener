@@ -59,7 +59,7 @@ const FEATURES = [
   {
     icon: Briefcase,
     title: "Portfolio Dashboard",
-    description: "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, diversity score, and stock-wise performance.",
+    description: "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, company fundamentals, and stock-wise performance.",
     badge: "Premium",
   },
 ];
@@ -88,7 +88,7 @@ const FALLBACK_TESTIMONIALS = [
     display_name: "Arjun K.",
     designation: "Portfolio Manager",
     rating: 5,
-    review: "The portfolio dashboard with sector allocation changed how I manage my investments. The diversity score keeps me balanced.",
+    review: "The portfolio dashboard with sector allocation changed how I manage my investments. The fundamentals snapshot keeps me informed.",
   },
 ];
 
@@ -107,7 +107,7 @@ const PREMIUM_EXTRAS = [
   "Event tagging & tracking",
   "Notes on stocks",
   "Portfolio performance dashboard",
-  "Sector allocation & diversity metrics",
+  "Sector allocation & fundamentals",
   "Stock-wise P&L charts",
   "Priority email support",
   "Early access to new features",
