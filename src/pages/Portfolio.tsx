@@ -145,14 +145,14 @@ const Portfolio = () => {
     holdings, loading, enriching, addHolding, removeHolding, enrichWithLivePrices,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
     totalDayChange, topGainer, topLoser,
-    sectorAllocation, diversityScore,
+    sectorAllocation,
   } = usePortfolio();
 
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ ticker: "", exchange: "NSE", buy_price: "", quantity: "", buy_date: new Date().toISOString().split("T")[0] });
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
 
-  const isPremiumPlan = subscription?.plan === "premium_monthly" || subscription?.plan === "lifetime" || subscription?.plan === "annual" || subscription?.plan === "yearly";
+  const isPremiumPlan = subscription?.plan === "premium_monthly" || subscription?.plan === "premium_yearly" || subscription?.plan === "lifetime" || subscription?.plan === "annual" || subscription?.plan === "yearly";
 
   if (!user) {
     return (
@@ -322,15 +322,23 @@ const Portfolio = () => {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
             <Card>
               <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground font-medium mb-1">Diversity Score</p>
-                <div className="flex items-center gap-2">
-                  <p className="text-xl font-bold font-mono">{diversityScore}</p>
-                  <span className="text-xs text-muted-foreground">/100</span>
+                <p className="text-xs text-muted-foreground font-medium mb-1">Portfolio Snapshot</p>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  <Badge variant="secondary" className="text-[10px]">
+                    <PieChartIcon className="h-2.5 w-2.5 mr-0.5" />
+                    {sectorAllocation.length} Sectors
+                  </Badge>
+                  {sectorAllocation.length > 0 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      Top: {sectorAllocation[0].sector} ({sectorAllocation[0].percentage.toFixed(0)}%)
+                    </Badge>
+                  )}
+                  {holdings.length > 0 && (
+                    <Badge variant="outline" className="text-[10px]">
+                      Avg Buy: ₹{(totalInvested / Math.max(holdings.reduce((s, h) => s + h.quantity, 0), 1)).toFixed(0)}
+                    </Badge>
+                  )}
                 </div>
-                <Badge variant="secondary" className="text-[10px] mt-1.5">
-                  {diversityScore >= 70 ? <Award className="h-2.5 w-2.5 mr-0.5" /> : diversityScore >= 40 ? <Zap className="h-2.5 w-2.5 mr-0.5" /> : <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />}
-                  {diversityScore >= 70 ? "Well Diversified" : diversityScore >= 40 ? "Moderate" : "Concentrated"}
-                </Badge>
               </CardContent>
             </Card>
           </motion.div>

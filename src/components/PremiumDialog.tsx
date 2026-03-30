@@ -48,7 +48,7 @@ const PremiumDialog = ({ open, onOpenChange, featureName, requiresPremium }: Pre
           <DialogDescription>
             {featureName
               ? isPremiumFeature
-                ? `"${featureName}" requires the Premium plan at $20/month.`
+                ? `"${featureName}" requires the Premium plan ($20/mo or $200/yr).`
                 : `"${featureName}" requires a Pro or Premium subscription.`
               : "Unlock all features to supercharge your stock tracking."}
           </DialogDescription>
@@ -75,7 +75,7 @@ const PremiumDialog = ({ open, onOpenChange, featureName, requiresPremium }: Pre
             }}
           >
             <Sparkles className="h-4 w-4" />
-            {isPremiumFeature ? "Get Premium ($20/month)" : "View Plans"}
+            {isPremiumFeature ? "Get Premium (from $20/mo)" : "View Plans"}
           </Button>
           <Button
             variant="ghost"
