@@ -397,30 +397,34 @@ const Landing = () => {
             </p>
 
             {/* Billing Cycle Toggle */}
-            <div className="flex items-center justify-center gap-2 mt-6">
+            <div className="flex items-center justify-center gap-1 mt-6 bg-muted rounded-full p-1 w-fit mx-auto relative">
               <button
                 onClick={() => setBillingCycle("monthly")}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  billingCycle === "monthly"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                className="relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors"
+                style={{ color: billingCycle === "monthly" ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))" }}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setBillingCycle("yearly")}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                  billingCycle === "yearly"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
+                className="relative z-10 px-5 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5"
+                style={{ color: billingCycle === "yearly" ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))" }}
               >
                 Yearly
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 dark:text-green-400 border-0">
                   Save 17%
                 </Badge>
               </button>
+              <motion.div
+                className="absolute top-1 bottom-1 rounded-full bg-primary"
+                layout
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                style={{
+                  left: billingCycle === "monthly" ? "4px" : undefined,
+                  right: billingCycle === "yearly" ? "4px" : undefined,
+                  width: billingCycle === "monthly" ? "calc(50% - 6px)" : "calc(50% + 10px)",
+                }}
+              />
             </div>
           </div>
 
