@@ -12,7 +12,7 @@ import {
   Shield, Smartphone, Star, TrendingUp, Zap, Check, Crown,
   Tag, SlidersHorizontal, Share2, FileDown, Users, X, Briefcase
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
