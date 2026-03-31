@@ -117,6 +117,7 @@ const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
     const fetchReviews = async () => {
