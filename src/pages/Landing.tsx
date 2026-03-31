@@ -199,7 +199,6 @@ const Landing = () => {
             EquityLens is the smarter way to manage and track all your stocks.
             Set custom price triggers, tag events, build watchlists,
             track your portfolio performance — all in one clean, powerful dashboard.
-            track your portfolio performance — all in one clean, powerful dashboard.
           </motion.p>
 
           <motion.div
