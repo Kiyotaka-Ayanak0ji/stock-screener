@@ -526,14 +526,38 @@ const Landing = () => {
                   Premium <Crown className="h-4 w-4 text-amber-500" />
                 </h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">${billingCycle === "yearly" ? "200" : "20"}</span>
-                  <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={billingCycle === "yearly" ? "200" : "20"}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-4xl font-extrabold"
+                    >
+                      ${billingCycle === "yearly" ? "200" : "20"}
+                    </motion.span>
+                  </AnimatePresence>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={billingCycle === "yearly" ? "/year-p" : "/month-p"}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="text-muted-foreground text-sm"
+                    >
+                      /{billingCycle === "yearly" ? "year" : "month"}
+                    </motion.span>
+                  </AnimatePresence>
                 </div>
-                {billingCycle === "yearly" ? (
-                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">~$16.67/mo — save $40/year</p>
-                ) : (
-                  <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
-                )}
+                <AnimatePresence mode="wait">
+                  {billingCycle === "yearly" ? (
+                    <motion.p key="yearly-savings-p" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="text-xs text-green-600 dark:text-green-400 mt-1">~$16.67/mo — save $40/year</motion.p>
+                  ) : (
+                    <motion.p key="monthly-hint-p" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.2 }} className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</motion.p>
+                  )}
+                </AnimatePresence>
                 <ul className="mt-6 space-y-2.5">
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
