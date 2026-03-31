@@ -396,6 +396,33 @@ const Landing = () => {
             <p className="mt-3 text-muted-foreground">
               Start free for 30 days. Choose the plan that fits your trading style.
             </p>
+
+            {/* Billing Cycle Toggle */}
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  billingCycle === "monthly"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle("yearly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  billingCycle === "yearly"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Yearly
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 dark:text-green-400 border-0">
+                  Save 17%
+                </Badge>
+              </button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -432,10 +459,14 @@ const Landing = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg">Pro</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">$5</span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-4xl font-extrabold">${billingCycle === "yearly" ? "50" : "5"}</span>
+                  <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">or <strong>$50/year</strong> (save 17%)</p>
+                {billingCycle === "yearly" ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">~$4.17/mo — save $10/year</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">or <strong>$50/year</strong> (save 17%)</p>
+                )}
                 <ul className="mt-6 space-y-2.5">
                   {PRO_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -468,10 +499,14 @@ const Landing = () => {
                   Premium <Crown className="h-4 w-4 text-amber-500" />
                 </h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">$20</span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-4xl font-extrabold">${billingCycle === "yearly" ? "200" : "20"}</span>
+                  <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
+                {billingCycle === "yearly" ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">~$16.67/mo — save $40/year</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
+                )}
                 <ul className="mt-6 space-y-2.5">
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
