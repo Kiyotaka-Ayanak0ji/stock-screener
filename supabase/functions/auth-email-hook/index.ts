@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "EquityIQ"
+const SITE_NAME = "EquityLens"
 const SENDER_DOMAIN = "notify.stockscreener.sbs"
 const ROOT_DOMAIN = "stockscreener.sbs"
 const FROM_DOMAIN = "stockscreener.sbs" // Domain shown in From address (may be root or sender subdomain)

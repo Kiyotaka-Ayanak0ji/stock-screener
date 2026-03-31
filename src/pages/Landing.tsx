@@ -76,7 +76,7 @@ const FALLBACK_TESTIMONIALS = [
     display_name: "Rahul M.",
     designation: "Swing Trader",
     rating: 5,
-    review: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
+    review: "EquityLens replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
   },
   {
     display_name: "Priya S.",
@@ -117,6 +117,7 @@ const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -141,7 +142,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-6 w-6 text-primary" />
             <span className="text-lg font-bold tracking-tight">
-              Equity<span className="text-primary">IQ</span>
+              Equity<span className="text-primary">Lens</span>
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
@@ -195,9 +196,8 @@ const Landing = () => {
             className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            EquityIQ is the smarter way to manage and track all your stocks.
+            EquityLens is the smarter way to manage and track all your stocks.
             Set custom price triggers, tag events, build watchlists,
-            track your portfolio performance — all in one clean, powerful dashboard.
             track your portfolio performance — all in one clean, powerful dashboard.
           </motion.p>
 
@@ -260,7 +260,7 @@ const Landing = () => {
             Excel sheet for your watchlist, and screenshot charts to share with
             friends. Sound familiar?{" "}
             <span className="text-foreground font-semibold">
-              EquityIQ brings everything into one place
+              EquityLens brings everything into one place
             </span>{" "}
             — so you spend less time managing tools and more time making decisions.
           </motion.p>
@@ -324,7 +324,7 @@ const Landing = () => {
             {[
               { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
               { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
-              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
+              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityLens notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -395,6 +395,33 @@ const Landing = () => {
             <p className="mt-3 text-muted-foreground">
               Start free for 30 days. Choose the plan that fits your trading style.
             </p>
+
+            {/* Billing Cycle Toggle */}
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                onClick={() => setBillingCycle("monthly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  billingCycle === "monthly"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle("yearly")}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                  billingCycle === "yearly"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Yearly
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 dark:text-green-400 border-0">
+                  Save 17%
+                </Badge>
+              </button>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -431,10 +458,14 @@ const Landing = () => {
               <CardContent className="p-6">
                 <h3 className="font-semibold text-lg">Pro</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">$5</span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-4xl font-extrabold">${billingCycle === "yearly" ? "50" : "5"}</span>
+                  <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">or <strong>$50/year</strong> (save 17%)</p>
+                {billingCycle === "yearly" ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">~$4.17/mo — save $10/year</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">or <strong>$50/year</strong> (save 17%)</p>
+                )}
                 <ul className="mt-6 space-y-2.5">
                   {PRO_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -467,10 +498,14 @@ const Landing = () => {
                   Premium <Crown className="h-4 w-4 text-amber-500" />
                 </h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold">$20</span>
-                  <span className="text-muted-foreground text-sm">/month</span>
+                  <span className="text-4xl font-extrabold">${billingCycle === "yearly" ? "200" : "20"}</span>
+                  <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
+                {billingCycle === "yearly" ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">~$16.67/mo — save $40/year</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">or <strong>$200/year</strong> (save 17%)</p>
+                )}
                 <ul className="mt-6 space-y-2.5">
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -503,12 +538,12 @@ const Landing = () => {
             <Accordion type="single" collapsible className="space-y-3">
               {[
                 {
-                  q: "Is EquityIQ free to use?",
+                  q: "Is EquityLens free to use?",
                   a: "Yes! You can start with a 30-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
+                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
@@ -519,8 +554,8 @@ const Landing = () => {
                   a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
-                  q: "Which stock exchanges does EquityIQ support?",
-                  a: "EquityIQ tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
+                  q: "Which stock exchanges does EquityLens support?",
+                  a: "EquityLens tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
                 },
                 {
                   q: "How accurate are the stock prices?",
@@ -572,7 +607,7 @@ const Landing = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={1}
           >
-            Join EquityIQ today and see why thousands of investors trust us to stay ahead of the market.
+            Join EquityLens today and see why thousands of investors trust us to stay ahead of the market.
           </motion.p>
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -602,14 +637,14 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            <span className="font-bold">Equity<span className="text-primary">IQ</span></span>
+            <span className="font-bold">Equity<span className="text-primary">Lens</span></span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <button onClick={() => navigate("/auth")} className="hover:text-foreground transition-colors">Sign In</button>
             <button onClick={() => navigate("/subscribe")} className="hover:text-foreground transition-colors">Pricing</button>
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} EquityIQ. All rights reserved.
+            © {new Date().getFullYear()} EquityLens. All rights reserved.
           </p>
         </div>
       </footer>
