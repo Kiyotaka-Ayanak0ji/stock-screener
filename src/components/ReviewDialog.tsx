@@ -98,7 +98,7 @@ const ReviewDialog = () => {
         <DialogHeader>
           <DialogTitle>How's your experience?</DialogTitle>
           <DialogDescription>
-            We'd love to hear your feedback! Your review helps other investors discover EquityIQ.
+            We'd love to hear your feedback! Your review helps other investors discover EquityLens.
           </DialogDescription>
         </DialogHeader>
 
@@ -159,7 +159,7 @@ const ReviewDialog = () => {
               id="review-text"
               value={review}
               onChange={(e) => setReview(e.target.value)}
-              placeholder="Tell us what you love about EquityIQ..."
+              placeholder="Tell us what you love about EquityLens..."
               rows={3}
               maxLength={500}
             />

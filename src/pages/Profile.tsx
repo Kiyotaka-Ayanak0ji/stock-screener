@@ -281,7 +281,7 @@ const Profile = () => {
                 <CardDescription>
                   {existingReview
                     ? "Update your review — it's displayed on our landing page"
-                    : "Share your experience to help other investors discover EquityIQ"}
+                    : "Share your experience to help other investors discover EquityLens"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -324,7 +324,7 @@ const Profile = () => {
                     id="profile-review-text"
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Tell us what you love about EquityIQ..."
+                    placeholder="Tell us what you love about EquityLens..."
                     rows={3}
                     maxLength={500}
                   />

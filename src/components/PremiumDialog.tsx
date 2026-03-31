@@ -43,7 +43,7 @@ const PremiumDialog = ({ open, onOpenChange, featureName, requiresPremium }: Pre
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <Crown className="h-5 w-5 text-amber-500" />
-            {isPremiumFeature ? "Premium Feature" : "Upgrade to EquityIQ Pro"}
+            {isPremiumFeature ? "Premium Feature" : "Upgrade to EquityLens Pro"}
           </DialogTitle>
           <DialogDescription>
             {featureName

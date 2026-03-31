@@ -76,7 +76,7 @@ const FALLBACK_TESTIMONIALS = [
     display_name: "Rahul M.",
     designation: "Swing Trader",
     rating: 5,
-    review: "EquityIQ replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
+    review: "EquityLens replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
   },
   {
     display_name: "Priya S.",
@@ -195,7 +195,7 @@ const Landing = () => {
             className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
             initial="hidden" animate="visible" variants={fadeUp} custom={2}
           >
-            EquityIQ is the smarter way to manage and track all your stocks.
+            EquityLens is the smarter way to manage and track all your stocks.
             Set custom price triggers, tag events, build watchlists,
             track your portfolio performance — all in one clean, powerful dashboard.
             track your portfolio performance — all in one clean, powerful dashboard.
@@ -260,7 +260,7 @@ const Landing = () => {
             Excel sheet for your watchlist, and screenshot charts to share with
             friends. Sound familiar?{" "}
             <span className="text-foreground font-semibold">
-              EquityIQ brings everything into one place
+              EquityLens brings everything into one place
             </span>{" "}
             — so you spend less time managing tools and more time making decisions.
           </motion.p>
@@ -324,7 +324,7 @@ const Landing = () => {
             {[
               { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
               { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
-              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
+              { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityLens notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -503,12 +503,12 @@ const Landing = () => {
             <Accordion type="single" collapsible className="space-y-3">
               {[
                 {
-                  q: "Is EquityIQ free to use?",
+                  q: "Is EquityLens free to use?",
                   a: "Yes! You can start with a 30-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityIQ has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
+                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
                   q: "What do I get during the 30-day free trial?",
@@ -519,8 +519,8 @@ const Landing = () => {
                   a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
-                  q: "Which stock exchanges does EquityIQ support?",
-                  a: "EquityIQ tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
+                  q: "Which stock exchanges does EquityLens support?",
+                  a: "EquityLens tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
                 },
                 {
                   q: "How accurate are the stock prices?",
@@ -572,7 +572,7 @@ const Landing = () => {
             initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp} custom={1}
           >
-            Join EquityIQ today and see why thousands of investors trust us to stay ahead of the market.
+            Join EquityLens today and see why thousands of investors trust us to stay ahead of the market.
           </motion.p>
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }}
@@ -609,7 +609,7 @@ const Landing = () => {
             <button onClick={() => navigate("/subscribe")} className="hover:text-foreground transition-colors">Pricing</button>
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} EquityIQ. All rights reserved.
+            © {new Date().getFullYear()} EquityLens. All rights reserved.
           </p>
         </div>
       </footer>
