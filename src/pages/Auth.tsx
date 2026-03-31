@@ -63,7 +63,7 @@ const Auth = () => {
         <div className="flex items-center justify-center gap-2 mb-8">
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
-            Equity<span className="text-primary">IQ</span>
+            Equity<span className="text-primary">Lens</span>
           </h1>
         </div>
 

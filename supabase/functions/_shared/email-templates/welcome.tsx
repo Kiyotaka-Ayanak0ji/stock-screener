@@ -29,7 +29,7 @@ export const WelcomeEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>
-          Welcome to Equity<span style={{ color: '#148a9e' }}>IQ</span> 📈
+          Welcome to Equity<span style={{ color: '#148a9e' }}>Lens</span> 📈
         </Heading>
         <Text style={text}>
           Hey {displayName}! 👋

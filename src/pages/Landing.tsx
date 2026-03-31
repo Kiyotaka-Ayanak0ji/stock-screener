@@ -141,7 +141,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-6 w-6 text-primary" />
             <span className="text-lg font-bold tracking-tight">
-              Equity<span className="text-primary">IQ</span>
+              Equity<span className="text-primary">Lens</span>
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
@@ -602,7 +602,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            <span className="font-bold">Equity<span className="text-primary">IQ</span></span>
+            <span className="font-bold">Equity<span className="text-primary">Lens</span></span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <button onClick={() => navigate("/auth")} className="hover:text-foreground transition-colors">Sign In</button>
