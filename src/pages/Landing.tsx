@@ -214,7 +214,10 @@ const Landing = () => {
             <Button size="lg" className="px-8 text-base" onClick={() => navigate("/auth")}>
               Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="px-8 text-base" onClick={() => {
+            <Button size="lg" variant="outline" className="px-8 text-base" onClick={() => setDemoOpen(true)}>
+              <Eye className="h-5 w-5 mr-2" /> View Demo
+            </Button>
+            <Button size="lg" variant="ghost" className="px-8 text-base" onClick={() => {
               document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
             }}>
               See Features
