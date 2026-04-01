@@ -325,7 +325,7 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
+              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 15 days of Pro-level access — most features unlocked, no credit card needed." },
               { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
               { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityLens notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
             ].map((item, i) => (
