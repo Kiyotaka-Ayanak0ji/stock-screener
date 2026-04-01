@@ -396,7 +396,7 @@ const Landing = () => {
               Simple pricing. Serious value.
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Start free for 30 days. Choose the plan that fits your trading style.
+              Start free for 15 days. Choose the plan that fits your trading style.
             </p>
 
             {/* Billing Cycle Toggle */}
