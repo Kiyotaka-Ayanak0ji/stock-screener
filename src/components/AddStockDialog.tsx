@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { ALL_AVAILABLE_STOCKS } from "@/lib/stockData";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,17 +20,19 @@ interface SearchResult {
   screenerCode?: string;
 }
 
-const GUEST_STOCK_LIMIT = 20;
-
 const AddStockDialog = () => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [screenerResults, setScreenerResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
+  const [premiumFeature, setPremiumFeature] = useState("");
   const { watchlist, addStock } = useStocks();
   const { isGuest } = useAuth();
+  const { maxStocksPerWatchlist, isPro } = useSubscription();
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stockLimit = isGuest ? 20 : maxStocksPerWatchlist;
 
   const localFiltered = useMemo(() => {
     if (!search.trim()) return ALL_AVAILABLE_STOCKS.filter(s => !watchlist.includes(s.ticker)).slice(0, 50);
@@ -66,7 +69,8 @@ const AddStockDialog = () => {
   }, [search]);
 
   const handleAdd = (stock: SearchResult) => {
-    if (isGuest && watchlist.length >= GUEST_STOCK_LIMIT) {
+    if (watchlist.length >= stockLimit) {
+      setPremiumFeature(`Adding more than ${stockLimit} stocks per watchlist`);
       setPremiumOpen(true);
       return;
     }
@@ -90,11 +94,10 @@ const AddStockDialog = () => {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add Stock to Watchlist</DialogTitle>
-            {isGuest && (
-              <p className="text-xs text-muted-foreground">
-                Guest mode: {watchlist.length}/{GUEST_STOCK_LIMIT} stocks used
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              {watchlist.length}/{stockLimit} stocks used
+              {!isPro && !isGuest && " (upgrade for more)"}
+            </p>
           </DialogHeader>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -145,7 +148,7 @@ const AddStockDialog = () => {
       <PremiumDialog
         open={premiumOpen}
         onOpenChange={setPremiumOpen}
-        featureName={`Adding more than ${GUEST_STOCK_LIMIT} stocks`}
+        featureName={premiumFeature}
       />
     </>
   );

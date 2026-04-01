@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { List, Plus, Pencil, Trash2, Check, X, ChevronDown } from "lucide-react";
+import { List, Plus, Pencil, Trash2, Check, X, ChevronDown, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Watchlist } from "@/hooks/useWatchlists";
+import PremiumDialog from "@/components/PremiumDialog";
+import { toast } from "sonner";
 
 interface WatchlistManagerProps {
   watchlists: Watchlist[];
@@ -37,11 +40,13 @@ const WatchlistManager = ({
   onDelete,
 }: WatchlistManagerProps) => {
   const { user } = useAuth();
+  const { maxWatchlists } = useSubscription();
   const [createOpen, setCreateOpen] = useState(false);
   const [renameOpen, setRenameOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameName, setRenameName] = useState("");
+  const [premiumOpen, setPremiumOpen] = useState(false);
 
   if (!user) return null;
 
@@ -53,6 +58,14 @@ const WatchlistManager = ({
       setNewName("");
       setCreateOpen(false);
     }
+  };
+
+  const handleNewWatchlistClick = () => {
+    if (watchlists.length >= maxWatchlists) {
+      setPremiumOpen(true);
+      return;
+    }
+    setCreateOpen(true);
   };
 
   const handleRename = () => {
@@ -78,6 +91,9 @@ const WatchlistManager = ({
             <List className="h-3.5 w-3.5" />
             <span className="hidden sm:inline max-w-[120px] truncate">
               {activeList?.name || "Lists"}
+            </span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              ({watchlists.length}/{maxWatchlists})
             </span>
             <ChevronDown className="h-3 w-3 opacity-50" />
           </Button>
@@ -136,12 +152,15 @@ const WatchlistManager = ({
           <DropdownMenuItem
             onSelect={(e) => {
               e.preventDefault();
-              setCreateOpen(true);
+              handleNewWatchlistClick();
             }}
             className="cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5 mr-2" />
             New Watchlist
+            {watchlists.length >= maxWatchlists && (
+              <Crown className="h-3 w-3 text-amber-500 ml-auto" />
+            )}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -193,6 +212,13 @@ const WatchlistManager = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Premium Dialog */}
+      <PremiumDialog
+        open={premiumOpen}
+        onOpenChange={setPremiumOpen}
+        featureName={`Creating more than ${maxWatchlists} watchlists`}
+      />
     </>
   );
 };
