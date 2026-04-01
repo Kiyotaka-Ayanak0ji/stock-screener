@@ -622,7 +622,7 @@ const Landing = () => {
                 },
                 {
                   q: "Can I share my watchlist with others?",
-                  a: "Yes! You can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
+                  a: "Yes! Premium subscribers can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
                 },
                 {
                   q: "Is my data safe and private?",
