@@ -606,7 +606,7 @@ const Landing = () => {
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityLens support?",
