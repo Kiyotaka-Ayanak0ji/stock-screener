@@ -674,7 +674,7 @@ const Landing = () => {
               className="mt-8 px-10 text-base"
               onClick={() => navigate("/auth")}
             >
-              Start Your Free 30-Day Trial <ArrowRight className="h-5 w-5 ml-2" />
+              Start Your Free 15-Day Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </motion.div>
           <motion.p
