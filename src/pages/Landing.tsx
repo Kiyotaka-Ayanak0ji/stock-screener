@@ -55,6 +55,7 @@ const FEATURES = [
     icon: Share2,
     title: "Share & Export",
     description: "Share your watchlist with friends via a unique link, or export it as a high-quality image or PDF report.",
+    badge: "Premium",
   },
   {
     icon: Briefcase,

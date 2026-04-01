@@ -252,7 +252,7 @@ const Subscribe = () => {
                   <span className="text-muted-foreground">{f}</span>
                 </li>
               ))}
-              {["Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
+              {["Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
                   <X className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                   <span className="text-muted-foreground/60">{f}</span>
