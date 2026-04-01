@@ -93,16 +93,19 @@ const FALLBACK_TESTIMONIALS = [
 ];
 
 const PRO_FEATURES = [
-  "Unlimited stocks in watchlist",
+  "Up to 5 watchlists",
+  "20 stocks per watchlist",
   "Column visibility customization",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
   "Multiple watchlists",
   "Real-time price updates",
 ];
 
 const PREMIUM_EXTRAS = [
   "Everything in Pro",
+  "Up to 20 watchlists",
+  "50 stocks per watchlist",
+  "Export as Image & PDF",
+  "Shareable watchlist links",
   "Price trigger alerts with email",
   "Event tagging & tracking",
   "Notes on stocks",
