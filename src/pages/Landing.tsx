@@ -594,15 +594,15 @@ const Landing = () => {
               {[
                 {
                   q: "Is EquityLens free to use?",
-                  a: "Yes! You can start with a 30-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
+                  a: "Yes! You can start with a 15-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
+                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — up to 5 watchlists with 20 stocks each, column customization, and real-time updates), and Premium ($20/month or $200/year — up to 20 watchlists with 50 stocks each, export/share, price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
-                  q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like price triggers, event tags, notes, and portfolio management require a Premium subscription.",
+                  q: "What do I get during the 15-day free trial?",
+                  a: "During your trial you get full Pro access — up to 5 watchlists with 20 stocks each, custom columns, and real-time updates. Premium-exclusive features like price triggers, event tags, notes, export/share, and portfolio management require a Premium subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
