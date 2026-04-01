@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Share2, Image, FileText, Link, Check, Loader2, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { useStocks } from "@/contexts/StockContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import html2canvas from "html2canvas";
@@ -29,6 +30,7 @@ function generateToken(): string {
 const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
   const { user, isGuest } = useAuth();
   const { stocks, activeWatchlist } = useStocks();
+  const { isPremium } = useSubscription();
   const [isExporting, setIsExporting] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
@@ -42,7 +44,7 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
   };
 
   const exportAsImage = async () => {
-    if (isGuest) { requirePremium("Export as Image"); return; }
+    if (!isPremium) { requirePremium("Export as Image"); return; }
     if (!tableRef.current) return;
     setIsExporting(true);
     try {
@@ -57,7 +59,7 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
   };
 
   const exportAsPDF = async () => {
-    if (isGuest) { requirePremium("Export as PDF"); return; }
+    if (!isPremium) { requirePremium("Export as PDF"); return; }
     if (!tableRef.current) return;
     setIsExporting(true);
     try {
@@ -81,6 +83,7 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
 
   const generateShareLink = async () => {
     if (!user) { toast.error("Please sign in to share watchlists"); return; }
+    if (!isPremium) { requirePremium("Shareable Watchlist Links"); return; }
     if (stocks.length === 0) { toast.error("No stocks to share"); return; }
     setIsExporting(true);
     try {
@@ -105,16 +108,16 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
     finally { setIsExporting(false); }
   };
 
-  // Guest: only share by link (which will prompt sign in)
   const handleShareLink = () => {
     if (isGuest) {
-      // For guest, allow copying current URL as a simple share
       navigator.clipboard.writeText(window.location.href);
       toast.success("Page link copied to clipboard!");
       return;
     }
     generateShareLink();
   };
+
+  const showCrown = !isPremium;
 
   return (
     <>
@@ -129,16 +132,17 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
           <DropdownMenuItem onClick={exportAsImage} className="cursor-pointer gap-2">
             <Image className="h-4 w-4" />
             Export as Image
-            {isGuest && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
+            {showCrown && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={exportAsPDF} className="cursor-pointer gap-2">
             <FileText className="h-4 w-4" />
             Export as PDF
-            {isGuest && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
+            {showCrown && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleShareLink} className="cursor-pointer gap-2">
             {linkCopied ? <Check className="h-4 w-4 text-gain" /> : <Link className="h-4 w-4" />}
             {linkCopied ? "Link Copied!" : "Copy Share Link"}
+            {showCrown && !isGuest && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

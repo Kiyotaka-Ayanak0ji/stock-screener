@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DemoModal from "@/components/DemoModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ const FEATURES = [
     icon: Share2,
     title: "Share & Export",
     description: "Share your watchlist with friends via a unique link, or export it as a high-quality image or PDF report.",
+    badge: "Premium",
   },
   {
     icon: Briefcase,
@@ -93,16 +95,19 @@ const FALLBACK_TESTIMONIALS = [
 ];
 
 const PRO_FEATURES = [
-  "Unlimited stocks in watchlist",
+  "Up to 5 watchlists",
+  "20 stocks per watchlist",
   "Column visibility customization",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
   "Multiple watchlists",
   "Real-time price updates",
 ];
 
 const PREMIUM_EXTRAS = [
   "Everything in Pro",
+  "Up to 20 watchlists",
+  "50 stocks per watchlist",
+  "Export as Image & PDF",
+  "Shareable watchlist links",
   "Price trigger alerts with email",
   "Event tagging & tracking",
   "Notes on stocks",
@@ -118,6 +123,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [demoOpen, setDemoOpen] = useState(false);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -179,7 +185,7 @@ const Landing = () => {
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-xs font-medium">
               <Zap className="h-3 w-3 mr-1.5 text-primary" />
-              30 days free trial — no credit card required
+              15 days free trial — no credit card required
             </Badge>
           </motion.div>
 
@@ -208,7 +214,10 @@ const Landing = () => {
             <Button size="lg" className="px-8 text-base" onClick={() => navigate("/auth")}>
               Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="px-8 text-base" onClick={() => {
+            <Button size="lg" variant="outline" className="px-8 text-base" onClick={() => setDemoOpen(true)}>
+              <Eye className="h-5 w-5 mr-2" /> View Demo
+            </Button>
+            <Button size="lg" variant="ghost" className="px-8 text-base" onClick={() => {
               document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
             }}>
               See Features
@@ -322,7 +331,7 @@ const Landing = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 30 days of Pro-level access — most features unlocked, no credit card needed." },
+              { step: "01", title: "Create your free account", desc: "Sign up with your email and get 15 days of Pro-level access — most features unlocked, no credit card needed." },
               { step: "02", title: "Build your watchlists", desc: "Search from 5,000+ NSE & BSE stocks and add them to organized watchlists with tags and custom notes." },
               { step: "03", title: "Set triggers & relax", desc: "Configure price alerts and let EquityLens notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking." },
             ].map((item, i) => (
@@ -393,7 +402,7 @@ const Landing = () => {
               Simple pricing. Serious value.
             </h2>
             <p className="mt-3 text-muted-foreground">
-              Start free for 30 days. Choose the plan that fits your trading style.
+              Start free for 15 days. Choose the plan that fits your trading style.
             </p>
 
             {/* Billing Cycle Toggle */}
@@ -501,7 +510,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
+                  {["Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
@@ -591,19 +600,19 @@ const Landing = () => {
               {[
                 {
                   q: "Is EquityLens free to use?",
-                  a: "Yes! You can start with a 30-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
+                  a: "Yes! You can start with a 15-day free trial that gives you full Pro-level access — no credit card required. Guests can also browse with a limited 20-stock watchlist without signing up.",
                 },
                 {
                   q: "What are the available plans?",
-                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — unlimited watchlists, column customization, export/share, and real-time updates), and Premium ($20/month or $200/year — everything in Pro plus price triggers, event tags, notes, and portfolio performance dashboard).",
+                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year — up to 5 watchlists with 20 stocks each, column customization, and real-time updates), and Premium ($20/month or $200/year — up to 20 watchlists with 50 stocks each, export/share, price triggers, event tags, notes, and portfolio performance dashboard).",
                 },
                 {
-                  q: "What do I get during the 30-day free trial?",
-                  a: "During your trial you get full Pro access — unlimited stocks, multiple watchlists, export, sharing, custom columns, and more. Premium-exclusive features like price triggers, event tags, notes, and portfolio management require a Premium subscription.",
+                  q: "What do I get during the 15-day free trial?",
+                  a: "During your trial you get full Pro access — up to 5 watchlists with 20 stocks each, custom columns, and real-time updates. Premium-exclusive features like price triggers, event tags, notes, export/share, and portfolio management require a Premium subscription.",
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
                   q: "Which stock exchanges does EquityLens support?",
@@ -615,11 +624,11 @@ const Landing = () => {
                 },
                 {
                   q: "What are price triggers and how do they work?",
-                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Pro and Premium plans.",
+                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Premium plans.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
-                  a: "Yes! You can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
+                  a: "Yes! Premium subscribers can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
                 },
                 {
                   q: "Is my data safe and private?",
@@ -671,7 +680,7 @@ const Landing = () => {
               className="mt-8 px-10 text-base"
               onClick={() => navigate("/auth")}
             >
-              Start Your Free 30-Day Trial <ArrowRight className="h-5 w-5 ml-2" />
+              Start Your Free 15-Day Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
           </motion.div>
           <motion.p
@@ -700,6 +709,7 @@ const Landing = () => {
           </p>
         </div>
       </footer>
+      <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />
     </div>
   );
 };
