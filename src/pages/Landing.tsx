@@ -618,7 +618,7 @@ const Landing = () => {
                 },
                 {
                   q: "What are price triggers and how do they work?",
-                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Pro and Premium plans.",
+                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Premium plans.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
