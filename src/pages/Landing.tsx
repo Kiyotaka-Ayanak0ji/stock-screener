@@ -709,6 +709,7 @@ const Landing = () => {
           </p>
         </div>
       </footer>
+      <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />
     </div>
   );
 };
