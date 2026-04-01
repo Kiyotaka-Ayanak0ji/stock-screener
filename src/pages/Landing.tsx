@@ -123,6 +123,7 @@ const Landing = () => {
   const navigate = useNavigate();
   const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [demoOpen, setDemoOpen] = useState(false);
 
   useEffect(() => {
     const fetchReviews = async () => {
