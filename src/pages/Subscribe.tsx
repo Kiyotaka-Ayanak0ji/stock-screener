@@ -164,9 +164,9 @@ const Subscribe = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a {isPremium ? 'Premium' : 'Pro'} Member!</CardTitle>
+            <CardTitle>You're a {tierLabel} Member!</CardTitle>
             <CardDescription>
-              Your {isPremium ? 'Premium' : 'Pro'} plan is active
+              Your {tierLabel} plan is active
               {subscription.subscription_ends_at && (
                 <> until {new Date(subscription.subscription_ends_at).toLocaleDateString()}</>
               )}
