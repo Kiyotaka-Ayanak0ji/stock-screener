@@ -76,7 +76,8 @@ serve(async (req) => {
       });
     }
 
-    const subscriptionEnds = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const isYearly = plan === 'yearly' || plan === 'premium_yearly' || plan === 'premium_plus_yearly';
+    const subscriptionEnds = new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000);
 
     const { error: upsertError } = await adminClient
       .from('user_subscriptions')
