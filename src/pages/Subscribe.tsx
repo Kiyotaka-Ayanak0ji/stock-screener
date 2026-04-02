@@ -40,25 +40,37 @@ const PREMIUM_EXTRAS = [
   "Early access to new features",
 ];
 
-type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly";
+const PREMIUM_PLUS_EXTRAS = [
+  "Unlimited watchlists",
+  "Unlimited stocks per watchlist",
+  "Unlimited price trigger alerts",
+  "Beta access to new features",
+  "Everything in Premium",
+];
+
+type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly" | "premium_plus_monthly" | "premium_plus_yearly";
 
 const PLAN_PRICES: Record<PlanKey, { usd: number; label: string }> = {
   monthly: { usd: 5, label: "Pro Monthly" },
   yearly: { usd: 50, label: "Pro Yearly" },
   premium_monthly: { usd: 20, label: "Premium Monthly" },
   premium_yearly: { usd: 200, label: "Premium Yearly" },
+  premium_plus_monthly: { usd: 40, label: "Premium Plus Monthly" },
+  premium_plus_yearly: { usd: 450, label: "Premium Plus Yearly" },
 };
 
 const Subscribe = () => {
   const { user } = useAuth();
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [selectedTier, setSelectedTier] = useState<"pro" | "premium">("premium");
+  const [selectedTier, setSelectedTier] = useState<"pro" | "premium" | "premium_plus">("premium");
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
   const selectedPlan: PlanKey = selectedTier === "pro"
     ? (billingCycle === "yearly" ? "yearly" : "monthly")
+    : selectedTier === "premium_plus"
+    ? (billingCycle === "yearly" ? "premium_plus_yearly" : "premium_plus_monthly")
     : (billingCycle === "yearly" ? "premium_yearly" : "premium_monthly");
 
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -88,7 +100,7 @@ const Subscribe = () => {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: selectedTier === "premium" ? "EquityLens Premium" : "EquityLens Pro",
+        name: selectedTier === "premium_plus" ? "EquityLens Premium Plus" : selectedTier === "premium" ? "EquityLens Premium" : "EquityLens Pro",
         description: isTest ? "Test Payment (1 cent)" : `${planInfo.label} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
@@ -144,15 +156,17 @@ const Subscribe = () => {
   if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
-    const isPremium = subscription.plan === 'premium_monthly' || subscription.plan === 'premium_yearly' || subscription.plan === 'yearly';
+    const isPP = subscription.plan === 'premium_plus_monthly' || subscription.plan === 'premium_plus_yearly';
+    const isPremium = !isPP && (subscription.plan === 'premium_monthly' || subscription.plan === 'premium_yearly' || subscription.plan === 'yearly');
+    const tierLabel = isPP ? 'Premium Plus' : isPremium ? 'Premium' : 'Pro';
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a {isPremium ? 'Premium' : 'Pro'} Member!</CardTitle>
+            <CardTitle>You're a {tierLabel} Member!</CardTitle>
             <CardDescription>
-              Your {isPremium ? 'Premium' : 'Pro'} plan is active
+              Your {tierLabel} plan is active
               {subscription.subscription_ends_at && (
                 <> until {new Date(subscription.subscription_ends_at).toLocaleDateString()}</>
               )}
@@ -214,7 +228,7 @@ const Subscribe = () => {
         </div>
 
         {/* Plan Selection */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
           {/* Pro */}
           <button
             onClick={() => setSelectedTier("pro")}
@@ -279,6 +293,41 @@ const Subscribe = () => {
                 <span className="text-muted-foreground font-medium">Everything in Pro, plus:</span>
               </li>
               {PREMIUM_EXTRAS.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <Check className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-muted-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </button>
+
+          {/* Premium Plus */}
+          <button
+            onClick={() => setSelectedTier("premium_plus")}
+            className={`text-left p-5 rounded-xl border-2 transition-all relative md:col-span-1 ${
+              selectedTier === "premium_plus"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/40"
+            }`}
+          >
+            <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
+              Unlimited
+            </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg flex items-center gap-1.5">
+                Premium Plus <Zap className="h-4 w-4 text-orange-500" />
+              </h3>
+              <Badge variant="outline" className="text-xs">{billingCycle === "yearly" ? "Yearly" : "Monthly"}</Badge>
+            </div>
+            <div className="flex items-baseline gap-1 mb-3">
+              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "450" : "40"}</span>
+              <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
+            </div>
+            {billingCycle === "yearly" && (
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$37.50/mo — save $30/year</p>
+            )}
+            <ul className="space-y-1.5">
+              {PREMIUM_PLUS_EXTRAS.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
                   <Check className="h-3 w-3 text-primary shrink-0" />
                   <span className="text-muted-foreground">{f}</span>

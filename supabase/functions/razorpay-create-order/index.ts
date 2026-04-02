@@ -65,6 +65,10 @@ serve(async (req) => {
       amountUsd = 20;
     } else if (plan === 'premium_yearly') {
       amountUsd = 200;
+    } else if (plan === 'premium_plus_monthly') {
+      amountUsd = 40;
+    } else if (plan === 'premium_plus_yearly') {
+      amountUsd = 450;
     } else {
       return new Response(JSON.stringify({ error: 'Invalid plan' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -9,7 +9,7 @@ export interface Subscription {
   subscription_ends_at: string | null;
 }
 
-export type PlanTier = "free" | "pro" | "premium";
+export type PlanTier = "free" | "pro" | "premium" | "premium_plus";
 
 export function useSubscription() {
   const { user } = useAuth();
@@ -56,24 +56,26 @@ export function useSubscription() {
   const planTier: PlanTier = (() => {
     if (!subscription || !isActive) return "free";
     const p = subscription.plan;
+    if (p === 'premium_plus_monthly' || p === 'premium_plus_yearly') return "premium_plus";
     if (p === 'premium_monthly' || p === 'premium_yearly' || p === 'yearly' || p === 'annual') return "premium";
     if (p === 'monthly' || p === 'pro_monthly' || p === 'pro_yearly') return "pro";
     // Trial users get pro-level access
     if (subscription.status === 'trial') return "pro";
-    if (subscription.status === 'lifetime') return "premium";
+    if (subscription.status === 'lifetime') return "premium_plus";
     return "free";
   })();
 
-  const isPro = planTier === "pro" || planTier === "premium";
-  const isPremium = planTier === "premium";
+  const isPremiumPlus = planTier === "premium_plus";
+  const isPro = planTier === "pro" || planTier === "premium" || isPremiumPlus;
+  const isPremium = planTier === "premium" || isPremiumPlus;
 
   // Plan limits
-  const maxWatchlists = isPremium ? 20 : isPro ? 5 : 1;
-  const maxStocksPerWatchlist = isPremium ? 50 : isPro ? 20 : 20;
+  const maxWatchlists = isPremiumPlus ? Infinity : isPremium ? 20 : isPro ? 5 : 1;
+  const maxStocksPerWatchlist = isPremiumPlus ? Infinity : isPremium ? 50 : isPro ? 20 : 20;
 
   return {
     subscription, loading, isActive, trialDaysLeft,
-    planTier, isPro, isPremium,
+    planTier, isPro, isPremium, isPremiumPlus,
     maxWatchlists, maxStocksPerWatchlist,
     refetch: fetchSubscription,
   };
