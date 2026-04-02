@@ -659,6 +659,10 @@ const Landing = () => {
                   a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
                 },
                 {
+                  q: "Can I get unlimited access to stocks, watchlists, alerts as well as new features as they roll out?",
+                  a: "Yes! Our Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, and exclusive beta access to new features before they're available to other users. You can find this plan on the subscription page after signing in.",
+                },
+                {
                   q: "Which stock exchanges does EquityLens support?",
                   a: "EquityLens tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
                 },

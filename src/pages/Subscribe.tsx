@@ -300,6 +300,41 @@ const Subscribe = () => {
               ))}
             </ul>
           </button>
+
+          {/* Premium Plus */}
+          <button
+            onClick={() => setSelectedTier("premium_plus")}
+            className={`text-left p-5 rounded-xl border-2 transition-all relative md:col-span-1 ${
+              selectedTier === "premium_plus"
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/40"
+            }`}
+          >
+            <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
+              Unlimited
+            </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-lg flex items-center gap-1.5">
+                Premium Plus <Zap className="h-4 w-4 text-orange-500" />
+              </h3>
+              <Badge variant="outline" className="text-xs">{billingCycle === "yearly" ? "Yearly" : "Monthly"}</Badge>
+            </div>
+            <div className="flex items-baseline gap-1 mb-3">
+              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "450" : "40"}</span>
+              <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
+            </div>
+            {billingCycle === "yearly" && (
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$37.50/mo — save $30/year</p>
+            )}
+            <ul className="space-y-1.5">
+              {PREMIUM_PLUS_EXTRAS.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-xs">
+                  <Check className="h-3 w-3 text-primary shrink-0" />
+                  <span className="text-muted-foreground">{f}</span>
+                </li>
+              ))}
+            </ul>
+          </button>
         </div>
 
         <Card>
