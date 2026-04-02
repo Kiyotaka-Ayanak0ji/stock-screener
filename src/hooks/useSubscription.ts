@@ -65,12 +65,13 @@ export function useSubscription() {
     return "free";
   })();
 
-  const isPro = planTier === "pro" || planTier === "premium";
-  const isPremium = planTier === "premium";
+  const isPremiumPlus = planTier === "premium_plus";
+  const isPro = planTier === "pro" || planTier === "premium" || isPremiumPlus;
+  const isPremium = planTier === "premium" || isPremiumPlus;
 
   // Plan limits
-  const maxWatchlists = isPremium ? 20 : isPro ? 5 : 1;
-  const maxStocksPerWatchlist = isPremium ? 50 : isPro ? 20 : 20;
+  const maxWatchlists = isPremiumPlus ? Infinity : isPremium ? 20 : isPro ? 5 : 1;
+  const maxStocksPerWatchlist = isPremiumPlus ? Infinity : isPremium ? 50 : isPro ? 20 : 20;
 
   return {
     subscription, loading, isActive, trialDaysLeft,
