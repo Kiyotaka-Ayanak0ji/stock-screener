@@ -156,7 +156,9 @@ const Subscribe = () => {
   if (!user) return null;
 
   if (isActive && subscription?.status === 'active') {
-    const isPremium = subscription.plan === 'premium_monthly' || subscription.plan === 'premium_yearly' || subscription.plan === 'yearly';
+    const isPP = subscription.plan === 'premium_plus_monthly' || subscription.plan === 'premium_plus_yearly';
+    const isPremium = !isPP && (subscription.plan === 'premium_monthly' || subscription.plan === 'premium_yearly' || subscription.plan === 'yearly');
+    const tierLabel = isPP ? 'Premium Plus' : isPremium ? 'Premium' : 'Pro';
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
