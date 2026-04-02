@@ -63,7 +63,7 @@ const Subscribe = () => {
   const { user } = useAuth();
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
-  const [selectedTier, setSelectedTier] = useState<"pro" | "premium">("premium");
+  const [selectedTier, setSelectedTier] = useState<"pro" | "premium" | "premium_plus">("premium");
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
