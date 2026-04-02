@@ -16,14 +16,6 @@ declare global {
   }
 }
 
-const BANK_DETAILS = {
-  bankName: "State Bank of India",
-  accountName: "ANSIK ARYAN SAMAL",
-  accountNumber: "39972895973",
-  ifscCode: "SBIN0005321",
-  upiId: "aryanansik@oksbi",
-  note: "After payment, email your transaction ID to aryanansik69@gmail.com for activation.",
-};
 
 const PRO_FEATURES = [
   "Up to 5 watchlists",
