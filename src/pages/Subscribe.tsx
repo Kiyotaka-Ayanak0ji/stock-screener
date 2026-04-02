@@ -54,9 +54,7 @@ const Subscribe = () => {
   const { subscription, isActive, trialDaysLeft, refetch } = useSubscription();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [selectedTier, setSelectedTier] = useState<"pro" | "premium">("premium");
-  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "bank">("razorpay");
   const [processing, setProcessing] = useState(false);
-  const [showBankDetails, setShowBankDetails] = useState(false);
   const navigate = useNavigate();
 
   const selectedPlan: PlanKey = selectedTier === "pro"
