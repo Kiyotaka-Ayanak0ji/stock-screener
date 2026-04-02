@@ -98,7 +98,6 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-
 const PRO_FEATURES = [
   "Up to 5 watchlists",
   "20 stocks per watchlist",
@@ -656,11 +655,7 @@ const Landing = () => {
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis, and a diversity score based on the Herfindahl-Hirschman Index.",
-                },
-                {
-                  q: "Can I get unlimited access to stocks, watchlists, alerts as well as new features as they roll out?",
-                  a: "Yes! Our Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, and exclusive beta access to new features before they're available to other users. You can find this plan on the subscription page after signing in.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis.",
                 },
                 {
                   q: "Which stock exchanges does EquityLens support?",
