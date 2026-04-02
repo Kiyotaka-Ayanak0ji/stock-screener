@@ -69,6 +69,8 @@ const Subscribe = () => {
 
   const selectedPlan: PlanKey = selectedTier === "pro"
     ? (billingCycle === "yearly" ? "yearly" : "monthly")
+    : selectedTier === "premium_plus"
+    ? (billingCycle === "yearly" ? "premium_plus_yearly" : "premium_plus_monthly")
     : (billingCycle === "yearly" ? "premium_yearly" : "premium_monthly");
 
   const loadRazorpayScript = (): Promise<boolean> => {
