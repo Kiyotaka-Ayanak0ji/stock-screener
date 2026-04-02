@@ -228,7 +228,7 @@ const Subscribe = () => {
         </div>
 
         {/* Plan Selection */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <div className="grid md:grid-cols-3 gap-4 mb-6">
           {/* Pro */}
           <button
             onClick={() => setSelectedTier("pro")}
