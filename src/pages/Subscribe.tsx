@@ -40,13 +40,23 @@ const PREMIUM_EXTRAS = [
   "Early access to new features",
 ];
 
-type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly";
+const PREMIUM_PLUS_EXTRAS = [
+  "Unlimited watchlists",
+  "Unlimited stocks per watchlist",
+  "Unlimited price trigger alerts",
+  "Beta access to new features",
+  "Everything in Premium",
+];
+
+type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly" | "premium_plus_monthly" | "premium_plus_yearly";
 
 const PLAN_PRICES: Record<PlanKey, { usd: number; label: string }> = {
   monthly: { usd: 5, label: "Pro Monthly" },
   yearly: { usd: 50, label: "Pro Yearly" },
   premium_monthly: { usd: 20, label: "Premium Monthly" },
   premium_yearly: { usd: 200, label: "Premium Yearly" },
+  premium_plus_monthly: { usd: 40, label: "Premium Plus Monthly" },
+  premium_plus_yearly: { usd: 450, label: "Premium Plus Yearly" },
 };
 
 const Subscribe = () => {
