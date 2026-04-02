@@ -290,70 +290,8 @@ const Subscribe = () => {
 
         <Card>
           <CardContent className="pt-6 space-y-4">
-            {/* Payment method */}
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Payment Method</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => { setPaymentMethod("razorpay"); setShowBankDetails(false); }}
-                  className={`flex items-center gap-2 p-3 rounded-lg border text-sm transition-colors ${
-                    paymentMethod === "razorpay"
-                      ? "border-primary bg-primary/5 text-foreground"
-                      : "border-border text-muted-foreground hover:border-primary/50"
-                  }`}
-                >
-                  <CreditCard className="h-4 w-4" />
-                  <div className="text-left">
-                    <div className="font-medium">Razorpay</div>
-                    <div className="text-[10px]">Card / UPI / Wallet</div>
-                  </div>
-                </button>
-                <button
-                  onClick={() => { setPaymentMethod("bank"); setShowBankDetails(true); }}
-                  className={`flex items-center gap-2 p-3 rounded-lg border text-sm transition-colors ${
-                    paymentMethod === "bank"
-                      ? "border-primary bg-primary/5 text-foreground"
-                      : "border-border text-muted-foreground hover:border-primary/50"
-                  }`}
-                >
-                  <Building2 className="h-4 w-4" />
-                  <div className="text-left">
-                    <div className="font-medium">Bank Transfer</div>
-                    <div className="text-[10px]">NEFT / IMPS / UPI</div>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            {/* Bank details */}
-            {showBankDetails && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="bg-muted rounded-lg p-4 space-y-2 text-sm"
-              >
-                <p className="font-medium flex items-center gap-2">
-                  <Building2 className="h-4 w-4" /> Bank Transfer Details
-                </p>
-                <div className="space-y-1.5 text-muted-foreground">
-                  <p><span className="font-medium text-foreground">Bank:</span> {BANK_DETAILS.bankName}</p>
-                  <p><span className="font-medium text-foreground">Account Name:</span> {BANK_DETAILS.accountName}</p>
-                  <p><span className="font-medium text-foreground">Account No:</span> {BANK_DETAILS.accountNumber}</p>
-                  <p><span className="font-medium text-foreground">IFSC:</span> {BANK_DETAILS.ifscCode}</p>
-                  <div className="flex items-center gap-2 pt-1">
-                    <Smartphone className="h-4 w-4" />
-                    <p><span className="font-medium text-foreground">UPI:</span> {BANK_DETAILS.upiId}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 bg-amber-500/10 p-2 rounded">
-                  {BANK_DETAILS.note}
-                </p>
-              </motion.div>
-            )}
-
             {/* Actions */}
-            {paymentMethod === "razorpay" && (
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Button
                   className="w-full gap-2"
                   onClick={() => handleRazorpayPayment(false)}
