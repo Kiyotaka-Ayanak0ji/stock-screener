@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DemoModal from "@/components/DemoModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -99,29 +98,6 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const FALLBACK_TESTIMONIALS = [
-  {
-    display_name: "Rahul M.",
-    designation: "Swing Trader",
-    rating: 5,
-    review:
-      "EquityLens replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
-  },
-  {
-    display_name: "Priya S.",
-    designation: "Long-term Investor",
-    rating: 5,
-    review:
-      "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
-  },
-  {
-    display_name: "Arjun K.",
-    designation: "Portfolio Manager",
-    rating: 5,
-    review:
-      "The portfolio dashboard with sector allocation changed how I manage my investments. The fundamentals snapshot keeps me informed.",
-  },
-];
 
 const PRO_FEATURES = [
   "Up to 5 watchlists",
@@ -148,24 +124,8 @@ const PREMIUM_EXTRAS = [
 const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [demoOpen, setDemoOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const { data } = await supabase
-        .from("app_reviews")
-        .select("display_name, designation, rating, review")
-        .eq("is_approved", true)
-        .order("created_at", { ascending: false })
-        .limit(6);
-      if (data && data.length > 0) {
-        setTestimonials(data);
-      }
-    };
-    fetchReviews();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -418,46 +378,6 @@ const Landing = () => {
                 <div className="text-5xl font-extrabold text-primary/20 mb-3">{item.step}</div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-20 px-4 bg-muted/30">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">Loved by investors</h2>
-            <p className="mt-3 text-muted-foreground">Here's what our users say</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={t.display_name + i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
-              >
-                <Card className="h-full">
-                  <CardContent className="p-6">
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(t.rating)].map((_, j) => (
-                        <Star key={j} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
-                      {[...Array(5 - t.rating)].map((_, j) => (
-                        <Star key={`empty-${j}`} className="h-4 w-4 text-muted-foreground/30" />
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed italic mb-4">"{t.review}"</p>
-                    <div>
-                      <p className="font-semibold text-sm">{t.display_name}</p>
-                      {t.designation && <p className="text-xs text-muted-foreground">{t.designation}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
               </motion.div>
             ))}
           </div>

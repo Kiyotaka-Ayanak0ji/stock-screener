@@ -18,17 +18,23 @@ async function fetchSectorFromScreener(ticker: string): Promise<string | null> {
     if (!res.ok) return null;
     const html = await res.text();
 
-    // Look for sector in the company info section
+    // Match sector from peers section: title="Sector">SectorName</a>
     const sectorMatch = html.match(
-      /Sector\s*<\/span>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i
+      /title="Sector">([^<]+)<\/a>/i
     );
-    if (sectorMatch) return sectorMatch[1].trim();
+    if (sectorMatch) return sectorMatch[1].replace(/&amp;/g, "&").trim();
 
-    // Fallback: look for industry
-    const industryMatch = html.match(
-      /Industry\s*<\/span>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i
+    // Fallback: Broad Sector
+    const broadMatch = html.match(
+      /title="Broad Sector">([^<]+)<\/a>/i
     );
-    if (industryMatch) return industryMatch[1].trim();
+    if (broadMatch) return broadMatch[1].replace(/&amp;/g, "&").trim();
+
+    // Fallback: Industry
+    const industryMatch = html.match(
+      /title="Industry">([^<]+)<\/a>/i
+    );
+    if (industryMatch) return industryMatch[1].replace(/&amp;/g, "&").trim();
 
     return null;
   } catch {
@@ -49,7 +55,6 @@ serve(async (req) => {
       });
     }
 
-    // Limit to 10 at a time to avoid overloading
     const limited = tickers.slice(0, 10);
     const results: Record<string, string | null> = {};
 
