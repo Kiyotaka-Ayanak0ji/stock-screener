@@ -125,24 +125,8 @@ const PREMIUM_EXTRAS = [
 const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [testimonials, setTestimonials] = useState(FALLBACK_TESTIMONIALS);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
   const [demoOpen, setDemoOpen] = useState(false);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const { data } = await supabase
-        .from("app_reviews")
-        .select("display_name, designation, rating, review")
-        .eq("is_approved", true)
-        .order("created_at", { ascending: false })
-        .limit(6);
-      if (data && data.length > 0) {
-        setTestimonials(data);
-      }
-    };
-    fetchReviews();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
