@@ -9,7 +9,7 @@ export interface Subscription {
   subscription_ends_at: string | null;
 }
 
-export type PlanTier = "free" | "pro" | "premium";
+export type PlanTier = "free" | "pro" | "premium" | "premium_plus";
 
 export function useSubscription() {
   const { user } = useAuth();
