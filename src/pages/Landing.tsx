@@ -224,7 +224,7 @@ const Landing = () => {
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-xs font-medium">
               <Zap className="h-3 w-3 mr-1.5 text-primary" />
-              15 days free trial — no credit card required
+              15 days free trial
             </Badge>
           </motion.div>
 
