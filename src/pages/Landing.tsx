@@ -99,29 +99,6 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const FALLBACK_TESTIMONIALS = [
-  {
-    display_name: "Rahul M.",
-    designation: "Swing Trader",
-    rating: 5,
-    review:
-      "EquityLens replaced three apps for me. The price triggers alone saved me from missing a breakout I'd been watching for weeks.",
-  },
-  {
-    display_name: "Priya S.",
-    designation: "Long-term Investor",
-    rating: 5,
-    review:
-      "I love the event tagging. I label all my stocks with dividend dates and earnings calls — it's like having a personal assistant.",
-  },
-  {
-    display_name: "Arjun K.",
-    designation: "Portfolio Manager",
-    rating: 5,
-    review:
-      "The portfolio dashboard with sector allocation changed how I manage my investments. The fundamentals snapshot keeps me informed.",
-  },
-];
 
 const PRO_FEATURES = [
   "Up to 5 watchlists",
