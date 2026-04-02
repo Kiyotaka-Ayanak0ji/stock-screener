@@ -75,7 +75,7 @@ export function useSubscription() {
 
   return {
     subscription, loading, isActive, trialDaysLeft,
-    planTier, isPro, isPremium,
+    planTier, isPro, isPremium, isPremiumPlus,
     maxWatchlists, maxStocksPerWatchlist,
     refetch: fetchSubscription,
   };
