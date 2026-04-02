@@ -310,8 +310,7 @@ const Subscribe = () => {
                   <Zap className="h-3 w-3" />
                   Send 1¢ test payment to verify gateway
                 </Button>
-              </div>
-            )}
+            </div>
 
             <Button
               variant="ghost"
