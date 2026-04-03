@@ -8,13 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Trash2, TrendingUp, TrendingDown, PieChartIcon, BarChart3, Shield, Lock, RefreshCw, ArrowLeft, Clock, Zap, Award, AlertTriangle, Activity, Search, Loader2 } from "lucide-react";
+import { Plus, Trash2, TrendingUp, TrendingDown, PieChartIcon, BarChart3, Shield, Lock, RefreshCw, ArrowLeft, Clock, Zap, Award, AlertTriangle, Activity, Search, Loader2, Wallet, Target, Flame, BarChart2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -91,7 +90,7 @@ const StockAutocomplete = ({
                 onSelect(stock.ticker, stock.exchange);
                 setShowDropdown(false);
               }}
-              className="w-full flex items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent/10 transition-colors"
             >
               <div className="truncate">
                 <span className="font-mono font-semibold">{stock.ticker}</span>
@@ -110,8 +109,12 @@ const SECTOR_COLORS = [
   "hsl(190, 80%, 42%)", "hsl(145, 63%, 42%)", "hsl(35, 90%, 55%)",
   "hsl(270, 60%, 55%)", "hsl(0, 72%, 51%)", "hsl(200, 70%, 50%)",
   "hsl(320, 65%, 50%)", "hsl(60, 70%, 45%)", "hsl(160, 50%, 40%)",
-  "hsl(20, 80%, 50%)",
+  "hsl(20, 80%, 50%)", "hsl(240, 55%, 55%)", "hsl(100, 60%, 40%)",
 ];
+
+function formatCurrency(val: number): string {
+  return `₹${val.toLocaleString("en-IN", { maximumFractionDigits: 0 })}`;
+}
 
 function formatMarketCap(raw: number): string {
   if (!raw || raw === 0) return "—";
@@ -137,10 +140,33 @@ function timeAgo(date?: Date): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+/* ---------- Stat Card Component ---------- */
+const StatCard = ({ icon: Icon, label, value, subValue, subColor, delay, gradient }: {
+  icon: any; label: string; value: string; subValue?: React.ReactNode; subColor?: string; delay: number; gradient?: string;
+}) => (
+  <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, duration: 0.4 }}>
+    <Card className={`relative overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow ${gradient || ""}`}>
+      <div className="absolute top-0 right-0 w-20 h-20 opacity-[0.07]">
+        <Icon className="w-full h-full" />
+      </div>
+      <CardContent className="pt-5 pb-4 relative z-10">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1.5 rounded-lg bg-primary/10">
+            <Icon className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        </div>
+        <p className="text-2xl font-bold font-mono tracking-tight">{value}</p>
+        {subValue && <div className="mt-1.5">{subValue}</div>}
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
 const Portfolio = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscription } = useSubscription();
+  const { isPremium, isPremiumPlus, subscription } = useSubscription();
   const {
     holdings, loading, enriching, addHolding, removeHolding, enrichWithLivePrices,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
@@ -152,7 +178,8 @@ const Portfolio = () => {
   const [form, setForm] = useState({ ticker: "", exchange: "NSE", buy_price: "", quantity: "", buy_date: new Date().toISOString().split("T")[0] });
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
 
-  const isPremiumPlan = subscription?.plan === "premium_monthly" || subscription?.plan === "premium_yearly" || subscription?.plan === "lifetime" || subscription?.plan === "annual" || subscription?.plan === "yearly";
+  // Lifetime, Premium, or Premium Plus users can access
+  const hasAccess = isPremium || isPremiumPlus || subscription?.status === "lifetime";
 
   if (!user) {
     return (
@@ -168,7 +195,7 @@ const Portfolio = () => {
     );
   }
 
-  if (!isPremiumPlan) {
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -176,7 +203,7 @@ const Portfolio = () => {
           <Shield className="h-16 w-16 mx-auto text-primary mb-4" />
           <h2 className="text-2xl font-bold mb-2">Premium Feature</h2>
           <p className="text-muted-foreground mb-2">
-            Portfolio Dashboard is available exclusively for <strong>Premium</strong> and <strong>Lifetime</strong> plan subscribers.
+            Portfolio Dashboard is available for <strong>Premium</strong>, <strong>Premium Plus</strong> and <strong>Lifetime</strong> subscribers.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
             Track your holdings, view sector allocation, diversity metrics, and gain/loss charts.
@@ -227,16 +254,14 @@ const Portfolio = () => {
 
   const barChartConfig = { gainLoss: { label: "Gain/Loss %", color: "hsl(var(--primary))" } };
 
+  const diversityScore = Math.min(100, sectorAllocation.length * 15 + Math.min(holdings.length, 10) * 2);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* Back nav + Title Row */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-3"
-        >
+      <div className="container mx-auto px-4 py-6 max-w-7xl space-y-6">
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <Button
             variant="ghost"
             size="sm"
@@ -246,10 +271,12 @@ const Portfolio = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h2 className="text-2xl font-bold">Portfolio Dashboard</h2>
-              <p className="text-sm text-muted-foreground">Track performance, allocation & diversity</p>
+              <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                Portfolio Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Real-time performance tracking & sector analysis</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={enrichWithLivePrices} disabled={enriching} className="gap-1.5">
@@ -280,108 +307,100 @@ const Portfolio = () => {
           </div>
         </motion.div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground font-medium mb-1">Total Invested</p>
-                <p className="text-xl font-bold font-mono">₹{totalInvested.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
-                <Badge variant="secondary" className="text-[10px] mt-1.5">{holdings.length} stocks</Badge>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground font-medium mb-1">Current Value</p>
-                <p className="text-xl font-bold font-mono">₹{totalCurrent.toLocaleString("en-IN", { maximumFractionDigits: 0 })}</p>
-                <div className="flex gap-1.5 mt-1.5">
-                  <Badge variant="secondary" className="text-[10px]">
-                    <Activity className="h-2.5 w-2.5 mr-0.5" />
-                    Day: {totalDayChange >= 0 ? "+" : ""}₹{Math.abs(totalDayChange).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground font-medium mb-1">Total P&L</p>
-                <p className={`text-xl font-bold font-mono ${totalGainLoss >= 0 ? "text-gain" : "text-loss"}`}>
-                  {totalGainLoss >= 0 ? "+" : ""}₹{Math.abs(totalGainLoss).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                </p>
-                <Badge variant={totalGainLossPercent >= 0 ? "default" : "destructive"} className="text-[10px] mt-1.5">
-                  {totalGainLossPercent >= 0 ? <TrendingUp className="h-2.5 w-2.5 mr-0.5" /> : <TrendingDown className="h-2.5 w-2.5 mr-0.5" />}
-                  {totalGainLossPercent >= 0 ? "+" : ""}{totalGainLossPercent.toFixed(2)}%
-                </Badge>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card>
-              <CardContent className="pt-5 pb-4">
-                <p className="text-xs text-muted-foreground font-medium mb-1">Portfolio Snapshot</p>
-                <div className="flex flex-wrap gap-1.5 mt-1">
-                  <Badge variant="secondary" className="text-[10px]">
-                    <PieChartIcon className="h-2.5 w-2.5 mr-0.5" />
-                    {sectorAllocation.length} Sectors
-                  </Badge>
-                  {sectorAllocation.length > 0 && (
-                    <Badge variant="outline" className="text-[10px]">
-                      Top: {sectorAllocation[0].sector} ({sectorAllocation[0].percentage.toFixed(0)}%)
-                    </Badge>
-                  )}
-                  {holdings.length > 0 && (
-                    <Badge variant="outline" className="text-[10px]">
-                      Avg Buy: ₹{(totalInvested / Math.max(holdings.reduce((s, h) => s + h.quantity, 0), 1)).toFixed(0)}
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+        {/* Summary Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <StatCard
+            icon={Wallet}
+            label="Total Invested"
+            value={formatCurrency(totalInvested)}
+            subValue={<Badge variant="secondary" className="text-[10px]">{holdings.length} stocks</Badge>}
+            delay={0.05}
+          />
+          <StatCard
+            icon={Target}
+            label="Current Value"
+            value={formatCurrency(totalCurrent)}
+            subValue={
+              <Badge variant="secondary" className="text-[10px]">
+                <Activity className="h-2.5 w-2.5 mr-0.5" />
+                Day: {totalDayChange >= 0 ? "+" : ""}{formatCurrency(Math.abs(totalDayChange))}
+              </Badge>
+            }
+            delay={0.1}
+          />
+          <StatCard
+            icon={totalGainLoss >= 0 ? TrendingUp : TrendingDown}
+            label="Total P&L"
+            value={`${totalGainLoss >= 0 ? "+" : ""}${formatCurrency(Math.abs(totalGainLoss))}`}
+            subValue={
+              <Badge variant={totalGainLossPercent >= 0 ? "default" : "destructive"} className="text-[10px]">
+                {totalGainLossPercent >= 0 ? "+" : ""}{totalGainLossPercent.toFixed(2)}%
+              </Badge>
+            }
+            delay={0.15}
+          />
+          <StatCard
+            icon={Flame}
+            label="Top Performer"
+            value={topGainer?.ticker || "—"}
+            subValue={topGainer && (topGainer.gainLossPercent || 0) > 0 ? (
+              <Badge className="text-[10px] bg-gain/10 text-gain border-gain/20">
+                +{(topGainer.gainLossPercent || 0).toFixed(1)}%
+              </Badge>
+            ) : null}
+            delay={0.2}
+          />
+          <StatCard
+            icon={BarChart2}
+            label="Diversity Score"
+            value={`${diversityScore}/100`}
+            subValue={
+              <div className="flex gap-1.5">
+                <Badge variant="secondary" className="text-[10px]">{sectorAllocation.length} sectors</Badge>
+              </div>
+            }
+            delay={0.25}
+          />
         </div>
 
         {/* Key Insights Row */}
-        {holdings.length > 0 && (topGainer || topLoser) && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="flex flex-wrap gap-2">
-            {topGainer && (topGainer.gainLossPercent || 0) > 0 && (
-              <Badge variant="secondary" className="text-xs py-1 px-2.5 gap-1">
-                <TrendingUp className="h-3 w-3 text-gain" />
-                Top Gainer: <span className="font-mono font-bold">{topGainer.ticker}</span>
-                <span className="text-gain font-mono">+{(topGainer.gainLossPercent || 0).toFixed(1)}%</span>
-              </Badge>
-            )}
-            {topLoser && (topLoser.gainLossPercent || 0) < 0 && (
-              <Badge variant="secondary" className="text-xs py-1 px-2.5 gap-1">
-                <TrendingDown className="h-3 w-3 text-loss" />
-                Top Loser: <span className="font-mono font-bold">{topLoser.ticker}</span>
-                <span className="text-loss font-mono">{(topLoser.gainLossPercent || 0).toFixed(1)}%</span>
-              </Badge>
-            )}
-            {sectorAllocation.length > 0 && (
-              <Badge variant="secondary" className="text-xs py-1 px-2.5 gap-1">
-                <PieChartIcon className="h-3 w-3" />
-                {sectorAllocation.length} Sectors
-              </Badge>
-            )}
-            {holdings.some(h => h.priceSource) && (
-              <Badge variant="outline" className="text-xs py-1 px-2.5 gap-1">
-                <Clock className="h-3 w-3" />
-                Updated {timeAgo(holdings.find(h => h.lastUpdated)?.lastUpdated)}
-              </Badge>
-            )}
+        {holdings.length > 0 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+            <Card className="border-0 shadow-sm bg-muted/30">
+              <CardContent className="py-3 px-4 flex flex-wrap items-center gap-2">
+                <Zap className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-medium text-muted-foreground mr-1">Quick Insights:</span>
+                {topGainer && (topGainer.gainLossPercent || 0) > 0 && (
+                  <Badge variant="outline" className="text-xs py-0.5 gap-1 bg-gain/5 border-gain/20">
+                    <TrendingUp className="h-3 w-3 text-gain" />
+                    Best: <span className="font-mono font-bold">{topGainer.ticker}</span>
+                    <span className="text-gain font-mono">+{(topGainer.gainLossPercent || 0).toFixed(1)}%</span>
+                  </Badge>
+                )}
+                {topLoser && (topLoser.gainLossPercent || 0) < 0 && (
+                  <Badge variant="outline" className="text-xs py-0.5 gap-1 bg-loss/5 border-loss/20">
+                    <TrendingDown className="h-3 w-3 text-loss" />
+                    Worst: <span className="font-mono font-bold">{topLoser.ticker}</span>
+                    <span className="text-loss font-mono">{(topLoser.gainLossPercent || 0).toFixed(1)}%</span>
+                  </Badge>
+                )}
+                {holdings.some(h => h.priceSource) && (
+                  <Badge variant="outline" className="text-xs py-0.5 gap-1">
+                    <Clock className="h-3 w-3" />
+                    Updated {timeAgo(holdings.find(h => h.lastUpdated)?.lastUpdated)}
+                  </Badge>
+                )}
+              </CardContent>
+            </Card>
           </motion.div>
         )}
 
         {/* Sector Filter Tags */}
         {sectorAllocation.length > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex flex-wrap gap-1.5">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex flex-wrap gap-1.5">
             <Badge
               variant={selectedSector === null ? "default" : "outline"}
-              className="cursor-pointer text-xs"
+              className="cursor-pointer text-xs transition-all hover:scale-105"
               onClick={() => setSelectedSector(null)}
             >
               All ({holdings.length})
@@ -390,7 +409,7 @@ const Portfolio = () => {
               <Badge
                 key={s.sector}
                 variant={selectedSector === s.sector ? "default" : "outline"}
-                className="cursor-pointer text-xs gap-1"
+                className="cursor-pointer text-xs gap-1 transition-all hover:scale-105"
                 onClick={() => setSelectedSector(selectedSector === s.sector ? null : s.sector)}
               >
                 <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
@@ -402,198 +421,246 @@ const Portfolio = () => {
 
         {/* Charts Row */}
         <div className="grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <PieChartIcon className="h-4 w-4 text-primary" /> Sector Allocation
-              </CardTitle>
-              <CardDescription>{sectorAllocation.length} sectors</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {sectorAllocation.length > 0 ? (
-                <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[280px]">
-                  <PieChart>
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Pie data={sectorAllocation} dataKey="percentage" nameKey="sector" cx="50%" cy="50%" outerRadius={100} label={({ sector, percentage }) => `${sector} ${percentage.toFixed(1)}%`} labelLine={false}>
-                      {sectorAllocation.map((_, i) => (
-                        <Cell key={i} fill={SECTOR_COLORS[i % SECTOR_COLORS.length]} />
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+            <Card className="border-0 shadow-md">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <PieChartIcon className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Sector Allocation</CardTitle>
+                    <CardDescription>{sectorAllocation.length} sectors · {holdings.length} stocks</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {sectorAllocation.length > 0 ? (
+                  <div className="flex flex-col items-center">
+                    <ChartContainer config={pieChartConfig} className="mx-auto aspect-square max-h-[260px]">
+                      <PieChart>
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Pie
+                          data={sectorAllocation}
+                          dataKey="percentage"
+                          nameKey="sector"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={95}
+                          innerRadius={45}
+                          strokeWidth={2}
+                          label={({ sector, percentage }) => `${percentage.toFixed(0)}%`}
+                          labelLine={false}
+                        >
+                          {sectorAllocation.map((_, i) => (
+                            <Cell key={i} fill={SECTOR_COLORS[i % SECTOR_COLORS.length]} className="drop-shadow-sm" />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
+                    {/* Legend */}
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-3 w-full max-w-xs">
+                      {sectorAllocation.slice(0, 8).map((s, i) => (
+                        <div key={s.sector} className="flex items-center gap-1.5 text-xs">
+                          <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
+                          <span className="truncate text-muted-foreground">{s.sector}</span>
+                          <span className="font-mono font-medium ml-auto">{s.percentage.toFixed(0)}%</span>
+                        </div>
                       ))}
-                    </Pie>
-                  </PieChart>
-                </ChartContainer>
-              ) : (
-                <p className="text-center text-muted-foreground py-10">Add holdings to see allocation</p>
-              )}
-            </CardContent>
-          </Card>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-10">Add holdings to see allocation</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-primary" /> Stock-wise P&L (%)
-              </CardTitle>
-              <CardDescription>Top holdings by return</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {barData.length > 0 ? (
-                <ChartContainer config={barChartConfig} className="aspect-video max-h-[280px]">
-                  <BarChart data={barData} layout="vertical" margin={{ left: 60 }}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
-                    <XAxis type="number" tickFormatter={v => `${v}%`} className="text-xs" />
-                    <YAxis type="category" dataKey="ticker" className="text-xs" width={55} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="gainLoss" radius={[0, 4, 4, 0]}>
-                      {barData.map((entry, i) => (
-                        <Cell key={i} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              ) : (
-                <p className="text-center text-muted-foreground py-10">Add holdings to see P&L chart</p>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
+            <Card className="border-0 shadow-md">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Stock-wise P&L (%)</CardTitle>
+                    <CardDescription>Top holdings by return</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {barData.length > 0 ? (
+                  <ChartContainer config={barChartConfig} className="aspect-video max-h-[280px]">
+                    <BarChart data={barData} layout="vertical" margin={{ left: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                      <XAxis type="number" tickFormatter={v => `${v}%`} className="text-xs" />
+                      <YAxis type="category" dataKey="ticker" className="text-xs" width={55} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="gainLoss" radius={[0, 4, 4, 0]}>
+                        {barData.map((entry, i) => (
+                          <Cell key={i} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                ) : (
+                  <p className="text-center text-muted-foreground py-10">Add holdings to see P&L chart</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
 
         {/* Holdings Table */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">
-                Holdings ({filteredHoldings.length}{selectedSector ? ` in ${selectedSector}` : ""})
-              </CardTitle>
-              {selectedSector && (
-                <Button variant="ghost" size="sm" onClick={() => setSelectedSector(null)} className="text-xs h-7">
-                  Clear filter
-                </Button>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <p className="text-center text-muted-foreground py-8">Loading holdings...</p>
-            ) : holdings.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground mb-4">No holdings yet. Add your first stock to get started.</p>
-                <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" /> Add Holding
-                </Button>
-              </div>
-            ) : (
-              <TooltipProvider>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Ticker</TableHead>
-                        <TableHead>Sector</TableHead>
-                        <TableHead className="text-right">Qty</TableHead>
-                        <TableHead className="text-right">Buy Price</TableHead>
-                        <TableHead className="text-right">CMP</TableHead>
-                        <TableHead className="text-right">Day Chg</TableHead>
-                        <TableHead className="text-right">Invested</TableHead>
-                        <TableHead className="text-right">Current</TableHead>
-                        <TableHead className="text-right">P&L</TableHead>
-                        <TableHead className="text-right">P&L %</TableHead>
-                        <TableHead></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <AnimatePresence>
-                        {filteredHoldings.map(h => (
-                          <motion.tr
-                            key={h.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="border-b transition-colors hover:bg-muted/50"
-                          >
-                            <TableCell className="font-medium">
-                              <div className="flex flex-col">
-                                <span className="font-mono">{h.ticker}</span>
-                                <div className="flex gap-1 mt-0.5">
-                                  <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">{h.exchange}</Badge>
-                                  {h.marketCap && h.marketCap > 0 && (
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">MCap: {formatMarketCap(h.marketCap)}</Badge>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Market Cap: ₹{(h.marketCap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr</TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                  {h.volume && h.volume > 0 && (
-                                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">Vol: {formatVolume(h.volume)}</Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              {h.sector ? (
-                                <Badge
-                                  variant="secondary"
-                                  className="text-[10px] cursor-pointer"
-                                  onClick={() => setSelectedSector(selectedSector === h.sector ? null : h.sector)}
-                                >
-                                  {h.sector}
-                                </Badge>
-                              ) : (
-                                <span className="text-muted-foreground text-xs">—</span>
-                              )}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">{h.quantity}</TableCell>
-                            <TableCell className="text-right font-mono">₹{h.buy_price.toLocaleString("en-IN")}</TableCell>
-                            <TableCell className="text-right font-mono">
-                              {h.currentPrice ? (
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <span>₹{h.currentPrice.toLocaleString("en-IN")}</span>
-                                  </TooltipTrigger>
-                                  <TooltipContent className="text-xs">
-                                    {h.priceSource && <span className="capitalize">{h.priceSource}</span>}
-                                    {h.lastUpdated && <span> · {timeAgo(h.lastUpdated)}</span>}
-                                    {h.high ? <><br />H: ₹{h.high.toLocaleString("en-IN")} · L: ₹{(h.low || 0).toLocaleString("en-IN")}</> : null}
-                                  </TooltipContent>
-                                </Tooltip>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className={`text-right font-mono text-xs ${(h.dayChangePercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
-                              {h.dayChangePercent !== undefined && h.dayChangePercent !== 0
-                                ? `${h.dayChangePercent >= 0 ? "+" : ""}${h.dayChangePercent.toFixed(2)}%`
-                                : "—"}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              ₹{(h.investedValue || 0).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                            </TableCell>
-                            <TableCell className="text-right font-mono">
-                              {h.currentValue ? `₹${h.currentValue.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—"}
-                            </TableCell>
-                            <TableCell className={`text-right font-mono font-medium ${(h.gainLoss || 0) >= 0 ? "text-gain" : "text-loss"}`}>
-                              {h.gainLoss !== undefined ? (
-                                <span className="flex items-center justify-end gap-1">
-                                  {h.gainLoss >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                  ₹{Math.abs(h.gainLoss).toLocaleString("en-IN", { maximumFractionDigits: 0 })}
-                                </span>
-                              ) : "—"}
-                            </TableCell>
-                            <TableCell className={`text-right font-mono font-medium ${(h.gainLossPercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
-                              {h.gainLossPercent !== undefined ? `${h.gainLossPercent >= 0 ? "+" : ""}${h.gainLossPercent.toFixed(2)}%` : "—"}
-                            </TableCell>
-                            <TableCell>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeHolding(h.id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
-                              </Button>
-                            </TableCell>
-                          </motion.tr>
-                        ))}
-                      </AnimatePresence>
-                    </TableBody>
-                  </Table>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <BarChart2 className="h-4 w-4 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">
+                    Holdings ({filteredHoldings.length}{selectedSector ? ` in ${selectedSector}` : ""})
+                  </CardTitle>
                 </div>
-              </TooltipProvider>
-            )}
-          </CardContent>
-        </Card>
+                {selectedSector && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedSector(null)} className="text-xs h-7">
+                    Clear filter
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <p className="text-center text-muted-foreground py-8">Loading holdings...</p>
+              ) : holdings.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    <Wallet className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-muted-foreground mb-4">No holdings yet. Add your first stock to get started.</p>
+                  <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" /> Add Holding
+                  </Button>
+                </div>
+              ) : (
+                <TooltipProvider>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b-2">
+                          <TableHead>Ticker</TableHead>
+                          <TableHead>Sector</TableHead>
+                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead className="text-right">Buy Price</TableHead>
+                          <TableHead className="text-right">CMP</TableHead>
+                          <TableHead className="text-right">Day Chg</TableHead>
+                          <TableHead className="text-right">Invested</TableHead>
+                          <TableHead className="text-right">Current</TableHead>
+                          <TableHead className="text-right">P&L</TableHead>
+                          <TableHead className="text-right">P&L %</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <AnimatePresence>
+                          {filteredHoldings.map((h, idx) => (
+                            <motion.tr
+                              key={h.id}
+                              initial={{ opacity: 0, x: -8 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 8 }}
+                              transition={{ delay: idx * 0.02 }}
+                              className="border-b transition-colors hover:bg-muted/40"
+                            >
+                              <TableCell className="font-medium">
+                                <div className="flex flex-col">
+                                  <span className="font-mono font-semibold">{h.ticker}</span>
+                                  <div className="flex gap-1 mt-0.5">
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">{h.exchange}</Badge>
+                                    {h.marketCap && h.marketCap > 0 && (
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">MCap: {formatMarketCap(h.marketCap)}</Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>Market Cap: ₹{(h.marketCap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr</TooltipContent>
+                                      </Tooltip>
+                                    )}
+                                    {h.volume && h.volume > 0 && (
+                                      <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">Vol: {formatVolume(h.volume)}</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {h.sector ? (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-[10px] cursor-pointer hover:bg-primary/10 transition-colors"
+                                    onClick={() => setSelectedSector(selectedSector === h.sector ? null : h.sector)}
+                                  >
+                                    {h.sector}
+                                  </Badge>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">—</span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right font-mono">{h.quantity}</TableCell>
+                              <TableCell className="text-right font-mono">₹{h.buy_price.toLocaleString("en-IN")}</TableCell>
+                              <TableCell className="text-right font-mono">
+                                {h.currentPrice ? (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <span>₹{h.currentPrice.toLocaleString("en-IN")}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="text-xs">
+                                      {h.priceSource && <span className="capitalize">{h.priceSource}</span>}
+                                      {h.lastUpdated && <span> · {timeAgo(h.lastUpdated)}</span>}
+                                      {h.high ? <><br />H: ₹{h.high.toLocaleString("en-IN")} · L: ₹{(h.low || 0).toLocaleString("en-IN")}</> : null}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono text-xs ${(h.dayChangePercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.dayChangePercent !== undefined && h.dayChangePercent !== 0
+                                  ? `${h.dayChangePercent >= 0 ? "+" : ""}${h.dayChangePercent.toFixed(2)}%`
+                                  : "—"}
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                {formatCurrency(h.investedValue || 0)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                {h.currentValue ? formatCurrency(h.currentValue) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono font-medium ${(h.gainLoss || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.gainLoss !== undefined ? (
+                                  <span className="flex items-center justify-end gap-1">
+                                    {h.gainLoss >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                                    {formatCurrency(Math.abs(h.gainLoss))}
+                                  </span>
+                                ) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono font-medium ${(h.gainLossPercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.gainLossPercent !== undefined ? `${h.gainLossPercent >= 0 ? "+" : ""}${h.gainLossPercent.toFixed(2)}%` : "—"}
+                              </TableCell>
+                              <TableCell>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-destructive/10" onClick={() => removeHolding(h.id)}>
+                                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive transition-colors" />
+                                </Button>
+                              </TableCell>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TooltipProvider>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
