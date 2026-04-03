@@ -56,7 +56,7 @@ export function useSubscription() {
   const planTier: PlanTier = (() => {
     if (!subscription || !isActive) return "free";
     const p = subscription.plan;
-    if (p === 'premium_plus_monthly' || p === 'premium_plus_yearly') return "premium_plus";
+    if (p === 'premium_plus_monthly' || p === 'premium_plus_yearly' || p === 'lifetime') return "premium_plus";
     if (p === 'premium_monthly' || p === 'premium_yearly' || p === 'yearly' || p === 'annual') return "premium";
     if (p === 'monthly' || p === 'pro_monthly' || p === 'pro_yearly') return "pro";
     // Trial users get pro-level access
