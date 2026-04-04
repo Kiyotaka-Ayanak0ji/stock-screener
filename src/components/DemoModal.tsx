@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight, ArrowLeft, TrendingUp, TrendingDown, Bell, Tag,
-  Layers, Share2, BarChart3, Plus, Search, Eye, Check, Star, X
+  Layers, Share2, BarChart3, Plus, Search, Eye, Check, Star, X, Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
