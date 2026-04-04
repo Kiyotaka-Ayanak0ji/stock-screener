@@ -18,8 +18,12 @@ const DEMO_STOCKS = [
   { ticker: "RELIANCE", name: "Reliance Industries", exchange: "NSE", price: 2945.50, change: 32.10, changePercent: 1.10, high: 2960, low: 2910, volume: "12.4M" },
   { ticker: "TCS", name: "Tata Consultancy Services", exchange: "NSE", price: 3812.75, change: -18.40, changePercent: -0.48, high: 3840, low: 3800, volume: "5.2M" },
   { ticker: "INFY", name: "Infosys Ltd", exchange: "NSE", price: 1520.30, change: 8.55, changePercent: 0.57, high: 1528, low: 1508, volume: "8.7M" },
-  { ticker: "HDFCBANK", name: "HDFC Bank Ltd", exchange: "NSE", price: 1645.80, change: -5.20, changePercent: -0.32, high: 1660, low: 1638, volume: "6.1M" },
+  { ticker: "POLYCAB", name: "Polycab India Ltd", exchange: "NSE", price: 5620.40, change: 85.30, changePercent: 1.54, high: 5650, low: 5530, volume: "1.8M" },
   { ticker: "TATAMOTORS", name: "Tata Motors Ltd", exchange: "NSE", price: 985.40, change: 22.75, changePercent: 2.36, high: 990, low: 960, volume: "15.8M" },
+  { ticker: "HDFCBANK", name: "HDFC Bank Ltd", exchange: "NSE", price: 1645.80, change: -5.20, changePercent: -0.32, high: 1660, low: 1638, volume: "6.1M" },
+  { ticker: "RPSGVENT", name: "RPSG Ventures Ltd", exchange: "BSE", price: 312.55, change: 6.80, changePercent: 2.22, high: 315, low: 304, volume: "82K" },
+  { ticker: "GANDHAR", name: "Gandhar Oil Refinery", exchange: "NSE", price: 198.70, change: -3.45, changePercent: -1.71, high: 204, low: 196, volume: "145K" },
+  { ticker: "KFINTECH", name: "KFin Technologies", exchange: "NSE", price: 875.20, change: 12.90, changePercent: 1.50, high: 880, low: 858, volume: "420K" },
 ];
 
 const DEMO_STEPS = [
