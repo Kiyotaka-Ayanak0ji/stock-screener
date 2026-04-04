@@ -267,9 +267,15 @@ export function usePortfolio() {
       .sort((a, b) => b.value - a.value);
   })();
 
+  const refreshAll = useCallback(async () => {
+    await enrichWithLivePrices();
+    sectorEnrichedRef.current = false;
+    await enrichSectors();
+  }, [enrichWithLivePrices, enrichSectors]);
+
   return {
     holdings, loading, enriching,
-    addHolding, removeHolding, fetchHoldings, enrichWithLivePrices,
+    addHolding, removeHolding, fetchHoldings, enrichWithLivePrices, enrichSectors, refreshAll,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
     totalDayChange, topGainer, topLoser,
     sectorAllocation,

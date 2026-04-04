@@ -168,7 +168,7 @@ const Portfolio = () => {
   const { user } = useAuth();
   const { isPremium, isPremiumPlus, subscription } = useSubscription();
   const {
-    holdings, loading, enriching, addHolding, removeHolding, enrichWithLivePrices,
+    holdings, loading, enriching, addHolding, removeHolding, refreshAll,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
     totalDayChange, topGainer, topLoser,
     sectorAllocation,
@@ -279,9 +279,9 @@ const Portfolio = () => {
               <p className="text-sm text-muted-foreground mt-0.5">Real-time performance tracking & sector analysis</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={enrichWithLivePrices} disabled={enriching} className="gap-1.5">
+              <Button variant="outline" size="sm" onClick={refreshAll} disabled={enriching} className="gap-1.5">
                 <RefreshCw className={`h-3.5 w-3.5 ${enriching ? "animate-spin" : ""}`} />
-                {enriching ? "Refreshing..." : "Refresh Prices"}
+                {enriching ? "Refreshing..." : "Refresh All"}
               </Button>
               <Dialog open={addOpen} onOpenChange={setAddOpen}>
                 <DialogTrigger asChild>

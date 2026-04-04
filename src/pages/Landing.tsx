@@ -655,7 +655,15 @@ const Landing = () => {
                 },
                 {
                   q: "What Premium-only features are available?",
-                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with real-time P&L tracking, sector allocation charts, stock-wise gain/loss analysis.",
+                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with a real-time 'Refresh All' button that updates live prices and sector classification data in one click — including P&L tracking, sector allocation charts, and stock-wise gain/loss analysis.",
+                },
+                {
+                  q: "Can I get unlimited access to stocks, watchlists, alerts as well as new features as they roll out?",
+                  a: "Yes! The Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, the full portfolio dashboard with real-time refresh, and early beta access to new features as they're developed. Lifetime subscribers also enjoy unlimited access to everything.",
+                },
+                {
+                  q: "Does the portfolio dashboard update in real time?",
+                  a: "Yes! The portfolio dashboard features a 'Refresh All' button that fetches the latest live prices and re-enriches sector data for all your holdings in one click. You get instant P&L updates, sector allocation recalculation, and diversity score adjustments — all in real time.",
                 },
                 {
                   q: "Which stock exchanges does EquityLens support?",
