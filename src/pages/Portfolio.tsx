@@ -168,7 +168,7 @@ const Portfolio = () => {
   const { user } = useAuth();
   const { isPremium, isPremiumPlus, subscription } = useSubscription();
   const {
-    holdings, loading, enriching, addHolding, removeHolding, enrichWithLivePrices,
+    holdings, loading, enriching, addHolding, removeHolding, refreshAll,
     totalInvested, totalCurrent, totalGainLoss, totalGainLossPercent,
     totalDayChange, topGainer, topLoser,
     sectorAllocation,
