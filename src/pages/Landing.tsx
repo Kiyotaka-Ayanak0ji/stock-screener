@@ -702,46 +702,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20 px-4 bg-primary text-primary-foreground">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.h2
-            className="text-3xl sm:text-4xl font-bold"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={0}
-          >
-            Ready to take control of your portfolio?
-          </motion.h2>
-          <motion.p
-            className="mt-4 text-primary-foreground/80 text-lg"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={1}
-          >
-            Join EquityLens today and see why thousands of investors trust us to stay ahead of the market.
-          </motion.p>
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}>
-            <Button size="lg" variant="secondary" className="mt-8 px-10 text-base" onClick={() => navigate("/auth")}>
-              Start Your Free 15-Day Trial <ArrowRight className="h-5 w-5 ml-2" />
-            </Button>
-          </motion.div>
-          <motion.p
-            className="mt-3 text-xs text-primary-foreground/60"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeUp}
-            custom={3}
-          >
-            ·Cancel anytime · Pro access from day one
-          </motion.p>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="border-t border-border py-10 px-4">
