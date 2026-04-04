@@ -659,7 +659,7 @@ const Landing = () => {
                 },
                 {
                   q: "Can I get unlimited access to stocks, watchlists, alerts as well as new features as they roll out?",
-                  a: "Yes! The Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, the full portfolio dashboard with real-time refresh, and early beta access to new features as they're developed. Lifetime subscribers also enjoy unlimited access to everything.",
+                  a: "Yes! The Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, the full portfolio dashboard with real-time refresh, and early beta access to new features as they're developed. ",
                 },
                 {
                   q: "Does the portfolio dashboard update in real time?",
