@@ -251,6 +251,30 @@ export type Database = {
         }
         Relationships: []
       }
+      sector_cache: {
+        Row: {
+          created_at: string
+          sector: string
+          source: string
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          sector: string
+          source?: string
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          sector?: string
+          source?: string
+          ticker?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shared_watchlists: {
         Row: {
           created_at: string
