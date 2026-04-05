@@ -163,6 +163,51 @@ const DemoModal = ({ open, onOpenChange }: DemoModalProps) => {
               </div>
             )}
 
+            {currentStep.id === "add-stock" && (() => {
+              const available = DEMO_STOCKS.filter(s => !addedStocks.includes(s.ticker)).filter(s =>
+                !searchVal || s.ticker.toLowerCase().includes(searchVal.toLowerCase()) || s.name.toLowerCase().includes(searchVal.toLowerCase())
+              );
+              return (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <input
+                      placeholder="Search stocks..."
+                      className="w-full pl-9 pr-3 py-2 text-sm border rounded-lg bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                      value={searchVal}
+                      onChange={e => setSearchVal(e.target.value)}
+                    />
+                  </div>
+                  <div className="border rounded-lg divide-y max-h-56 overflow-y-auto">
+                    {available.map(s => (
+                      <div key={s.ticker} className="flex items-center justify-between px-3 py-2.5 hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-semibold text-sm">{s.ticker}</span>
+                          <span className="text-xs text-muted-foreground hidden sm:inline">{s.name}</span>
+                          <Badge variant="outline" className="text-[9px] px-1 py-0">{s.exchange}</Badge>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium">₹{s.price.toLocaleString()}</span>
+                          <button
+                            onClick={() => setAddedStocks(prev => [...prev, s.ticker])}
+                            className="p-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {available.length === 0 && (
+                      <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                        <Check className="h-5 w-5 mx-auto mb-1 text-green-500" />
+                        All stocks added to your watchlist!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
             {currentStep.id === "triggers" && (
               <div className="space-y-2">
                 {addedStocks.slice(0, 3).map(ticker => {
