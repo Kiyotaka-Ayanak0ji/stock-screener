@@ -172,14 +172,36 @@ export function usePortfolio() {
     if (missing.length === 0) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke("sector-lookup", {
-        body: { tickers: missing.map(h => h.ticker) },
-      });
-      if (error || !data) return;
+      const missingTickers = missing.map(h => h.ticker);
 
-      // Update DB and local state
+      // Step 1: Check sector_cache table first
+      const { data: cached } = await supabase
+        .from("sector_cache")
+        .select("ticker, sector")
+        .in("ticker", missingTickers);
+
+      const cachedMap = new Map((cached || []).map((c: any) => [c.ticker, c.sector]));
+      const stillMissing = missingTickers.filter(t => !cachedMap.has(t));
+
+      // Step 2: Call edge function only for truly uncached tickers
+      let remoteSectors: Record<string, string> = {};
+      if (stillMissing.length > 0) {
+        const { data, error } = await supabase.functions.invoke("sector-lookup", {
+          body: { tickers: stillMissing },
+        });
+        if (!error && data) {
+          remoteSectors = data;
+        }
+      }
+
+      // Merge cached + remote results
+      const allSectors: Record<string, string> = {};
+      for (const [ticker, sector] of cachedMap) allSectors[ticker] = sector;
+      for (const [ticker, sector] of Object.entries(remoteSectors)) allSectors[ticker] = sector;
+
+      // Update DB holdings with resolved sectors
       for (const h of missing) {
-        const sector = data[h.ticker];
+        const sector = allSectors[h.ticker];
         if (sector) {
           await supabase
             .from("portfolio_holdings")
@@ -191,7 +213,7 @@ export function usePortfolio() {
       setHoldings(prev =>
         prev.map(h => ({
           ...h,
-          sector: data[h.ticker] || h.sector,
+          sector: allSectors[h.ticker] || h.sector,
         }))
       );
     } catch (err) {
