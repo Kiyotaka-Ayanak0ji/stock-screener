@@ -113,7 +113,7 @@ const StockTable = () => {
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks
+            {filtered.length !== stocks.length ? `${filtered.length} of ${stocks.length} stocks` : `${stocks.length} stocks`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -291,6 +291,7 @@ const StockTable = () => {
       <p className="text-xs text-muted-foreground mt-3 text-center">
         · Preferences encrypted &amp; synced
       </p>
+      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName="P/E Ratio" />
     </motion.div>
   );
 };
