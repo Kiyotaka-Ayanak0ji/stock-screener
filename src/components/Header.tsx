@@ -43,16 +43,18 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/portfolio")}
-            className="gap-1.5 text-xs hidden sm:flex"
-            title="Portfolio Dashboard"
-          >
-            <Briefcase className="h-3.5 w-3.5" />
-            Portfolio
-          </Button>
+          {hasActiveAccess && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/portfolio")}
+              className="gap-1.5 text-xs hidden sm:flex"
+              title="Portfolio Dashboard"
+            >
+              <Briefcase className="h-3.5 w-3.5" />
+              Portfolio
+            </Button>
+          )}
 
           {user && subscription?.status === 'trial' && (
             <button
