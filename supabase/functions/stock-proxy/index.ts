@@ -94,7 +94,7 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
 }
 
 // Fetch only market cap and volume from Screener for enrichment
-async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: number; volume?: number } | null> {
+async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: number; volume?: number; pe?: number } | null> {
   try {
     const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
     const res = await fetch(url, {
@@ -106,7 +106,7 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
     if (!res.ok) return null;
     const html = await res.text();
 
-    const result: { marketCap?: number; volume?: number } = {};
+    const result: { marketCap?: number; volume?: number; pe?: number } = {};
 
     const mcSection = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
     if (mcSection) {
@@ -116,6 +116,12 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
     const volMatch = html.match(/Volume[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
     if (volMatch) {
       result.volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
+    }
+
+    const peMatch = html.match(/Stock P\/E[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    if (peMatch) {
+      const pe = parseFloat(peMatch[1].replace(/,/g, ''));
+      if (!isNaN(pe) && pe > 0) result.pe = pe;
     }
 
     return result;
