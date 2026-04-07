@@ -16,7 +16,7 @@ const ColumnVisibilityDropdown = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
 
-  const builtInColumns: { key: string; label: string }[] = [
+  const builtInColumns: { key: string; label: string; premium?: boolean }[] = [
     { key: "exchange", label: "Exchange" },
     { key: "price", label: "Price" },
     { key: "change", label: "Change" },
@@ -24,6 +24,7 @@ const ColumnVisibilityDropdown = () => {
     { key: "low", label: "Low" },
     { key: "volume", label: "Volume" },
     { key: "marketCap", label: "Market Cap" },
+    { key: "pe", label: "P/E Ratio", premium: true },
     { key: "priceTrigger", label: "Price Trigger" },
     { key: "event", label: "Event" },
     { key: "notes", label: "Notes" },
