@@ -464,7 +464,7 @@ const Portfolio = () => {
                         <div key={s.sector} className="flex items-center gap-1.5 text-xs">
                           <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
                           <span className="truncate text-muted-foreground">{s.sector}</span>
-                          <span className="font-mono font-medium ml-auto">{s.percentage.toFixed(0)}%</span>
+                          <span className="font-mono font-medium ml-auto">{s.percentage.toFixed(1)}%</span>
                         </div>
                       ))}
                     </div>
