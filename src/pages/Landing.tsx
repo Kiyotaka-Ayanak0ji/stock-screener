@@ -46,13 +46,13 @@ const FEATURES = [
     icon: TrendingUp,
     title: "Real-Time Price Tracking",
     description:
-      "Watch your portfolio move in real time with live price updates, change percentages, and volume data across NSE & BSE.",
+      "Watch your stocks move in real time with live price updates, change percentages, and volume data across NSE & BSE.",
   },
   {
     icon: Bell,
     title: "Custom Price Triggers",
     description:
-      "Set upper and lower price alerts on any stock. Get notified via email the moment your target price is hit — never miss an entry or exit.",
+      "Set upper and lower price alerts on any stock. Get notified via email the moment your target price is hit so that you never miss an entry or exit.",
     badge: "Premium",
   },
   {
@@ -86,7 +86,7 @@ const FEATURES = [
     icon: Briefcase,
     title: "Portfolio Dashboard",
     description:
-      "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, company fundamentals, and stock-wise performance.",
+      "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, company details, and stock-wise performance.",
     badge: "Premium",
   },
 ];
