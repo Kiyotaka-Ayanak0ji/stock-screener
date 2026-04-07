@@ -78,10 +78,13 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
 
     // Extract Stock P/E ratio
     let pe = 0;
-    const peMatch = html.match(/Stock P\/E[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>[\s\S]*?<\/li>/i);
-    if (peMatch) {
-      pe = parseFloat(peMatch[1].replace(/,/g, ''));
-      if (isNaN(pe)) pe = 0;
+    const peLiMatch = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
+    if (peLiMatch) {
+      const peNumMatch = peLiMatch[0].match(/<span class="number">([\d,]+(?:\.\d+)?)<\/span>/);
+      if (peNumMatch && peNumMatch[1]) {
+        pe = parseFloat(peNumMatch[1].replace(/,/g, ''));
+        if (isNaN(pe)) pe = 0;
+      }
     }
 
     console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}, Vol=${volume}, PE=${pe}`);
