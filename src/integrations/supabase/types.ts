@@ -57,6 +57,7 @@ export type Database = {
           market_cap: number
           name: string
           open_price: number
+          pe: number
           previous_close: number
           price: number
           ticker: string
@@ -72,6 +73,7 @@ export type Database = {
           market_cap: number
           name: string
           open_price: number
+          pe?: number
           previous_close: number
           price: number
           ticker: string
@@ -87,6 +89,7 @@ export type Database = {
           market_cap?: number
           name?: string
           open_price?: number
+          pe?: number
           previous_close?: number
           price?: number
           ticker?: string

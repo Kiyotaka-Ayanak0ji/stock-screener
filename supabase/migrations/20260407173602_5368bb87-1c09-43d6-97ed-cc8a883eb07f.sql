@@ -1,0 +1,1 @@
+ALTER TABLE public.cached_stock_prices ADD COLUMN pe numeric DEFAULT 0 NOT NULL;

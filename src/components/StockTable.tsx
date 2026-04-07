@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Filter } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
@@ -11,11 +11,17 @@ import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event" | string;
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useSubscription } from "@/hooks/useSubscription";
+import PremiumDialog from "@/components/PremiumDialog";
+type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "pe" | "event" | string;
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  const { subscription } = useSubscription();
+  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
@@ -25,6 +31,9 @@ const StockTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [peFilterMin, setPeFilterMin] = useState<string>("");
+  const [peFilterMax, setPeFilterMax] = useState<string>("");
+  const [premiumOpen, setPremiumOpen] = useState(false);
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
 
@@ -33,8 +42,26 @@ const StockTable = () => {
     else { setSortKey(key); setSortDir(key === "ticker" ? "asc" : "desc"); }
   };
 
+  const filtered = useMemo(() => {
+    let list = [...stocks];
+    // P/E filter (premium only)
+    if (isPremium && isVisible("pe")) {
+      const min = peFilterMin ? parseFloat(peFilterMin) : null;
+      const max = peFilterMax ? parseFloat(peFilterMax) : null;
+      if (min !== null || max !== null) {
+        list = list.filter(s => {
+          if (s.pe <= 0) return false; // Exclude stocks with no P/E data
+          if (min !== null && s.pe < min) return false;
+          if (max !== null && s.pe > max) return false;
+          return true;
+        });
+      }
+    }
+    return list;
+  }, [stocks, isPremium, peFilterMin, peFilterMax, columnVisibility]);
+
   const sorted = useMemo(() => {
-    return [...stocks].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
         case "ticker": cmp = a.ticker.localeCompare(b.ticker); break;
@@ -43,6 +70,7 @@ const StockTable = () => {
         case "changePercent": cmp = a.changePercent - b.changePercent; break;
         case "volume": cmp = a.volume - b.volume; break;
         case "marketCap": cmp = a.marketCap - b.marketCap; break;
+        case "pe": cmp = (a.pe || 0) - (b.pe || 0); break;
         case "event": {
           const aEvent = events.find(e => e.ticker === a.ticker)?.tags?.join(",") || "";
           const bEvent = events.find(e => e.ticker === b.ticker)?.tags?.join(",") || "";
@@ -85,7 +113,7 @@ const StockTable = () => {
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {stocks.length} stocks
+            {filtered.length !== stocks.length ? `${filtered.length} of ${stocks.length} stocks` : `${stocks.length} stocks`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -160,6 +188,54 @@ const StockTable = () => {
                     <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
                   </th>
                 )}
+                {isVisible("pe") && (
+                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
+                    <div className="flex items-center justify-end gap-1">
+                      P/E <SortIcon col="pe" />
+                      {isPremium && (
+                        <Popover>
+                          <PopoverTrigger asChild onClick={e => e.stopPropagation()}>
+                            <button className="ml-0.5 hover:text-primary transition-colors">
+                              <Filter className={`h-3 w-3 ${peFilterMin || peFilterMax ? "text-primary" : "opacity-40"}`} />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-52 p-3" align="end" onClick={e => e.stopPropagation()}>
+                            <p className="text-xs font-medium mb-2">Filter by P/E Ratio</p>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                placeholder="Min"
+                                value={peFilterMin}
+                                onChange={e => setPeFilterMin(e.target.value)}
+                                className="h-7 text-xs"
+                                step="any"
+                              />
+                              <span className="text-xs text-muted-foreground">—</span>
+                              <Input
+                                type="number"
+                                placeholder="Max"
+                                value={peFilterMax}
+                                onChange={e => setPeFilterMax(e.target.value)}
+                                className="h-7 text-xs"
+                                step="any"
+                              />
+                            </div>
+                            {(peFilterMin || peFilterMax) && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="w-full mt-2 text-xs h-7"
+                                onClick={() => { setPeFilterMin(""); setPeFilterMax(""); }}
+                              >
+                                Clear Filter
+                              </Button>
+                            )}
+                          </PopoverContent>
+                        </Popover>
+                      )}
+                    </div>
+                  </th>
+                )}
                 {visibleCustomColumns.map(col => (
                   <th key={col.id} className={`${headerClass} text-right`} onClick={() => toggleSort(`custom_${col.id}`)}>
                     <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
@@ -215,6 +291,7 @@ const StockTable = () => {
       <p className="text-xs text-muted-foreground mt-3 text-center">
         · Preferences encrypted &amp; synced
       </p>
+      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName="P/E Ratio" />
     </motion.div>
   );
 };

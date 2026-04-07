@@ -9,6 +9,7 @@ interface StockQuote {
   close?: number;
   volume?: number;
   marketCap?: number;
+  pe?: number;
 }
 
 export async function fetchLivePrices(
@@ -58,6 +59,7 @@ export function applyLiveData(
     marketCap: liveData.marketCap && liveData.marketCap > 0
       ? Math.round(liveData.marketCap / 10000000) // Convert from raw to Crores
       : stock.marketCap,
+    pe: liveData.pe ?? stock.pe,
     lastUpdated: new Date(),
   };
 }

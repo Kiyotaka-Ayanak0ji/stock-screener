@@ -203,6 +203,24 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
             {isPriceAvailable ? <>₹{formatMarketCap(stock.marketCap)}</> : <Skeleton className="h-3 w-18 ml-auto" />}
           </td>
         )}
+        {isVisible("pe") && (
+          <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
+            {isPriceAvailable ? (
+              stock.pe > 0 ? (
+                <span>{stock.pe.toFixed(2)}</span>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-muted-foreground/50">N/A</span>
+                  </TooltipTrigger>
+                  <TooltipContent>P/E data not available for this stock</TooltipContent>
+                </Tooltip>
+              )
+            ) : (
+              <Skeleton className="h-3 w-14 ml-auto" />
+            )}
+          </td>
+        )}
         {visibleCustomColumns.map(col => {
           const val = customColumnData[stock.ticker]?.[col.id];
           return (

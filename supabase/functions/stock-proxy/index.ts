@@ -300,6 +300,7 @@ Deno.serve(async (req) => {
         close: q.regularMarketPreviousClose ?? 0,
         volume: q.regularMarketVolume ?? 0,
         marketCap: q.marketCap ?? 0,
+        pe: q.trailingPE ?? 0,
       };
 
       const mappedKey = yahooToKey.get(symbol);
@@ -359,6 +360,7 @@ Deno.serve(async (req) => {
               close: q.regularMarketPreviousClose ?? 0,
               volume: q.regularMarketVolume ?? 0,
               marketCap: q.marketCap ?? 0,
+              pe: q.trailingPE ?? 0,
             };
             resolvedKeys.add(key);
             console.log(`Alt-exchange resolved ${ticker} via ${q.symbol}`);

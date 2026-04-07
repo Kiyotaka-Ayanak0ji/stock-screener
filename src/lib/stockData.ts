@@ -11,6 +11,7 @@ export interface Stock {
   open: number;
   volume: number;
   marketCap: number;
+  pe: number;
   lastUpdated: Date;
   yahooSymbol?: string; // For indices/special symbols where ticker != Yahoo symbol
   isIndex?: boolean;
@@ -55,17 +56,17 @@ function getMarketCap(ticker: string, price: number): number {
 }
 
 export const SAMPLE_STOCKS: Stock[] = [
-  { ticker: "RELIANCE", name: "Reliance Industries", exchange: "NSE", price: 2487.35, previousClose: 2465.10, change: 22.25, changePercent: 0.90, high: 2501.00, low: 2460.00, open: 2470.00, volume: 8945621, marketCap: 1680000, lastUpdated: new Date() },
-  { ticker: "TCS", name: "Tata Consultancy Services", exchange: "NSE", price: 3842.50, previousClose: 3870.25, change: -27.75, changePercent: -0.72, high: 3880.00, low: 3835.00, open: 3870.00, volume: 3254891, marketCap: 1400000, lastUpdated: new Date() },
-  { ticker: "INFY", name: "Infosys Ltd", exchange: "NSE", price: 1567.80, previousClose: 1545.60, change: 22.20, changePercent: 1.44, high: 1575.00, low: 1540.00, open: 1548.00, volume: 6521340, marketCap: 650000, lastUpdated: new Date() },
-  { ticker: "HDFCBANK", name: "HDFC Bank Ltd", exchange: "NSE", price: 1689.25, previousClose: 1695.40, change: -6.15, changePercent: -0.36, high: 1700.00, low: 1682.00, open: 1695.00, volume: 4521890, marketCap: 1250000, lastUpdated: new Date() },
-  { ticker: "ICICIBANK", name: "ICICI Bank Ltd", exchange: "NSE", price: 1234.60, previousClose: 1220.35, change: 14.25, changePercent: 1.17, high: 1240.00, low: 1218.00, open: 1222.00, volume: 5678432, marketCap: 870000, lastUpdated: new Date() },
-  { ticker: "WIPRO", name: "Wipro Ltd", exchange: "NSE", price: 456.30, previousClose: 462.15, change: -5.85, changePercent: -1.27, high: 465.00, low: 454.00, open: 462.00, volume: 7823456, marketCap: 250000, lastUpdated: new Date() },
-  { ticker: "SBIN", name: "State Bank of India", exchange: "NSE", price: 789.45, previousClose: 782.30, change: 7.15, changePercent: 0.91, high: 795.00, low: 780.00, open: 783.00, volume: 9876543, marketCap: 710000, lastUpdated: new Date() },
-  { ticker: "TMCV", name: "Tata Motors Commercial Vehicles", exchange: "NSE", price: 520.00, previousClose: 515.00, change: 5.00, changePercent: 0.97, high: 525.00, low: 512.00, open: 516.00, volume: 3200000, marketCap: 180000, lastUpdated: new Date() },
-  { ticker: "TMPV", name: "Tata Motors Passenger Vehicles", exchange: "NSE", price: 430.00, previousClose: 425.00, change: 5.00, changePercent: 1.18, high: 435.00, low: 422.00, open: 426.00, volume: 2800000, marketCap: 170000, lastUpdated: new Date() },
-  { ticker: "BHARTIARTL", name: "Bharti Airtel Ltd", exchange: "NSE", price: 1345.80, previousClose: 1360.00, change: -14.20, changePercent: -1.04, high: 1362.00, low: 1340.00, open: 1358.00, volume: 3456789, marketCap: 780000, lastUpdated: new Date() },
-  { ticker: "SUNPHARMA", name: "Sun Pharma Industries", exchange: "NSE", price: 1178.90, previousClose: 1165.50, change: 13.40, changePercent: 1.15, high: 1185.00, low: 1162.00, open: 1168.00, volume: 2345678, marketCap: 285000, lastUpdated: new Date() },
+  { ticker: "RELIANCE", name: "Reliance Industries", exchange: "NSE", price: 2487.35, previousClose: 2465.10, change: 22.25, changePercent: 0.90, high: 2501.00, low: 2460.00, open: 2470.00, volume: 8945621, marketCap: 1680000, pe: 0, lastUpdated: new Date() },
+  { ticker: "TCS", name: "Tata Consultancy Services", exchange: "NSE", price: 3842.50, previousClose: 3870.25, change: -27.75, changePercent: -0.72, high: 3880.00, low: 3835.00, open: 3870.00, volume: 3254891, marketCap: 1400000, pe: 0, lastUpdated: new Date() },
+  { ticker: "INFY", name: "Infosys Ltd", exchange: "NSE", price: 1567.80, previousClose: 1545.60, change: 22.20, changePercent: 1.44, high: 1575.00, low: 1540.00, open: 1548.00, volume: 6521340, marketCap: 650000, pe: 0, lastUpdated: new Date() },
+  { ticker: "HDFCBANK", name: "HDFC Bank Ltd", exchange: "NSE", price: 1689.25, previousClose: 1695.40, change: -6.15, changePercent: -0.36, high: 1700.00, low: 1682.00, open: 1695.00, volume: 4521890, marketCap: 1250000, pe: 0, lastUpdated: new Date() },
+  { ticker: "ICICIBANK", name: "ICICI Bank Ltd", exchange: "NSE", price: 1234.60, previousClose: 1220.35, change: 14.25, changePercent: 1.17, high: 1240.00, low: 1218.00, open: 1222.00, volume: 5678432, marketCap: 870000, pe: 0, lastUpdated: new Date() },
+  { ticker: "WIPRO", name: "Wipro Ltd", exchange: "NSE", price: 456.30, previousClose: 462.15, change: -5.85, changePercent: -1.27, high: 465.00, low: 454.00, open: 462.00, volume: 7823456, marketCap: 250000, pe: 0, lastUpdated: new Date() },
+  { ticker: "SBIN", name: "State Bank of India", exchange: "NSE", price: 789.45, previousClose: 782.30, change: 7.15, changePercent: 0.91, high: 795.00, low: 780.00, open: 783.00, volume: 9876543, marketCap: 710000, pe: 0, lastUpdated: new Date() },
+  { ticker: "TMCV", name: "Tata Motors Commercial Vehicles", exchange: "NSE", price: 520.00, previousClose: 515.00, change: 5.00, changePercent: 0.97, high: 525.00, low: 512.00, open: 516.00, volume: 3200000, marketCap: 180000, pe: 0, lastUpdated: new Date() },
+  { ticker: "TMPV", name: "Tata Motors Passenger Vehicles", exchange: "NSE", price: 430.00, previousClose: 425.00, change: 5.00, changePercent: 1.18, high: 435.00, low: 422.00, open: 426.00, volume: 2800000, marketCap: 170000, pe: 0, lastUpdated: new Date() },
+  { ticker: "BHARTIARTL", name: "Bharti Airtel Ltd", exchange: "NSE", price: 1345.80, previousClose: 1360.00, change: -14.20, changePercent: -1.04, high: 1362.00, low: 1340.00, open: 1358.00, volume: 3456789, marketCap: 780000, pe: 0, lastUpdated: new Date() },
+  { ticker: "SUNPHARMA", name: "Sun Pharma Industries", exchange: "NSE", price: 1178.90, previousClose: 1165.50, change: 13.40, changePercent: 1.15, high: 1185.00, low: 1162.00, open: 1168.00, volume: 2345678, marketCap: 285000, pe: 0, lastUpdated: new Date() },
 ];
 
 export const ALL_AVAILABLE_STOCKS: { ticker: string; name: string; exchange: "NSE" | "BSE" }[] = [
@@ -370,6 +371,7 @@ export function generateStockData(
     open: 0,
     volume: 0,
     marketCap: MARKET_CAP_MAP[ticker] || 0,
+    pe: 0,
     lastUpdated: new Date(),
     ...(options?.yahooSymbol && { yahooSymbol: options.yahooSymbol }),
     ...(options?.isIndex && { isIndex: true }),
