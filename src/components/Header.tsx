@@ -16,6 +16,9 @@ const Header = () => {
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const navigate = useNavigate();
 
+  // Whether the user has an active subscription/trial
+  const hasActiveAccess = isActive;
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -40,16 +43,18 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/portfolio")}
-            className="gap-1.5 text-xs hidden sm:flex"
-            title="Portfolio Dashboard"
-          >
-            <Briefcase className="h-3.5 w-3.5" />
-            Portfolio
-          </Button>
+          {hasActiveAccess && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/portfolio")}
+              className="gap-1.5 text-xs hidden sm:flex"
+              title="Portfolio Dashboard"
+            >
+              <Briefcase className="h-3.5 w-3.5" />
+              Portfolio
+            </Button>
+          )}
 
           {user && subscription?.status === 'trial' && (
             <button
@@ -74,7 +79,7 @@ const Header = () => {
             </Badge>
           )}
 
-          <AlertsPanel />
+          {hasActiveAccess && <AlertsPanel />}
 
           {user ? (
             <div className="flex items-center gap-2">

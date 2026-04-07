@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { StockProvider } from "@/contexts/StockContext";
+import SubscriptionGate from "@/components/SubscriptionGate";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import DevNoticeDialog from "./components/DevNoticeDialog";
@@ -37,9 +38,9 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin" element={<SubscriptionGate><AdminDashboard /></SubscriptionGate>} />
                 
-                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/portfolio" element={<SubscriptionGate><Portfolio /></SubscriptionGate>} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="*" element={<NotFound />} />
