@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { Loader2 } from "lucide-react";
+import RestrictedDashboard from "@/pages/RestrictedDashboard";
 
 interface SubscriptionGateProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface SubscriptionGateProps {
 
 /**
  * Wraps routes that require an active subscription or trial.
- * Expired-trial / inactive users are redirected to /subscribe.
+ * Expired-trial / inactive users see the restricted dashboard.
  * Unauthenticated users are redirected to landing.
  */
 const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
@@ -22,23 +23,8 @@ const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     if (authLoading) return;
     if (!user) {
       navigate("/", { replace: true });
-      return;
     }
   }, [authLoading, user, navigate]);
-
-  useEffect(() => {
-    if (authLoading || subLoading) return;
-    if (!user) return;
-    // If there's a subscription record but it's not active, block access
-    if (subscription && !isActive) {
-      navigate("/subscribe", { replace: true });
-      return;
-    }
-    // If there's no subscription record at all, also block
-    if (!subscription) {
-      navigate("/subscribe", { replace: true });
-    }
-  }, [authLoading, subLoading, user, subscription, isActive, navigate]);
 
   if (authLoading || subLoading) {
     return (
@@ -48,7 +34,12 @@ const SubscriptionGate = ({ children }: SubscriptionGateProps) => {
     );
   }
 
-  if (!user || !isActive) return null;
+  if (!user) return null;
+
+  // No active subscription → show restricted dashboard
+  if (!isActive) {
+    return <RestrictedDashboard />;
+  }
 
   return <>{children}</>;
 };
