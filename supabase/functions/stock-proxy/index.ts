@@ -401,12 +401,12 @@ Deno.serve(async (req) => {
       return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
     });
 
-    // Identify resolved tickers that need enrichment (marketCap=0 or volume=0)
+    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0)
     const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
       const key = `${s.exchange}_${s.ticker}`;
       if (!resolvedKeys.has(key)) return false;
       const d = result[key];
-      return (d.marketCap === 0 || d.volume === 0);
+      return (d.marketCap === 0 || d.volume === 0 || d.pe === 0);
     });
 
     const SCRAPE_TIMEOUT = 4000; // 4s timeout per scrape
@@ -427,12 +427,13 @@ Deno.serve(async (req) => {
             if (screenerData && gfData) {
               if (fallback.marketCap === 0 && gfData.marketCap) fallback.marketCap = gfData.marketCap;
               if (fallback.volume === 0 && gfData.volume) fallback.volume = gfData.volume;
+              if ((!fallback.pe || fallback.pe === 0) && gfData.pe) fallback.pe = gfData.pe;
             }
             result[`${s.exchange}_${s.ticker}`] = fallback;
           }
         } catch { /* both timed out */ }
       }),
-      // Enrichment for stocks with missing marketCap or volume — race both sources
+      // Enrichment for stocks with missing marketCap, volume, or P/E — race both sources
       ...needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
         const key = `${s.exchange}_${s.ticker}`;
         try {
@@ -447,6 +448,9 @@ Deno.serve(async (req) => {
           }
           if (result[key].volume === 0) {
             result[key].volume = sData?.volume || gData?.volume || 0;
+          }
+          if (result[key].pe === 0) {
+            result[key].pe = sData?.pe || gData?.pe || 0;
           }
         } catch { /* both timed out */ }
       }),
