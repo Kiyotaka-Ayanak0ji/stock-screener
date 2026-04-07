@@ -37,9 +37,26 @@ const KNOWN_SECTORS: Record<string, string> = {
   GANDHAR: "Chemicals", RPSGVENT: "Diversified",
 };
 
-async function fetchSectorFromScreener(ticker: string): Promise<string | null> {
+function extractSectorFromHtml(html: string): string | null {
+  const patterns = [
+    /title="Sector"[^>]*>([^<]+)<\/a>/i,
+    /class="sub"[^>]*>[^<]*<a[^>]*>([^<]+)<\/a>/i,
+    /title="Broad Sector"[^>]*>([^<]+)<\/a>/i,
+    /title="Industry"[^>]*>([^<]+)<\/a>/i,
+    /Sector\s*(?::|=)\s*([A-Za-z &,]+)/i,
+  ];
+  for (const p of patterns) {
+    const m = html.match(p);
+    if (m?.[1]) {
+      const sector = m[1].replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim();
+      if (sector.length > 1 && sector.length < 60) return sector;
+    }
+  }
+  return null;
+}
+
+async function fetchScreenerHtml(url: string): Promise<string | null> {
   try {
-    const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -48,33 +65,49 @@ async function fetchSectorFromScreener(ticker: string): Promise<string | null> {
       signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
-    const html = await res.text();
-
-    // Screener.in has a company-info section with sector/industry links
-    const patterns = [
-      // <a ... title="Sector">Consumer Durables</a>
-      /title="Sector"[^>]*>([^<]+)<\/a>/i,
-      // Sector link in sub navigation
-      /class="sub"[^>]*>[^<]*<a[^>]*>([^<]+)<\/a>/i,
-      // Broad sector from peers
-      /title="Broad Sector"[^>]*>([^<]+)<\/a>/i,
-      // Industry as final fallback  
-      /title="Industry"[^>]*>([^<]+)<\/a>/i,
-      // Company ratios section sometimes has sector info
-      /Sector\s*(?::|=)\s*([A-Za-z &,]+)/i,
-    ];
-
-    for (const p of patterns) {
-      const m = html.match(p);
-      if (m?.[1]) {
-        const sector = m[1].replace(/&amp;/g, "&").replace(/&#39;/g, "'").trim();
-        if (sector.length > 1 && sector.length < 60) return sector;
-      }
-    }
-    return null;
+    return await res.text();
   } catch {
     return null;
   }
+}
+
+async function fetchSectorFromScreener(ticker: string): Promise<string | null> {
+  // Try direct ticker URL first
+  const html = await fetchScreenerHtml(
+    `https://www.screener.in/company/${encodeURIComponent(ticker)}/`
+  );
+  if (html) {
+    const sector = extractSectorFromHtml(html);
+    if (sector) return sector;
+  }
+
+  // Fallback: use Screener search API to find the correct company page
+  try {
+    const searchRes = await fetch(
+      `https://www.screener.in/api/company/search/?q=${encodeURIComponent(ticker)}`,
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        signal: AbortSignal.timeout(5000),
+      }
+    );
+    if (!searchRes.ok) return null;
+    const results = await searchRes.json();
+    if (!Array.isArray(results) || results.length === 0) return null;
+
+    // Use the first search result's URL (e.g. /company/526443/)
+    const companyUrl = results[0]?.url;
+    if (!companyUrl) return null;
+
+    console.log(`Screener search resolved ${ticker} → ${companyUrl}`);
+    const companyHtml = await fetchScreenerHtml(`https://www.screener.in${companyUrl}`);
+    if (companyHtml) {
+      return extractSectorFromHtml(companyHtml);
+    }
+  } catch {
+    // ignore
+  }
+
+  return null;
 }
 
 async function fetchSectorFromGoogle(ticker: string): Promise<string | null> {
