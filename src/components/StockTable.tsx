@@ -42,8 +42,26 @@ const StockTable = () => {
     else { setSortKey(key); setSortDir(key === "ticker" ? "asc" : "desc"); }
   };
 
+  const filtered = useMemo(() => {
+    let list = [...stocks];
+    // P/E filter (premium only)
+    if (isPremium && isVisible("pe")) {
+      const min = peFilterMin ? parseFloat(peFilterMin) : null;
+      const max = peFilterMax ? parseFloat(peFilterMax) : null;
+      if (min !== null || max !== null) {
+        list = list.filter(s => {
+          if (s.pe <= 0) return false; // Exclude stocks with no P/E data
+          if (min !== null && s.pe < min) return false;
+          if (max !== null && s.pe > max) return false;
+          return true;
+        });
+      }
+    }
+    return list;
+  }, [stocks, isPremium, peFilterMin, peFilterMax, columnVisibility]);
+
   const sorted = useMemo(() => {
-    return [...stocks].sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
         case "ticker": cmp = a.ticker.localeCompare(b.ticker); break;
@@ -52,6 +70,7 @@ const StockTable = () => {
         case "changePercent": cmp = a.changePercent - b.changePercent; break;
         case "volume": cmp = a.volume - b.volume; break;
         case "marketCap": cmp = a.marketCap - b.marketCap; break;
+        case "pe": cmp = (a.pe || 0) - (b.pe || 0); break;
         case "event": {
           const aEvent = events.find(e => e.ticker === a.ticker)?.tags?.join(",") || "";
           const bEvent = events.find(e => e.ticker === b.ticker)?.tags?.join(",") || "";
