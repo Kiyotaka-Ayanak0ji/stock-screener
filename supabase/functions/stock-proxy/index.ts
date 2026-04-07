@@ -193,7 +193,7 @@ async function fetchGoogleFinanceFull(ticker: string, exchange: string): Promise
 }
 
 // Fallback: scrape Google Finance for market cap when Screener is unavailable
-async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number } | null> {
+async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number; pe?: number } | null> {
   try {
     const gfExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
     const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
@@ -206,14 +206,12 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
     if (!res.ok) return null;
     const html = await res.text();
 
-    const result: { marketCap?: number; volume?: number } = {};
+    const result: { marketCap?: number; volume?: number; pe?: number } = {};
 
-    // Market cap pattern: data-source="...Market cap..." followed by value like "1.07T INR" or "214.00Cr INR"
     const mcMatch = html.match(/Market cap[\s\S]*?([\d,.]+)\s*(T|B|Cr|M|K)?\s*INR/i);
     if (mcMatch) {
       let val = parseFloat(mcMatch[1].replace(/,/g, ''));
       const unit = (mcMatch[2] || '').toUpperCase();
-      // Convert to raw value then to Crores in the caller
       if (unit === 'T') val = val * 1e12;
       else if (unit === 'B') val = val * 1e9;
       else if (unit === 'CR') val = val * 1e7;
@@ -223,7 +221,6 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
       console.log(`Google Finance enrichment: ${ticker} marketCap=${val}`);
     }
 
-    // Avg Volume pattern
     const volMatch = html.match(/Avg Volume[\s\S]*?([\d,.]+)\s*(K|M|B)?/i);
     if (volMatch) {
       let vol = parseFloat(volMatch[1].replace(/,/g, ''));
@@ -232,6 +229,12 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
       else if (unit === 'M') vol *= 1e6;
       else if (unit === 'B') vol *= 1e9;
       result.volume = Math.round(vol);
+    }
+
+    const peMatch = html.match(/P\/E ratio[\s\S]*?([\d,.]+)/i);
+    if (peMatch) {
+      const pe = parseFloat(peMatch[1].replace(/,/g, ''));
+      if (!isNaN(pe) && pe > 0) result.pe = pe;
     }
 
     return Object.keys(result).length > 0 ? result : null;
