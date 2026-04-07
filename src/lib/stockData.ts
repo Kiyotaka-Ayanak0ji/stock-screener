@@ -11,6 +11,7 @@ export interface Stock {
   open: number;
   volume: number;
   marketCap: number;
+  pe: number;
   lastUpdated: Date;
   yahooSymbol?: string; // For indices/special symbols where ticker != Yahoo symbol
   isIndex?: boolean;
