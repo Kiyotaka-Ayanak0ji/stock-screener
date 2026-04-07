@@ -78,7 +78,7 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
 
     // Extract Stock P/E ratio
     let pe = 0;
-    const peMatch = html.match(/Stock P\/E[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
+    const peMatch = html.match(/Stock P\/E[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>[\s\S]*?<\/li>/i);
     if (peMatch) {
       pe = parseFloat(peMatch[1].replace(/,/g, ''));
       if (isNaN(pe)) pe = 0;
