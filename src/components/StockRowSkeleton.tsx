@@ -66,6 +66,12 @@ const StockRowSkeleton = ({ index, columnVisibility, customColumnCount }: StockR
           <Skeleton className="h-3 w-18 ml-auto" />
         </td>
       )}
+      {/* P/E Ratio */}
+      {isVisible("pe") && (
+        <td className="px-4 py-3 text-right hidden md:table-cell">
+          <Skeleton className="h-3 w-14 ml-auto" />
+        </td>
+      )}
       {/* Custom columns */}
       {Array.from({ length: customColumnCount }).map((_, i) => (
         <td key={`custom-${i}`} className="px-4 py-3 text-right">
