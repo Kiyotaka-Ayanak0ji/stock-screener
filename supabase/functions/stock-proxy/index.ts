@@ -177,8 +177,16 @@ async function fetchGoogleFinanceFull(ticker: string, exchange: string): Promise
       volume = Math.round(vol);
     }
 
-    console.log(`Google Finance full fallback: ${ticker} = ₹${price}`);
-    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap };
+    // Extract P/E ratio
+    let pe = 0;
+    const peMatch = html.match(/P\/E ratio[\s\S]*?([\d,.]+)/i);
+    if (peMatch) {
+      pe = parseFloat(peMatch[1].replace(/,/g, ''));
+      if (isNaN(pe)) pe = 0;
+    }
+
+    console.log(`Google Finance full fallback: ${ticker} = ₹${price}, PE=${pe}`);
+    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap, pe };
   } catch {
     return null;
   }
