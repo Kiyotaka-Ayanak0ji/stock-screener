@@ -76,9 +76,20 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
       volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
     }
 
-    console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}, Vol=${volume}`);
+    // Extract Stock P/E ratio
+    let pe = 0;
+    const peLiMatch = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
+    if (peLiMatch) {
+      const peNumMatch = peLiMatch[0].match(/<span class="number">([\d,]+(?:\.\d+)?)<\/span>/);
+      if (peNumMatch && peNumMatch[1]) {
+        pe = parseFloat(peNumMatch[1].replace(/,/g, ''));
+        if (isNaN(pe)) pe = 0;
+      }
+    }
 
-    return { ltp: price, open: price, high: price, low: price, close: price, volume, marketCap };
+    console.log(`Screener fallback: ${ticker} = ₹${price}, MCap=${marketCap}, Vol=${volume}, PE=${pe}`);
+
+    return { ltp: price, open: price, high: price, low: price, close: price, volume, marketCap, pe };
   } catch (err) {
     console.error(`Screener fallback error for ${ticker}:`, err);
     return null;
@@ -86,7 +97,7 @@ async function fetchScreenerFallback(ticker: string): Promise<Record<string, num
 }
 
 // Fetch only market cap and volume from Screener for enrichment
-async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: number; volume?: number } | null> {
+async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: number; volume?: number; pe?: number } | null> {
   try {
     const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
     const res = await fetch(url, {
@@ -98,7 +109,7 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
     if (!res.ok) return null;
     const html = await res.text();
 
-    const result: { marketCap?: number; volume?: number } = {};
+    const result: { marketCap?: number; volume?: number; pe?: number } = {};
 
     const mcSection = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
     if (mcSection) {
@@ -108,6 +119,15 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
     const volMatch = html.match(/Volume[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
     if (volMatch) {
       result.volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
+    }
+
+    const peLiMatch = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
+    if (peLiMatch) {
+      const peNumMatch = peLiMatch[0].match(/<span class="number">([\d,]+(?:\.\d+)?)<\/span>/);
+      if (peNumMatch && peNumMatch[1]) {
+        const pe = parseFloat(peNumMatch[1].replace(/,/g, ''));
+        if (!isNaN(pe) && pe > 0) result.pe = pe;
+      }
     }
 
     return result;
@@ -163,15 +183,23 @@ async function fetchGoogleFinanceFull(ticker: string, exchange: string): Promise
       volume = Math.round(vol);
     }
 
-    console.log(`Google Finance full fallback: ${ticker} = ₹${price}`);
-    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap };
+    // Extract P/E ratio
+    let pe = 0;
+    const peMatch = html.match(/P\/E ratio[\s\S]*?([\d,.]+)/i);
+    if (peMatch) {
+      pe = parseFloat(peMatch[1].replace(/,/g, ''));
+      if (isNaN(pe)) pe = 0;
+    }
+
+    console.log(`Google Finance full fallback: ${ticker} = ₹${price}, PE=${pe}`);
+    return { ltp: price, open: price, high: price, low: price, close, volume, marketCap, pe };
   } catch {
     return null;
   }
 }
 
 // Fallback: scrape Google Finance for market cap when Screener is unavailable
-async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number } | null> {
+async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Promise<{ marketCap?: number; volume?: number; pe?: number } | null> {
   try {
     const gfExchange = exchange === 'BSE' ? 'BOM' : 'NSE';
     const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
@@ -184,14 +212,12 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
     if (!res.ok) return null;
     const html = await res.text();
 
-    const result: { marketCap?: number; volume?: number } = {};
+    const result: { marketCap?: number; volume?: number; pe?: number } = {};
 
-    // Market cap pattern: data-source="...Market cap..." followed by value like "1.07T INR" or "214.00Cr INR"
     const mcMatch = html.match(/Market cap[\s\S]*?([\d,.]+)\s*(T|B|Cr|M|K)?\s*INR/i);
     if (mcMatch) {
       let val = parseFloat(mcMatch[1].replace(/,/g, ''));
       const unit = (mcMatch[2] || '').toUpperCase();
-      // Convert to raw value then to Crores in the caller
       if (unit === 'T') val = val * 1e12;
       else if (unit === 'B') val = val * 1e9;
       else if (unit === 'CR') val = val * 1e7;
@@ -201,7 +227,6 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
       console.log(`Google Finance enrichment: ${ticker} marketCap=${val}`);
     }
 
-    // Avg Volume pattern
     const volMatch = html.match(/Avg Volume[\s\S]*?([\d,.]+)\s*(K|M|B)?/i);
     if (volMatch) {
       let vol = parseFloat(volMatch[1].replace(/,/g, ''));
@@ -210,6 +235,12 @@ async function fetchGoogleFinanceMarketCap(ticker: string, exchange: string): Pr
       else if (unit === 'M') vol *= 1e6;
       else if (unit === 'B') vol *= 1e9;
       result.volume = Math.round(vol);
+    }
+
+    const peMatch = html.match(/P\/E ratio[\s\S]*?([\d,.]+)/i);
+    if (peMatch) {
+      const pe = parseFloat(peMatch[1].replace(/,/g, ''));
+      if (!isNaN(pe) && pe > 0) result.pe = pe;
     }
 
     return Object.keys(result).length > 0 ? result : null;
@@ -376,12 +407,12 @@ Deno.serve(async (req) => {
       return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
     });
 
-    // Identify resolved tickers that need enrichment (marketCap=0 or volume=0)
+    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0)
     const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
       const key = `${s.exchange}_${s.ticker}`;
       if (!resolvedKeys.has(key)) return false;
       const d = result[key];
-      return (d.marketCap === 0 || d.volume === 0);
+      return (d.marketCap === 0 || d.volume === 0 || d.pe === 0);
     });
 
     const SCRAPE_TIMEOUT = 4000; // 4s timeout per scrape
@@ -402,12 +433,13 @@ Deno.serve(async (req) => {
             if (screenerData && gfData) {
               if (fallback.marketCap === 0 && gfData.marketCap) fallback.marketCap = gfData.marketCap;
               if (fallback.volume === 0 && gfData.volume) fallback.volume = gfData.volume;
+              if ((!fallback.pe || fallback.pe === 0) && gfData.pe) fallback.pe = gfData.pe;
             }
             result[`${s.exchange}_${s.ticker}`] = fallback;
           }
         } catch { /* both timed out */ }
       }),
-      // Enrichment for stocks with missing marketCap or volume — race both sources
+      // Enrichment for stocks with missing marketCap, volume, or P/E — race both sources
       ...needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
         const key = `${s.exchange}_${s.ticker}`;
         try {
@@ -422,6 +454,9 @@ Deno.serve(async (req) => {
           }
           if (result[key].volume === 0) {
             result[key].volume = sData?.volume || gData?.volume || 0;
+          }
+          if (result[key].pe === 0) {
+            result[key].pe = sData?.pe || gData?.pe || 0;
           }
         } catch { /* both timed out */ }
       }),
