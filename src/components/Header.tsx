@@ -16,6 +16,9 @@ const Header = () => {
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const navigate = useNavigate();
 
+  // Whether the user has an active subscription/trial
+  const hasActiveAccess = isActive;
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
