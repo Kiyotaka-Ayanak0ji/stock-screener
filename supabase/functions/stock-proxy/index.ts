@@ -121,10 +121,13 @@ async function fetchScreenerEnrichment(ticker: string): Promise<{ marketCap?: nu
       result.volume = Math.round(parseFloat(volMatch[1].replace(/,/g, '')));
     }
 
-    const peMatch = html.match(/Stock P\/E[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
-    if (peMatch) {
-      const pe = parseFloat(peMatch[1].replace(/,/g, ''));
-      if (!isNaN(pe) && pe > 0) result.pe = pe;
+    const peLiMatch = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
+    if (peLiMatch) {
+      const peNumMatch = peLiMatch[0].match(/<span class="number">([\d,]+(?:\.\d+)?)<\/span>/);
+      if (peNumMatch && peNumMatch[1]) {
+        const pe = parseFloat(peNumMatch[1].replace(/,/g, ''));
+        if (!isNaN(pe) && pe > 0) result.pe = pe;
+      }
     }
 
     return result;
