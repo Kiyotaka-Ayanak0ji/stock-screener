@@ -413,7 +413,7 @@ const Portfolio = () => {
                 onClick={() => setSelectedSector(selectedSector === s.sector ? null : s.sector)}
               >
                 <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
-                {s.sector} ({s.count}) · {s.percentage.toFixed(0)}%
+                {s.sector} ({s.count}) · {s.percentage.toFixed(1)}%
               </Badge>
             ))}
           </motion.div>
@@ -449,7 +449,7 @@ const Portfolio = () => {
                           outerRadius={95}
                           innerRadius={45}
                           strokeWidth={2}
-                          label={({ sector, percentage }) => `${percentage.toFixed(0)}%`}
+                          label={({ sector, percentage }) => `${percentage.toFixed(1)}%`}
                           labelLine={false}
                         >
                           {sectorAllocation.map((_, i) => (
