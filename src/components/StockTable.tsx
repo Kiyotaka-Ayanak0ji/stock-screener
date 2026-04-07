@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Filter } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
@@ -11,11 +11,17 @@ import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "event" | string;
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useSubscription } from "@/hooks/useSubscription";
+import PremiumDialog from "@/components/PremiumDialog";
+type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "pe" | "event" | string;
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  const { subscription } = useSubscription();
+  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
@@ -25,6 +31,9 @@ const StockTable = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [sortKey, setSortKey] = useState<SortKey>("ticker");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [peFilterMin, setPeFilterMin] = useState<string>("");
+  const [peFilterMax, setPeFilterMax] = useState<string>("");
+  const [premiumOpen, setPremiumOpen] = useState(false);
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
 
