@@ -162,6 +162,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         open_price: s.open,
         volume: s.volume,
         market_cap: s.marketCap,
+        pe: s.pe || 0,
         updated_at: new Date().toISOString(),
       }));
 
@@ -212,6 +213,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               open: Number(cached.open_price),
               volume: Number(cached.volume),
               marketCap: Number(cached.market_cap),
+              pe: Number(cached.pe) || 0,
               lastUpdated: new Date(cached.updated_at),
             };
           }
