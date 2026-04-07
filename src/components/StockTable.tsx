@@ -195,8 +195,8 @@ const StockTable = () => {
                       {isPremium && (
                         <Popover>
                           <PopoverTrigger asChild onClick={e => e.stopPropagation()}>
-                            <button className="ml-0.5 hover:text-primary transition-colors text-xs">
-                              {peFilterMin || peFilterMax ? "✕" : "▾"}
+                            <button className="ml-0.5 hover:text-primary transition-colors">
+                              <Filter className={`h-3 w-3 ${peFilterMin || peFilterMax ? "text-primary" : "opacity-40"}`} />
                             </button>
                           </PopoverTrigger>
                           <PopoverContent className="w-52 p-3" align="end" onClick={e => e.stopPropagation()}>
