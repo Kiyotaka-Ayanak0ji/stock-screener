@@ -32,10 +32,8 @@ const Unsubscribe = () => {
         setStatus("invalid");
         return;
       }
-      if (data?.expired) {
-        setStatus("expired");
-      } else if (data?.error) {
-        setStatus("invalid");
+      if (data?.error) {
+      } else if (data?.alreadyUnsubscribed) {
       } else if (data?.alreadyUnsubscribed) {
         setStatus("already");
       } else if (data?.valid) {
