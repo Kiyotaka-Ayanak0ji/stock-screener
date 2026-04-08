@@ -113,6 +113,29 @@ const StockTable = () => {
 
   const headerClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors";
 
+  const FilterPopover = ({ label, min, max, setMin, setMax }: { label: string; min: string; max: string; setMin: (v: string) => void; setMax: (v: string) => void }) => (
+    <Popover>
+      <PopoverTrigger asChild onClick={e => e.stopPropagation()}>
+        <button className="ml-0.5 hover:text-primary transition-colors">
+          <Filter className={`h-3 w-3 ${min || max ? "text-primary" : "opacity-40"}`} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-3" align="end" onClick={e => e.stopPropagation()}>
+        <p className="text-xs font-medium mb-2">Filter by {label}</p>
+        <div className="flex items-center gap-2">
+          <Input type="number" placeholder="Min" value={min} onChange={e => setMin(e.target.value)} className="h-7 text-xs" step="any" />
+          <span className="text-xs text-muted-foreground">—</span>
+          <Input type="number" placeholder="Max" value={max} onChange={e => setMax(e.target.value)} className="h-7 text-xs" step="any" />
+        </div>
+        {(min || max) && (
+          <Button size="sm" variant="ghost" className="w-full mt-2 text-xs h-7" onClick={() => { setMin(""); setMax(""); }}>
+            Clear Filter
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+
   const visibleCustomColumns = customColumns.filter(c => isVisible(`custom_${c.id}`));
 
   return (
