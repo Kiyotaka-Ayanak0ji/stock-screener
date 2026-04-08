@@ -202,7 +202,10 @@ const StockTable = () => {
                 )}
                 {isVisible("price") && (
                   <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
-                    <div className="flex items-center justify-end gap-1">Price <SortIcon col="price" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Price <SortIcon col="price" />
+                      {isPremium && <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("change") && (
