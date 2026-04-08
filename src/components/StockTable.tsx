@@ -6,6 +6,7 @@ import StockRow from "@/components/StockRow";
 import AddStockDialog from "@/components/AddStockDialog";
 import StockRowSkeleton from "@/components/StockRowSkeleton";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
+import FilterPopover from "@/components/FilterPopover";
 import WatchlistManager from "@/components/WatchlistManager";
 import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
