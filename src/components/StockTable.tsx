@@ -221,12 +221,18 @@ const StockTable = () => {
                 )}
                 {isVisible("volume") && (
                   <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
-                    <div className="flex items-center justify-end gap-1">Volume <SortIcon col="volume" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Volume <SortIcon col="volume" />
+                      {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("marketCap") && (
                   <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
-                    <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Market Cap <SortIcon col="marketCap" />
+                      {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("pe") && (
