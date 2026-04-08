@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Loader2, MailX, Clock, Settings } from "lucide-react";
+import { CheckCircle, XCircle, Loader2, MailX, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
@@ -85,11 +85,6 @@ const Unsubscribe = () => {
       title: "Successfully Unsubscribed",
       desc: "You have been unsubscribed from email digest updates. You will still receive important alerts. You can re-enable email updates anytime from your profile settings.",
     },
-    expired: {
-      icon: <Clock className="h-12 w-12 text-yellow-500" />,
-      title: "Link Expired",
-      desc: "This unsubscribe link has expired (valid for 10 minutes only). You can manage your email preferences from your profile settings instead.",
-    },
     invalid: {
       icon: <XCircle className="h-12 w-12 text-destructive" />,
       title: "Invalid Link",
@@ -103,7 +98,7 @@ const Unsubscribe = () => {
   };
 
   const c = content[status];
-  const showProfileButton = status === "expired" || status === "invalid" || status === "success" || status === "error";
+  const showProfileButton = status === "invalid" || status === "success" || status === "error";
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
