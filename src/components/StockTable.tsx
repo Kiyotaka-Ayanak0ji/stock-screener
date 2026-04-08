@@ -33,6 +33,12 @@ const StockTable = () => {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [peFilterMin, setPeFilterMin] = useState<string>("");
   const [peFilterMax, setPeFilterMax] = useState<string>("");
+  const [priceFilterMin, setPriceFilterMin] = useState<string>("");
+  const [priceFilterMax, setPriceFilterMax] = useState<string>("");
+  const [volumeFilterMin, setVolumeFilterMin] = useState<string>("");
+  const [volumeFilterMax, setVolumeFilterMax] = useState<string>("");
+  const [mcapFilterMin, setMcapFilterMin] = useState<string>("");
+  const [mcapFilterMax, setMcapFilterMax] = useState<string>("");
   const [premiumOpen, setPremiumOpen] = useState(false);
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
