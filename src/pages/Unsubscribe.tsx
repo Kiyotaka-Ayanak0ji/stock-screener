@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Loader2, MailX, Clock, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 
-type Status = "loading" | "valid" | "already" | "invalid" | "expired" | "success" | "error";
+type Status = "loading" | "valid" | "already" | "invalid" | "success" | "error";
 
 const Unsubscribe = () => {
   const [searchParams] = useSearchParams();

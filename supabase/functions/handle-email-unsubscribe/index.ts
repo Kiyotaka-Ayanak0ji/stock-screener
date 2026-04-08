@@ -6,8 +6,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const TOKEN_EXPIRY_MINUTES = 10;
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -40,19 +38,6 @@ Deno.serve(async (req) => {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Check if token has expired (10 minute window)
-    const createdAt = new Date(tokenRecord.created_at).getTime();
-    const now = Date.now();
-    const expiryMs = TOKEN_EXPIRY_MINUTES * 60 * 1000;
-    const isExpired = (now - createdAt) > expiryMs;
-
-    if (isExpired && !tokenRecord.used_at) {
-      return new Response(
-        JSON.stringify({ error: "This unsubscribe link has expired. Please use the toggle in your profile settings instead.", expired: true }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
     }
 
     // Validation only (no confirm flag)
