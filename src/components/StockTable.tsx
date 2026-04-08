@@ -33,6 +33,12 @@ const StockTable = () => {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [peFilterMin, setPeFilterMin] = useState<string>("");
   const [peFilterMax, setPeFilterMax] = useState<string>("");
+  const [priceFilterMin, setPriceFilterMin] = useState<string>("");
+  const [priceFilterMax, setPriceFilterMax] = useState<string>("");
+  const [volumeFilterMin, setVolumeFilterMin] = useState<string>("");
+  const [volumeFilterMax, setVolumeFilterMax] = useState<string>("");
+  const [mcapFilterMin, setMcapFilterMin] = useState<string>("");
+  const [mcapFilterMax, setMcapFilterMax] = useState<string>("");
   const [premiumOpen, setPremiumOpen] = useState(false);
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
@@ -42,23 +48,32 @@ const StockTable = () => {
     else { setSortKey(key); setSortDir(key === "ticker" ? "asc" : "desc"); }
   };
 
+  const applyRange = (value: number, min: string, max: string) => {
+    const lo = min ? parseFloat(min) : null;
+    const hi = max ? parseFloat(max) : null;
+    if (lo !== null && value < lo) return false;
+    if (hi !== null && value > hi) return false;
+    return true;
+  };
+
   const filtered = useMemo(() => {
     let list = [...stocks];
-    // P/E filter (premium only)
-    if (isPremium && isVisible("pe")) {
-      const min = peFilterMin ? parseFloat(peFilterMin) : null;
-      const max = peFilterMax ? parseFloat(peFilterMax) : null;
-      if (min !== null || max !== null) {
-        list = list.filter(s => {
-          if (s.pe <= 0) return false; // Exclude stocks with no P/E data
-          if (min !== null && s.pe < min) return false;
-          if (max !== null && s.pe > max) return false;
-          return true;
-        });
+    if (isPremium) {
+      if (isVisible("pe") && (peFilterMin || peFilterMax)) {
+        list = list.filter(s => s.pe > 0 && applyRange(s.pe, peFilterMin, peFilterMax));
+      }
+      if (isVisible("price") && (priceFilterMin || priceFilterMax)) {
+        list = list.filter(s => applyRange(s.price, priceFilterMin, priceFilterMax));
+      }
+      if (isVisible("volume") && (volumeFilterMin || volumeFilterMax)) {
+        list = list.filter(s => applyRange(s.volume, volumeFilterMin, volumeFilterMax));
+      }
+      if (isVisible("marketCap") && (mcapFilterMin || mcapFilterMax)) {
+        list = list.filter(s => applyRange(s.marketCap, mcapFilterMin, mcapFilterMax));
       }
     }
     return list;
-  }, [stocks, isPremium, peFilterMin, peFilterMax, columnVisibility]);
+  }, [stocks, isPremium, peFilterMin, peFilterMax, priceFilterMin, priceFilterMax, volumeFilterMin, volumeFilterMax, mcapFilterMin, mcapFilterMax, columnVisibility]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -97,6 +112,29 @@ const StockTable = () => {
   };
 
   const headerClass = "px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer select-none hover:text-foreground transition-colors";
+
+  const FilterPopover = ({ label, min, max, setMin, setMax }: { label: string; min: string; max: string; setMin: (v: string) => void; setMax: (v: string) => void }) => (
+    <Popover>
+      <PopoverTrigger asChild onClick={e => e.stopPropagation()}>
+        <button className="ml-0.5 hover:text-primary transition-colors">
+          <Filter className={`h-3 w-3 ${min || max ? "text-primary" : "opacity-40"}`} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-3" align="end" onClick={e => e.stopPropagation()}>
+        <p className="text-xs font-medium mb-2">Filter by {label}</p>
+        <div className="flex items-center gap-2">
+          <Input type="number" placeholder="Min" value={min} onChange={e => setMin(e.target.value)} className="h-7 text-xs" step="any" />
+          <span className="text-xs text-muted-foreground">—</span>
+          <Input type="number" placeholder="Max" value={max} onChange={e => setMax(e.target.value)} className="h-7 text-xs" step="any" />
+        </div>
+        {(min || max) && (
+          <Button size="sm" variant="ghost" className="w-full mt-2 text-xs h-7" onClick={() => { setMin(""); setMax(""); }}>
+            Clear Filter
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
 
   const visibleCustomColumns = customColumns.filter(c => isVisible(`custom_${c.id}`));
 
@@ -164,7 +202,10 @@ const StockTable = () => {
                 )}
                 {isVisible("price") && (
                   <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
-                    <div className="flex items-center justify-end gap-1">Price <SortIcon col="price" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Price <SortIcon col="price" />
+                      {isPremium && <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("change") && (
@@ -180,59 +221,25 @@ const StockTable = () => {
                 )}
                 {isVisible("volume") && (
                   <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
-                    <div className="flex items-center justify-end gap-1">Volume <SortIcon col="volume" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Volume <SortIcon col="volume" />
+                      {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("marketCap") && (
                   <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
-                    <div className="flex items-center justify-end gap-1">Market Cap <SortIcon col="marketCap" /></div>
+                    <div className="flex items-center justify-end gap-1">
+                      Market Cap <SortIcon col="marketCap" />
+                      {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
+                    </div>
                   </th>
                 )}
                 {isVisible("pe") && (
                   <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
                     <div className="flex items-center justify-end gap-1">
                       P/E <SortIcon col="pe" />
-                      {isPremium && (
-                        <Popover>
-                          <PopoverTrigger asChild onClick={e => e.stopPropagation()}>
-                            <button className="ml-0.5 hover:text-primary transition-colors">
-                              <Filter className={`h-3 w-3 ${peFilterMin || peFilterMax ? "text-primary" : "opacity-40"}`} />
-                            </button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-52 p-3" align="end" onClick={e => e.stopPropagation()}>
-                            <p className="text-xs font-medium mb-2">Filter by P/E Ratio</p>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="number"
-                                placeholder="Min"
-                                value={peFilterMin}
-                                onChange={e => setPeFilterMin(e.target.value)}
-                                className="h-7 text-xs"
-                                step="any"
-                              />
-                              <span className="text-xs text-muted-foreground">—</span>
-                              <Input
-                                type="number"
-                                placeholder="Max"
-                                value={peFilterMax}
-                                onChange={e => setPeFilterMax(e.target.value)}
-                                className="h-7 text-xs"
-                                step="any"
-                              />
-                            </div>
-                            {(peFilterMin || peFilterMax) && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="w-full mt-2 text-xs h-7"
-                                onClick={() => { setPeFilterMin(""); setPeFilterMax(""); }}
-                              >
-                                Clear Filter
-                              </Button>
-                            )}
-                          </PopoverContent>
-                        </Popover>
-                      )}
+                      {isPremium && <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />}
                     </div>
                   </th>
                 )}
