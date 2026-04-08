@@ -48,23 +48,32 @@ const StockTable = () => {
     else { setSortKey(key); setSortDir(key === "ticker" ? "asc" : "desc"); }
   };
 
+  const applyRange = (value: number, min: string, max: string) => {
+    const lo = min ? parseFloat(min) : null;
+    const hi = max ? parseFloat(max) : null;
+    if (lo !== null && value < lo) return false;
+    if (hi !== null && value > hi) return false;
+    return true;
+  };
+
   const filtered = useMemo(() => {
     let list = [...stocks];
-    // P/E filter (premium only)
-    if (isPremium && isVisible("pe")) {
-      const min = peFilterMin ? parseFloat(peFilterMin) : null;
-      const max = peFilterMax ? parseFloat(peFilterMax) : null;
-      if (min !== null || max !== null) {
-        list = list.filter(s => {
-          if (s.pe <= 0) return false; // Exclude stocks with no P/E data
-          if (min !== null && s.pe < min) return false;
-          if (max !== null && s.pe > max) return false;
-          return true;
-        });
+    if (isPremium) {
+      if (isVisible("pe") && (peFilterMin || peFilterMax)) {
+        list = list.filter(s => s.pe > 0 && applyRange(s.pe, peFilterMin, peFilterMax));
+      }
+      if (isVisible("price") && (priceFilterMin || priceFilterMax)) {
+        list = list.filter(s => applyRange(s.price, priceFilterMin, priceFilterMax));
+      }
+      if (isVisible("volume") && (volumeFilterMin || volumeFilterMax)) {
+        list = list.filter(s => applyRange(s.volume, volumeFilterMin, volumeFilterMax));
+      }
+      if (isVisible("marketCap") && (mcapFilterMin || mcapFilterMax)) {
+        list = list.filter(s => applyRange(s.marketCap, mcapFilterMin, mcapFilterMax));
       }
     }
     return list;
-  }, [stocks, isPremium, peFilterMin, peFilterMax, columnVisibility]);
+  }, [stocks, isPremium, peFilterMin, peFilterMax, priceFilterMin, priceFilterMax, volumeFilterMin, volumeFilterMax, mcapFilterMin, mcapFilterMax, columnVisibility]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
