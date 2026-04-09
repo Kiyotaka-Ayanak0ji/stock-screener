@@ -396,25 +396,39 @@ const Portfolio = () => {
         )}
 
         {/* Sector Filter Tags */}
+        {/* Sector Filter Pills */}
         {sectorAllocation.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex flex-wrap gap-1.5">
-            <Badge
-              variant={selectedSector === null ? "default" : "outline"}
-              className="cursor-pointer text-xs transition-all hover:scale-105"
+            <button
               onClick={() => setSelectedSector(null)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                selectedSector === null
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
             >
-              All ({holdings.length})
-            </Badge>
+              All
+              <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded-full ${
+                selectedSector === null ? "bg-primary-foreground/20" : "bg-background"
+              }`}>{holdings.length}</span>
+            </button>
             {sectorAllocation.map((s, i) => (
-              <Badge
+              <button
                 key={s.sector}
-                variant={selectedSector === s.sector ? "default" : "outline"}
-                className="cursor-pointer text-xs gap-1 transition-all hover:scale-105"
                 onClick={() => setSelectedSector(selectedSector === s.sector ? null : s.sector)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  selectedSector === s.sector
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
               >
-                <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
-                {s.sector} ({s.count}) · {s.percentage.toFixed(1)}%
-              </Badge>
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: SECTOR_COLORS[i % SECTOR_COLORS.length] }} />
+                {s.sector}
+                <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded-full ${
+                  selectedSector === s.sector ? "bg-primary-foreground/20" : "bg-background"
+                }`}>{s.count}</span>
+                <span className="font-mono text-[10px] opacity-70">{s.percentage.toFixed(1)}%</span>
+              </button>
             ))}
           </motion.div>
         )}
@@ -458,7 +472,6 @@ const Portfolio = () => {
                         </Pie>
                       </PieChart>
                     </ChartContainer>
-                    {/* Legend */}
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1 mt-3 w-full max-w-xs">
                       {sectorAllocation.slice(0, 8).map((s, i) => (
                         <div key={s.sector} className="flex items-center gap-1.5 text-xs">
@@ -476,6 +489,232 @@ const Portfolio = () => {
             </Card>
           </motion.div>
 
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
+            <Card className="border-0 shadow-md">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Stock-wise P&L (%)</CardTitle>
+                    <CardDescription>Top holdings by return</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {barData.length > 0 ? (
+                  <ChartContainer config={barChartConfig} className="aspect-video max-h-[280px]">
+                    <BarChart data={barData} layout="vertical" margin={{ left: 60 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                      <XAxis type="number" tickFormatter={v => `${v}%`} className="text-xs" />
+                      <YAxis type="category" dataKey="ticker" className="text-xs" width={55} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="gainLoss" radius={[0, 4, 4, 0]}>
+                        {barData.map((entry, i) => (
+                          <Cell key={i} fill={entry.fill} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                ) : (
+                  <p className="text-center text-muted-foreground py-10">Add holdings to see P&L chart</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Holdings Table */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+          <Card className="border-0 shadow-md">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-primary/10">
+                    <BarChart2 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">
+                      Holdings ({filteredHoldings.length}{selectedSector ? ` in ${selectedSector}` : ""})
+                    </CardTitle>
+                    <CardDescription className="text-xs">Hover over market data for details</CardDescription>
+                  </div>
+                </div>
+                {selectedSector && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedSector(null)} className="text-xs h-7">
+                    Clear filter
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <p className="text-center text-muted-foreground py-8">Loading holdings...</p>
+              ) : holdings.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    <Wallet className="h-8 w-8 text-muted-foreground/50" />
+                  </div>
+                  <p className="text-muted-foreground mb-4">No holdings yet. Add your first stock to get started.</p>
+                  <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
+                    <Plus className="h-3.5 w-3.5" /> Add Holding
+                  </Button>
+                </div>
+              ) : (
+                <TooltipProvider>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b-2">
+                          <TableHead className="w-[180px]">Stock</TableHead>
+                          <TableHead>Market Data</TableHead>
+                          <TableHead className="text-right">Qty</TableHead>
+                          <TableHead className="text-right">Buy Price</TableHead>
+                          <TableHead className="text-right">CMP</TableHead>
+                          <TableHead className="text-right">Day Chg</TableHead>
+                          <TableHead className="text-right">Invested</TableHead>
+                          <TableHead className="text-right">Current</TableHead>
+                          <TableHead className="text-right">P&L</TableHead>
+                          <TableHead className="text-right">P&L %</TableHead>
+                          <TableHead className="w-[40px]"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <AnimatePresence>
+                          {filteredHoldings.map((h, idx) => (
+                            <motion.tr
+                              key={h.id}
+                              initial={{ opacity: 0, y: 6 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, x: -10 }}
+                              transition={{ delay: idx * 0.03, duration: 0.3 }}
+                              className="border-b transition-colors hover:bg-muted/40 group"
+                            >
+                              {/* Stock: Ticker + Exchange + Sector */}
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex flex-col">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="font-mono font-bold text-sm">{h.ticker}</span>
+                                      <span className="text-[10px] font-medium text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded">{h.exchange}</span>
+                                    </div>
+                                    {h.sector && (
+                                      <button
+                                        onClick={() => setSelectedSector(selectedSector === h.sector ? null : h.sector)}
+                                        className="text-[10px] text-muted-foreground hover:text-primary transition-colors text-left mt-0.5 truncate max-w-[140px]"
+                                      >
+                                        {h.sector}
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              </TableCell>
+
+                              {/* Market Data: MCap, Volume, Day Range */}
+                              <TableCell>
+                                <div className="flex items-center gap-1">
+                                  {h.marketCap && h.marketCap > 0 ? (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-primary/5 text-primary/80 border border-primary/10 px-2 py-0.5 rounded-md cursor-default">
+                                          <Award className="h-2.5 w-2.5" />
+                                          {formatMarketCap(h.marketCap)}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="text-xs">
+                                        Market Cap: ₹{(h.marketCap / 1e7).toLocaleString("en-IN", { maximumFractionDigits: 0 })} Cr
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground/40">—</span>
+                                  )}
+                                  {h.volume && h.volume > 0 ? (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-muted/80 text-muted-foreground border border-border/50 px-2 py-0.5 rounded-md cursor-default">
+                                          <Activity className="h-2.5 w-2.5" />
+                                          {formatVolume(h.volume)}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="text-xs">
+                                        Volume: {h.volume.toLocaleString("en-IN")}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  ) : null}
+                                  {h.high && h.low ? (
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-muted/80 text-muted-foreground border border-border/50 px-2 py-0.5 rounded-md cursor-default">
+                                          ₹{h.low.toLocaleString("en-IN")}–{h.high.toLocaleString("en-IN")}
+                                        </span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="text-xs">
+                                        Day Range — Low: ₹{h.low.toLocaleString("en-IN")} · High: ₹{h.high.toLocaleString("en-IN")}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  ) : null}
+                                </div>
+                              </TableCell>
+
+                              <TableCell className="text-right font-mono text-sm">{h.quantity}</TableCell>
+                              <TableCell className="text-right font-mono text-sm">₹{h.buy_price.toLocaleString("en-IN")}</TableCell>
+                              <TableCell className="text-right font-mono text-sm">
+                                {h.currentPrice ? (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <span>₹{h.currentPrice.toLocaleString("en-IN")}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent className="text-xs">
+                                      {h.priceSource && <span className="capitalize">{h.priceSource}</span>}
+                                      {h.lastUpdated && <span> · {timeAgo(h.lastUpdated)}</span>}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                ) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono text-xs ${(h.dayChangePercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.dayChangePercent !== undefined && h.dayChangePercent !== 0
+                                  ? `${h.dayChangePercent >= 0 ? "+" : ""}${h.dayChangePercent.toFixed(2)}%`
+                                  : "—"}
+                              </TableCell>
+                              <TableCell className="text-right font-mono text-sm">
+                                {formatCurrency(h.investedValue || 0)}
+                              </TableCell>
+                              <TableCell className="text-right font-mono text-sm">
+                                {h.currentValue ? formatCurrency(h.currentValue) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono font-medium text-sm ${(h.gainLoss || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.gainLoss !== undefined ? (
+                                  <span className="flex items-center justify-end gap-1">
+                                    {h.gainLoss >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                                    {formatCurrency(Math.abs(h.gainLoss))}
+                                  </span>
+                                ) : "—"}
+                              </TableCell>
+                              <TableCell className={`text-right font-mono font-semibold text-sm ${(h.gainLossPercent || 0) >= 0 ? "text-gain" : "text-loss"}`}>
+                                {h.gainLossPercent !== undefined ? `${h.gainLossPercent >= 0 ? "+" : ""}${h.gainLossPercent.toFixed(2)}%` : "—"}
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10"
+                                  onClick={() => removeHolding(h.id)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive transition-colors" />
+                                </Button>
+                              </TableCell>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
+                      </TableBody>
+                    </Table>
+                  </div>
+                </TooltipProvider>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
             <Card className="border-0 shadow-md">
               <CardHeader className="pb-2">
