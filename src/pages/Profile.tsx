@@ -73,6 +73,14 @@ const Profile = () => {
       .from("profiles")
       .update({ display_name: displayName.trim(), email_opt_in: emailOptIn })
       .eq("user_id", user.id);
+
+    // If user re-enabled email opt-in, also remove from suppression list
+    if (!error && emailOptIn) {
+      await supabase.functions.invoke("handle-email-unsubscribe", {
+        body: { action: "resubscribe", user_id: user.id },
+      });
+    }
+
     setSaving(false);
     if (error) {
       toast.error("Failed to save profile");

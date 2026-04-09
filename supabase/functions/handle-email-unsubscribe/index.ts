@@ -17,6 +17,55 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
+
+    // ── Re-subscribe flow (called from Profile page) ──
+    if (body.action === "resubscribe" && body.user_id) {
+      // Verify the caller is the same user (check auth header)
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: { user }, error: authError } = await createClient(
+        supabaseUrl,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      ).auth.getUser();
+
+      if (authError || !user || user.id !== body.user_id) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const email = user.email;
+      if (!email) {
+        return new Response(JSON.stringify({ error: "No email found" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Remove from suppressed emails
+      await supabase.from("suppressed_emails").delete().eq("email", email);
+
+      // Reset unsubscribe token (clear used_at so the link works again if they unsubscribe later)
+      await supabase
+        .from("email_unsubscribe_tokens")
+        .update({ used_at: null })
+        .eq("email", email);
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Successfully re-subscribed" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── Unsubscribe flow ──
     const { token } = body;
 
     if (!token) {
