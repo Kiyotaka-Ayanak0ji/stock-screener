@@ -27,6 +27,15 @@ const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; sub
     subject: (props: any) =>
       `🔔 ${props.alerts?.length || 1} price trigger${(props.alerts?.length || 1) > 1 ? 's' : ''} hit`,
   },
+  smart_alert_digest: {
+    component: SmartAlertDigestEmail,
+    subject: (props: any) =>
+      `⚡ ${props.alerts?.length || 1} smart alert${(props.alerts?.length || 1) > 1 ? 's' : ''} detected`,
+  },
+  daily_summary: {
+    component: DailySummaryEmail,
+    subject: (props: any) => `📊 Daily Summary — ${props.date || 'Today'}`,
+  },
 }
 
 Deno.serve(async (req) => {
