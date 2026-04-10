@@ -1,8 +1,9 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase, Shield } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
