@@ -3,6 +3,8 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { WelcomeEmail } from '../_shared/email-templates/welcome.tsx'
 import { PriceTriggerDigestEmail } from '../_shared/email-templates/price-trigger-digest.tsx'
+import { SmartAlertDigestEmail } from '../_shared/email-templates/smart-alert-digest.tsx'
+import { DailySummaryEmail } from '../_shared/email-templates/daily-summary.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
