@@ -94,6 +94,12 @@ const Header = () => {
                 <span className="text-secondary-foreground font-medium truncate max-w-[120px]">
                   {profile?.display_name || user.email}
                 </span>
+                {isAdmin && (
+                  <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] font-semibold bg-primary/15 text-primary border-0">
+                    <Shield className="h-2.5 w-2.5 mr-0.5" />
+                    Admin
+                  </Badge>
+                )}
               </div>
               <Button
                 variant="ghost"
