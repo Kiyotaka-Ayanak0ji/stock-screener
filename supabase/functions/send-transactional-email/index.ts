@@ -3,6 +3,8 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { WelcomeEmail } from '../_shared/email-templates/welcome.tsx'
 import { PriceTriggerDigestEmail } from '../_shared/email-templates/price-trigger-digest.tsx'
+import { SmartAlertDigestEmail } from '../_shared/email-templates/smart-alert-digest.tsx'
+import { DailySummaryEmail } from '../_shared/email-templates/daily-summary.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +26,15 @@ const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; sub
     component: PriceTriggerDigestEmail,
     subject: (props: any) =>
       `🔔 ${props.alerts?.length || 1} price trigger${(props.alerts?.length || 1) > 1 ? 's' : ''} hit`,
+  },
+  smart_alert_digest: {
+    component: SmartAlertDigestEmail,
+    subject: (props: any) =>
+      `⚡ ${props.alerts?.length || 1} smart alert${(props.alerts?.length || 1) > 1 ? 's' : ''} detected`,
+  },
+  daily_summary: {
+    component: DailySummaryEmail,
+    subject: (props: any) => `📊 Daily Summary — ${props.date || 'Today'}`,
   },
 }
 

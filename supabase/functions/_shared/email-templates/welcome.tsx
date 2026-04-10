@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
   Hr,
+  Section,
 } from 'npm:@react-email/components@0.0.22'
 
 interface WelcomeEmailProps {
@@ -28,25 +29,60 @@ export const WelcomeEmail = ({
     <Preview>Welcome to EquityLens — your stock watchlist is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={headerSection}>
+          <Text style={brandText}>
+            Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+          </Text>
+        </Section>
+
         <Heading style={h1}>
-          Welcome to Equity<span style={{ color: '#148a9e' }}>Lens</span> 📈
+          Welcome aboard! 📈
         </Heading>
         <Text style={text}>
           Hey {displayName}! 👋
         </Text>
         <Text style={text}>
           Thanks for joining EquityLens. Your account is set up and ready to go.
-          Here's what you can do:
         </Text>
-        <Text style={featureText}>
-          📊 <strong>Track stocks in real time</strong> — add NSE & BSE stocks to your watchlist{'\n'}
-          🔔 <strong>Set price triggers</strong> — get notified when a stock hits your target price{'\n'}
-          📋 <strong>Multiple watchlists</strong> — organize stocks into separate groups{'\n'}
-          📤 <strong>Share watchlists</strong> — export or share with anyone via a link
-        </Text>
-        <Button style={button} href={siteUrl}>
-          Open Your Dashboard
-        </Button>
+
+        <Section style={featuresGrid}>
+          <table style={{ width: '100%' }}>
+            <tr>
+              <td style={featureCard}>
+                <Text style={featureEmoji}>📊</Text>
+                <Text style={featureTitle}>Real-time Tracking</Text>
+                <Text style={featureDesc}>NSE & BSE stocks, live</Text>
+              </td>
+              <td style={{ width: '10px' }} />
+              <td style={featureCard}>
+                <Text style={featureEmoji}>🔔</Text>
+                <Text style={featureTitle}>Price Triggers</Text>
+                <Text style={featureDesc}>Get notified at target</Text>
+              </td>
+            </tr>
+            <tr><td style={{ height: '10px' }} /><td /><td /></tr>
+            <tr>
+              <td style={featureCard}>
+                <Text style={featureEmoji}>📋</Text>
+                <Text style={featureTitle}>Watchlists</Text>
+                <Text style={featureDesc}>Organize into groups</Text>
+              </td>
+              <td style={{ width: '10px' }} />
+              <td style={featureCard}>
+                <Text style={featureEmoji}>⚡</Text>
+                <Text style={featureTitle}>Smart Alerts</Text>
+                <Text style={featureDesc}>Auto-detect anomalies</Text>
+              </td>
+            </tr>
+          </table>
+        </Section>
+
+        <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+          <Button style={button} href={siteUrl}>
+            Open Your Dashboard →
+          </Button>
+        </Section>
+
         <Hr style={hr} />
         <Text style={footer}>
           You're receiving this because you signed up on EquityLens.
@@ -59,37 +95,79 @@ export const WelcomeEmail = ({
 
 export default WelcomeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Inter, Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = {
+  backgroundColor: '#0f1419',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+}
+const container = {
+  padding: '32px 24px',
+  maxWidth: '560px',
+  margin: '0 auto',
+}
+const headerSection = { marginBottom: '24px' }
+const brandText = {
+  fontSize: '18px',
   fontWeight: 'bold' as const,
-  color: '#131a24',
-  margin: '0 0 20px',
+  color: '#e2e8f0',
+  margin: '0',
+}
+const h1 = {
+  fontSize: '26px',
+  fontWeight: 'bold' as const,
+  color: '#f1f5f9',
+  margin: '0 0 16px',
+  letterSpacing: '-0.02em',
 }
 const text = {
   fontSize: '14px',
-  color: '#6a6f78',
-  lineHeight: '1.5',
-  margin: '0 0 20px',
+  color: '#94a3b8',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
 }
-const featureText = {
-  fontSize: '14px',
-  color: '#6a6f78',
-  lineHeight: '2',
-  margin: '0 0 25px',
-  whiteSpace: 'pre-line' as const,
+const featuresGrid = {
+  margin: '24px 0',
+}
+const featureCard = {
+  backgroundColor: '#1a2332',
+  borderRadius: '12px',
+  padding: '16px',
+  border: '1px solid #1e293b',
+  width: '50%',
+  verticalAlign: 'top' as const,
+}
+const featureEmoji = {
+  fontSize: '20px',
+  margin: '0 0 8px',
+  lineHeight: '1',
+}
+const featureTitle = {
+  fontSize: '13px',
+  fontWeight: 'bold' as const,
+  color: '#e2e8f0',
+  margin: '0 0 4px',
+}
+const featureDesc = {
+  fontSize: '11px',
+  color: '#64748b',
+  margin: '0',
+  lineHeight: '1.4',
 }
 const button = {
-  backgroundColor: '#148a9e',
-  color: '#ffffff',
+  backgroundColor: '#22d3ee',
+  color: '#0f1419',
   fontSize: '14px',
-  borderRadius: '12px',
-  padding: '12px 20px',
+  fontWeight: 'bold' as const,
+  borderRadius: '10px',
+  padding: '14px 28px',
   textDecoration: 'none',
 }
 const hr = {
-  borderColor: '#e5e7eb',
-  margin: '30px 0 20px',
+  borderColor: '#1e293b',
+  margin: '28px 0 20px',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '0' }
+const footer = {
+  fontSize: '11px',
+  color: '#475569',
+  margin: '0',
+  lineHeight: '1.5',
+}

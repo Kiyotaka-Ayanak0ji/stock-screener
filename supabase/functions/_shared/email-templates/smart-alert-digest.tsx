@@ -14,27 +14,47 @@ import {
   Section,
 } from 'npm:@react-email/components@0.0.22'
 
-interface PriceTriggerDigestEmailProps {
+interface SmartAlertDigestEmailProps {
   displayName: string
   alerts: Array<{
+    type: string
     ticker: string
-    triggerPrice: number
-    hitPrice: number
+    message: string
+    detail: string
     timestamp: string
   }>
 }
 
-export const PriceTriggerDigestEmail = ({
+const getAlertEmoji = (type: string) => {
+  switch (type) {
+    case '52w_high': return '📈'
+    case '52w_low': return '📉'
+    case 'volume_spike': return '🔊'
+    default: return '⚡'
+  }
+}
+
+const getAlertLabel = (type: string) => {
+  switch (type) {
+    case '52w_high': return 'Session High'
+    case '52w_low': return 'Session Low'
+    case 'volume_spike': return 'Volume Spike'
+    default: return 'Alert'
+  }
+}
+
+export const SmartAlertDigestEmail = ({
   displayName,
   alerts,
-}: PriceTriggerDigestEmailProps) => (
+}: SmartAlertDigestEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on EquityLens
+      ⚡ {alerts.length} smart alert{alerts.length > 1 ? 's' : ''} detected on EquityLens
     </Preview>
     <Body style={main}>
       <Container style={container}>
+        {/* Header */}
         <Section style={headerSection}>
           <table style={{ width: '100%' }}>
             <tr>
@@ -44,35 +64,32 @@ export const PriceTriggerDigestEmail = ({
                 </Text>
               </td>
               <td style={{ textAlign: 'right' as const }}>
-                <Text style={badgeStyle}>🔔 Price Alerts</Text>
+                <Text style={badgeStyle}>⚡ Smart Alerts</Text>
               </td>
             </tr>
           </table>
         </Section>
 
         <Heading style={h1}>
-          Price Trigger Alert
+          Smart Alert Digest
         </Heading>
         <Text style={text}>
-          Hey {displayName}, your price triggers have been hit!
+          Hey {displayName}, here's what our system detected in your watchlist:
         </Text>
 
+        {/* Alert Cards */}
         {alerts.map((alert, i) => (
           <Section key={i} style={alertCard}>
             <table style={{ width: '100%' }}>
               <tr>
+                <td style={{ width: '40px', verticalAlign: 'top' as const, paddingTop: '2px' }}>
+                  <Text style={emojiStyle}>{getAlertEmoji(alert.type)}</Text>
+                </td>
                 <td>
-                  <Text style={tickerStyle}>{alert.ticker}</Text>
-                  <Text style={labelStyle}>Target Hit</Text>
-                </td>
-                <td style={{ textAlign: 'right' as const, verticalAlign: 'top' as const }}>
-                  <Text style={priceStyle}>₹{alert.hitPrice.toFixed(2)}</Text>
-                  <Text style={targetStyle}>Target: ₹{alert.triggerPrice.toFixed(2)}</Text>
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={2}>
-                  <Text style={timeStyle}>{alert.timestamp}</Text>
+                  <Text style={alertTicker}>{alert.ticker}</Text>
+                  <Text style={alertLabelStyle}>{getAlertLabel(alert.type)}</Text>
+                  <Text style={alertDetail}>{alert.detail}</Text>
+                  <Text style={alertTime}>{alert.timestamp}</Text>
                 </td>
               </tr>
             </table>
@@ -81,14 +98,15 @@ export const PriceTriggerDigestEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you set price triggers on EquityLens.
+          Smart alerts are automatically detected when stocks in your watchlist
+          hit session highs/lows or show unusual volume activity.
         </Text>
       </Container>
     </Body>
   </Html>
 )
 
-export default PriceTriggerDigestEmail
+export default SmartAlertDigestEmail
 
 const main = {
   backgroundColor: '#0f1419',
@@ -99,7 +117,9 @@ const container = {
   maxWidth: '560px',
   margin: '0 auto',
 }
-const headerSection = { marginBottom: '24px' }
+const headerSection = {
+  marginBottom: '24px',
+}
 const brandText = {
   fontSize: '18px',
   fontWeight: 'bold' as const,
@@ -109,8 +129,8 @@ const brandText = {
 const badgeStyle = {
   fontSize: '11px',
   fontWeight: '600' as const,
-  color: '#fbbf24',
-  backgroundColor: '#fbbf2415',
+  color: '#22d3ee',
+  backgroundColor: '#22d3ee15',
   padding: '4px 10px',
   borderRadius: '20px',
   margin: '0',
@@ -136,37 +156,35 @@ const alertCard = {
   marginBottom: '10px',
   border: '1px solid #1e293b',
 }
-const tickerStyle = {
-  fontSize: '18px',
+const emojiStyle = {
+  fontSize: '20px',
+  margin: '0',
+  lineHeight: '1',
+}
+const alertTicker = {
+  fontSize: '16px',
   fontWeight: 'bold' as const,
   color: '#f1f5f9',
   margin: '0 0 2px',
-  fontFamily: '"JetBrains Mono", monospace',
+  fontFamily: '"JetBrains Mono", "Fira Code", monospace',
 }
-const labelStyle = {
+const alertLabelStyle = {
   fontSize: '11px',
   fontWeight: '600' as const,
-  color: '#4ade80',
-  margin: '0',
+  color: '#22d3ee',
+  margin: '0 0 6px',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.05em',
 }
-const priceStyle = {
-  fontSize: '18px',
-  fontWeight: 'bold' as const,
-  color: '#22d3ee',
-  margin: '0 0 2px',
-  fontFamily: '"JetBrains Mono", monospace',
+const alertDetail = {
+  fontSize: '13px',
+  color: '#94a3b8',
+  margin: '0 0 4px',
 }
-const targetStyle = {
+const alertTime = {
   fontSize: '11px',
   color: '#64748b',
   margin: '0',
-}
-const timeStyle = {
-  fontSize: '11px',
-  color: '#475569',
-  margin: '8px 0 0',
 }
 const hr = {
   borderColor: '#1e293b',
