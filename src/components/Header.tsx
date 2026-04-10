@@ -1,8 +1,9 @@
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase, Shield } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useAdminRole } from "@/hooks/useAdminRole";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
@@ -14,6 +15,7 @@ const Header = () => {
   const { isMarketOpen } = useStocks();
   const { user, profile, signOut, isGuest } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
+  const { isAdmin } = useAdminRole();
   const navigate = useNavigate();
 
   // Whether the user has an active subscription/trial
@@ -92,6 +94,12 @@ const Header = () => {
                 <span className="text-secondary-foreground font-medium truncate max-w-[120px]">
                   {profile?.display_name || user.email}
                 </span>
+                {isAdmin && (
+                  <Badge variant="secondary" className="ml-1 px-1.5 py-0 text-[10px] font-semibold bg-primary/15 text-primary border-0">
+                    <Shield className="h-2.5 w-2.5 mr-0.5" />
+                    Admin
+                  </Badge>
+                )}
               </div>
               <Button
                 variant="ghost"
