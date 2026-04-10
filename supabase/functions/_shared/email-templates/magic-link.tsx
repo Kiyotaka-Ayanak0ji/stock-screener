@@ -11,6 +11,8 @@ import {
   Html,
   Preview,
   Text,
+  Hr,
+  Section,
 } from 'npm:@react-email/components@0.0.22'
 
 interface MagicLinkEmailProps {
@@ -27,14 +29,25 @@ export const MagicLinkEmail = ({
     <Preview>Your EquityLens login link</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Your login link</Heading>
+        <Section style={headerSection}>
+          <Text style={brandText}>
+            Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+          </Text>
+        </Section>
+
+        <Heading style={h1}>Your login link 🔗</Heading>
         <Text style={text}>
           Click the button below to log in to EquityLens. This link will expire
           shortly.
         </Text>
-        <Button style={button} href={confirmationUrl}>
-          Log In
-        </Button>
+
+        <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+          <Button style={button} href={confirmationUrl}>
+            Log In →
+          </Button>
+        </Section>
+
+        <Hr style={hr} />
         <Text style={footer}>
           If you didn't request this link, you can safely ignore this email.
         </Text>
@@ -45,26 +58,51 @@ export const MagicLinkEmail = ({
 
 export default MagicLinkEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Inter, Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = {
+  backgroundColor: '#0f1419',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+}
+const container = {
+  padding: '32px 24px',
+  maxWidth: '560px',
+  margin: '0 auto',
+}
+const headerSection = { marginBottom: '24px' }
+const brandText = {
+  fontSize: '18px',
   fontWeight: 'bold' as const,
-  color: '#131a24',
-  margin: '0 0 20px',
+  color: '#e2e8f0',
+  margin: '0',
+}
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#f1f5f9',
+  margin: '0 0 16px',
+  letterSpacing: '-0.02em',
 }
 const text = {
   fontSize: '14px',
-  color: '#6a6f78',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  color: '#94a3b8',
+  lineHeight: '1.6',
+  margin: '0 0 20px',
 }
 const button = {
-  backgroundColor: '#148a9e',
-  color: '#ffffff',
+  backgroundColor: '#22d3ee',
+  color: '#0f1419',
   fontSize: '14px',
-  borderRadius: '12px',
-  padding: '12px 20px',
+  fontWeight: 'bold' as const,
+  borderRadius: '10px',
+  padding: '14px 28px',
   textDecoration: 'none',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const hr = {
+  borderColor: '#1e293b',
+  margin: '28px 0 20px',
+}
+const footer = {
+  fontSize: '11px',
+  color: '#475569',
+  margin: '0',
+  lineHeight: '1.5',
+}

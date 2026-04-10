@@ -11,6 +11,7 @@ import {
   Preview,
   Text,
   Hr,
+  Section,
 } from 'npm:@react-email/components@0.0.22'
 
 interface PriceTriggerDigestEmailProps {
@@ -34,37 +35,49 @@ export const PriceTriggerDigestEmail = ({
     </Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={headerSection}>
+          <table style={{ width: '100%' }}>
+            <tr>
+              <td>
+                <Text style={brandText}>
+                  Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+                </Text>
+              </td>
+              <td style={{ textAlign: 'right' as const }}>
+                <Text style={badgeStyle}>🔔 Price Alerts</Text>
+              </td>
+            </tr>
+          </table>
+        </Section>
+
         <Heading style={h1}>
-          🔔 Price Trigger Alert
+          Price Trigger Alert
         </Heading>
         <Text style={text}>
           Hey {displayName}, your price triggers have been hit!
         </Text>
 
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Stock</th>
-              <th style={thStyle}>Target</th>
-              <th style={thStyle}>Hit Price</th>
-              <th style={thStyle}>Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {alerts.map((alert, i) => (
-              <tr key={i}>
-                <td style={tdStyle}>
-                  <strong style={{ color: '#131a24' }}>{alert.ticker}</strong>
+        {alerts.map((alert, i) => (
+          <Section key={i} style={alertCard}>
+            <table style={{ width: '100%' }}>
+              <tr>
+                <td>
+                  <Text style={tickerStyle}>{alert.ticker}</Text>
+                  <Text style={labelStyle}>Target Hit</Text>
                 </td>
-                <td style={tdStyle}>₹{alert.triggerPrice.toFixed(2)}</td>
-                <td style={{ ...tdStyle, color: '#148a9e', fontWeight: 'bold' as const }}>
-                  ₹{alert.hitPrice.toFixed(2)}
+                <td style={{ textAlign: 'right' as const, verticalAlign: 'top' as const }}>
+                  <Text style={priceStyle}>₹{alert.hitPrice.toFixed(2)}</Text>
+                  <Text style={targetStyle}>Target: ₹{alert.triggerPrice.toFixed(2)}</Text>
                 </td>
-                <td style={tdStyle}>{alert.timestamp}</td>
               </tr>
-            ))}
-          </tbody>
-        </table>
+              <tr>
+                <td colSpan={2}>
+                  <Text style={timeStyle}>{alert.timestamp}</Text>
+                </td>
+              </tr>
+            </table>
+          </Section>
+        ))}
 
         <Hr style={hr} />
         <Text style={footer}>
@@ -77,43 +90,91 @@ export const PriceTriggerDigestEmail = ({
 
 export default PriceTriggerDigestEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Inter, Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
+const main = {
+  backgroundColor: '#0f1419',
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+}
+const container = {
+  padding: '32px 24px',
+  maxWidth: '560px',
+  margin: '0 auto',
+}
+const headerSection = { marginBottom: '24px' }
+const brandText = {
+  fontSize: '18px',
   fontWeight: 'bold' as const,
-  color: '#131a24',
-  margin: '0 0 20px',
+  color: '#e2e8f0',
+  margin: '0',
+}
+const badgeStyle = {
+  fontSize: '11px',
+  fontWeight: '600' as const,
+  color: '#fbbf24',
+  backgroundColor: '#fbbf2415',
+  padding: '4px 10px',
+  borderRadius: '20px',
+  margin: '0',
+  display: 'inline-block' as const,
+}
+const h1 = {
+  fontSize: '24px',
+  fontWeight: 'bold' as const,
+  color: '#f1f5f9',
+  margin: '0 0 12px',
+  letterSpacing: '-0.02em',
 }
 const text = {
   fontSize: '14px',
-  color: '#6a6f78',
-  lineHeight: '1.5',
-  margin: '0 0 20px',
+  color: '#94a3b8',
+  lineHeight: '1.6',
+  margin: '0 0 24px',
 }
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse' as const,
-  margin: '0 0 20px',
+const alertCard = {
+  backgroundColor: '#1a2332',
+  borderRadius: '12px',
+  padding: '16px',
+  marginBottom: '10px',
+  border: '1px solid #1e293b',
 }
-const thStyle = {
-  textAlign: 'left' as const,
-  padding: '8px 12px',
-  fontSize: '12px',
+const tickerStyle = {
+  fontSize: '18px',
+  fontWeight: 'bold' as const,
+  color: '#f1f5f9',
+  margin: '0 0 2px',
+  fontFamily: '"JetBrains Mono", monospace',
+}
+const labelStyle = {
+  fontSize: '11px',
   fontWeight: '600' as const,
-  color: '#6a6f78',
-  borderBottom: '2px solid #e5e7eb',
+  color: '#4ade80',
+  margin: '0',
   textTransform: 'uppercase' as const,
   letterSpacing: '0.05em',
 }
-const tdStyle = {
-  padding: '10px 12px',
-  fontSize: '14px',
-  color: '#6a6f78',
-  borderBottom: '1px solid #f3f4f6',
+const priceStyle = {
+  fontSize: '18px',
+  fontWeight: 'bold' as const,
+  color: '#22d3ee',
+  margin: '0 0 2px',
+  fontFamily: '"JetBrains Mono", monospace',
+}
+const targetStyle = {
+  fontSize: '11px',
+  color: '#64748b',
+  margin: '0',
+}
+const timeStyle = {
+  fontSize: '11px',
+  color: '#475569',
+  margin: '8px 0 0',
 }
 const hr = {
-  borderColor: '#e5e7eb',
-  margin: '20px 0',
+  borderColor: '#1e293b',
+  margin: '24px 0',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '0' }
+const footer = {
+  fontSize: '11px',
+  color: '#475569',
+  margin: '0',
+  lineHeight: '1.5',
+}
