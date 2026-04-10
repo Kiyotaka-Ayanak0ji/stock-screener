@@ -15,6 +15,7 @@ const Header = () => {
   const { isMarketOpen } = useStocks();
   const { user, profile, signOut, isGuest } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
+  const { isAdmin } = useAdminRole();
   const navigate = useNavigate();
 
   // Whether the user has an active subscription/trial
