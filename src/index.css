@@ -152,6 +152,26 @@
   .price-flash-down {
     animation: flashRed 0.6s ease-out;
   }
+
+
+  /* Mobile touch improvements */
+  @media (max-width: 640px) {
+    .container {
+      max-width: 100%;
+    }
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Prevent text size adjustment on mobile */
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
 }
 
 @keyframes flashGreen {
