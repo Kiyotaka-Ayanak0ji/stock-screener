@@ -130,10 +130,10 @@ const Landing = () => {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 h-16">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-3 sm:px-4 h-14 sm:h-16">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-primary" />
-            <span className="text-lg font-bold tracking-tight">
+            <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <span className="text-base sm:text-lg font-bold tracking-tight">
               Equity<span className="text-primary">Lens</span>
             </span>
           </div>
@@ -141,6 +141,7 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="hidden sm:inline-flex"
               onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
             >
               Features
@@ -148,6 +149,7 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="hidden sm:inline-flex"
               onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}
             >
               Pricing
@@ -155,21 +157,22 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="sm"
+              className="hidden sm:inline-flex"
               onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}
             >
               FAQ
             </Button>
             {user ? (
-              <Button onClick={() => navigate("/dashboard")} size="sm">
-                Go to Dashboard <ArrowRight className="h-4 w-4 ml-1" />
+              <Button onClick={() => navigate("/dashboard")} size="sm" className="text-xs sm:text-sm">
+                Dashboard <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="hidden sm:inline-flex">
                   Sign In
                 </Button>
-                <Button size="sm" onClick={() => navigate("/auth")}>
-                  Get Started Free <ArrowRight className="h-4 w-4 ml-1" />
+                <Button size="sm" onClick={() => navigate("/auth")} className="text-xs sm:text-sm">
+                  Get Started <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-1" />
                 </Button>
               </>
             )}
@@ -178,7 +181,7 @@ const Landing = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-4">
+      <section className="pt-24 sm:pt-32 pb-14 sm:pb-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-xs font-medium">
@@ -643,47 +646,51 @@ const Landing = () => {
               {[
                 {
                   q: "Is EquityLens free to use?",
-                  a: "Yes! You can start with a 15-day free trial that gives you full Pro-level access.",
+                  a: "Yes! Sign up and get a 15-day free trial with full Pro-level access. No credit card required. After the trial, choose a plan that suits your needs or continue with the free Guest tier.",
                 },
                 {
-                  q: "What are the available plans?",
-                  a: "EquityLens has three tiers: Free (limited access, 20 stocks), Pro ($5/month or $50/year - up to 5 watchlists with 20 stocks each, column customization, and real-time updates), and Premium ($20/month or $200/year — up to 20 watchlists with 50 stocks each, export/share, price triggers, event tags, notes, and portfolio performance dashboard).",
+                  q: "What plans are available and what's included?",
+                  a: "We offer three tiers:\n\n• **Guest (Free)** — 1 watchlist with up to 20 stocks, basic price data, light & dark mode.\n• **Pro ($5/mo or $50/yr)** — Up to 5 watchlists × 20 stocks, column customization, real-time updates.\n• **Premium ($20/mo or $200/yr)** — Up to 20 watchlists × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio dashboard with sector analysis.",
                 },
                 {
                   q: "What do I get during the 15-day free trial?",
-                  a: "During your trial you get full Pro access — up to 5 watchlists with 20 stocks each, custom columns, and real-time updates. Premium-exclusive features like price triggers, event tags, notes, export/share, and portfolio management require a Premium subscription.",
+                  a: "During your trial, you unlock full Pro access — multiple watchlists, column customization, and real-time price updates. Premium features like price triggers, event tags, notes, sharing, and portfolio analytics are exclusive to Premium subscribers.",
                 },
                 {
-                  q: "What Premium-only features are available?",
-                  a: "Premium subscribers unlock price trigger alerts with email notifications, event tagging, stock notes, export as image/PDF, shareable watchlist links, and the portfolio performance dashboard with a real-time 'Refresh All' button that updates live prices and sector classification data in one click — including P&L tracking, sector allocation charts, and stock-wise gain/loss analysis.",
+                  q: "What's included in the Premium plan?",
+                  a: "Premium unlocks the full EquityLens experience: price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, diversity scoring, and a one-click 'Refresh All' button.",
                 },
                 {
-                  q: "Can I get unlimited access to stocks, watchlists, alerts as well as new features as they roll out?",
-                  a: "Yes! The Premium Plus plan ($40/month or $450/year) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, the full portfolio dashboard with real-time refresh, and early beta access to new features as they're developed. ",
+                  q: "Is there an unlimited plan?",
+                  a: "Yes! Premium Plus ($40/mo or $450/yr) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, everything in Premium, and early beta access to new features as they launch.",
                 },
                 {
                   q: "Does the portfolio dashboard update in real time?",
-                  a: "Yes! The portfolio dashboard features a 'Refresh All' button that fetches the latest live prices and re-enriches sector data for all your holdings in one click. You get instant P&L updates, sector allocation recalculation, and diversity score adjustments — all in real time.",
+                  a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments — all in real time.",
                 },
                 {
-                  q: "Which stock exchanges does EquityLens support?",
-                  a: "EquityLens tracks stocks listed on both the NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities including small-cap and micro-cap stocks.",
+                  q: "Which stock exchanges are supported?",
+                  a: "EquityLens tracks stocks listed on both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities — including small-cap and micro-cap stocks.",
                 },
                 {
-                  q: "What are price triggers and how do they work?",
-                  a: "Price triggers let you set upper and lower price thresholds on any stock. When the stock hits your target, you'll receive an email notification so you never miss an entry or exit opportunity. Available on Premium plans.",
+                  q: "How do price triggers work?",
+                  a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. This feature is available on Premium and Premium Plus plans.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
-                  a: "Yes! Premium subscribers can generate a unique shareable link for any watchlist, or export it as a high-quality image or professional PDF report to share with friends, family, or clients.",
+                  a: "Yes! Premium users can generate a unique shareable link for any watchlist, or export it as a high-quality image or a professional PDF report — perfect for sharing with friends, family, or clients.",
                 },
                 {
-                  q: "Is my data safe and private?",
-                  a: "All user data — including watchlists, notes, and custom columns — is encrypted before being stored. We use industry-standard security practices and your data is never shared with third parties.",
+                  q: "Is my data safe?",
+                  a: "Absolutely. All your data — watchlists, notes, custom columns, and triggers — is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
                 },
                 {
                   q: "Can I cancel my subscription anytime?",
-                  a: "Yes, you can cancel anytime with no questions asked. You'll continue to have access until the end of your billing period.",
+                  a: "Yes, cancel anytime with no questions asked. You'll retain access to all paid features until the end of your current billing period.",
+                },
+                {
+                  q: "Does EquityLens work on mobile?",
+                  a: "Yes! EquityLens is a Progressive Web App (PWA), so it works beautifully on any device. You can install it directly from your browser to your home screen — no app store required. It loads fast, works offline-ready, and provides the same features on mobile as on desktop.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
@@ -694,7 +701,7 @@ const Landing = () => {
                   <AccordionTrigger className="text-left text-sm font-medium hover:no-underline">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed">{faq.a}</AccordionContent>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{faq.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
