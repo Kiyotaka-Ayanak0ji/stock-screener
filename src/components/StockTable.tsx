@@ -175,111 +175,149 @@ const StockTable = () => {
         </div>
       </div>
 
-      <div ref={tableRef} className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className={headerClass} onClick={() => toggleSort("ticker")}>
-                  <div className="flex items-center gap-1">Ticker <SortIcon col="ticker" /></div>
-                </th>
-                {isVisible("exchange") && (
-                  <th className={headerClass}>Exchange</th>
-                )}
-                {isVisible("price") && (
-                  <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
-                    <div className="flex items-center justify-end gap-1">
-                      Price <SortIcon col="price" />
-                      {isPremium && <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />}
+      {/* Mobile Card View */}
+      {isMobile ? (
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
+          {!pricesLoaded ? (
+            <div className="space-y-0">
+              {Array.from({ length: stocks.length || 4 }).map((_, i) => (
+                <div key={`skeleton-${i}`} className="border-b border-border px-3 py-3 animate-pulse">
+                  <div className="flex justify-between">
+                    <div className="space-y-2">
+                      <div className="h-4 w-20 bg-muted rounded" />
+                      <div className="h-3 w-32 bg-muted rounded" />
                     </div>
-                  </th>
-                )}
-                {isVisible("change") && (
-                  <th className={`${headerClass} text-right`} onClick={() => toggleSort("changePercent")}>
-                    <div className="flex items-center justify-end gap-1">Change <SortIcon col="changePercent" /></div>
-                  </th>
-                )}
-                {isVisible("high") && (
-                  <th className={`${headerClass} text-right hidden lg:table-cell`}>High</th>
-                )}
-                {isVisible("low") && (
-                  <th className={`${headerClass} text-right hidden lg:table-cell`}>Low</th>
-                )}
-                {isVisible("volume") && (
-                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
-                    <div className="flex items-center justify-end gap-1">
-                      Volume <SortIcon col="volume" />
-                      {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                    <div className="space-y-2 text-right">
+                      <div className="h-4 w-16 bg-muted rounded ml-auto" />
+                      <div className="h-4 w-20 bg-muted rounded ml-auto" />
                     </div>
-                  </th>
-                )}
-                {isVisible("marketCap") && (
-                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
-                    <div className="flex items-center justify-end gap-1">
-                      Market Cap <SortIcon col="marketCap" />
-                      {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
-                    </div>
-                  </th>
-                )}
-                {isVisible("pe") && (
-                  <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
-                    <div className="flex items-center justify-end gap-1">
-                      P/E <SortIcon col="pe" />
-                      {isPremium && <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />}
-                    </div>
-                  </th>
-                )}
-                {visibleCustomColumns.map(col => (
-                  <th key={col.id} className={`${headerClass} text-right`} onClick={() => toggleSort(`custom_${col.id}`)}>
-                    <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
-                  </th>
-                ))}
-                {isVisible("priceTrigger") && (
-                  <th className={`${headerClass} text-right`}>
-                    <div className="flex items-center justify-end gap-1">Price Trigger</div>
-                  </th>
-                )}
-                {isVisible("event") && (
-                  <th className={headerClass} onClick={() => toggleSort("event")}>
-                    <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>
-                  </th>
-                )}
-                {isVisible("notes") && (
-                  <th className={headerClass}>Notes</th>
-                )}
-                <th className={`${headerClass} w-10`}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {!pricesLoaded ? (
-                <>
-                  {Array.from({ length: stocks.length || 4 }).map((_, i) => (
-                    <StockRowSkeleton
-                      key={`skeleton-${i}`}
-                      index={i}
-                      columnVisibility={columnVisibility}
-                      customColumnCount={visibleCustomColumns.length}
-                    />
-                  ))}
-                </>
-              ) : (
-                <AnimatePresence>
-                  {sorted.map((stock, i) => (
-                    <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} priceLoading={!loadedTickers.has(stock.ticker)} />
-                  ))}
-                </AnimatePresence>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <AnimatePresence>
+              {sorted.map((stock, i) => (
+                <MobileStockCard key={stock.ticker} stock={stock} index={i} priceLoading={!loadedTickers.has(stock.ticker)} />
+              ))}
+            </AnimatePresence>
+          )}
 
-        {stocks.length === 0 && (
-          <div className="py-16 text-center text-muted-foreground">
-            <p className="text-sm">No stocks in your watchlist</p>
-            <p className="text-xs mt-1">Click "Add Stock" to get started</p>
+          {stocks.length === 0 && (
+            <div className="py-16 text-center text-muted-foreground">
+              <p className="text-sm">No stocks in your watchlist</p>
+              <p className="text-xs mt-1">Tap "Add Stock" to get started</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Desktop Table View */
+        <div ref={tableRef} className="rounded-lg border border-border bg-card glow-primary overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className={headerClass} onClick={() => toggleSort("ticker")}>
+                    <div className="flex items-center gap-1">Ticker <SortIcon col="ticker" /></div>
+                  </th>
+                  {isVisible("exchange") && (
+                    <th className={headerClass}>Exchange</th>
+                  )}
+                  {isVisible("price") && (
+                    <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
+                      <div className="flex items-center justify-end gap-1">
+                        Price <SortIcon col="price" />
+                        {isPremium && <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />}
+                      </div>
+                    </th>
+                  )}
+                  {isVisible("change") && (
+                    <th className={`${headerClass} text-right`} onClick={() => toggleSort("changePercent")}>
+                      <div className="flex items-center justify-end gap-1">Change <SortIcon col="changePercent" /></div>
+                    </th>
+                  )}
+                  {isVisible("high") && (
+                    <th className={`${headerClass} text-right hidden lg:table-cell`}>High</th>
+                  )}
+                  {isVisible("low") && (
+                    <th className={`${headerClass} text-right hidden lg:table-cell`}>Low</th>
+                  )}
+                  {isVisible("volume") && (
+                    <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
+                      <div className="flex items-center justify-end gap-1">
+                        Volume <SortIcon col="volume" />
+                        {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                      </div>
+                    </th>
+                  )}
+                  {isVisible("marketCap") && (
+                    <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
+                      <div className="flex items-center justify-end gap-1">
+                        Market Cap <SortIcon col="marketCap" />
+                        {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
+                      </div>
+                    </th>
+                  )}
+                  {isVisible("pe") && (
+                    <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
+                      <div className="flex items-center justify-end gap-1">
+                        P/E <SortIcon col="pe" />
+                        {isPremium && <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />}
+                      </div>
+                    </th>
+                  )}
+                  {visibleCustomColumns.map(col => (
+                    <th key={col.id} className={`${headerClass} text-right`} onClick={() => toggleSort(`custom_${col.id}`)}>
+                      <div className="flex items-center justify-end gap-1">{col.name} <SortIcon col={`custom_${col.id}`} /></div>
+                    </th>
+                  ))}
+                  {isVisible("priceTrigger") && (
+                    <th className={`${headerClass} text-right`}>
+                      <div className="flex items-center justify-end gap-1">Price Trigger</div>
+                    </th>
+                  )}
+                  {isVisible("event") && (
+                    <th className={headerClass} onClick={() => toggleSort("event")}>
+                      <div className="flex items-center gap-1">Event <SortIcon col="event" /></div>
+                    </th>
+                  )}
+                  {isVisible("notes") && (
+                    <th className={headerClass}>Notes</th>
+                  )}
+                  <th className={`${headerClass} w-10`}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {!pricesLoaded ? (
+                  <>
+                    {Array.from({ length: stocks.length || 4 }).map((_, i) => (
+                      <StockRowSkeleton
+                        key={`skeleton-${i}`}
+                        index={i}
+                        columnVisibility={columnVisibility}
+                        customColumnCount={visibleCustomColumns.length}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <AnimatePresence>
+                    {sorted.map((stock, i) => (
+                      <StockRow key={stock.ticker} stock={stock} index={i} visibleCustomColumns={visibleCustomColumns} priceLoading={!loadedTickers.has(stock.ticker)} />
+                    ))}
+                  </AnimatePresence>
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {stocks.length === 0 && (
+            <div className="py-16 text-center text-muted-foreground">
+              <p className="text-sm">No stocks in your watchlist</p>
+              <p className="text-xs mt-1">Click "Add Stock" to get started</p>
+            </div>
+          )}
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground mt-3 text-center">
         · Preferences encrypted &amp; synced
