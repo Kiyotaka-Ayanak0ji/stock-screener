@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Filter } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
+import MobileStockCard from "@/components/MobileStockCard";
 import AddStockDialog from "@/components/AddStockDialog";
 import StockRowSkeleton from "@/components/StockRowSkeleton";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
@@ -15,6 +16,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useIsMobile } from "@/hooks/use-mobile";
 import PremiumDialog from "@/components/PremiumDialog";
 type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "pe" | "event" | string;
 type SortDir = "asc" | "desc";
