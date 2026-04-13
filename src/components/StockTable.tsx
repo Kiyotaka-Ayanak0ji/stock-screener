@@ -124,9 +124,9 @@ const StockTable = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      className="container mx-auto px-4 py-6"
+      className="container mx-auto px-2 sm:px-4 py-4 sm:py-6"
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
         <div>
           <h2 className="text-lg font-bold">
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
@@ -135,11 +135,16 @@ const StockTable = () => {
             {filtered.length !== stocks.length ? `${filtered.length} of ${stocks.length} stocks` : `${stocks.length} stocks`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <div className="hidden md:flex items-center gap-2 text-xs font-mono px-2 py-1 rounded-md bg-secondary">
             <span className="text-gain">{stocks.filter(s => s.change > 0).length} ▲</span>
             <span className="text-loss">{stocks.filter(s => s.change < 0).length} ▼</span>
             <span className="text-muted-foreground">{stocks.filter(s => s.change === 0).length} —</span>
+          </div>
+          {/* Mobile gain/loss summary */}
+          <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-mono px-2 py-1 rounded-md bg-secondary">
+            <span className="text-gain">{stocks.filter(s => s.change > 0).length}▲</span>
+            <span className="text-loss">{stocks.filter(s => s.change < 0).length}▼</span>
           </div>
           <WatchlistManager
             watchlists={userWatchlists}
@@ -156,16 +161,16 @@ const StockTable = () => {
                 variant="outline"
                 onClick={refreshPrices}
                 disabled={isRefreshing}
-                className="gap-1.5"
+                className="gap-1 sm:gap-1.5 text-xs px-2 sm:px-3"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? "Refreshing..." : "Refresh"}
+                <span className="hidden sm:inline">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
           </Tooltip>
-          <ShareExportButton tableRef={tableRef} />
-          <ColumnVisibilityDropdown />
+          <div className="hidden sm:block"><ShareExportButton tableRef={tableRef} /></div>
+          <div className="hidden sm:block"><ColumnVisibilityDropdown /></div>
           <AddStockDialog />
         </div>
       </div>
