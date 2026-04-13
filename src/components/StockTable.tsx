@@ -24,6 +24,7 @@ type SortDir = "asc" | "desc";
 const StockTable = () => {
   const { user, isGuest } = useAuth();
   const { subscription } = useSubscription();
+  const isMobile = useIsMobile();
   const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
