@@ -154,11 +154,11 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background pb-bottom-nav">
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
         <Button
           variant="ghost"
           onClick={() => navigate("/dashboard")}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
@@ -168,250 +168,185 @@ const Profile = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
+          className="space-y-5"
         >
-          <h1 className="text-3xl font-bold text-foreground mb-2">Profile Settings</h1>
-          <p className="text-muted-foreground mb-8">Manage your personal information and preferences</p>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Profile Settings</h1>
+            <p className="text-muted-foreground text-sm">Manage your personal information and preferences</p>
+          </div>
 
           {/* Personal Information */}
-          <Card className="mb-6 border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <User className="h-5 w-5 text-primary" />
-                Personal Information
-              </CardTitle>
-              <CardDescription>Update your display name and view your account details</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-muted-foreground">Email</Label>
-                <Input
-                  id="email"
-                  value={user?.email || ""}
-                  disabled
-                  className="bg-muted text-muted-foreground"
-                />
-                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Enter your display name"
-                  maxLength={100}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Email Preferences */}
-          <Card className="mb-6 border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Bell className="h-5 w-5 text-primary" />
-                Email Preferences
-              </CardTitle>
-              <CardDescription>Choose which emails you'd like to receive</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between rounded-lg border border-border p-4">
-                <div className="space-y-0.5">
-                  <Label htmlFor="email-opt-in" className="text-sm font-medium">Email Updates</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Receive price alerts, watchlist notifications, and product updates
-                  </p>
-                </div>
-                <Switch
-                  id="email-opt-in"
-                  checked={emailOptIn}
-                  onCheckedChange={setEmailOptIn}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Change Password */}
-          <Card className="mb-6 border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Lock className="h-5 w-5 text-primary" />
-                Change Password
-              </CardTitle>
-              <CardDescription>Update your account password</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  minLength={6}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  minLength={6}
-                />
-              </div>
-              <Button
-                onClick={handleChangePassword}
-                disabled={changingPassword || !newPassword || !confirmPassword}
-                variant="secondary"
-                className="w-full"
-              >
-                {changingPassword ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Lock className="mr-2 h-4 w-4" />
-                )}
-                Change Password
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Review Section - hidden for admins */}
-          {!isAdmin && (
-            <Card className="mb-6 border-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  {existingReview ? "Your Review" : "Leave a Review"}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-primary/10"><User className="h-4 w-4 text-primary" /></div>
+                  Personal Information
                 </CardTitle>
-                <CardDescription>
-                  {existingReview
-                    ? "Update your review — it's displayed on our landing page"
-                    : "Share your experience to help other investors discover EquityLens"}
-                </CardDescription>
+                <CardDescription className="text-xs">Update your display name and view your account details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label>Rating</Label>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        className="transition-transform hover:scale-110"
-                        onMouseEnter={() => setReviewHover(star)}
-                        onMouseLeave={() => setReviewHover(0)}
-                        onClick={() => setReviewRating(star)}
-                      >
-                        <Star
-                          className={`h-7 w-7 transition-colors ${
-                            star <= (reviewHover || reviewRating)
-                              ? "fill-primary text-primary"
-                              : "text-muted-foreground/40"
-                          }`}
-                        />
-                      </button>
-                    ))}
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-muted-foreground text-xs">Email</Label>
+                  <Input id="email" value={user?.email || ""} disabled className="bg-muted text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="displayName" className="text-xs">Display Name</Label>
+                  <Input id="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Enter your display name" maxLength={100} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Email Preferences */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-primary/10"><Bell className="h-4 w-4 text-primary" /></div>
+                  Email Preferences
+                </CardTitle>
+                <CardDescription className="text-xs">Choose which emails you'd like to receive</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="email-opt-in" className="text-sm font-medium">Email Updates</Label>
+                    <p className="text-xs text-muted-foreground">Receive price alerts, watchlist notifications, and product updates</p>
                   </div>
+                  <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="profile-review-designation">Designation (optional)</Label>
-                  <Input
-                    id="profile-review-designation"
-                    value={reviewDesignation}
-                    onChange={(e) => setReviewDesignation(e.target.value)}
-                    placeholder="e.g. Swing Trader, Long-term Investor"
-                    maxLength={60}
-                  />
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Change Password */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-primary/10"><Lock className="h-4 w-4 text-primary" /></div>
+                  Change Password
+                </CardTitle>
+                <CardDescription className="text-xs">Update your account password</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword" className="text-xs">New Password</Label>
+                  <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" minLength={6} />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="profile-review-text">Your Review</Label>
-                  <Textarea
-                    id="profile-review-text"
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Tell us what you love about EquityLens..."
-                    rows={3}
-                    maxLength={500}
-                  />
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-xs">Confirm New Password</Label>
+                  <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" minLength={6} />
                 </div>
-                <Button
-                  onClick={handleSaveReview}
-                  disabled={savingReview || reviewRating === 0 || !reviewText.trim()}
-                  className="w-full"
-                  variant="secondary"
-                >
-                  {savingReview ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Star className="mr-2 h-4 w-4" />
-                  )}
-                  {existingReview ? "Update Review" : "Submit Review"}
+                <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword || !confirmPassword} variant="secondary" className="w-full active:scale-[0.98] transition-all">
+                  {changingPassword ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                  Change Password
                 </Button>
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* Review Section */}
+          {!isAdmin && (
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                    <div className="p-1.5 rounded-lg bg-primary/10"><MessageSquare className="h-4 w-4 text-primary" /></div>
+                    {existingReview ? "Your Review" : "Leave a Review"}
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    {existingReview ? "Update your review — it's displayed on our landing page" : "Share your experience to help other investors discover EquityLens"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Rating</Label>
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button key={star} type="button" className="transition-transform hover:scale-125 active:scale-95" onMouseEnter={() => setReviewHover(star)} onMouseLeave={() => setReviewHover(0)} onClick={() => setReviewRating(star)}>
+                          <Star className={`h-7 w-7 transition-colors ${star <= (reviewHover || reviewRating) ? "fill-primary text-primary" : "text-muted-foreground/40"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="profile-review-designation" className="text-xs">Designation (optional)</Label>
+                    <Input id="profile-review-designation" value={reviewDesignation} onChange={(e) => setReviewDesignation(e.target.value)} placeholder="e.g. Swing Trader, Long-term Investor" maxLength={60} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="profile-review-text" className="text-xs">Your Review</Label>
+                    <Textarea id="profile-review-text" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Tell us what you love about EquityLens..." rows={3} maxLength={500} />
+                  </div>
+                  <Button onClick={handleSaveReview} disabled={savingReview || reviewRating === 0 || !reviewText.trim()} className="w-full active:scale-[0.98] transition-all" variant="secondary">
+                    {savingReview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
+                    {existingReview ? "Update Review" : "Submit Review"}
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
           {isAdmin && (
-            <Card className="mb-6 border-primary/30 bg-primary/5">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Admin Panel
-                </CardTitle>
-                <CardDescription>You have administrator access</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => navigate("/admin")} className="w-full">
-                  <Shield className="mr-2 h-4 w-4" />
-                  View & Manage All Users
-                </Button>
-              </CardContent>
-            </Card>
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <Card className="border-primary/30 bg-primary/5 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                    <div className="p-1.5 rounded-lg bg-primary/15"><Shield className="h-4 w-4 text-primary" /></div>
+                    Admin Panel
+                  </CardTitle>
+                  <CardDescription className="text-xs">You have administrator access</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => navigate("/admin")} className="w-full active:scale-[0.98] transition-all">
+                    <Shield className="mr-2 h-4 w-4" /> View & Manage All Users
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
 
-          <Card className="mb-8 border-border">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-foreground">
-                <Mail className="h-5 w-5 text-primary" />
-                Account
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Email Verified</p>
-                  <p className="text-xs text-muted-foreground">
-                    {user?.email_confirmed_at ? "Your email is verified" : "Please verify your email"}
-                  </p>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+            <Card className="border-border shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-primary/10"><Mail className="h-4 w-4 text-primary" /></div>
+                  Account
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Email Verified</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user?.email_confirmed_at ? "Your email is verified" : "Please verify your email"}
+                    </p>
+                  </div>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                    user?.email_confirmed_at
+                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                      : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                  }`}>
+                    {user?.email_confirmed_at ? "Verified" : "Pending"}
+                  </span>
                 </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                  user?.email_confirmed_at
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
-                }`}>
-                  {user?.email_confirmed_at ? "Verified" : "Pending"}
-                </span>
-              </div>
-              <div className="pt-2 border-t border-border">
-                <Button variant="destructive" size="sm" onClick={signOut}>
-                  Sign Out
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="pt-2 border-t border-border">
+                  <Button variant="destructive" size="sm" onClick={signOut} className="active:scale-95 transition-all">
+                    Sign Out
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
-            {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Save Changes
-          </Button>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              Save Changes
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
       <BottomNav />

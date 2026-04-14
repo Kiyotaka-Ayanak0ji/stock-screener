@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -55,89 +55,124 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-md"
       >
-        <div className="flex items-center justify-center gap-2 mb-8">
+        <motion.div
+          className="flex items-center justify-center gap-2 mb-8"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
             Equity<span className="text-primary">Lens</span>
           </h1>
-        </div>
+        </motion.div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{isLogin ? "Welcome back" : "Create account"}</CardTitle>
-            <CardDescription>
-              {isLogin
-                ? "Sign in to sync your watchlist across devices"
-                : "Sign up to save your preferences securely"}
-            </CardDescription>
+        <Card className="shadow-lg border-border/60 overflow-hidden">
+          <CardHeader className="pb-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={isLogin ? "login" : "signup"}
+                initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CardTitle className="text-xl">{isLogin ? "Welcome back" : "Create account"}</CardTitle>
+                <CardDescription className="mt-1">
+                  {isLogin
+                    ? "Sign in to sync your watchlist across devices"
+                    : "Sign up to save your preferences securely"}
+                </CardDescription>
+              </motion.div>
+            </AnimatePresence>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input
-                    id="displayName"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your name"
-                    required
-                    maxLength={100}
-                  />
-                </div>
-              )}
+              <AnimatePresence>
+                {!isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2 overflow-hidden"
+                  >
+                    <Label htmlFor="displayName">Display Name</Label>
+                    <div className="relative">
+                      <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="displayName"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        placeholder="Your name"
+                        required
+                        maxLength={100}
+                        className="pl-9"
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  maxLength={255}
-                />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    maxLength={255}
+                    className="pl-9"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={6}
-                  maxLength={128}
-                />
+                <div className="relative">
+                  <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    minLength={6}
+                    maxLength={128}
+                    className="pl-9"
+                  />
+                </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Button type="submit" className="w-full h-11 text-sm font-semibold transition-all active:scale-[0.98]" disabled={loading}>
+                {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isLogin ? "Sign In" : "Sign Up"}
               </Button>
             </form>
 
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-5 text-center text-sm">
               <span className="text-muted-foreground">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
               </span>{" "}
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline font-medium"
+                className="text-primary hover:underline font-medium transition-colors"
               >
                 {isLogin ? "Sign Up" : "Sign In"}
               </button>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-5 pt-4 border-t border-border">
               <Button
                 variant="ghost"
-                className="w-full gap-2"
+                className="w-full gap-2 text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => navigate("/dashboard")}
               >
                 <ArrowLeft className="h-4 w-4" />

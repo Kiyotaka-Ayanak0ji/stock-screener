@@ -138,11 +138,16 @@
   }
 
   .table-row-hover {
-    @apply transition-colors duration-150;
+    @apply transition-all duration-150;
   }
 
   .table-row-hover:hover {
     background-color: hsl(var(--primary) / 0.05);
+  }
+
+  /* Smooth button press */
+  button, a[role="button"], [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 
   .price-flash-up {
