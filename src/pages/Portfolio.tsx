@@ -718,6 +718,7 @@ const Portfolio = () => {
         </motion.div>
       </div>
       <BottomNav />
+    </div>
   );
 };
 
