@@ -1,6 +1,6 @@
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
-import { ExternalLink, Trash2, Bell, BellOff, Crown } from "lucide-react";
+import { ExternalLink, Trash2, Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -35,7 +35,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ delay: index * 0.02, duration: 0.25 }}
-      className="border-b border-border px-3 py-3 active:bg-muted/50 transition-colors"
+      className="border-b border-border px-3 py-3 active:bg-muted/50 transition-all duration-150 hover:bg-muted/30"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -44,7 +44,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono font-bold text-sm text-primary inline-flex items-center gap-1"
+              className="font-mono font-bold text-sm text-primary inline-flex items-center gap-1 active:opacity-70 transition-opacity"
             >
               {stock.ticker}
               <ExternalLink className="h-3 w-3 opacity-40" />
@@ -53,7 +53,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               {stock.exchange}
             </Badge>
             {trigger && (
-              <Bell className="h-3 w-3 text-primary" />
+              <Bell className="h-3 w-3 text-primary animate-pulse" />
             )}
           </div>
           <p className="text-xs text-muted-foreground truncate mt-0.5">{stock.name}</p>
@@ -65,12 +65,17 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <p className="font-mono font-semibold text-sm">
                 ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
               </p>
-              <span className={`inline-flex items-center gap-0.5 text-xs font-mono px-1.5 py-0.5 rounded ${changeBg} ${changeColor}`}>
+              <motion.span
+                key={stock.change}
+                initial={{ scale: 1.05 }}
+                animate={{ scale: 1 }}
+                className={`inline-flex items-center gap-0.5 text-xs font-mono px-1.5 py-0.5 rounded-md ${changeBg} ${changeColor}`}
+              >
                 {isPositive ? "+" : ""}{stock.change.toFixed(2)}
                 <span className="text-[10px]">
                   ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
                 </span>
-              </span>
+              </motion.span>
             </>
           ) : (
             <>
@@ -91,7 +96,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6 text-muted-foreground hover:text-loss shrink-0"
+            className="h-7 w-7 text-muted-foreground hover:text-loss active:scale-90 transition-all shrink-0"
             onClick={() => removeStock(stock.ticker)}
           >
             <Trash2 className="h-3 w-3" />
