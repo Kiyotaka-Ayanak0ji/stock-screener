@@ -33,11 +33,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
+    transition: { delay: i * 0.08, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
   }),
 };
 
@@ -219,16 +219,16 @@ const Landing = () => {
             variants={fadeUp}
             custom={3}
           >
-            <Button size="lg" className="px-8 text-base" onClick={() => navigate("/auth")}>
+            <Button size="lg" className="px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all" onClick={() => navigate("/auth")}>
               Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="px-8 text-base" onClick={() => setDemoOpen(true)}>
+            <Button size="lg" variant="outline" className="px-8 text-base hover:bg-accent/10 active:scale-[0.97] transition-all" onClick={() => setDemoOpen(true)}>
               <Eye className="h-5 w-5 mr-2" /> View Demo
             </Button>
             <Button
               size="lg"
               variant="ghost"
-              className="px-8 text-base"
+              className="px-8 text-base active:scale-[0.97] transition-all"
               onClick={() => {
                 document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
               }}
@@ -321,7 +321,7 @@ const Landing = () => {
                 variants={fadeUp}
                 custom={i}
               >
-                <Card className="h-full border-border hover:border-primary/40 transition-colors group relative">
+                <Card className="h-full border-border hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative">
                   {(f as any).badge && (
                     <Badge className="absolute top-3 right-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px]">
                       <Crown className="h-2.5 w-2.5 mr-1" />
@@ -329,7 +329,7 @@ const Landing = () => {
                     </Badge>
                   )}
                   <CardContent className="p-6">
-                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                       <f.icon className="h-5 w-5 text-primary" />
                     </div>
                     <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
@@ -370,14 +370,14 @@ const Landing = () => {
             ].map((item, i) => (
               <motion.div
                 key={item.step}
-                className="text-center"
+                className="text-center group"
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeUp}
                 custom={i}
               >
-                <div className="text-5xl font-extrabold text-primary/20 mb-3">{item.step}</div>
+                <div className="text-5xl font-extrabold text-primary/15 mb-3 group-hover:text-primary/25 transition-colors">{item.step}</div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
               </motion.div>
@@ -470,7 +470,7 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/auth")}>
+                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/auth")}>
                   Try for Free
                 </Button>
               </CardContent>
@@ -547,7 +547,7 @@ const Landing = () => {
                     ),
                   )}
                 </ul>
-                <Button className="w-full mt-6" variant="outline" onClick={() => navigate("/subscribe")}>
+                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/subscribe")}>
                   Get Pro
                 </Button>
               </CardContent>
@@ -621,7 +621,7 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6" onClick={() => navigate("/subscribe")}>
+                <Button className="w-full mt-6 shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.97] transition-all" onClick={() => navigate("/subscribe")}>
                   Get Premium <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
@@ -696,12 +696,12 @@ const Landing = () => {
                 <AccordionItem
                   key={i}
                   value={`faq-${i}`}
-                  className="border border-border rounded-lg px-4 data-[state=open]:bg-background"
+                  className="border border-border rounded-lg px-4 data-[state=open]:bg-background data-[state=open]:shadow-sm transition-shadow"
                 >
-                  <AccordionTrigger className="text-left text-sm font-medium hover:no-underline">
+                  <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{faq.a}</AccordionContent>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
