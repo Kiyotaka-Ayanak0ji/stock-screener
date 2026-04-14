@@ -718,7 +718,7 @@ const Portfolio = () => {
         </motion.div>
       </div>
       <BottomNav />
-    </div>
+  );
 };
 
 export default Portfolio;
