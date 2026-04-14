@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,7 +153,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-bottom-nav">
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Button
           variant="ghost"
@@ -413,6 +414,7 @@ const Profile = () => {
           </Button>
         </motion.div>
       </div>
+      <BottomNav />
     </div>
   );
 };

@@ -161,6 +161,18 @@
     }
   }
 
+  /* Safe area for bottom nav on notched devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Add bottom padding to pages when bottom nav is visible */
+  @media (max-width: 640px) {
+    .pb-bottom-nav {
+      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;

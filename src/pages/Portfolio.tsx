@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -257,7 +258,7 @@ const Portfolio = () => {
   const diversityScore = Math.min(100, sectorAllocation.length * 15 + Math.min(holdings.length, 10) * 2);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-bottom-nav">
       <Header />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl space-y-4 sm:space-y-6">
         {/* Header */}
@@ -716,6 +717,7 @@ const Portfolio = () => {
           </Card>
         </motion.div>
       </div>
+      <BottomNav />
     </div>
   );
 };
