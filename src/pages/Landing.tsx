@@ -711,7 +711,7 @@ const Landing = () => {
                   <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.a}</AccordionContent>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.richAnswer || faq.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
