@@ -761,7 +761,7 @@ const Landing = () => {
                 },
                 {
                   q: "Does EquityLens work on mobile?",
-                  a: "Yes! EquityLens is a Progressive Web App (PWA), so it works beautifully on any device. You can install it directly from your browser to your home screen — no app store required. It loads fast, works offline-ready, and provides the same features on mobile as on desktop.",
+                  a: "Yes! EquityLens is available as a native Android app and a Windows desktop app. Download the APK for Android or the installer for Windows from our Downloads section above. Both versions deliver the full EquityLens experience optimized for your platform.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
