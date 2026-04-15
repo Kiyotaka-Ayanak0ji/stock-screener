@@ -650,7 +650,17 @@ const Landing = () => {
                 },
                 {
                   q: "What plans are available and what's included?",
-                  a: "We offer three tiers:\n\n• **Guest (Free)** — 1 watchlist with up to 20 stocks, basic price data, light & dark mode.\n• **Pro ($5/mo or $50/yr)** — Up to 5 watchlists × 20 stocks, column customization, real-time updates.\n• **Premium ($20/mo or $200/yr)** — Up to 20 watchlists × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio dashboard with sector analysis.",
+                  a: null,
+                  richAnswer: (
+                    <div className="space-y-2">
+                      <p>We offer three tiers:</p>
+                      <ul className="list-disc list-inside space-y-1.5 ml-1">
+                        <li><strong className="text-foreground">Guest (Free)</strong> — 1 watchlist with up to 20 stocks, basic price data, light &amp; dark mode.</li>
+                        <li><strong className="text-foreground">Pro ($5/mo or $50/yr)</strong> — Up to 5 watchlists × 20 stocks, column customization, real-time updates.</li>
+                        <li><strong className="text-foreground">Premium ($20/mo or $200/yr)</strong> — Up to 20 watchlists × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio dashboard with sector analysis.</li>
+                      </ul>
+                    </div>
+                  ),
                 },
                 {
                   q: "What do I get during the 15-day free trial?",
@@ -701,7 +711,7 @@ const Landing = () => {
                   <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.a}</AccordionContent>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.richAnswer || faq.a}</AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
