@@ -37,13 +37,17 @@ export function useSubscription() {
 
   const isActive = (() => {
     if (!subscription) return false;
+    // Lifetime plan is always active regardless of dates
+    if (subscription.plan === 'lifetime') return true;
+    if (subscription.status === 'lifetime') return true;
     if (subscription.status === 'active') {
-      if (subscription.subscription_ends_at && new Date(subscription.subscription_ends_at) > new Date()) return true;
+      // Active with no end date (e.g. lifetime) is always active
+      if (!subscription.subscription_ends_at) return true;
+      if (new Date(subscription.subscription_ends_at) > new Date()) return true;
     }
     if (subscription.status === 'trial') {
       if (subscription.trial_ends_at && new Date(subscription.trial_ends_at) > new Date()) return true;
     }
-    if (subscription.status === 'lifetime') return true;
     return false;
   })();
 
