@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus } from "lucide-react";
+import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,13 +15,20 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [accountExists, setAccountExists] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const switchMode = (toLogin: boolean) => {
+    setIsLogin(toLogin);
+    setAccountExists(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAccountExists(false);
 
     let result;
     if (isLogin) {
@@ -38,6 +45,10 @@ const Auth = () => {
     setLoading(false);
 
     if (result.error) {
+      if (!isLogin && result.error === "ACCOUNT_EXISTS") {
+        setAccountExists(true);
+        return;
+      }
       toast({ title: "Error", description: result.error, variant: "destructive" });
     } else {
       if (isLogin) {
@@ -93,6 +104,33 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <AnimatePresence>
+                {accountExists && !isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm"
+                    role="alert"
+                  >
+                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-destructive font-medium">Account already exists</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">
+                        An account with <span className="font-medium text-foreground">{email}</span> is already registered.{" "}
+                        <button
+                          type="button"
+                          onClick={() => switchMode(true)}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Sign in instead
+                        </button>
+                        .
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <AnimatePresence>
                 {!isLogin && (
                   <motion.div
@@ -162,7 +200,7 @@ const Auth = () => {
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
               </span>{" "}
               <button
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => switchMode(!isLogin)}
                 className="text-primary hover:underline font-medium transition-colors"
               >
                 {isLogin ? "Sign Up" : "Sign In"}

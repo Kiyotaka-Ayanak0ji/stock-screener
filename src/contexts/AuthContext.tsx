@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, displayName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -85,7 +85,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailRedirectTo: window.location.origin,
       },
     });
-    return { error: error?.message ?? null };
+    if (error) {
+      const msg = error.message?.toLowerCase() ?? "";
+      if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("user already")) {
+        return { error: "ACCOUNT_EXISTS" };
+      }
+      return { error: error.message };
+    }
+    // Supabase returns a user with an empty identities[] array when the email
+    // is already registered (to prevent email enumeration). Detect this and
+    // surface a clear message instead of a misleading "verify your email" toast.
+    if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return { error: "ACCOUNT_EXISTS" };
+    }
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {
