@@ -8,6 +8,7 @@ import AddStockDialog from "@/components/AddStockDialog";
 import StockRowSkeleton from "@/components/StockRowSkeleton";
 import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import FilterPopover from "@/components/FilterPopover";
+import FilterLockBadge from "@/components/FilterLockBadge";
 import WatchlistManager from "@/components/WatchlistManager";
 import ShareExportButton from "@/components/ShareExportButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -227,7 +228,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right`} onClick={() => toggleSort("price")}>
                       <div className="flex items-center justify-end gap-1">
                         Price <SortIcon col="price" />
-                        {isPremium && <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="Price" min={priceFilterMin} max={priceFilterMax} setMin={setPriceFilterMin} setMax={setPriceFilterMax} />
+                          : <FilterLockBadge label="Price" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
@@ -246,7 +249,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
                       <div className="flex items-center justify-end gap-1">
                         Volume <SortIcon col="volume" />
-                        {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />
+                          : <FilterLockBadge label="Volume" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
@@ -254,7 +259,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
                       <div className="flex items-center justify-end gap-1">
                         Market Cap <SortIcon col="marketCap" />
-                        {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />
+                          : <FilterLockBadge label="Market Cap" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
@@ -262,7 +269,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
                       <div className="flex items-center justify-end gap-1">
                         P/E <SortIcon col="pe" />
-                        {isPremium && <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />
+                          : <FilterLockBadge label="P/E Ratio" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
