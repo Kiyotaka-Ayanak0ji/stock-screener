@@ -104,7 +104,10 @@ const AlertsPanel = () => {
               >
                 <Zap className="h-3 w-3 mr-1" />
                 Smart
-                {smartAlertCount > 0 && (
+                {!isPro && (
+                  <Lock className="h-2.5 w-2.5 ml-1 text-muted-foreground/60" />
+                )}
+                {isPro && smartAlertCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-4 px-1 text-[9px] bg-primary/10 text-primary">
                     {smartAlertCount}
                   </Badge>
