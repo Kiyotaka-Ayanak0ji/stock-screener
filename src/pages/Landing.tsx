@@ -120,12 +120,14 @@ const PRO_FEATURES = [
   "Column visibility customization",
   "Multiple watchlists",
   "Real-time price updates",
+  "Smart Alerts (52-week highs/lows & volume spikes)",
 ];
 
 const PREMIUM_EXTRAS = [
   "Everything in Pro",
   "Up to 20 watchlists",
   "50 stocks per watchlist",
+  "Advanced filters (Price, Volume, Market Cap, P/E)",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Price trigger alerts with email",
