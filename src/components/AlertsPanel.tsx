@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Bell, Trash2, X, TrendingUp, TrendingDown, Volume2, Zap } from "lucide-react";
+import { Bell, Trash2, X, TrendingUp, TrendingDown, Volume2, Zap, Lock } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -8,9 +8,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSmartAlerts, SmartAlert } from "@/components/SmartAlerts";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Link } from "react-router-dom";
 
 const AlertsPanel = () => {
   const { triggeredAlerts, clearAlert, clearAllAlerts, priceTriggers } = useStocks();
+  const { isPro } = useSubscription();
   const [smartAlerts, setSmartAlerts] = useState<SmartAlert[]>([]);
 
   const handleSmartAlert = useCallback((alert: SmartAlert) => {
