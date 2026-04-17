@@ -29,6 +29,8 @@ import {
   Users,
   X,
   Briefcase,
+  Filter,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -83,6 +85,20 @@ const FEATURES = [
     badge: "Premium",
   },
   {
+    icon: Sparkles,
+    title: "Smart Alerts",
+    description:
+      "Automatic anomaly detection across your watchlist — 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
+    badge: "Pro",
+  },
+  {
+    icon: Filter,
+    title: "Advanced Filters",
+    description:
+      "Slice your watchlist by Price, Volume, Market Cap, and P/E ratio with min/max range filters. Find exactly the setups you're looking for in seconds.",
+    badge: "Premium",
+  },
+  {
     icon: Briefcase,
     title: "Portfolio Dashboard",
     description:
@@ -104,12 +120,14 @@ const PRO_FEATURES = [
   "Column visibility customization",
   "Multiple watchlists",
   "Real-time price updates",
+  "Smart Alerts (52-week highs/lows & volume spikes)",
 ];
 
 const PREMIUM_EXTRAS = [
   "Everything in Pro",
   "Up to 20 watchlists",
   "50 stocks per watchlist",
+  "Advanced filters (Price, Volume, Market Cap, P/E)",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Price trigger alerts with email",
@@ -459,6 +477,8 @@ const Landing = () => {
                     </li>
                   ))}
                   {[
+                    "Smart Alerts",
+                    "Advanced filters (Price, Volume, P/E, Market Cap)",
                     "Price triggers & email alerts",
                     "Event tags & notes",
                     "Export & sharing",
@@ -538,7 +558,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map(
+                  {["Advanced filters (Premium)", "Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map(
                     (f) => (
                       <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
@@ -746,6 +766,14 @@ const Landing = () => {
                 {
                   q: "How do price triggers work?",
                   a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. This feature is available on Premium and Premium Plus plans.",
+                },
+                {
+                  q: "What are Smart Alerts?",
+                  a: "Smart Alerts automatically scan your watchlist for meaningful market events — 52-week highs and lows, unusual volume spikes, and other anomalies — and surface them in real time. No setup required. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+                },
+                {
+                  q: "Can I filter stocks by price, volume, market cap, or P/E ratio?",
+                  a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio — directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
                 },
                 {
                   q: "Can I share my watchlist with others?",
