@@ -768,6 +768,14 @@ const Landing = () => {
                   a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. This feature is available on Premium and Premium Plus plans.",
                 },
                 {
+                  q: "What are Smart Alerts?",
+                  a: "Smart Alerts automatically scan your watchlist for meaningful market events — 52-week highs and lows, unusual volume spikes, and other anomalies — and surface them in real time. No setup required. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+                },
+                {
+                  q: "Can I filter stocks by price, volume, market cap, or P/E ratio?",
+                  a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio — directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
+                },
+                {
                   q: "Can I share my watchlist with others?",
                   a: "Yes! Premium users can generate a unique shareable link for any watchlist, or export it as a high-quality image or a professional PDF report — perfect for sharing with friends, family, or clients.",
                 },
