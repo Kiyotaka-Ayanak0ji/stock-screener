@@ -29,6 +29,8 @@ import {
   Users,
   X,
   Briefcase,
+  Filter,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
