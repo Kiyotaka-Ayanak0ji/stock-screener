@@ -105,6 +105,33 @@ const Auth = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <AnimatePresence>
+                {accountExists && !isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm"
+                    role="alert"
+                  >
+                    <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-destructive font-medium">Account already exists</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">
+                        An account with <span className="font-medium text-foreground">{email}</span> is already registered.{" "}
+                        <button
+                          type="button"
+                          onClick={() => switchMode(true)}
+                          className="text-primary hover:underline font-medium"
+                        >
+                          Sign in instead
+                        </button>
+                        .
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <AnimatePresence>
                 {!isLogin && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
