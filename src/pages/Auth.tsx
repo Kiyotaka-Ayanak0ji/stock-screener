@@ -15,13 +15,20 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [accountExists, setAccountExists] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const switchMode = (toLogin: boolean) => {
+    setIsLogin(toLogin);
+    setAccountExists(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAccountExists(false);
 
     let result;
     if (isLogin) {
@@ -38,6 +45,10 @@ const Auth = () => {
     setLoading(false);
 
     if (result.error) {
+      if (!isLogin && result.error === "ACCOUNT_EXISTS") {
+        setAccountExists(true);
+        return;
+      }
       toast({ title: "Error", description: result.error, variant: "destructive" });
     } else {
       if (isLogin) {
