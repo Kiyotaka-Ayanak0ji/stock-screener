@@ -477,6 +477,8 @@ const Landing = () => {
                     </li>
                   ))}
                   {[
+                    "Smart Alerts",
+                    "Advanced filters (Price, Volume, P/E, Market Cap)",
                     "Price triggers & email alerts",
                     "Event tags & notes",
                     "Export & sharing",
