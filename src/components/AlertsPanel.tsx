@@ -20,7 +20,9 @@ const AlertsPanel = () => {
     setSmartAlerts(prev => [alert, ...prev].slice(0, 50));
   }, []);
 
+  // Only run smart-alert detection for Pro+ subscribers
   const { sendSmartAlertEmail } = useSmartAlerts((alert) => {
+    if (!isPro) return;
     handleSmartAlert(alert);
     sendSmartAlertEmail(alert);
   });
