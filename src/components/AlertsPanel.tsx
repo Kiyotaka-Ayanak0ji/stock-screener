@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Bell, Trash2, X, TrendingUp, TrendingDown, Volume2, Zap } from "lucide-react";
+import { Bell, Trash2, X, TrendingUp, TrendingDown, Volume2, Zap, Lock } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -8,16 +8,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSmartAlerts, SmartAlert } from "@/components/SmartAlerts";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Link } from "react-router-dom";
 
 const AlertsPanel = () => {
   const { triggeredAlerts, clearAlert, clearAllAlerts, priceTriggers } = useStocks();
+  const { isPro } = useSubscription();
   const [smartAlerts, setSmartAlerts] = useState<SmartAlert[]>([]);
 
   const handleSmartAlert = useCallback((alert: SmartAlert) => {
     setSmartAlerts(prev => [alert, ...prev].slice(0, 50));
   }, []);
 
+  // Only run smart-alert detection for Pro+ subscribers
   const { sendSmartAlertEmail } = useSmartAlerts((alert) => {
+    if (!isPro) return;
     handleSmartAlert(alert);
     sendSmartAlertEmail(alert);
   });
@@ -183,7 +188,16 @@ const AlertsPanel = () => {
             </div>
             <div className="border-t border-border" />
             <ScrollArea className="max-h-72">
-              {smartAlertCount === 0 ? (
+              {!isPro ? (
+                <div className="py-8 px-4 text-center text-muted-foreground">
+                  <Lock className="h-8 w-8 mx-auto mb-2 opacity-40 text-primary" />
+                  <p className="text-xs font-semibold text-foreground">Smart Alerts is a Pro feature</p>
+                  <p className="text-[10px] mt-1 opacity-70">Auto-detect 52-week highs/lows & volume spikes</p>
+                  <Button asChild size="sm" className="mt-3 h-7 text-[11px]">
+                    <Link to="/subscribe">Upgrade to Pro</Link>
+                  </Button>
+                </div>
+              ) : smartAlertCount === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <Zap className="h-8 w-8 mx-auto mb-2 opacity-20" />
                   <p className="text-xs">No smart alerts yet</p>

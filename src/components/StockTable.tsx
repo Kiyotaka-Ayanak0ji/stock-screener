@@ -22,10 +22,10 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { user, isGuest } = useAuth();
-  const { subscription } = useSubscription();
+  const { isGuest } = useAuth();
+  const { isPremium: isPremiumSub } = useSubscription();
   const isMobile = useIsMobile();
-  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
+  const isPremium = !isGuest && isPremiumSub;
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
