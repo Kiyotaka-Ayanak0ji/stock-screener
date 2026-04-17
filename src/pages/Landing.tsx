@@ -558,7 +558,7 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map(
+                  {["Advanced filters (Premium)", "Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map(
                     (f) => (
                       <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
