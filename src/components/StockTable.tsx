@@ -269,7 +269,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("pe")}>
                       <div className="flex items-center justify-end gap-1">
                         P/E <SortIcon col="pe" />
-                        {isPremium && <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="P/E Ratio" min={peFilterMin} max={peFilterMax} setMin={setPeFilterMin} setMax={setPeFilterMax} />
+                          : <FilterLockBadge label="P/E Ratio" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
