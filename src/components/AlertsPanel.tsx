@@ -188,7 +188,16 @@ const AlertsPanel = () => {
             </div>
             <div className="border-t border-border" />
             <ScrollArea className="max-h-72">
-              {smartAlertCount === 0 ? (
+              {!isPro ? (
+                <div className="py-8 px-4 text-center text-muted-foreground">
+                  <Lock className="h-8 w-8 mx-auto mb-2 opacity-40 text-primary" />
+                  <p className="text-xs font-semibold text-foreground">Smart Alerts is a Pro feature</p>
+                  <p className="text-[10px] mt-1 opacity-70">Auto-detect 52-week highs/lows & volume spikes</p>
+                  <Button asChild size="sm" className="mt-3 h-7 text-[11px]">
+                    <Link to="/subscribe">Upgrade to Pro</Link>
+                  </Button>
+                </div>
+              ) : smartAlertCount === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <Zap className="h-8 w-8 mx-auto mb-2 opacity-20" />
                   <p className="text-xs">No smart alerts yet</p>
