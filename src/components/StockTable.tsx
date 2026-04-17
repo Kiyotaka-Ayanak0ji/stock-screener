@@ -259,7 +259,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("marketCap")}>
                       <div className="flex items-center justify-end gap-1">
                         Market Cap <SortIcon col="marketCap" />
-                        {isPremium && <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="Market Cap" min={mcapFilterMin} max={mcapFilterMax} setMin={setMcapFilterMin} setMax={setMcapFilterMax} />
+                          : <FilterLockBadge label="Market Cap" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
