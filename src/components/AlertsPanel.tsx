@@ -104,7 +104,10 @@ const AlertsPanel = () => {
               >
                 <Zap className="h-3 w-3 mr-1" />
                 Smart
-                {smartAlertCount > 0 && (
+                {!isPro && (
+                  <Lock className="h-2.5 w-2.5 ml-1 text-muted-foreground/60" />
+                )}
+                {isPro && smartAlertCount > 0 && (
                   <Badge variant="secondary" className="ml-1 h-4 px-1 text-[9px] bg-primary/10 text-primary">
                     {smartAlertCount}
                   </Badge>
@@ -176,10 +179,11 @@ const AlertsPanel = () => {
           {/* Smart Alerts Tab */}
           <TabsContent value="smart" className="mt-0">
             <div className="p-3 pb-2 flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
                 Session highs, lows & volume spikes
+                {!isPro && <Lock className="h-3 w-3 text-muted-foreground/60" />}
               </p>
-              {smartAlertCount > 0 && (
+              {isPro && smartAlertCount > 0 && (
                 <Button size="sm" variant="ghost" className="text-xs gap-1 h-6 px-2" onClick={clearAllSmartAlerts}>
                   <Trash2 className="h-3 w-3" />
                   Clear
@@ -189,13 +193,12 @@ const AlertsPanel = () => {
             <div className="border-t border-border" />
             <ScrollArea className="max-h-72">
               {!isPro ? (
-                <div className="py-8 px-4 text-center text-muted-foreground">
-                  <Lock className="h-8 w-8 mx-auto mb-2 opacity-40 text-primary" />
-                  <p className="text-xs font-semibold text-foreground">Smart Alerts is a Pro feature</p>
-                  <p className="text-[10px] mt-1 opacity-70">Auto-detect 52-week highs/lows & volume spikes</p>
-                  <Button asChild size="sm" className="mt-3 h-7 text-[11px]">
-                    <Link to="/subscribe">Upgrade to Pro</Link>
-                  </Button>
+                <div className="py-6 text-center text-muted-foreground">
+                  <Zap className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                  <p className="text-xs">Smart alerts preview</p>
+                  <p className="text-[10px] mt-1 opacity-60 px-6">
+                    Auto-detect 52-week highs, lows & volume spikes during market hours
+                  </p>
                 </div>
               ) : smartAlertCount === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
@@ -237,6 +240,14 @@ const AlertsPanel = () => {
                 </div>
               )}
             </ScrollArea>
+            {!isPro && (
+              <div className="border-t border-border p-2.5 flex items-center justify-between gap-2 bg-muted/30">
+                <p className="text-[10px] text-muted-foreground">Unlock with Pro</p>
+                <Button asChild size="sm" className="h-6 text-[10px] px-2.5">
+                  <Link to="/subscribe">Upgrade</Link>
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </PopoverContent>
