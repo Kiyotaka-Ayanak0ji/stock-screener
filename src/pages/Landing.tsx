@@ -85,6 +85,20 @@ const FEATURES = [
     badge: "Premium",
   },
   {
+    icon: Sparkles,
+    title: "Smart Alerts",
+    description:
+      "Automatic anomaly detection across your watchlist — 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
+    badge: "Pro",
+  },
+  {
+    icon: Filter,
+    title: "Advanced Filters",
+    description:
+      "Slice your watchlist by Price, Volume, Market Cap, and P/E ratio with min/max range filters. Find exactly the setups you're looking for in seconds.",
+    badge: "Premium",
+  },
+  {
     icon: Briefcase,
     title: "Portfolio Dashboard",
     description:
