@@ -249,7 +249,9 @@ const StockTable = () => {
                     <th className={`${headerClass} text-right hidden md:table-cell`} onClick={() => toggleSort("volume")}>
                       <div className="flex items-center justify-end gap-1">
                         Volume <SortIcon col="volume" />
-                        {isPremium && <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />}
+                        {isPremium
+                          ? <FilterPopover label="Volume" min={volumeFilterMin} max={volumeFilterMax} setMin={setVolumeFilterMin} setMax={setVolumeFilterMax} />
+                          : <FilterLockBadge label="Volume" onClick={() => setPremiumOpen(true)} />}
                       </div>
                     </th>
                   )}
