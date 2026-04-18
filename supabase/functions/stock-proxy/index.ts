@@ -1,4 +1,4 @@
-import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
+// stock-proxy is a public endpoint — prices are public market data.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -258,14 +258,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Require an authenticated Supabase user
-  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
-  if (!userId) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Public endpoint: stock prices are public market data, no user-specific info exposed.
+  // Guest users on the dashboard need access to live prices.
 
   try {
     const { symbols } = await req.json();
