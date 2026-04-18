@@ -3,7 +3,6 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
   SheetContent,
@@ -29,6 +28,7 @@ import {
   Minus,
 } from "lucide-react";
 import PremiumDialog from "@/components/PremiumDialog";
+import PriceChart from "@/components/PriceChart";
 
 interface StockDetailSheetProps {
   stock: Stock | null;
@@ -48,45 +48,6 @@ const PRESET_TAGS = [
   "Watch",
   "Target Hit",
 ];
-
-const Sparkline = ({ points, positive }: { points: number[]; positive: boolean }) => {
-  if (points.length < 2) {
-    return (
-      <div className="h-24 flex items-center justify-center text-xs text-muted-foreground">
-        Collecting price data…
-      </div>
-    );
-  }
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const width = 320;
-  const height = 96;
-  const stepX = width / (points.length - 1);
-  const path = points
-    .map((p, i) => {
-      const x = i * stepX;
-      const y = height - ((p - min) / range) * height;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  const areaPath = `${path} L${width},${height} L0,${height} Z`;
-  const stroke = positive ? "hsl(var(--gain))" : "hsl(var(--loss))";
-  const fill = positive ? "hsl(var(--gain) / 0.12)" : "hsl(var(--loss) / 0.12)";
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      className="w-full h-24"
-      role="img"
-      aria-label="Recent price trend"
-    >
-      <path d={areaPath} fill={fill} />
-      <path d={path} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  );
-};
 
 const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) => {
   const {
@@ -113,8 +74,6 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
   const [customTag, setCustomTag] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("");
-  const [series, setSeries] = useState<number[]>([]);
-  const [seriesLoading, setSeriesLoading] = useState(false);
 
   const note = stock ? notes.find((n) => n.ticker === stock.ticker)?.note || "" : "";
   const stockEvents = stock ? events.find((e) => e.ticker === stock.ticker)?.tags || [] : [];
@@ -126,45 +85,6 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     setNoteValue(note);
     setTriggerValue(trigger ? String(trigger.price) : "");
   }, [stock?.ticker, open]);
-
-  // Load multi-day price history from DB whenever the sheet opens for a stock
-  useEffect(() => {
-    if (!stock || !open) return;
-    let cancelled = false;
-    setSeriesLoading(true);
-    (async () => {
-      const { data, error } = await supabase
-        .from("stock_price_history")
-        .select("price, recorded_at")
-        .eq("ticker", stock.ticker)
-        .eq("exchange", stock.exchange)
-        .order("recorded_at", { ascending: true })
-        .limit(500);
-      if (cancelled) return;
-      if (error) {
-        console.error("Failed to load price history:", error);
-        setSeries([]);
-      } else {
-        const points = (data ?? []).map((d: any) => Number(d.price)).filter((n) => Number.isFinite(n));
-        // Always include current live price as the latest point
-        if (stock.price && (points.length === 0 || points[points.length - 1] !== stock.price)) {
-          points.push(stock.price);
-        }
-        setSeries(points);
-      }
-      setSeriesLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [stock?.ticker, stock?.exchange, open]);
-
-  // Keep latest live tick visible without refetching
-  useEffect(() => {
-    if (!stock || !open || !stock.price) return;
-    setSeries((prev) => {
-      if (prev.length > 0 && prev[prev.length - 1] === stock.price) return prev;
-      return [...prev, stock.price].slice(-500);
-    });
-  }, [stock?.price, open]);
 
   const requirePremium = (feature: string) => {
     setPremiumFeature(feature);
@@ -288,18 +208,14 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
               </div>
             </div>
 
-            {/* Sparkline */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Price trend
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {seriesLoading ? "Loading…" : series.length > 1 ? `${series.length} pts` : "Live"}
-                </p>
-              </div>
-              <Sparkline points={series} positive={!isNegative} />
-            </div>
+            {/* Interactive price chart */}
+            <PriceChart
+              ticker={stock.ticker}
+              exchange={stock.exchange}
+              livePrice={stock.price}
+              previousClose={stock.previousClose}
+              positive={!isNegative}
+            />
 
             {/* Metrics grid */}
             <div className="grid grid-cols-2 gap-2 text-xs">
