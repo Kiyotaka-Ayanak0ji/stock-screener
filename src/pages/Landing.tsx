@@ -243,10 +243,19 @@ const Landing = () => {
             variants={fadeUp}
             custom={3}
           >
-            <Button size="lg" className="px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all" onClick={() => navigate("/auth")}>
+            <Button
+              size="lg"
+              className="px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all"
+              onClick={() => navigate("/auth")}
+            >
               Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-            <Button size="lg" variant="outline" className="px-8 text-base hover:bg-accent/10 active:scale-[0.97] transition-all" onClick={() => setDemoOpen(true)}>
+            <Button
+              size="lg"
+              variant="outline"
+              className="px-8 text-base hover:bg-accent/10 active:scale-[0.97] transition-all"
+              onClick={() => setDemoOpen(true)}
+            >
               <Eye className="h-5 w-5 mr-2" /> View Demo
             </Button>
             <Button
@@ -401,7 +410,9 @@ const Landing = () => {
                 variants={fadeUp}
                 custom={i}
               >
-                <div className="text-5xl font-extrabold text-primary/15 mb-3 group-hover:text-primary/25 transition-colors">{item.step}</div>
+                <div className="text-5xl font-extrabold text-primary/15 mb-3 group-hover:text-primary/25 transition-colors">
+                  {item.step}
+                </div>
                 <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
               </motion.div>
@@ -484,7 +495,11 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/auth")}>
+                <Button
+                  className="w-full mt-6 active:scale-[0.97] transition-all"
+                  variant="outline"
+                  onClick={() => navigate("/auth")}
+                >
                   Try for Free
                 </Button>
               </CardContent>
@@ -559,7 +574,11 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/subscribe")}>
+                <Button
+                  className="w-full mt-6 active:scale-[0.97] transition-all"
+                  variant="outline"
+                  onClick={() => navigate("/subscribe")}
+                >
                   Get Pro
                 </Button>
               </CardContent>
@@ -637,7 +656,10 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6 shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.97] transition-all" onClick={() => navigate("/subscribe")}>
+                <Button
+                  className="w-full mt-6 shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.97] transition-all"
+                  onClick={() => navigate("/subscribe")}
+                >
                   Get Premium <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
@@ -717,7 +739,11 @@ const Landing = () => {
                     </li>
                   ))}
                 </ul>
-                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/subscribe")}>
+                <Button
+                  className="w-full mt-6 active:scale-[0.97] transition-all"
+                  variant="outline"
+                  onClick={() => navigate("/subscribe")}
+                >
                   Get Premium Plus <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
@@ -751,9 +777,19 @@ const Landing = () => {
                     <div className="space-y-2">
                       <p>We offer three tiers:</p>
                       <ul className="list-disc list-inside space-y-1.5 ml-1">
-                        <li><strong className="text-foreground">Guest (Free)</strong> — 1 watchlist with up to 20 stocks, basic price data, light &amp; dark mode.</li>
-                        <li><strong className="text-foreground">Pro ($5/mo or $50/yr)</strong> — Up to 5 watchlists × 20 stocks, column customization, real-time updates.</li>
-                        <li><strong className="text-foreground">Premium ($20/mo or $200/yr)</strong> — Up to 20 watchlists × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio dashboard with sector analysis.</li>
+                        <li>
+                          <strong className="text-foreground">Guest (Free)</strong> — 1 watchlist with up to 20 stocks,
+                          basic price data, light &amp; dark mode.
+                        </li>
+                        <li>
+                          <strong className="text-foreground">Pro ($5/mo or $50/yr)</strong> — Up to 5 watchlists × 20
+                          stocks, column customization, real-time updates.
+                        </li>
+                        <li>
+                          <strong className="text-foreground">Premium ($20/mo or $200/yr)</strong> — Up to 20 watchlists
+                          × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio
+                          dashboard with sector analysis.
+                        </li>
                       </ul>
                     </div>
                   ),
@@ -807,14 +843,6 @@ const Landing = () => {
                   a: "Yes — EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
                 },
                 {
-                  q: "Can I undo if I accidentally swipe-delete a stock?",
-                  a: "Yes. Whenever you swipe-delete a stock on mobile, an Undo button appears in the toast for 5 seconds. One tap restores the stock to your watchlist exactly where it was — no need to search and re-add it.",
-                },
-                {
-                  q: "How do I navigate back from the stock detail view?",
-                  a: "The stock detail sheet has a clear 'Back to watchlist' button at the top-left of the panel. You can also tap outside the panel or swipe it away on mobile to return to your watchlist instantly — no page reloads, no lost scroll position.",
-                },
-                {
                   q: "How does the interactive multi-day price chart work?",
                   a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts load instantly thanks to client-side caching, and price history is persisted to our database — so you see real multi-day trends, not session-reset sparklines.",
                 },
@@ -827,14 +855,15 @@ const Landing = () => {
                   <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
                     {faq.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">{faq.richAnswer || faq.a}</AccordionContent>
+                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
+                    {faq.richAnswer || faq.a}
+                  </AccordionContent>
                 </AccordionItem>
               ))}
             </Accordion>
           </motion.div>
         </div>
       </section>
-
 
       {/* Footer */}
       <footer className="border-t border-border py-10 px-4">
