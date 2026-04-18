@@ -153,12 +153,12 @@ const StockTable = () => {
       className="container mx-auto px-2 sm:px-4 py-4 sm:py-6"
     >
       {/* Title row — visible on all viewports */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-4 gap-3">
         <div>
-          <h2 className="text-lg font-bold">
+          <h2 className="text-base sm:text-lg font-bold leading-tight">
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
           </h2>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-[11px] sm:text-xs text-muted-foreground">
             {filtered.length !== stocks.length ? `${filtered.length} of ${stocks.length} stocks` : `${stocks.length} stocks`}
           </p>
         </div>
