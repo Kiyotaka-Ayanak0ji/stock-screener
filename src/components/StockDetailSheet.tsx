@@ -292,10 +292,10 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
             <div className="rounded-lg border border-border bg-muted/20 p-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Session trend
+                  Price trend
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  {series.length > 1 ? `${series.length} ticks` : "Live"}
+                  {seriesLoading ? "Loading…" : series.length > 1 ? `${series.length} pts` : "Live"}
                 </p>
               </div>
               <Sparkline points={series} positive={!isNegative} />
