@@ -3,7 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2 } from "lucide-react";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,7 +30,7 @@ interface MobileStockCardProps {
 const SWIPE_THRESHOLD = 90;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
-  const { priceTriggers, removeStock, setPriceTrigger } = useStocks();
+  const { priceTriggers, removeStock, addStock, setPriceTrigger } = useStocks();
   const { isGuest } = useAuth();
   const { subscription } = useSubscription();
   const isPremium =
@@ -45,6 +45,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const [triggerOpen, setTriggerOpen] = useState(false);
   const [triggerValue, setTriggerValue] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
+  const [premiumFeature, setPremiumFeature] = useState("Price Triggers");
   const swipedRef = useRef(false);
 
   const x = useMotionValue(0);
@@ -78,10 +79,46 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       swipedRef.current = false;
       return;
     }
+    if (!isPremium) {
+      setPremiumFeature("Stock Detail Sheet");
+      setPremiumOpen(true);
+      return;
+    }
     setDetailOpen(true);
   };
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+
+  const performDelete = () => {
+    // Snapshot what we need to restore
+    const snapshot = {
+      ticker: stock.ticker,
+      name: stock.name,
+      exchange: stock.exchange as "NSE" | "BSE",
+      yahooSymbol: stock.yahooSymbol,
+      isIndex: stock.isIndex,
+      screenerCode: stock.screenerCode,
+    };
+    let undone = false;
+    removeStock(snapshot.ticker);
+    toast(`${snapshot.ticker} removed from watchlist`, {
+      duration: 5000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          undone = true;
+          addStock(snapshot.ticker, snapshot.name, snapshot.exchange, {
+            yahooSymbol: snapshot.yahooSymbol,
+            isIndex: snapshot.isIndex,
+            screenerCode: snapshot.screenerCode,
+          });
+          toast.success(`${snapshot.ticker} restored`);
+        },
+      },
+    });
+    // No further action needed; if undone, addStock re-inserts ticker.
+    void undone;
+  };
 
   const handleDragEnd = (_e: unknown, info: PanInfo) => {
     const offset = info.offset.x;
@@ -89,11 +126,10 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
     const triggered = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
 
     if (triggered && offset < 0) {
-      // Swipe left → delete
+      // Swipe left → delete (with Undo)
       swipedRef.current = true;
       animate(x, -400, { duration: 0.18 }).then(() => {
-        removeStock(stock.ticker);
-        toast.success(`${stock.ticker} removed from watchlist`);
+        performDelete();
       });
       return;
     }
@@ -103,6 +139,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       swipedRef.current = true;
       animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
       if (!isPremium) {
+        setPremiumFeature("Price Triggers");
         setPremiumOpen(true);
         return;
       }
@@ -293,7 +330,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
         </DialogContent>
       </Dialog>
 
-      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName="Price Triggers" />
+      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
     </>
   );
 };

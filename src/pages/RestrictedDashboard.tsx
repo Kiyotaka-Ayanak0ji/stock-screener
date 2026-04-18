@@ -79,7 +79,7 @@ const RestrictedDashboard = () => {
             Your trial has expired
           </h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            Subscribe to a plan to unlock your watchlists, portfolio dashboard, price alerts, and all the features you love.
+            Subscribe to a plan to unlock your watchlists, interactive multi-day price charts, the stock detail sheet, price triggers, mobile swipe gestures with Undo, the portfolio dashboard, and every feature you love.
           </p>
         </motion.div>
 

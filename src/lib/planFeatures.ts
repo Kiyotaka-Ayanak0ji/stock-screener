@@ -19,6 +19,7 @@ export const GUEST_FEATURES = [
   "Up to 20 stocks in 1 watchlist",
   "Basic price data (NSE & BSE)",
   "Light & dark mode",
+  "Mobile PWA — install to home screen",
 ] as const;
 
 // Features Guest does NOT have (used for cross-out lists on Landing).
@@ -28,6 +29,7 @@ export const GUEST_LOCKED = [
   "Advanced filters (Price, Volume, P/E, Market Cap)",
   "Price triggers & email alerts",
   "Event tags & notes",
+  "Stock detail sheet with multi-day chart",
   "Export & sharing",
   "Portfolio dashboard",
 ] as const;
@@ -38,6 +40,7 @@ export const PRO_FEATURES = [
   "Real-time NSE & BSE price updates",
   "Column visibility customization",
   "Smart Alerts (52-week highs/lows & volume spikes)",
+  "Mobile swipe gestures with Undo",
 ] as const;
 
 // Features Pro does NOT have — Premium-gated (used for cross-out on Pro card).
@@ -45,6 +48,7 @@ export const PRO_LOCKED = [
   "Advanced filters (Price, Volume, Market Cap, P/E)",
   "Price triggers with email alerts",
   "Event tags & personal notes",
+  "Stock detail sheet with multi-day interactive chart",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Portfolio dashboard with sector analysis",
@@ -57,6 +61,7 @@ export const PREMIUM_EXTRAS = [
   "Price trigger alerts with email",
   "Event tagging & tracking",
   "Notes on stocks",
+  "Stock detail sheet with interactive multi-day chart (1D/1W/1M/All)",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Portfolio dashboard",
@@ -91,6 +96,7 @@ export function inferRequiredTier(featureName?: string): RequiredTier {
     "price trigger", "trigger",
     "event tag", "tag",
     "note",
+    "detail", "chart", "stock detail",
     "export", "image", "pdf",
     "share", "shareable",
     "portfolio", "sector",
