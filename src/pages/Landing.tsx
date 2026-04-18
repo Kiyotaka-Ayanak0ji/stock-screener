@@ -30,6 +30,9 @@ import {
   Briefcase,
   Filter,
   Sparkles,
+  Hand,
+  Undo2,
+  Activity,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -48,6 +51,13 @@ const FEATURES = [
     title: "Real-Time Price Tracking",
     description:
       "Watch your stocks move in real time with live price updates, change percentages, and volume data across NSE & BSE.",
+  },
+  {
+    icon: Activity,
+    title: "Interactive Multi-Day Charts",
+    description:
+      "Tap any stock to open a rich detail sheet with an interactive price chart — switch between 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch.",
+    badge: "Premium",
   },
   {
     icon: Bell,
@@ -77,6 +87,12 @@ const FEATURES = [
     badge: "Premium",
   },
   {
+    icon: Hand,
+    title: "Mobile Swipe Gestures",
+    description:
+      "Swipe left to remove a stock (with a 5-second Undo) and swipe right to instantly set a price trigger. Manage your watchlist faster than ever on mobile.",
+  },
+  {
     icon: Share2,
     title: "Share & Export",
     description:
@@ -103,6 +119,12 @@ const FEATURES = [
     description:
       "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, company details, and stock-wise performance.",
     badge: "Premium",
+  },
+  {
+    icon: Smartphone,
+    title: "Mobile PWA — Install Anywhere",
+    description:
+      "Install EquityLens to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
 ];
 
