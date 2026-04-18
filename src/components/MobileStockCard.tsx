@@ -35,7 +35,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ delay: index * 0.02, duration: 0.25 }}
-      className="border-b border-border px-3 py-3 active:bg-muted/50 transition-all duration-150 hover:bg-muted/30"
+      className="border-b border-border px-4 py-3.5 active:bg-muted/50 transition-all duration-150 hover:bg-muted/30"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -96,10 +96,11 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
           <Button
             size="icon"
             variant="ghost"
-            className="h-7 w-7 text-muted-foreground hover:text-loss active:scale-90 transition-all shrink-0"
+            className="h-9 w-9 text-muted-foreground hover:text-loss active:scale-90 transition-all shrink-0 -mr-2"
             onClick={() => removeStock(stock.ticker)}
+            aria-label={`Remove ${stock.ticker}`}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       )}

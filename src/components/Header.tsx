@@ -123,20 +123,20 @@ const Header = () => {
         </div>
 
         {/* Mobile Nav */}
-        <div className="flex sm:hidden items-center gap-1.5">
+        <div className="flex sm:hidden items-center gap-2">
           {/* Market status indicator */}
           <div className={`h-2 w-2 rounded-full ${isMarketOpen ? "bg-gain animate-pulse" : "bg-loss"}`} />
-          
+
           {hasActiveAccess && <AlertsPanel />}
 
-          <Button variant="outline" size="icon" onClick={toggleTheme} className="rounded-full h-8 w-8">
-            {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          <Button variant="outline" size="icon" onClick={toggleTheme} className="rounded-full h-10 w-10" aria-label="Toggle theme">
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Menu className="h-4.5 w-4.5" />
+              <Button variant="ghost" size="icon" className="h-10 w-10" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-0">

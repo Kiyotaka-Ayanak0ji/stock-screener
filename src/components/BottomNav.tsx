@@ -20,7 +20,7 @@ const BottomNav = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-border bg-card/95 backdrop-blur-md safe-area-bottom">
-      <div className="flex items-center justify-around h-14">
+      <div className="flex items-center justify-around h-16">
         {NAV_ITEMS.map((item) => {
           if (item.requiresAuth && !user) return null;
           if (item.path === "/portfolio" && !isActive) return null;
@@ -30,16 +30,16 @@ const BottomNav = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
+              aria-label={item.label}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors",
+                "flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors",
                 "active:bg-muted/50",
-                active
-                  ? "text-primary"
-                  : "text-muted-foreground"
+                active ? "text-primary" : "text-muted-foreground"
               )}
             >
-              <item.icon className={cn("h-5 w-5", active && "drop-shadow-sm")} />
-              <span className={cn("text-[10px] font-medium", active && "font-semibold")}>
+              <item.icon className={cn("h-[22px] w-[22px]", active && "drop-shadow-sm")} />
+              <span className={cn("text-[11px] font-medium leading-none", active && "font-semibold")}>
                 {item.label}
               </span>
             </button>
