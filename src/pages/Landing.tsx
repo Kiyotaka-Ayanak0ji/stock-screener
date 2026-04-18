@@ -186,6 +186,14 @@ const Landing = () => {
             >
               FAQ
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => document.getElementById("support")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Support
+            </Button>
             {user ? (
               <Button onClick={() => navigate("/dashboard")} size="sm" className="text-xs sm:text-sm">
                 Dashboard <ArrowRight className="h-4 w-4 ml-1" />
