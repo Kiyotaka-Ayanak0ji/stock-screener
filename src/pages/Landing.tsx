@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Mail, LifeBuoy } from "lucide-react";
 import {
   ArrowRight,
   BarChart3,
@@ -185,6 +185,14 @@ const Landing = () => {
               onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}
             >
               FAQ
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => document.getElementById("support")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Support
             </Button>
             {user ? (
               <Button onClick={() => navigate("/dashboard")} size="sm" className="text-xs sm:text-sm">
@@ -865,6 +873,63 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Support */}
+      <section id="support" className="py-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center mb-10"
+          >
+            <Badge variant="secondary" className="mb-3">
+              <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold">Need a hand?</h2>
+            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+              Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon as possible.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card className="border border-border bg-gradient-to-br from-card to-muted/40 shadow-sm">
+              <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Mail className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <p className="text-sm text-muted-foreground">Product, pricing & customer support</p>
+                    <a
+                      href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support"
+                      className="text-lg sm:text-xl font-semibold text-foreground hover:text-primary transition-colors break-all"
+                    >
+                      aryanansik@gmail.com
+                    </a>
+                  </div>
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto"
+                  onClick={() => (window.location.href = "mailto:aryanansik@gmail.com?subject=EquityLens%20Support")}
+                >
+                  <Mail className="h-4 w-4 mr-2" /> Email Support
+                </Button>
+              </CardContent>
+            </Card>
+            <p className="text-xs text-muted-foreground text-center mt-4">
+              Typical response time: within 24 hours on business days.
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="border-t border-border py-10 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -881,6 +946,9 @@ const Landing = () => {
             <button onClick={() => navigate("/subscribe")} className="hover:text-foreground transition-colors">
               Pricing
             </button>
+            <a href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support" className="hover:text-foreground transition-colors">
+              Support
+            </a>
           </div>
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EquityLens. All rights reserved.</p>
         </div>
