@@ -1,4 +1,4 @@
-import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
+// stock-proxy is a public endpoint — prices are public market data.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
