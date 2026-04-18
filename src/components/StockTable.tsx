@@ -224,15 +224,16 @@ const StockTable = () => {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                size="icon"
+                size="sm"
                 variant="outline"
-                className="h-9 w-9 relative shrink-0"
+                className="h-9 w-full relative gap-1.5 text-[11px] px-2"
                 aria-label="Sort"
               >
-                <ArrowDownUp className={`h-4 w-4 ${sortKey !== "ticker" || sortDir !== "asc" ? "text-primary" : ""}`} />
+                <ArrowDownUp className={`h-3.5 w-3.5 ${sortKey !== "ticker" || sortDir !== "asc" ? "text-primary" : ""}`} />
+                Sort
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="start" className="w-48">
               <DropdownMenuLabel className="text-xs">Sort by</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {([
@@ -261,13 +262,14 @@ const StockTable = () => {
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                size="icon"
+                size="sm"
                 variant="outline"
-                className="h-9 w-9 relative shrink-0"
+                className="h-9 w-full relative gap-1.5 text-[11px] px-2"
                 aria-label="Filters"
                 onClick={(e) => { if (!isPremium) { e.preventDefault(); setPremiumOpen(true); } }}
               >
-                <Filter className={`h-4 w-4 ${activeFilterCount > 0 ? "text-primary" : ""}`} />
+                <Filter className={`h-3.5 w-3.5 ${activeFilterCount > 0 ? "text-primary" : ""}`} />
+                Filter
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
                     {activeFilterCount}
@@ -276,7 +278,7 @@ const StockTable = () => {
               </Button>
             </PopoverTrigger>
             {isPremium && (
-              <PopoverContent align="end" className="w-72 p-3 space-y-3">
+              <PopoverContent align="center" className="w-72 p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold">Filters</p>
                   {activeFilterCount > 0 && (
@@ -303,22 +305,20 @@ const StockTable = () => {
               </PopoverContent>
             )}
           </Popover>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={refreshPrices}
-                disabled={isRefreshing}
-                className="h-9 w-9 shrink-0"
-                aria-label="Refresh prices"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Refresh prices</TooltipContent>
-          </Tooltip>
-          <AddStockDialog />
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={refreshPrices}
+            disabled={isRefreshing}
+            className="h-9 w-full gap-1.5 text-[11px] px-2"
+            aria-label="Refresh prices"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+          <div className="[&>*]:w-full [&_button]:w-full [&_button]:h-9 [&_button]:text-[11px] [&_button]:px-2 [&_button]:gap-1.5">
+            <AddStockDialog />
+          </div>
         </div>
       </div>
 
