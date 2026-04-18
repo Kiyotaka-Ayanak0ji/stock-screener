@@ -46,22 +46,29 @@ const SharedWatchlist = () => {
     }
 
     const fetchShared = async () => {
-      const { data: row, error: err } = await supabase
-        .from("shared_watchlists")
-        .select("watchlist_name, stock_data, created_at")
-        .eq("share_token", token)
-        .single();
+      // Reads happen through the get-shared-watchlist edge function so the
+      // shared_watchlists table is no longer publicly readable.
+      const { data: row, error: err } = await supabase.functions.invoke(
+        "get-shared-watchlist",
+        { body: { token } },
+      );
 
-      if (err || !row) {
+      if (err || !row || (row as { error?: string }).error) {
         setError("This shared watchlist was not found or has expired.");
         setLoading(false);
         return;
       }
 
+      const payload = row as {
+        watchlist_name: string;
+        stock_data: SharedStock[];
+        created_at: string;
+      };
+
       setData({
-        watchlist_name: row.watchlist_name,
-        stock_data: (row.stock_data as unknown as SharedStock[]) || [],
-        created_at: row.created_at,
+        watchlist_name: payload.watchlist_name,
+        stock_data: (payload.stock_data as unknown as SharedStock[]) || [],
+        created_at: payload.created_at,
       });
       setLoading(false);
     };

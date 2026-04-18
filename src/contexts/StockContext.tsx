@@ -163,12 +163,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         volume: s.volume,
         market_cap: s.marketCap,
         pe: s.pe || 0,
-        updated_at: new Date().toISOString(),
       }));
 
-      const { error } = await supabase
-        .from("cached_stock_prices")
-        .upsert(rows, { onConflict: "ticker,exchange" });
+      // Writes go through the upsert-stock-prices edge function (service-role).
+      // Anonymous and unauthenticated callers cannot tamper with cached prices anymore.
+      const { error } = await supabase.functions.invoke("upsert-stock-prices", {
+        body: { rows },
+      });
 
       if (error) console.error("Failed to cache prices:", error);
     } catch (err) {
