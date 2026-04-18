@@ -114,29 +114,14 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const PRO_FEATURES = [
-  "Up to 5 watchlists",
-  "20 stocks per watchlist",
-  "Column visibility customization",
-  "Multiple watchlists",
-  "Real-time price updates",
-  "Smart Alerts (52-week highs/lows & volume spikes)",
-];
-
-const PREMIUM_EXTRAS = [
-  "Everything in Pro",
-  "Up to 20 watchlists",
-  "50 stocks per watchlist",
-  "Advanced filters (Price, Volume, Market Cap, P/E)",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
-  "Portfolio performance dashboard",
-  "Sector allocation",
-  "Priority email support",
-];
+import {
+  PRO_FEATURES,
+  PRO_LOCKED,
+  PREMIUM_EXTRAS,
+  PREMIUM_PLUS_EXTRAS,
+  GUEST_FEATURES,
+  GUEST_LOCKED,
+} from "@/lib/planFeatures";
 
 const Landing = () => {
   const { user } = useAuth();
