@@ -156,14 +156,20 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => setDetailOpen(true)}
+                    onClick={() => {
+                      if (!isPremium) { requirePremium("Stock Detail Sheet"); return; }
+                      setDetailOpen(true);
+                    }}
                     aria-label={`View full details for ${stock.ticker}`}
-                    className="text-muted-foreground/60 hover:text-primary transition-colors"
+                    className="text-muted-foreground/60 hover:text-primary transition-colors inline-flex items-center"
                   >
                     <Info className="h-3.5 w-3.5" />
+                    {!isPremium && <Crown className="h-2.5 w-2.5 -ml-0.5 text-amber-500" />}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top">View details, chart & quick actions</TooltipContent>
+                <TooltipContent side="top">
+                  {isPremium ? "View details, chart & quick actions" : "Premium · view details, multi-day chart & quick actions"}
+                </TooltipContent>
               </Tooltip>
             </div>
             <span className="text-xs text-muted-foreground truncate max-w-[140px]">{stock.name}</span>
