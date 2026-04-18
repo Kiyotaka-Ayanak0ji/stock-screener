@@ -35,13 +35,17 @@ const Header = () => {
       className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50"
     >
       <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 sm:gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            aria-label="Go to landing page"
+          >
             <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <h1 className="text-lg sm:text-xl font-bold tracking-tight">
               Equity<span className="text-primary">Lens</span>
             </h1>
-          </div>
+          </button>
           <div className="hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 rounded-full bg-secondary text-xs font-medium">
             <Activity className={`h-3 w-3 ${isMarketOpen ? "text-gain animate-pulse" : "text-loss"}`} />
             <span className="text-secondary-foreground">
@@ -123,20 +127,23 @@ const Header = () => {
         </div>
 
         {/* Mobile Nav */}
-        <div className="flex sm:hidden items-center gap-2">
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           {/* Market status indicator */}
-          <div className={`h-2 w-2 rounded-full ${isMarketOpen ? "bg-gain animate-pulse" : "bg-loss"}`} />
+          <div
+            className={`h-2 w-2 rounded-full mr-0.5 ${isMarketOpen ? "bg-gain animate-pulse" : "bg-loss"}`}
+            aria-label={isMarketOpen ? "Market open" : "Market closed"}
+          />
 
           {hasActiveAccess && <AlertsPanel />}
 
-          <Button variant="outline" size="icon" onClick={toggleTheme} className="rounded-full h-10 w-10" aria-label="Toggle theme">
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full h-9 w-9" aria-label="Toggle theme">
+            {theme === "dark" ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
           </Button>
 
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10" aria-label="Open menu">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Open menu">
+                <Menu className="h-[18px] w-[18px]" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72 p-0">
