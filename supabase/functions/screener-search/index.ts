@@ -1,3 +1,5 @@
+import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -88,11 +90,27 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require an authenticated Supabase user
+  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
+  if (!userId) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { query } = await req.json();
 
-    if (!query || query.trim().length < 1) {
+    if (!query || typeof query !== "string" || query.trim().length < 1) {
       return new Response(JSON.stringify({ results: [] }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Cap query length and restrict to safe characters to prevent abuse
+    if (query.length > 100 || !/^[A-Za-z0-9 .&_\-]+$/.test(query.trim())) {
+      return new Response(JSON.stringify({ results: [], error: 'Invalid query' }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
