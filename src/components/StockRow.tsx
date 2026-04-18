@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown } from "lucide-react";
+import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import PremiumDialog from "@/components/PremiumDialog";
+import StockDetailSheet from "@/components/StockDetailSheet";
 
 interface StockRowProps {
   stock: Stock;
@@ -41,6 +42,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   const [flashClass, setFlashClass] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("");
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const requirePremium = (feature: string) => {
     setPremiumFeature(feature);
@@ -141,15 +143,29 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
       >
         <td className="px-4 py-3">
           <div className="flex flex-col">
-            <a
-              href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono font-bold text-sm text-primary hover:underline inline-flex items-center gap-1 group w-fit"
-            >
-              {stock.ticker}
-              <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-            </a>
+            <div className="flex items-center gap-1.5">
+              <a
+                href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono font-bold text-sm text-primary hover:underline inline-flex items-center gap-1 group w-fit"
+              >
+                {stock.ticker}
+                <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </a>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setDetailOpen(true)}
+                    aria-label={`View full details for ${stock.ticker}`}
+                    className="text-muted-foreground/60 hover:text-primary transition-colors"
+                  >
+                    <Info className="h-3.5 w-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top">View details, chart & quick actions</TooltipContent>
+              </Tooltip>
+            </div>
             <span className="text-xs text-muted-foreground truncate max-w-[140px]">{stock.name}</span>
           </div>
         </td>
@@ -351,6 +367,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         </td>
       </motion.tr>
       <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
+      <StockDetailSheet stock={stock} open={detailOpen} onOpenChange={setDetailOpen} />
     </>
   );
 };
