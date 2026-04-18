@@ -330,7 +330,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
         </DialogContent>
       </Dialog>
 
-      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName="Price Triggers" />
+      <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
     </>
   );
 };
