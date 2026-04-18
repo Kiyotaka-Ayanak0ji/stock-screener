@@ -16,37 +16,12 @@ declare global {
   }
 }
 
-
-const PRO_FEATURES = [
-  "Up to 5 watchlists",
-  "20 stocks per watchlist",
-  "Column visibility customization",
-  "Multiple watchlists",
-  "Real-time price updates",
-];
-
-const PREMIUM_EXTRAS = [
-  "Up to 20 watchlists",
-  "50 stocks per watchlist",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
-  "Portfolio performance dashboard",
-  "Sector allocation & fundamentals",
-  "Stock-wise P&L charts",
-  "Priority email support",
-  "Early access to new features",
-];
-
-const PREMIUM_PLUS_EXTRAS = [
-  "Unlimited watchlists",
-  "Unlimited stocks per watchlist",
-  "Unlimited price trigger alerts",
-  "Beta access to new features",
-  "Everything in Premium",
-];
+import {
+  PRO_FEATURES,
+  PRO_LOCKED,
+  PREMIUM_EXTRAS,
+  PREMIUM_PLUS_EXTRAS,
+} from "@/lib/planFeatures";
 
 type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly" | "premium_plus_monthly" | "premium_plus_yearly";
 
