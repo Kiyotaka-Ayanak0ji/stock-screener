@@ -107,6 +107,49 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Append history points for sparklines (multi-day trend)
+    // Only record when price actually changed since the last point to avoid bloat.
+    try {
+      const tickers = cleaned.map((c) => c.ticker);
+      const { data: lastPoints } = await sb
+        .from("stock_price_history")
+        .select("ticker, exchange, price, recorded_at")
+        .in("ticker", tickers)
+        .order("recorded_at", { ascending: false })
+        .limit(500);
+
+      const lastByKey = new Map<string, number>();
+      (lastPoints ?? []).forEach((p: any) => {
+        const key = `${p.exchange}|${p.ticker}`;
+        if (!lastByKey.has(key)) lastByKey.set(key, Number(p.price));
+      });
+
+      const historyRows = cleaned
+        .filter((c) => {
+          const key = `${c.exchange}|${c.ticker}`;
+          const last = lastByKey.get(key);
+          // Always store first point; otherwise store only on actual change
+          return last === undefined || Math.abs(last - c.price) > 0.0001;
+        })
+        .map((c) => ({
+          ticker: c.ticker,
+          exchange: c.exchange,
+          price: c.price,
+          recorded_at: now,
+        }));
+
+      if (historyRows.length > 0) {
+        await sb.from("stock_price_history").insert(historyRows);
+      }
+
+      // Prune points older than 30 days (best-effort, ignore errors)
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      await sb.from("stock_price_history").delete().lt("recorded_at", cutoff);
+    } catch (historyErr) {
+      console.error("price history append failed:", historyErr);
+      // Non-fatal — primary upsert already succeeded
+    }
+
     return new Response(JSON.stringify({ ok: true, written: cleaned.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
