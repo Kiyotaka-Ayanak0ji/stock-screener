@@ -90,7 +90,7 @@ const FEATURES = [
     icon: Hand,
     title: "Mobile Swipe Gestures",
     description:
-      "Swipe left to remove (with 5s Undo), swipe right to instantly set a price trigger, and swipe up to drop a quick note — all from your watchlist card.",
+      "Swipe left to remove a stock (with a 5-second Undo) and swipe right to instantly set a price trigger. Manage your watchlist faster than ever on mobile.",
   },
   {
     icon: Share2,
@@ -804,15 +804,11 @@ const Landing = () => {
                 },
                 {
                   q: "Does EquityLens work on mobile?",
-                  a: "Yes — EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), swipe right to instantly set a price trigger, and swipe up to add a quick note via a fast bottom sheet.",
+                  a: "Yes — EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
                 },
                 {
                   q: "Can I undo if I accidentally swipe-delete a stock?",
                   a: "Yes. Whenever you swipe-delete a stock on mobile, an Undo button appears in the toast for 5 seconds. One tap restores the stock to your watchlist exactly where it was — no need to search and re-add it.",
-                },
-                {
-                  q: "How do I add a quick note to a stock on mobile?",
-                  a: "On any mobile stock card, swipe up to instantly open a Quick Note bottom sheet. Type your thought, hit Save, and a small note indicator appears on the card so you know which stocks have notes. Notes are part of the Premium plan.",
                 },
               ].map((faq, i) => (
                 <AccordionItem

@@ -3,7 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2, Crown, StickyNote } from "lucide-react";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,16 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -37,10 +28,9 @@ interface MobileStockCardProps {
 }
 
 const SWIPE_THRESHOLD = 90;
-const SWIPE_UP_THRESHOLD = 70;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
-  const { priceTriggers, removeStock, addStock, setPriceTrigger, notes, updateNote } = useStocks();
+  const { priceTriggers, removeStock, addStock, setPriceTrigger } = useStocks();
   const { isGuest } = useAuth();
   const { subscription } = useSubscription();
   const isPremium =
@@ -54,18 +44,14 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const [detailOpen, setDetailOpen] = useState(false);
   const [triggerOpen, setTriggerOpen] = useState(false);
   const [triggerValue, setTriggerValue] = useState("");
-  const [noteOpen, setNoteOpen] = useState(false);
-  const [noteValue, setNoteValue] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("Price Triggers");
   const swipedRef = useRef(false);
 
   const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  // Action backgrounds: red (delete) on left swipe, primary (trigger) on right swipe, accent (note) on up swipe
+  // Action backgrounds: red (delete) on left swipe, primary (trigger) on right swipe
   const leftActionOpacity = useTransform(x, [-SWIPE_THRESHOLD, -20, 0], [1, 0.3, 0]);
   const rightActionOpacity = useTransform(x, [0, 20, SWIPE_THRESHOLD], [0, 0.3, 1]);
-  const upActionOpacity = useTransform(y, [-SWIPE_UP_THRESHOLD, -15, 0], [1, 0.3, 0]);
 
   const isPriceAvailable = !priceLoading || stock.price !== 0;
   const isPositive = stock.change > 0;
@@ -73,7 +59,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-muted-foreground";
   const changeBg = isPositive ? "bg-gain/10" : isNegative ? "bg-loss/10" : "bg-muted";
   const trigger = priceTriggers[stock.ticker];
-  const existingNote = notes.find((n) => n.ticker === stock.ticker)?.note ?? "";
 
   const formatVolume = (v: number) => {
     if (v >= 10000000) return (v / 10000000).toFixed(2) + " Cr";
@@ -135,53 +120,24 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
     void undone;
   };
 
-  const openNoteSheet = () => {
-    if (!isPremium) {
-      setPremiumFeature("Notes");
-      setPremiumOpen(true);
-      return;
-    }
-    setNoteValue(existingNote);
-    setNoteOpen(true);
-  };
-
   const handleDragEnd = (_e: unknown, info: PanInfo) => {
-    const offsetX = info.offset.x;
-    const offsetY = info.offset.y;
-    const velocityX = info.velocity.x;
-    const velocityY = info.velocity.y;
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
+    const triggered = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
 
-    // Vertical wins only when clearly more vertical than horizontal.
-    const verticalDominant = Math.abs(offsetY) > Math.abs(offsetX) * 1.2;
-    const upTriggered =
-      verticalDominant && (offsetY < -SWIPE_UP_THRESHOLD || velocityY < -500);
-
-    if (upTriggered) {
-      swipedRef.current = true;
-      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
-      animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
-      openNoteSheet();
-      return;
-    }
-
-    const horizontalTriggered =
-      Math.abs(offsetX) > SWIPE_THRESHOLD || Math.abs(velocityX) > 500;
-
-    if (horizontalTriggered && offsetX < 0) {
+    if (triggered && offset < 0) {
       // Swipe left → delete (with Undo)
       swipedRef.current = true;
-      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
       animate(x, -400, { duration: 0.18 }).then(() => {
         performDelete();
       });
       return;
     }
 
-    if (horizontalTriggered && offsetX > 0) {
+    if (triggered && offset > 0) {
       // Swipe right → set trigger
       swipedRef.current = true;
       animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
-      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
       if (!isPremium) {
         setPremiumFeature("Price Triggers");
         setPremiumOpen(true);
@@ -194,17 +150,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
 
     // Snap back
     animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
-    animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
-  };
-
-  const saveNote = () => {
-    updateNote(stock.ticker, noteValue.trim());
-    if (noteValue.trim()) {
-      toast.success(`Note saved for ${stock.ticker}`);
-    } else {
-      toast.success(`Note cleared for ${stock.ticker}`);
-    }
-    setNoteOpen(false);
   };
 
   const saveTrigger = () => {
@@ -246,25 +191,15 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
           <Trash2 className="h-5 w-5" />
         </motion.div>
 
-        {/* Swipe-up action background (quick note) */}
         <motion.div
-          style={{ opacity: upActionOpacity }}
-          className="absolute inset-x-0 bottom-0 flex items-center justify-center py-2 bg-accent/30 text-accent-foreground pointer-events-none"
-          aria-hidden="true"
-        >
-          <StickyNote className="h-4 w-4 mr-2 text-primary" />
-          <span className="text-xs font-semibold uppercase tracking-wide">Quick Note</span>
-        </motion.div>
-
-        <motion.div
-          drag
-          dragConstraints={{ left: 0, right: 0, top: -120, bottom: 0 }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.6}
           dragDirectionLock
           onDragEnd={handleDragEnd}
-          style={{ x, y }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          style={{ x }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ delay: index * 0.02, duration: 0.25 }}
           role="button"
@@ -276,8 +211,8 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               handleOpen();
             }
           }}
-          aria-label={`Open details for ${stock.ticker}. Swipe right to set price trigger, swipe left to remove, swipe up to add a note.`}
-          className="relative bg-background px-4 py-3.5 active:bg-muted/50 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+          aria-label={`Open details for ${stock.ticker}. Swipe right to set price trigger, swipe left to remove.`}
+          className="relative bg-background px-4 py-3.5 active:bg-muted/50 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset touch-pan-y"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
@@ -297,9 +232,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 </Badge>
                 {trigger && (
                   <Bell className="h-3.5 w-3.5 text-primary animate-pulse" />
-                )}
-                {existingNote && (
-                  <StickyNote className="h-3.5 w-3.5 text-accent" aria-label="Has note" />
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate mt-0.5">{stock.name}</p>
@@ -397,43 +329,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Sheet open={noteOpen} onOpenChange={setNoteOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl">
-          <SheetHeader className="text-left">
-            <SheetTitle className="font-mono flex items-center gap-2">
-              <StickyNote className="h-4 w-4 text-accent" />
-              Quick Note · {stock.ticker}
-            </SheetTitle>
-            <SheetDescription>
-              Jot a fast thought about {stock.name}. Saved instantly to your watchlist.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="py-4">
-            <Textarea
-              autoFocus
-              value={noteValue}
-              onChange={(e) => setNoteValue(e.target.value)}
-              placeholder="e.g. Watch breakout above ₹500…"
-              rows={4}
-              className="resize-none text-sm"
-              maxLength={500}
-            />
-            <div className="flex justify-between items-center mt-1.5 text-[11px] text-muted-foreground">
-              <span>Press Save to persist</span>
-              <span>{noteValue.length}/500</span>
-            </div>
-          </div>
-          <SheetFooter className="flex-row gap-2">
-            <Button variant="ghost" className="flex-1" onClick={() => setNoteOpen(false)}>
-              Cancel
-            </Button>
-            <Button className="flex-1" onClick={saveNote}>
-              Save Note
-            </Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
 
       <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
     </>
