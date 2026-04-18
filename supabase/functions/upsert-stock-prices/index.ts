@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,13 +35,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  // Public endpoint — writes go through service role with strict input validation.
+  // Same model as cached_stock_prices: market data is non-sensitive.
 
   try {
     const body = await req.json();
