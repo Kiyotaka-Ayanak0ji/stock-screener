@@ -760,11 +760,11 @@ const Landing = () => {
                 },
                 {
                   q: "What do I get during the 15-day free trial?",
-                  a: "During your trial, you unlock full Pro access — multiple watchlists, column customization, and real-time price updates. Premium features like price triggers, event tags, notes, sharing, and portfolio analytics are exclusive to Premium subscribers.",
+                  a: "During your trial, you unlock full Pro access — multiple watchlists, column customization, real-time price updates, Smart Alerts, and mobile swipe gestures with Undo. Premium features like the interactive stock detail sheet, multi-day charts, price triggers, event tags, notes, sharing, and portfolio analytics remain exclusive to Premium subscribers.",
                 },
                 {
                   q: "What's included in the Premium plan?",
-                  a: "Premium unlocks the full EquityLens experience: price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, diversity scoring, and a one-click 'Refresh All' button.",
+                  a: "Premium unlocks the full EquityLens experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
                 },
                 {
                   q: "Is there an unlimited plan?",
@@ -804,7 +804,11 @@ const Landing = () => {
                 },
                 {
                   q: "Does EquityLens work on mobile?",
-                  a: "Yes — EquityLens is a mobile-first web app that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support and full-screen mode. The same experience scales beautifully to tablets and desktops.",
+                  a: "Yes — EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
+                },
+                {
+                  q: "Can I undo if I accidentally swipe-delete a stock?",
+                  a: "Yes. Whenever you swipe-delete a stock on mobile, an Undo button appears in the toast for 5 seconds. One tap restores the stock to your watchlist exactly where it was — no need to search and re-add it.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
