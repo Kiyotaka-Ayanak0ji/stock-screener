@@ -208,18 +208,14 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
               </div>
             </div>
 
-            {/* Sparkline */}
-            <div className="rounded-lg border border-border bg-muted/20 p-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Price trend
-                </p>
-                <p className="text-[10px] text-muted-foreground">
-                  {seriesLoading ? "Loading…" : series.length > 1 ? `${series.length} pts` : "Live"}
-                </p>
-              </div>
-              <Sparkline points={series} positive={!isNegative} />
-            </div>
+            {/* Interactive price chart */}
+            <PriceChart
+              ticker={stock.ticker}
+              exchange={stock.exchange}
+              livePrice={stock.price}
+              previousClose={stock.previousClose}
+              positive={!isNegative}
+            />
 
             {/* Metrics grid */}
             <div className="grid grid-cols-2 gap-2 text-xs">
