@@ -25,7 +25,6 @@ import {
   Tag,
   SlidersHorizontal,
   Share2,
-  FileDown,
   Users,
   X,
   Briefcase,
@@ -705,67 +704,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Downloads */}
-      <section id="downloads" className="py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <Badge variant="secondary" className="mb-3">
-              <Smartphone className="h-3 w-3 mr-1 text-primary" /> Download
-            </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Get EquityLens on Your Device</h2>
-            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-              Track your stocks natively on Windows or Android — same powerful features, optimized for your platform.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {/* Windows */}
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-              <Card className="border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="h-7 w-7 text-primary" fill="currentColor">
-                      <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">Windows</h3>
-                  <p className="text-sm text-muted-foreground">Desktop app for Windows 10/11 (x64)</p>
-                  <Button
-                    className="w-full active:scale-[0.97] transition-all gap-2"
-                    onClick={() => window.open("https://github.com/nicholasxdavis/EquityLens/releases/latest", "_blank")}
-                  >
-                    <FileDown className="h-4 w-4" /> Download for Windows
-                  </Button>
-                  <p className="text-xs text-muted-foreground">.exe installer · ~80 MB</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Android */}
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
-              <Card className="border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                <CardContent className="p-8 text-center space-y-4">
-                  <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" className="h-7 w-7 text-primary" fill="currentColor">
-                      <path d="M17.523 15.341a.96.96 0 0 0-.96.96v3.168a.96.96 0 1 0 1.92 0v-3.168a.96.96 0 0 0-.96-.96zm-11.046 0a.96.96 0 0 0-.96.96v3.168a.96.96 0 1 0 1.92 0v-3.168a.96.96 0 0 0-.96-.96zM15.165 5.344l1.29-2.344a.269.269 0 0 0-.468-.268l-1.308 2.376A7.95 7.95 0 0 0 12 4.476a7.95 7.95 0 0 0-2.679.632L8.013 2.732a.269.269 0 0 0-.468.268l1.29 2.344C6.567 6.512 5.133 8.748 5.133 11.34h13.734c0-2.592-1.434-4.828-3.702-5.996zM9.504 9.18a.72.72 0 1 1 .001-1.44.72.72 0 0 1-.001 1.44zm4.992 0a.72.72 0 1 1 .001-1.44.72.72 0 0 1-.001 1.44zM5.133 12.54v7.776a1.2 1.2 0 0 0 1.2 1.2h1.08v2.52a.96.96 0 1 0 1.92 0v-2.52h3.334v2.52a.96.96 0 1 0 1.92 0v-2.52h1.08a1.2 1.2 0 0 0 1.2-1.2V12.54H5.133z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">Android</h3>
-                  <p className="text-sm text-muted-foreground">Native app for Android 8.0+</p>
-                  <Button
-                    className="w-full active:scale-[0.97] transition-all gap-2"
-                    onClick={() => window.open("https://github.com/nicholasxdavis/EquityLens/releases/latest", "_blank")}
-                  >
-                    <FileDown className="h-4 w-4" /> Download for Android
-                  </Button>
-                  <p className="text-xs text-muted-foreground">.apk file · ~25 MB</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section id="faq" className="py-20 px-4 bg-muted/30">
         <div className="max-w-3xl mx-auto">
@@ -844,7 +782,7 @@ const Landing = () => {
                 },
                 {
                   q: "Does EquityLens work on mobile?",
-                  a: "Yes! EquityLens is available as a native Android app and a Windows desktop app. Download the APK for Android or the installer for Windows from our Downloads section above. Both versions deliver the full EquityLens experience optimized for your platform.",
+                  a: "Yes — EquityLens is a mobile-first web app that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support and full-screen mode. The same experience scales beautifully to tablets and desktops.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
