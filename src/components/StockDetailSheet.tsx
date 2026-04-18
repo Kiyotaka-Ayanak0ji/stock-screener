@@ -49,45 +49,6 @@ const PRESET_TAGS = [
   "Target Hit",
 ];
 
-const Sparkline = ({ points, positive }: { points: number[]; positive: boolean }) => {
-  if (points.length < 2) {
-    return (
-      <div className="h-24 flex items-center justify-center text-xs text-muted-foreground">
-        Collecting price data…
-      </div>
-    );
-  }
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const width = 320;
-  const height = 96;
-  const stepX = width / (points.length - 1);
-  const path = points
-    .map((p, i) => {
-      const x = i * stepX;
-      const y = height - ((p - min) / range) * height;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  const areaPath = `${path} L${width},${height} L0,${height} Z`;
-  const stroke = positive ? "hsl(var(--gain))" : "hsl(var(--loss))";
-  const fill = positive ? "hsl(var(--gain) / 0.12)" : "hsl(var(--loss) / 0.12)";
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      preserveAspectRatio="none"
-      className="w-full h-24"
-      role="img"
-      aria-label="Recent price trend"
-    >
-      <path d={areaPath} fill={fill} />
-      <path d={path} fill="none" stroke={stroke} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  );
-};
-
 const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) => {
   const {
     notes,
