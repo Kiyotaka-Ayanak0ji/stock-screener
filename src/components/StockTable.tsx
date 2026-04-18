@@ -198,12 +198,14 @@ const StockTable = () => {
         </div>
       </div>
 
-      {/* Mobile sticky compact toolbar */}
-      <div className="sm:hidden sticky top-[49px] z-40 -mx-2 px-2 py-2 bg-background/95 backdrop-blur-md border-b border-border mb-3">
+      {/* Mobile sticky compact toolbar — two rows for clarity */}
+      <div className="sm:hidden sticky top-[49px] z-40 -mx-2 px-2 py-2 bg-background/95 backdrop-blur-md border-b border-border mb-3 space-y-2">
+        {/* Row 1: market breadth + watchlist selector */}
         <div className="flex items-center gap-1.5">
           <div className="flex items-center gap-1 text-[10px] font-mono px-2 py-1.5 rounded-md bg-secondary shrink-0">
             <span className="text-gain">{stocks.filter(s => s.change > 0).length}▲</span>
             <span className="text-loss">{stocks.filter(s => s.change < 0).length}▼</span>
+            <span className="text-muted-foreground">{stocks.filter(s => s.change === 0).length}—</span>
           </div>
           <div className="flex-1 min-w-0">
             <WatchlistManager
@@ -215,6 +217,10 @@ const StockTable = () => {
               onDelete={deleteWatchlist}
             />
           </div>
+        </div>
+
+        {/* Row 2: action buttons, evenly distributed */}
+        <div className="grid grid-cols-4 gap-1.5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
