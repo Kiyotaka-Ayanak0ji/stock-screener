@@ -398,6 +398,43 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
         </DialogContent>
       </Dialog>
 
+      <Sheet open={noteOpen} onOpenChange={setNoteOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader className="text-left">
+            <SheetTitle className="font-mono flex items-center gap-2">
+              <StickyNote className="h-4 w-4 text-accent" />
+              Quick Note · {stock.ticker}
+            </SheetTitle>
+            <SheetDescription>
+              Jot a fast thought about {stock.name}. Saved instantly to your watchlist.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="py-4">
+            <Textarea
+              autoFocus
+              value={noteValue}
+              onChange={(e) => setNoteValue(e.target.value)}
+              placeholder="e.g. Watch breakout above ₹500…"
+              rows={4}
+              className="resize-none text-sm"
+              maxLength={500}
+            />
+            <div className="flex justify-between items-center mt-1.5 text-[11px] text-muted-foreground">
+              <span>Press Save to persist</span>
+              <span>{noteValue.length}/500</span>
+            </div>
+          </div>
+          <SheetFooter className="flex-row gap-2">
+            <Button variant="ghost" className="flex-1" onClick={() => setNoteOpen(false)}>
+              Cancel
+            </Button>
+            <Button className="flex-1" onClick={saveNote}>
+              Save Note
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+
       <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
     </>
   );
