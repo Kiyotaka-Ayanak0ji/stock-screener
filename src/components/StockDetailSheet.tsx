@@ -3,6 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
   SheetContent,
@@ -47,27 +48,6 @@ const PRESET_TAGS = [
   "Watch",
   "Target Hit",
 ];
-
-const SPARK_KEY_PREFIX = "st_spark_";
-
-// Tracks a small in-memory price series per ticker so we can draw a sparkline
-// without storing anything heavy in the DB. Persists in sessionStorage.
-function loadSeries(ticker: string): number[] {
-  try {
-    const raw = sessionStorage.getItem(SPARK_KEY_PREFIX + ticker);
-    return raw ? (JSON.parse(raw) as number[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveSeries(ticker: string, series: number[]) {
-  try {
-    sessionStorage.setItem(SPARK_KEY_PREFIX + ticker, JSON.stringify(series));
-  } catch {
-    /* ignore quota */
-  }
-}
 
 const Sparkline = ({ points, positive }: { points: number[]; positive: boolean }) => {
   if (points.length < 2) {
