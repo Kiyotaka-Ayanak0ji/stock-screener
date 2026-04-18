@@ -26,6 +26,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  ArrowLeft,
 } from "lucide-react";
 import PremiumDialog from "@/components/PremiumDialog";
 import PriceChart from "@/components/PriceChart";
@@ -162,7 +163,15 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
           side="right"
           className="w-full sm:max-w-md p-0 overflow-y-auto"
         >
-          <SheetHeader className="px-5 pt-5 pb-3 sticky top-0 bg-background/95 backdrop-blur z-10 border-b border-border">
+          <SheetHeader className="px-5 pt-4 pb-3 sticky top-0 bg-background/95 backdrop-blur z-10 border-b border-border">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors -ml-1 mb-2 w-fit group"
+              aria-label="Back to watchlist"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              Back to watchlist
+            </button>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <SheetTitle className="font-mono text-lg flex items-center gap-2 flex-wrap">

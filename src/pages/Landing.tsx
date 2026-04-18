@@ -810,6 +810,14 @@ const Landing = () => {
                   q: "Can I undo if I accidentally swipe-delete a stock?",
                   a: "Yes. Whenever you swipe-delete a stock on mobile, an Undo button appears in the toast for 5 seconds. One tap restores the stock to your watchlist exactly where it was — no need to search and re-add it.",
                 },
+                {
+                  q: "How do I navigate back from the stock detail view?",
+                  a: "The stock detail sheet has a clear 'Back to watchlist' button at the top-left of the panel. You can also tap outside the panel or swipe it away on mobile to return to your watchlist instantly — no page reloads, no lost scroll position.",
+                },
+                {
+                  q: "How does the interactive multi-day price chart work?",
+                  a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts load instantly thanks to client-side caching, and price history is persisted to our database — so you see real multi-day trends, not session-reset sparklines.",
+                },
               ].map((faq, i) => (
                 <AccordionItem
                   key={i}
