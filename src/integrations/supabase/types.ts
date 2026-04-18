@@ -311,6 +311,30 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_price_history: {
+        Row: {
+          exchange: string
+          id: number
+          price: number
+          recorded_at: string
+          ticker: string
+        }
+        Insert: {
+          exchange: string
+          id?: number
+          price: number
+          recorded_at?: string
+          ticker: string
+        }
+        Update: {
+          exchange?: string
+          id?: number
+          price?: number
+          recorded_at?: string
+          ticker?: string
+        }
+        Relationships: []
+      }
       suppressed_emails: {
         Row: {
           created_at: string

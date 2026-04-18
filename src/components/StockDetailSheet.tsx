@@ -3,6 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
   SheetContent,
@@ -47,27 +48,6 @@ const PRESET_TAGS = [
   "Watch",
   "Target Hit",
 ];
-
-const SPARK_KEY_PREFIX = "st_spark_";
-
-// Tracks a small in-memory price series per ticker so we can draw a sparkline
-// without storing anything heavy in the DB. Persists in sessionStorage.
-function loadSeries(ticker: string): number[] {
-  try {
-    const raw = sessionStorage.getItem(SPARK_KEY_PREFIX + ticker);
-    return raw ? (JSON.parse(raw) as number[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveSeries(ticker: string, series: number[]) {
-  try {
-    sessionStorage.setItem(SPARK_KEY_PREFIX + ticker, JSON.stringify(series));
-  } catch {
-    /* ignore quota */
-  }
-}
 
 const Sparkline = ({ points, positive }: { points: number[]; positive: boolean }) => {
   if (points.length < 2) {
@@ -134,6 +114,7 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("");
   const [series, setSeries] = useState<number[]>([]);
+  const [seriesLoading, setSeriesLoading] = useState(false);
 
   const note = stock ? notes.find((n) => n.ticker === stock.ticker)?.note || "" : "";
   const stockEvents = stock ? events.find((e) => e.ticker === stock.ticker)?.tags || [] : [];
@@ -144,19 +125,46 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     if (!stock) return;
     setNoteValue(note);
     setTriggerValue(trigger ? String(trigger.price) : "");
-    setSeries(loadSeries(stock.ticker));
   }, [stock?.ticker, open]);
 
-  // Append latest price to the series whenever it changes
+  // Load multi-day price history from DB whenever the sheet opens for a stock
   useEffect(() => {
-    if (!stock || !stock.price) return;
-    const existing = loadSeries(stock.ticker);
-    const last = existing[existing.length - 1];
-    if (last === stock.price) return;
-    const next = [...existing, stock.price].slice(-60);
-    saveSeries(stock.ticker, next);
-    if (open) setSeries(next);
-  }, [stock?.price, stock?.ticker, open]);
+    if (!stock || !open) return;
+    let cancelled = false;
+    setSeriesLoading(true);
+    (async () => {
+      const { data, error } = await supabase
+        .from("stock_price_history")
+        .select("price, recorded_at")
+        .eq("ticker", stock.ticker)
+        .eq("exchange", stock.exchange)
+        .order("recorded_at", { ascending: true })
+        .limit(500);
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load price history:", error);
+        setSeries([]);
+      } else {
+        const points = (data ?? []).map((d: any) => Number(d.price)).filter((n) => Number.isFinite(n));
+        // Always include current live price as the latest point
+        if (stock.price && (points.length === 0 || points[points.length - 1] !== stock.price)) {
+          points.push(stock.price);
+        }
+        setSeries(points);
+      }
+      setSeriesLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [stock?.ticker, stock?.exchange, open]);
+
+  // Keep latest live tick visible without refetching
+  useEffect(() => {
+    if (!stock || !open || !stock.price) return;
+    setSeries((prev) => {
+      if (prev.length > 0 && prev[prev.length - 1] === stock.price) return prev;
+      return [...prev, stock.price].slice(-500);
+    });
+  }, [stock?.price, open]);
 
   const requirePremium = (feature: string) => {
     setPremiumFeature(feature);
@@ -284,10 +292,10 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
             <div className="rounded-lg border border-border bg-muted/20 p-3">
               <div className="flex items-center justify-between mb-1">
                 <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Session trend
+                  Price trend
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  {series.length > 1 ? `${series.length} ticks` : "Live"}
+                  {seriesLoading ? "Loading…" : series.length > 1 ? `${series.length} pts` : "Live"}
                 </p>
               </div>
               <Sparkline points={series} positive={!isNegative} />

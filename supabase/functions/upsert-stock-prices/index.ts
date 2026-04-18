@@ -1,5 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -36,13 +35,8 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
-  if (!userId) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  // Public endpoint — writes go through service role with strict input validation.
+  // Same model as cached_stock_prices: market data is non-sensitive.
 
   try {
     const body = await req.json();
@@ -105,6 +99,49 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Append history points for sparklines (multi-day trend)
+    // Only record when price actually changed since the last point to avoid bloat.
+    try {
+      const tickers = cleaned.map((c) => c.ticker);
+      const { data: lastPoints } = await sb
+        .from("stock_price_history")
+        .select("ticker, exchange, price, recorded_at")
+        .in("ticker", tickers)
+        .order("recorded_at", { ascending: false })
+        .limit(500);
+
+      const lastByKey = new Map<string, number>();
+      (lastPoints ?? []).forEach((p: any) => {
+        const key = `${p.exchange}|${p.ticker}`;
+        if (!lastByKey.has(key)) lastByKey.set(key, Number(p.price));
+      });
+
+      const historyRows = cleaned
+        .filter((c) => {
+          const key = `${c.exchange}|${c.ticker}`;
+          const last = lastByKey.get(key);
+          // Always store first point; otherwise store only on actual change
+          return last === undefined || Math.abs(last - c.price) > 0.0001;
+        })
+        .map((c) => ({
+          ticker: c.ticker,
+          exchange: c.exchange,
+          price: c.price,
+          recorded_at: now,
+        }));
+
+      if (historyRows.length > 0) {
+        await sb.from("stock_price_history").insert(historyRows);
+      }
+
+      // Prune points older than 30 days (best-effort, ignore errors)
+      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      await sb.from("stock_price_history").delete().lt("recorded_at", cutoff);
+    } catch (historyErr) {
+      console.error("price history append failed:", historyErr);
+      // Non-fatal — primary upsert already succeeded
     }
 
     return new Response(JSON.stringify({ ok: true, written: cleaned.length }), {
