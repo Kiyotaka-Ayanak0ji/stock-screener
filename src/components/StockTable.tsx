@@ -120,6 +120,22 @@ const StockTable = () => {
 
   const visibleCustomColumns = customColumns.filter(c => isVisible(`custom_${c.id}`));
 
+  const activeFilterCount = isPremium
+    ? [
+        peFilterMin || peFilterMax,
+        priceFilterMin || priceFilterMax,
+        volumeFilterMin || volumeFilterMax,
+        mcapFilterMin || mcapFilterMax,
+      ].filter(Boolean).length
+    : 0;
+
+  const clearAllFilters = () => {
+    setPeFilterMin(""); setPeFilterMax("");
+    setPriceFilterMin(""); setPriceFilterMax("");
+    setVolumeFilterMin(""); setVolumeFilterMax("");
+    setMcapFilterMin(""); setMcapFilterMax("");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -127,7 +143,8 @@ const StockTable = () => {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="container mx-auto px-2 sm:px-4 py-4 sm:py-6"
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
+      {/* Title row — visible on all viewports */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 sm:mb-4 gap-3">
         <div>
           <h2 className="text-lg font-bold">
             {activeWatchlist ? activeWatchlist.name : "Live Watchlist"}
@@ -136,16 +153,12 @@ const StockTable = () => {
             {filtered.length !== stocks.length ? `${filtered.length} of ${stocks.length} stocks` : `${stocks.length} stocks`}
           </p>
         </div>
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        {/* Desktop / tablet toolbar */}
+        <div className="hidden sm:flex items-center gap-2 flex-wrap">
           <div className="hidden md:flex items-center gap-2 text-xs font-mono px-2 py-1 rounded-md bg-secondary">
             <span className="text-gain">{stocks.filter(s => s.change > 0).length} ▲</span>
             <span className="text-loss">{stocks.filter(s => s.change < 0).length} ▼</span>
             <span className="text-muted-foreground">{stocks.filter(s => s.change === 0).length} —</span>
-          </div>
-          {/* Mobile gain/loss summary */}
-          <div className="flex sm:hidden items-center gap-1.5 text-[10px] font-mono px-2 py-1 rounded-md bg-secondary">
-            <span className="text-gain">{stocks.filter(s => s.change > 0).length}▲</span>
-            <span className="text-loss">{stocks.filter(s => s.change < 0).length}▼</span>
           </div>
           <WatchlistManager
             watchlists={userWatchlists}
@@ -162,16 +175,97 @@ const StockTable = () => {
                 variant="outline"
                 onClick={refreshPrices}
                 disabled={isRefreshing}
-                className="gap-1 sm:gap-1.5 text-xs px-2 sm:px-3"
+                className="gap-1.5 text-xs px-3"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">{isRefreshing ? "Refreshing..." : "Refresh"}</span>
+                {isRefreshing ? "Refreshing..." : "Refresh"}
               </Button>
             </TooltipTrigger>
             <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
           </Tooltip>
-          <div className="hidden sm:block"><ShareExportButton tableRef={tableRef} /></div>
-          <div className="hidden sm:block"><ColumnVisibilityDropdown /></div>
+          <ShareExportButton tableRef={tableRef} />
+          <ColumnVisibilityDropdown />
+          <AddStockDialog />
+        </div>
+      </div>
+
+      {/* Mobile sticky compact toolbar */}
+      <div className="sm:hidden sticky top-[49px] z-40 -mx-2 px-2 py-2 bg-background/95 backdrop-blur-md border-b border-border mb-3">
+        <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 text-[10px] font-mono px-2 py-1.5 rounded-md bg-secondary shrink-0">
+            <span className="text-gain">{stocks.filter(s => s.change > 0).length}▲</span>
+            <span className="text-loss">{stocks.filter(s => s.change < 0).length}▼</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <WatchlistManager
+              watchlists={userWatchlists}
+              activeWatchlistId={activeWatchlistId}
+              onSelect={setActiveWatchlistId}
+              onCreate={createWatchlist}
+              onRename={renameWatchlist}
+              onDelete={deleteWatchlist}
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-9 w-9 relative shrink-0"
+                aria-label="Filters"
+                onClick={(e) => { if (!isPremium) { e.preventDefault(); setPremiumOpen(true); } }}
+              >
+                <Filter className={`h-4 w-4 ${activeFilterCount > 0 ? "text-primary" : ""}`} />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            {isPremium && (
+              <PopoverContent align="end" className="w-72 p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold">Filters</p>
+                  {activeFilterCount > 0 && (
+                    <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={clearAllFilters}>
+                      Clear all
+                    </Button>
+                  )}
+                </div>
+                {[
+                  { label: "Price", min: priceFilterMin, max: priceFilterMax, setMin: setPriceFilterMin, setMax: setPriceFilterMax },
+                  { label: "Volume", min: volumeFilterMin, max: volumeFilterMax, setMin: setVolumeFilterMin, setMax: setVolumeFilterMax },
+                  { label: "Market Cap", min: mcapFilterMin, max: mcapFilterMax, setMin: setMcapFilterMin, setMax: setMcapFilterMax },
+                  { label: "P/E Ratio", min: peFilterMin, max: peFilterMax, setMin: setPeFilterMin, setMax: setPeFilterMax },
+                ].map((f) => (
+                  <div key={f.label} className="space-y-1.5">
+                    <p className="text-[11px] font-medium text-muted-foreground">{f.label}</p>
+                    <div className="flex items-center gap-2">
+                      <Input type="number" inputMode="decimal" placeholder="Min" value={f.min} onChange={(e) => f.setMin(e.target.value)} className="h-9 text-xs" step="any" />
+                      <span className="text-xs text-muted-foreground">—</span>
+                      <Input type="number" inputMode="decimal" placeholder="Max" value={f.max} onChange={(e) => f.setMax(e.target.value)} className="h-9 text-xs" step="any" />
+                    </div>
+                  </div>
+                ))}
+              </PopoverContent>
+            )}
+          </Popover>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={refreshPrices}
+                disabled={isRefreshing}
+                className="h-9 w-9 shrink-0"
+                aria-label="Refresh prices"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Refresh prices</TooltipContent>
+          </Tooltip>
           <AddStockDialog />
         </div>
       </div>
