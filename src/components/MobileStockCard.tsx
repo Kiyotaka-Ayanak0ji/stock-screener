@@ -29,6 +29,13 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
     return v.toString();
   };
 
+  const formatMarketCap = (v: number) => {
+    if (!v || v <= 0) return "—";
+    if (v >= 100000) return "₹" + (v / 100000).toFixed(2) + " L Cr";
+    if (v >= 1000) return "₹" + (v / 1000).toFixed(2) + " K Cr";
+    return "₹" + v.toFixed(0) + " Cr";
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -87,22 +94,38 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       </div>
 
       {isPriceAvailable && (
-        <div className="flex items-center justify-between mt-2.5 text-xs text-muted-foreground font-mono">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span>H: ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
-            <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
-            {stock.volume > 0 && <span>Vol: {formatVolume(stock.volume)}</span>}
+        <>
+          <div className="flex items-center justify-between mt-2.5 text-xs text-muted-foreground font-mono">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span>H: ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+              <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+              {stock.volume > 0 && <span>Vol: {formatVolume(stock.volume)}</span>}
+            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 text-muted-foreground hover:text-loss active:scale-90 transition-all shrink-0 -mr-2"
+              onClick={() => removeStock(stock.ticker)}
+              aria-label={`Remove ${stock.ticker}`}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-9 w-9 text-muted-foreground hover:text-loss active:scale-90 transition-all shrink-0 -mr-2"
-            onClick={() => removeStock(stock.ticker)}
-            aria-label={`Remove ${stock.ticker}`}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+          <div className="flex items-center gap-3 flex-wrap mt-1.5 text-xs text-muted-foreground font-mono">
+            <span>
+              P/E:{" "}
+              <span className="text-foreground/80 font-semibold">
+                {stock.pe && stock.pe > 0 ? stock.pe.toFixed(2) : "—"}
+              </span>
+            </span>
+            <span>
+              MCap:{" "}
+              <span className="text-foreground/80 font-semibold">
+                {formatMarketCap(stock.marketCap)}
+              </span>
+            </span>
+          </div>
+        </>
       )}
     </motion.div>
   );
