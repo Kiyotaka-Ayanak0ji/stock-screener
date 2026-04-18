@@ -299,7 +299,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                   <Bell className="h-3.5 w-3.5 text-primary animate-pulse" />
                 )}
                 {existingNote && (
-                  <StickyNote className="h-3.5 w-3.5 text-amber-500" aria-label="Has note" />
+                  <StickyNote className="h-3.5 w-3.5 text-accent" aria-label="Has note" />
                 )}
               </div>
               <p className="text-sm text-muted-foreground truncate mt-0.5">{stock.name}</p>
