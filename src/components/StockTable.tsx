@@ -215,6 +215,43 @@ const StockTable = () => {
               onDelete={deleteWatchlist}
             />
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-9 w-9 relative shrink-0"
+                aria-label="Sort"
+              >
+                <ArrowDownUp className={`h-4 w-4 ${sortKey !== "ticker" || sortDir !== "asc" ? "text-primary" : ""}`} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-xs">Sort by</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {([
+                { key: "ticker", label: "Ticker" },
+                { key: "price", label: "Price" },
+                { key: "changePercent", label: "Change %" },
+                { key: "volume", label: "Volume" },
+                { key: "marketCap", label: "Market Cap" },
+              ] as { key: SortKey; label: string }[]).map((opt) => {
+                const active = sortKey === opt.key;
+                return (
+                  <DropdownMenuItem
+                    key={opt.key}
+                    onClick={() => toggleSort(opt.key)}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className={active ? "font-semibold text-primary" : ""}>{opt.label}</span>
+                    {active && (sortDir === "asc"
+                      ? <ArrowUp className="h-3.5 w-3.5 text-primary" />
+                      : <ArrowDown className="h-3.5 w-3.5 text-primary" />)}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Popover>
             <PopoverTrigger asChild>
               <Button
