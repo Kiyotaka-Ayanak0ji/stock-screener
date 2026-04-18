@@ -114,29 +114,14 @@ const STATS = [
   { value: "99.9%", label: "Uptime" },
 ];
 
-const PRO_FEATURES = [
-  "Up to 5 watchlists",
-  "20 stocks per watchlist",
-  "Column visibility customization",
-  "Multiple watchlists",
-  "Real-time price updates",
-  "Smart Alerts (52-week highs/lows & volume spikes)",
-];
-
-const PREMIUM_EXTRAS = [
-  "Everything in Pro",
-  "Up to 20 watchlists",
-  "50 stocks per watchlist",
-  "Advanced filters (Price, Volume, Market Cap, P/E)",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
-  "Portfolio performance dashboard",
-  "Sector allocation",
-  "Priority email support",
-];
+import {
+  PRO_FEATURES,
+  PRO_LOCKED,
+  PREMIUM_EXTRAS,
+  PREMIUM_PLUS_EXTRAS,
+  GUEST_FEATURES,
+  GUEST_LOCKED,
+} from "@/lib/planFeatures";
 
 const Landing = () => {
   const { user } = useAuth();
@@ -455,7 +440,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {/* Free / Guest */}
             <Card className="border-border">
               <CardContent className="p-6">
@@ -465,25 +450,13 @@ const Landing = () => {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Limited access</p>
                 <ul className="mt-6 space-y-2.5">
-                  {[
-                    "Up to 20 stocks in watchlist",
-                    "Basic price data (NSE & BSE)",
-                    "Single default watchlist",
-                    "Light & dark mode",
-                  ].map((f) => (
+                  {GUEST_FEATURES.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary shrink-0" />
                       {f}
                     </li>
                   ))}
-                  {[
-                    "Smart Alerts",
-                    "Advanced filters (Price, Volume, P/E, Market Cap)",
-                    "Price triggers & email alerts",
-                    "Event tags & notes",
-                    "Export & sharing",
-                    "Portfolio dashboard",
-                  ].map((f) => (
+                  {GUEST_LOCKED.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
                       <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
                       {f}
@@ -558,14 +531,12 @@ const Landing = () => {
                       {f}
                     </li>
                   ))}
-                  {["Advanced filters (Premium)", "Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map(
-                    (f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
-                        {f}
-                      </li>
-                    ),
-                  )}
+                  {PRO_LOCKED.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <X className="h-4 w-4 text-muted-foreground/50 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
                 </ul>
                 <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/subscribe")}>
                   Get Pro
@@ -634,6 +605,10 @@ const Landing = () => {
                   )}
                 </AnimatePresence>
                 <ul className="mt-6 space-y-2.5">
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    Everything in Pro, plus:
+                  </li>
                   {PREMIUM_EXTRAS.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
                       <Check className="h-4 w-4 text-primary shrink-0" />
@@ -643,6 +618,86 @@ const Landing = () => {
                 </ul>
                 <Button className="w-full mt-6 shadow-lg shadow-primary/20 hover:shadow-xl active:scale-[0.97] transition-all" onClick={() => navigate("/subscribe")}>
                   Get Premium <ArrowRight className="h-4 w-4 ml-1" />
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Premium Plus */}
+            <Card className="border-border relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs px-3">
+                  UNLIMITED
+                </Badge>
+              </div>
+              <CardContent className="p-6">
+                <h3 className="font-semibold text-lg flex items-center gap-1.5">
+                  Premium Plus <Sparkles className="h-4 w-4 text-orange-500" />
+                </h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={billingCycle === "yearly" ? "450" : "40"}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-4xl font-extrabold"
+                    >
+                      ${billingCycle === "yearly" ? "450" : "40"}
+                    </motion.span>
+                  </AnimatePresence>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={billingCycle === "yearly" ? "/year-pp" : "/month-pp"}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="text-muted-foreground text-sm"
+                    >
+                      /{billingCycle === "yearly" ? "year" : "month"}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <AnimatePresence mode="wait">
+                  {billingCycle === "yearly" ? (
+                    <motion.p
+                      key="yearly-savings-pp"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-xs text-green-600 dark:text-green-400 mt-1"
+                    >
+                      ~$37.50/mo — save $30/year
+                    </motion.p>
+                  ) : (
+                    <motion.p
+                      key="monthly-hint-pp"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="text-xs text-muted-foreground mt-1"
+                    >
+                      or <strong>$450/year</strong> (save ~6%)
+                    </motion.p>
+                  )}
+                </AnimatePresence>
+                <ul className="mt-6 space-y-2.5">
+                  <li className="flex items-center gap-2 text-sm font-medium">
+                    <Check className="h-4 w-4 text-primary shrink-0" />
+                    Everything in Premium, plus:
+                  </li>
+                  {PREMIUM_PLUS_EXTRAS.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm">
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button className="w-full mt-6 active:scale-[0.97] transition-all" variant="outline" onClick={() => navigate("/subscribe")}>
+                  Get Premium Plus <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
               </CardContent>
             </Card>

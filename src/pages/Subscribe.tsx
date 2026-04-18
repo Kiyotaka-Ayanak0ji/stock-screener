@@ -9,44 +9,18 @@ import { Check, Crown, CreditCard, Loader2, ArrowLeft, Zap, X } from "lucide-rea
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  PRO_FEATURES,
+  PRO_LOCKED,
+  PREMIUM_EXTRAS,
+  PREMIUM_PLUS_EXTRAS,
+} from "@/lib/planFeatures";
 
 declare global {
   interface Window {
     Razorpay: any;
   }
 }
-
-
-const PRO_FEATURES = [
-  "Up to 5 watchlists",
-  "20 stocks per watchlist",
-  "Column visibility customization",
-  "Multiple watchlists",
-  "Real-time price updates",
-];
-
-const PREMIUM_EXTRAS = [
-  "Up to 20 watchlists",
-  "50 stocks per watchlist",
-  "Export as Image & PDF",
-  "Shareable watchlist links",
-  "Price trigger alerts with email",
-  "Event tagging & tracking",
-  "Notes on stocks",
-  "Portfolio performance dashboard",
-  "Sector allocation & fundamentals",
-  "Stock-wise P&L charts",
-  "Priority email support",
-  "Early access to new features",
-];
-
-const PREMIUM_PLUS_EXTRAS = [
-  "Unlimited watchlists",
-  "Unlimited stocks per watchlist",
-  "Unlimited price trigger alerts",
-  "Beta access to new features",
-  "Everything in Premium",
-];
 
 type PlanKey = "monthly" | "yearly" | "premium_monthly" | "premium_yearly" | "premium_plus_monthly" | "premium_plus_yearly";
 
@@ -256,7 +230,7 @@ const Subscribe = () => {
                   <span className="text-muted-foreground">{f}</span>
                 </li>
               ))}
-              {["Export & sharing", "Price triggers & alerts", "Event tags & notes", "Portfolio dashboard"].map((f) => (
+              {PRO_LOCKED.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
                   <X className="h-3 w-3 text-muted-foreground/50 shrink-0" />
                   <span className="text-muted-foreground/60">{f}</span>
@@ -327,6 +301,10 @@ const Subscribe = () => {
               <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$37.50/mo — save $30/year</p>
             )}
             <ul className="space-y-1.5">
+              <li className="flex items-center gap-2 text-xs">
+                <Check className="h-3 w-3 text-primary shrink-0" />
+                <span className="text-muted-foreground font-medium">Everything in Premium, plus:</span>
+              </li>
               {PREMIUM_PLUS_EXTRAS.map((f) => (
                 <li key={f} className="flex items-center gap-2 text-xs">
                   <Check className="h-3 w-3 text-primary shrink-0" />
