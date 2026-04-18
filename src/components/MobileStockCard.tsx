@@ -135,24 +135,53 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
     void undone;
   };
 
-  const handleDragEnd = (_e: unknown, info: PanInfo) => {
-    const offset = info.offset.x;
-    const velocity = info.velocity.x;
-    const triggered = Math.abs(offset) > SWIPE_THRESHOLD || Math.abs(velocity) > 500;
+  const openNoteSheet = () => {
+    if (!isPremium) {
+      setPremiumFeature("Notes");
+      setPremiumOpen(true);
+      return;
+    }
+    setNoteValue(existingNote);
+    setNoteOpen(true);
+  };
 
-    if (triggered && offset < 0) {
+  const handleDragEnd = (_e: unknown, info: PanInfo) => {
+    const offsetX = info.offset.x;
+    const offsetY = info.offset.y;
+    const velocityX = info.velocity.x;
+    const velocityY = info.velocity.y;
+
+    // Vertical wins only when clearly more vertical than horizontal.
+    const verticalDominant = Math.abs(offsetY) > Math.abs(offsetX) * 1.2;
+    const upTriggered =
+      verticalDominant && (offsetY < -SWIPE_UP_THRESHOLD || velocityY < -500);
+
+    if (upTriggered) {
+      swipedRef.current = true;
+      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
+      animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
+      openNoteSheet();
+      return;
+    }
+
+    const horizontalTriggered =
+      Math.abs(offsetX) > SWIPE_THRESHOLD || Math.abs(velocityX) > 500;
+
+    if (horizontalTriggered && offsetX < 0) {
       // Swipe left → delete (with Undo)
       swipedRef.current = true;
+      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
       animate(x, -400, { duration: 0.18 }).then(() => {
         performDelete();
       });
       return;
     }
 
-    if (triggered && offset > 0) {
+    if (horizontalTriggered && offsetX > 0) {
       // Swipe right → set trigger
       swipedRef.current = true;
       animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
+      animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
       if (!isPremium) {
         setPremiumFeature("Price Triggers");
         setPremiumOpen(true);
@@ -165,6 +194,17 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
 
     // Snap back
     animate(x, 0, { type: "spring", stiffness: 400, damping: 30 });
+    animate(y, 0, { type: "spring", stiffness: 400, damping: 30 });
+  };
+
+  const saveNote = () => {
+    updateNote(stock.ticker, noteValue.trim());
+    if (noteValue.trim()) {
+      toast.success(`Note saved for ${stock.ticker}`);
+    } else {
+      toast.success(`Note cleared for ${stock.ticker}`);
+    }
+    setNoteOpen(false);
   };
 
   const saveTrigger = () => {
