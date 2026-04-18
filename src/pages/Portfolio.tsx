@@ -564,7 +564,79 @@ const Portfolio = () => {
                 </div>
               ) : (
                 <TooltipProvider>
-                  <div className="overflow-x-auto">
+                  {/* Mobile-only card list */}
+                  <div className="sm:hidden -mx-4 divide-y divide-border">
+                    <AnimatePresence>
+                      {filteredHoldings.map((h, idx) => {
+                        const gl = h.gainLoss ?? 0;
+                        const glp = h.gainLossPercent ?? 0;
+                        const positive = gl >= 0;
+                        return (
+                          <motion.div
+                            key={h.id}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ delay: idx * 0.02, duration: 0.25 }}
+                            className="px-4 py-3.5 active:bg-muted/40 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="font-mono font-bold text-sm">{h.ticker}</span>
+                                  <span className="text-[10px] font-medium text-muted-foreground/70 bg-muted/60 px-1.5 py-0.5 rounded">{h.exchange}</span>
+                                  {h.sector && (
+                                    <button
+                                      onClick={() => setSelectedSector(selectedSector === h.sector ? null : h.sector)}
+                                      className="text-[10px] text-muted-foreground hover:text-primary transition-colors truncate max-w-[140px]"
+                                    >
+                                      · {h.sector}
+                                    </button>
+                                  )}
+                                </div>
+                                <p className="text-[11px] text-muted-foreground mt-0.5 font-mono">
+                                  {h.quantity} × ₹{h.buy_price.toLocaleString("en-IN")} → {h.currentPrice ? `₹${h.currentPrice.toLocaleString("en-IN")}` : "—"}
+                                </p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9 -mr-1 -mt-1 shrink-0 hover:bg-destructive/10"
+                                onClick={() => removeHolding(h.id)}
+                                aria-label={`Remove ${h.ticker}`}
+                              >
+                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mt-2.5 text-xs">
+                              <div>
+                                <p className="text-[10px] text-muted-foreground">Invested</p>
+                                <p className="font-mono font-medium">{formatCurrency(h.investedValue || 0)}</p>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-muted-foreground">Current</p>
+                                <p className="font-mono font-medium">{h.currentValue ? formatCurrency(h.currentValue) : "—"}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-[10px] text-muted-foreground">P&L</p>
+                                <p className={`font-mono font-semibold ${positive ? "text-gain" : "text-loss"}`}>
+                                  {h.gainLoss !== undefined ? `${positive ? "+" : ""}${formatCurrency(Math.abs(gl))}` : "—"}
+                                  {h.gainLossPercent !== undefined && (
+                                    <span className="block text-[10px] opacity-80">
+                                      {positive ? "+" : ""}{glp.toFixed(2)}%
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Desktop / tablet table */}
+                  <div className="hidden sm:block overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="border-b-2">
@@ -717,6 +789,14 @@ const Portfolio = () => {
           </Card>
         </motion.div>
       </div>
+
+      {/* Sticky bottom Add Holding CTA — mobile only */}
+      <div className="sticky-bottom-action">
+        <Button onClick={() => setAddOpen(true)} className="w-full h-11 gap-1.5" size="lg">
+          <Plus className="h-4 w-4" /> Add Holding
+        </Button>
+      </div>
+
       <BottomNav />
     </div>
   );
