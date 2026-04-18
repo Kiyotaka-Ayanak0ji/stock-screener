@@ -3,7 +3,6 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { supabase } from "@/integrations/supabase/client";
 import {
   Sheet,
   SheetContent,
@@ -29,6 +28,7 @@ import {
   Minus,
 } from "lucide-react";
 import PremiumDialog from "@/components/PremiumDialog";
+import PriceChart from "@/components/PriceChart";
 
 interface StockDetailSheetProps {
   stock: Stock | null;
