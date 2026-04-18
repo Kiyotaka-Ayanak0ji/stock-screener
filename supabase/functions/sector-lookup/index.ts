@@ -200,7 +200,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(supabaseUrl, supabaseKey);
 
-    const limited = tickers.slice(0, 20);
+    const limited = safeTickers.slice(0, 20);
     const results: Record<string, string> = {};
 
     // Step 1: Check sector_cache first
