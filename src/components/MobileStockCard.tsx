@@ -246,15 +246,25 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
           <Trash2 className="h-5 w-5" />
         </motion.div>
 
+        {/* Swipe-up action background (quick note) */}
         <motion.div
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
+          style={{ opacity: upActionOpacity }}
+          className="absolute inset-x-0 bottom-0 flex items-center justify-center py-2 bg-accent/30 text-accent-foreground pointer-events-none"
+          aria-hidden="true"
+        >
+          <StickyNote className="h-4 w-4 mr-2 text-primary" />
+          <span className="text-xs font-semibold uppercase tracking-wide">Quick Note</span>
+        </motion.div>
+
+        <motion.div
+          drag
+          dragConstraints={{ left: 0, right: 0, top: -120, bottom: 0 }}
           dragElastic={0.6}
           dragDirectionLock
           onDragEnd={handleDragEnd}
-          style={{ x }}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
+          style={{ x, y }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ delay: index * 0.02, duration: 0.25 }}
           role="button"
@@ -266,8 +276,8 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               handleOpen();
             }
           }}
-          aria-label={`Open details for ${stock.ticker}. Swipe right to set price trigger, swipe left to remove.`}
-          className="relative bg-background px-4 py-3.5 active:bg-muted/50 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset touch-pan-y"
+          aria-label={`Open details for ${stock.ticker}. Swipe right to set price trigger, swipe left to remove, swipe up to add a note.`}
+          className="relative bg-background px-4 py-3.5 active:bg-muted/50 transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
