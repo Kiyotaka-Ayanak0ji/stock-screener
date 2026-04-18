@@ -37,9 +37,10 @@ interface MobileStockCardProps {
 }
 
 const SWIPE_THRESHOLD = 90;
+const SWIPE_UP_THRESHOLD = 70;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
-  const { priceTriggers, removeStock, addStock, setPriceTrigger } = useStocks();
+  const { priceTriggers, removeStock, addStock, setPriceTrigger, notes, updateNote } = useStocks();
   const { isGuest } = useAuth();
   const { subscription } = useSubscription();
   const isPremium =
@@ -53,14 +54,18 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const [detailOpen, setDetailOpen] = useState(false);
   const [triggerOpen, setTriggerOpen] = useState(false);
   const [triggerValue, setTriggerValue] = useState("");
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [noteValue, setNoteValue] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("Price Triggers");
   const swipedRef = useRef(false);
 
   const x = useMotionValue(0);
-  // Action backgrounds: red (delete) on left swipe, primary (trigger) on right swipe
+  const y = useMotionValue(0);
+  // Action backgrounds: red (delete) on left swipe, primary (trigger) on right swipe, accent (note) on up swipe
   const leftActionOpacity = useTransform(x, [-SWIPE_THRESHOLD, -20, 0], [1, 0.3, 0]);
   const rightActionOpacity = useTransform(x, [0, 20, SWIPE_THRESHOLD], [0, 0.3, 1]);
+  const upActionOpacity = useTransform(y, [-SWIPE_UP_THRESHOLD, -15, 0], [1, 0.3, 0]);
 
   const isPriceAvailable = !priceLoading || stock.price !== 0;
   const isPositive = stock.change > 0;
@@ -68,6 +73,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-muted-foreground";
   const changeBg = isPositive ? "bg-gain/10" : isNegative ? "bg-loss/10" : "bg-muted";
   const trigger = priceTriggers[stock.ticker];
+  const existingNote = notes.find((n) => n.ticker === stock.ticker)?.note ?? "";
 
   const formatVolume = (v: number) => {
     if (v >= 10000000) return (v / 10000000).toFixed(2) + " Cr";
