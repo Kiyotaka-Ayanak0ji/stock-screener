@@ -39,40 +39,40 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <a
               href={getStockUrl(stock.ticker, stock.exchange, stock.screenerCode)}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono font-bold text-sm text-primary inline-flex items-center gap-1 active:opacity-70 transition-opacity"
+              className="font-mono font-bold text-base text-primary inline-flex items-center gap-1 active:opacity-70 transition-opacity"
             >
               {stock.ticker}
-              <ExternalLink className="h-3 w-3 opacity-40" />
+              <ExternalLink className="h-3.5 w-3.5 opacity-50" />
             </a>
-            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
               {stock.exchange}
             </Badge>
             {trigger && (
-              <Bell className="h-3 w-3 text-primary animate-pulse" />
+              <Bell className="h-3.5 w-3.5 text-primary animate-pulse" />
             )}
           </div>
-          <p className="text-xs text-muted-foreground truncate mt-0.5">{stock.name}</p>
+          <p className="text-sm text-muted-foreground truncate mt-0.5">{stock.name}</p>
         </div>
 
         <div className="text-right shrink-0">
           {isPriceAvailable ? (
             <>
-              <p className="font-mono font-semibold text-sm">
+              <p className="font-mono font-bold text-base">
                 ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
               </p>
               <motion.span
                 key={stock.change}
                 initial={{ scale: 1.05 }}
                 animate={{ scale: 1 }}
-                className={`inline-flex items-center gap-0.5 text-xs font-mono px-1.5 py-0.5 rounded-md ${changeBg} ${changeColor}`}
+                className={`inline-flex items-center gap-0.5 text-sm font-mono font-semibold px-1.5 py-0.5 rounded-md mt-0.5 ${changeBg} ${changeColor}`}
               >
                 {isPositive ? "+" : ""}{stock.change.toFixed(2)}
-                <span className="text-[10px]">
+                <span className="text-[11px] opacity-90">
                   ({isPositive ? "+" : ""}{stock.changePercent.toFixed(2)}%)
                 </span>
               </motion.span>
@@ -87,8 +87,8 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
       </div>
 
       {isPriceAvailable && (
-        <div className="flex items-center justify-between mt-2 text-[11px] text-muted-foreground font-mono">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mt-2.5 text-xs text-muted-foreground font-mono">
+          <div className="flex items-center gap-3 flex-wrap">
             <span>H: ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
             <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
             {stock.volume > 0 && <span>Vol: {formatVolume(stock.volume)}</span>}
@@ -100,7 +100,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
             onClick={() => removeStock(stock.ticker)}
             aria-label={`Remove ${stock.ticker}`}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       )}

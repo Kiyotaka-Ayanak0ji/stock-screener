@@ -123,17 +123,17 @@ const DemoModal = ({ open, onOpenChange }: DemoModalProps) => {
             {/* Step-specific interactive content */}
             {currentStep.id === "watchlist" && (
               <div className="border rounded-lg overflow-hidden">
-                <div className="bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground grid grid-cols-7 gap-2">
+                <div className="bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground grid grid-cols-5 sm:grid-cols-7 gap-2">
                   <span className="col-span-2">Stock</span>
                   <span className="text-right">Price</span>
                   <span className="text-right">Change</span>
-                  <span className="text-right">High/Low</span>
-                  <span className="text-right">Volume</span>
+                  <span className="text-right hidden sm:block">High/Low</span>
+                  <span className="text-right hidden sm:block">Volume</span>
                   <span className="text-right"></span>
                 </div>
                 {DEMO_STOCKS.filter(s => addedStocks.includes(s.ticker)).map(s => (
-                  <div key={s.ticker} className="px-3 py-2.5 border-t grid grid-cols-7 gap-2 items-center hover:bg-muted/30 transition-colors text-sm group">
-                    <div className="col-span-2">
+                  <div key={s.ticker} className="px-3 py-2.5 border-t grid grid-cols-5 sm:grid-cols-7 gap-2 items-center hover:bg-muted/30 transition-colors text-sm group">
+                    <div className="col-span-2 min-w-0">
                       <span className="font-mono font-semibold">{s.ticker}</span>
                       <span className="text-xs text-muted-foreground ml-1.5 hidden sm:inline">{s.name}</span>
                     </div>
@@ -142,12 +142,12 @@ const DemoModal = ({ open, onOpenChange }: DemoModalProps) => {
                       {s.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                       {s.changePercent > 0 ? "+" : ""}{s.changePercent.toFixed(2)}%
                     </span>
-                    <span className="text-right text-xs text-muted-foreground">{s.low}-{s.high}</span>
-                    <span className="text-right text-xs text-muted-foreground">{s.volume}</span>
+                    <span className="text-right text-xs text-muted-foreground hidden sm:block">{s.low}-{s.high}</span>
+                    <span className="text-right text-xs text-muted-foreground hidden sm:block">{s.volume}</span>
                     <div className="text-right">
                       <button
                         onClick={() => setAddedStocks(prev => prev.filter(t => t !== s.ticker))}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
                         title={`Remove ${s.ticker}`}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
