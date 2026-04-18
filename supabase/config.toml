@@ -19,3 +19,7 @@ project_id = "szkezahvdumeiqmnlugj"
     verify_jwt = false
   [functions.handle-email-unsubscribe]
     verify_jwt = false
+  [functions.upsert-stock-prices]
+    verify_jwt = false
+  [functions.get-shared-watchlist]
+    verify_jwt = false

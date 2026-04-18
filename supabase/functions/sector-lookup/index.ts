@@ -1,11 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+const TICKER_RE = /^[A-Za-z0-9_\-.]{1,30}$/;
 
 // Well-known Indian stock sectors as fallback
 const KNOWN_SECTORS: Record<string, string> = {
@@ -169,9 +172,25 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Require an authenticated Supabase user
+  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { tickers } = await req.json();
     if (!Array.isArray(tickers) || tickers.length === 0) {
+      return new Response(JSON.stringify({}), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Validate ticker format to prevent injection / abuse
+    const safeTickers = tickers.filter((t: unknown): t is string => typeof t === "string" && TICKER_RE.test(t));
+    if (safeTickers.length === 0) {
       return new Response(JSON.stringify({}), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -181,7 +200,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(supabaseUrl, supabaseKey);
 
-    const limited = tickers.slice(0, 20);
+    const limited = safeTickers.slice(0, 20);
     const results: Record<string, string> = {};
 
     // Step 1: Check sector_cache first
