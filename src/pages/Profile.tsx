@@ -153,7 +153,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-bottom-nav">
+    <div className="min-h-screen bg-background pb-bottom-nav-with-action sm:pb-bottom-nav">
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
         <Button
           variant="ghost"
@@ -333,7 +333,7 @@ const Profile = () => {
                   </span>
                 </div>
                 <div className="pt-2 border-t border-border">
-                  <Button variant="destructive" size="sm" onClick={signOut} className="active:scale-95 transition-all">
+                  <Button variant="destructive" onClick={signOut} className="active:scale-95 transition-all h-10">
                     Sign Out
                   </Button>
                 </div>
@@ -341,13 +341,22 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          {/* Desktop save button — sticky version is rendered separately for mobile */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="hidden sm:block">
             <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
               Save Changes
             </Button>
           </motion.div>
         </motion.div>
+      </div>
+
+      {/* Sticky bottom save bar — mobile only */}
+      <div className="sticky-bottom-action">
+        <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
+          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+          Save Changes
+        </Button>
       </div>
       <BottomNav />
     </div>

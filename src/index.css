@@ -171,11 +171,31 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Add bottom padding to pages when bottom nav is visible */
+  /* Add bottom padding to pages when bottom nav is visible (4rem nav + safe area) */
   @media (max-width: 640px) {
     .pb-bottom-nav {
-      padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
     }
+    /* Extra padding when a sticky bottom action bar is also rendered */
+    .pb-bottom-nav-with-action {
+      padding-bottom: calc(8rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Sticky bottom action bar (mobile only) — sits above the bottom nav */
+  .sticky-bottom-action {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    padding: 0.625rem 1rem;
+    background-color: hsl(var(--card) / 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid hsl(var(--border));
+  }
+  @media (min-width: 640px) {
+    .sticky-bottom-action { display: none; }
   }
 
   /* Smooth scrolling */
