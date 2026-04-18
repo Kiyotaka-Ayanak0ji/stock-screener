@@ -74,8 +74,6 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
   const [customTag, setCustomTag] = useState("");
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("");
-  const [series, setSeries] = useState<number[]>([]);
-  const [seriesLoading, setSeriesLoading] = useState(false);
 
   const note = stock ? notes.find((n) => n.ticker === stock.ticker)?.note || "" : "";
   const stockEvents = stock ? events.find((e) => e.ticker === stock.ticker)?.tags || [] : [];
@@ -87,45 +85,6 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     setNoteValue(note);
     setTriggerValue(trigger ? String(trigger.price) : "");
   }, [stock?.ticker, open]);
-
-  // Load multi-day price history from DB whenever the sheet opens for a stock
-  useEffect(() => {
-    if (!stock || !open) return;
-    let cancelled = false;
-    setSeriesLoading(true);
-    (async () => {
-      const { data, error } = await supabase
-        .from("stock_price_history")
-        .select("price, recorded_at")
-        .eq("ticker", stock.ticker)
-        .eq("exchange", stock.exchange)
-        .order("recorded_at", { ascending: true })
-        .limit(500);
-      if (cancelled) return;
-      if (error) {
-        console.error("Failed to load price history:", error);
-        setSeries([]);
-      } else {
-        const points = (data ?? []).map((d: any) => Number(d.price)).filter((n) => Number.isFinite(n));
-        // Always include current live price as the latest point
-        if (stock.price && (points.length === 0 || points[points.length - 1] !== stock.price)) {
-          points.push(stock.price);
-        }
-        setSeries(points);
-      }
-      setSeriesLoading(false);
-    })();
-    return () => { cancelled = true; };
-  }, [stock?.ticker, stock?.exchange, open]);
-
-  // Keep latest live tick visible without refetching
-  useEffect(() => {
-    if (!stock || !open || !stock.price) return;
-    setSeries((prev) => {
-      if (prev.length > 0 && prev[prev.length - 1] === stock.price) return prev;
-      return [...prev, stock.price].slice(-500);
-    });
-  }, [stock?.price, open]);
 
   const requirePremium = (feature: string) => {
     setPremiumFeature(feature);
