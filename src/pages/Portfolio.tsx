@@ -258,7 +258,7 @@ const Portfolio = () => {
   const diversityScore = Math.min(100, sectorAllocation.length * 15 + Math.min(holdings.length, 10) * 2);
 
   return (
-    <div className="min-h-screen bg-background pb-bottom-nav">
+    <div className="min-h-screen bg-background pb-bottom-nav-with-action sm:pb-bottom-nav">
       <Header />
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl space-y-4 sm:space-y-6">
         {/* Header */}
@@ -272,7 +272,7 @@ const Portfolio = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Dashboard
           </Button>
 
-          <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                 Portfolio Dashboard
@@ -280,13 +280,13 @@ const Portfolio = () => {
               <p className="text-sm text-muted-foreground mt-0.5">Real-time performance tracking & sector analysis</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={refreshAll} disabled={enriching} className="gap-1.5">
+              <Button variant="outline" onClick={refreshAll} disabled={enriching} className="gap-1.5 h-10 sm:h-9 flex-1 sm:flex-initial">
                 <RefreshCw className={`h-3.5 w-3.5 ${enriching ? "animate-spin" : ""}`} />
                 {enriching ? "Refreshing..." : "Refresh All"}
               </Button>
               <Dialog open={addOpen} onOpenChange={setAddOpen}>
                 <DialogTrigger asChild>
-                  <Button size="sm" className="gap-1.5"><Plus className="h-3.5 w-3.5" /> Add Holding</Button>
+                  <Button className="gap-1.5 h-10 sm:h-9 hidden sm:inline-flex"><Plus className="h-3.5 w-3.5" /> Add Holding</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader><DialogTitle>Add Stock Holding</DialogTitle></DialogHeader>
@@ -296,11 +296,11 @@ const Portfolio = () => {
                       onSelect={(ticker, exchange) => setForm(f => ({ ...f, ticker, exchange }))}
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <Input type="number" placeholder="Buy Price" value={form.buy_price} onChange={e => setForm(f => ({ ...f, buy_price: e.target.value }))} />
-                      <Input type="number" placeholder="Qty" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} />
-                      <Input type="date" value={form.buy_date} onChange={e => setForm(f => ({ ...f, buy_date: e.target.value }))} />
+                      <Input type="number" inputMode="decimal" placeholder="Buy Price" value={form.buy_price} onChange={e => setForm(f => ({ ...f, buy_price: e.target.value }))} className="h-11 sm:h-10" />
+                      <Input type="number" inputMode="decimal" placeholder="Qty" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} className="h-11 sm:h-10" />
+                      <Input type="date" value={form.buy_date} onChange={e => setForm(f => ({ ...f, buy_date: e.target.value }))} className="h-11 sm:h-10" />
                     </div>
-                    <Button onClick={handleAdd} disabled={!form.ticker || !form.buy_price || !form.quantity}>Add to Portfolio</Button>
+                    <Button onClick={handleAdd} disabled={!form.ticker || !form.buy_price || !form.quantity} className="h-11 sm:h-10">Add to Portfolio</Button>
                   </div>
                 </DialogContent>
               </Dialog>
