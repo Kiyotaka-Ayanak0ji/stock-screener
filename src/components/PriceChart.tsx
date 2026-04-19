@@ -91,9 +91,18 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const [loading, setLoading] = useState(!cacheFresh);
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<PriceRange>("1D");
+  const [mode, setMode] = useState<ChartMode>("line");
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [hoverCandleIdx, setHoverCandleIdx] = useState<number | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Force back to line mode if user switches to a range that doesn't support candles
+  useEffect(() => {
+    if (mode === "candle" && !CANDLE_ELIGIBLE[range]) {
+      setMode("line");
+    }
+  }, [range, mode]);
 
   // Fetch history once per ticker, then filter by range client-side.
   useEffect(() => {
