@@ -2,14 +2,39 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
 export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "ALL";
+export type ChartMode = "line" | "candle";
 
 interface PricePoint {
   price: number;
   recorded_at: string;
   ts: number; // pre-parsed epoch ms for fast filtering / sorting
+}
+
+interface Candle {
+  ts: number;     // bucket start (midnight IST as epoch ms)
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+// Candle mode is only meaningful for ranges that span multiple days
+const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
+  "1D": false,
+  "1W": false,
+  "1M": true,
+  "1Y": true,
+  ALL: true,
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function dayBucket(ts: number): number {
+  // Bucket by UTC day — simple, monotonic, and consistent with recorded_at storage
+  return Math.floor(ts / DAY_MS) * DAY_MS;
 }
 
 interface PriceChartProps {
