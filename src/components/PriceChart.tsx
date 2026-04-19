@@ -54,15 +54,13 @@ const RANGE_LABELS: Record<PriceRange, string> = {
   "1W": "1W",
   "1M": "1M",
   "1Y": "1Y",
-  ALL: "All",
 };
 
-const RANGE_MS: Record<PriceRange, number | null> = {
+const RANGE_MS: Record<PriceRange, number> = {
   "1D": 24 * 60 * 60 * 1000,
   "1W": 7 * 24 * 60 * 60 * 1000,
   "1M": 30 * 24 * 60 * 60 * 1000,
   "1Y": 365 * 24 * 60 * 60 * 1000,
-  ALL: null,
 };
 
 const WIDTH = 600;
