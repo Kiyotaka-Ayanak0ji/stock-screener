@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
-export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "ALL";
+export type PriceRange = "1D" | "1W" | "1M" | "1Y";
 export type ChartMode = "line" | "candle";
 
 interface PricePoint {
