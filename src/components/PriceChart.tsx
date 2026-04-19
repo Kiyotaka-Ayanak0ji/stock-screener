@@ -370,8 +370,12 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const handleRefresh = () => {
     HISTORY_CACHE.delete(cacheKey);
     setHoverIdx(null);
+    setHoverCandleIdx(null);
     setRefreshNonce((n) => n + 1);
   };
+
+  const hoverCandle = hoverCandleIdx != null ? candles[hoverCandleIdx] : null;
+  const candleEligible = CANDLE_ELIGIBLE[range];
 
   return (
     <div className="rounded-xl border border-border bg-muted/10 p-3 select-none">
