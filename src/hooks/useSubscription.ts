@@ -11,10 +11,48 @@ export interface Subscription {
 
 export type PlanTier = "free" | "pro" | "premium" | "premium_plus";
 
+const CACHE_KEY_PREFIX = "el_sub_cache_v1:";
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h — re-validated in background
+
+interface CachedEntry {
+  subscription: Subscription | null;
+  cachedAt: number;
+}
+
+function readCache(userId: string): CachedEntry | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY_PREFIX + userId);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CachedEntry;
+    if (!parsed || typeof parsed.cachedAt !== "number") return null;
+    if (Date.now() - parsed.cachedAt > CACHE_TTL_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(userId: string, subscription: Subscription | null) {
+  try {
+    const entry: CachedEntry = { subscription, cachedAt: Date.now() };
+    localStorage.setItem(CACHE_KEY_PREFIX + userId, JSON.stringify(entry));
+  } catch {
+    /* ignore quota errors */
+  }
+}
+
 export function useSubscription() {
   const { user } = useAuth();
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Hydrate from localStorage synchronously so returning Lifetime / Premium
+  // users never see the SubscriptionGate flash on initial load.
+  const initialCached = user ? readCache(user.id) : null;
+
+  const [subscription, setSubscription] = useState<Subscription | null>(
+    initialCached?.subscription ?? null,
+  );
+  // If we already have a fresh cached entry, skip the loading state entirely.
+  const [loading, setLoading] = useState(!initialCached);
 
   const fetchSubscription = useCallback(async () => {
     if (!user) {
@@ -27,13 +65,27 @@ export function useSubscription() {
       .select("plan, status, trial_ends_at, subscription_ends_at")
       .eq("user_id", user.id)
       .single();
-    setSubscription(data as Subscription | null);
+    const next = (data as Subscription | null) ?? null;
+    setSubscription(next);
+    writeCache(user.id, next);
     setLoading(false);
   }, [user]);
 
   useEffect(() => {
+    if (!user) {
+      setSubscription(null);
+      setLoading(false);
+      return;
+    }
+    // Re-hydrate from cache when user changes (e.g. after sign-in)
+    const cached = readCache(user.id);
+    if (cached) {
+      setSubscription(cached.subscription);
+      setLoading(false);
+    }
+    // Always re-validate in background so changes are picked up
     fetchSubscription();
-  }, [fetchSubscription]);
+  }, [user, fetchSubscription]);
 
   const isActive = (() => {
     if (!subscription) return false;
