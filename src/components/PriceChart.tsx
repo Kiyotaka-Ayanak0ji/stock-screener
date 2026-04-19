@@ -396,7 +396,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             <p className="text-xs text-muted-foreground">Building history…</p>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap justify-end">
           <button
             onClick={handleRefresh}
             disabled={refreshing || loading}
@@ -409,11 +409,46 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
           >
             <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
           </button>
+
+          {/* Line / Candle mode toggle — only meaningful for multi-day ranges */}
+          <div className="flex items-center gap-0.5 bg-background/80 border border-border rounded-md p-0.5">
+            <button
+              onClick={() => { setMode("line"); setHoverIdx(null); setHoverCandleIdx(null); }}
+              className={cn(
+                "h-6 w-6 inline-flex items-center justify-center rounded transition-colors",
+                mode === "line"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              )}
+              aria-pressed={mode === "line"}
+              aria-label="Line chart"
+              title="Line chart"
+            >
+              <LineChart className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => { if (candleEligible) { setMode("candle"); setHoverIdx(null); setHoverCandleIdx(null); } }}
+              disabled={!candleEligible}
+              className={cn(
+                "h-6 w-6 inline-flex items-center justify-center rounded transition-colors",
+                mode === "candle" && candleEligible
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                !candleEligible && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground"
+              )}
+              aria-pressed={mode === "candle"}
+              aria-label="Candlestick chart"
+              title={candleEligible ? "Daily candlesticks" : "Candlesticks available on 1M / 1Y / All"}
+            >
+              <CandlestickChart className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-0.5 bg-background/80 border border-border rounded-md p-0.5">
             {(Object.keys(RANGE_LABELS) as PriceRange[]).map((r) => (
               <button
                 key={r}
-                onClick={() => { setRange(r); setHoverIdx(null); }}
+                onClick={() => { setRange(r); setHoverIdx(null); setHoverCandleIdx(null); }}
                 className={cn(
                   "px-1.5 py-1 text-[11px] font-semibold rounded transition-colors",
                   range === r
