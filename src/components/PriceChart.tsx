@@ -27,7 +27,6 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1W": false,
   "1M": true,
   "1Y": true,
-  ALL: true,
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
