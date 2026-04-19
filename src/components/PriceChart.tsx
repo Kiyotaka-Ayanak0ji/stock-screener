@@ -73,7 +73,7 @@ function formatTime(ts: number, range: PriceRange): string {
   if (range === "1D") {
     return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
   }
-  if (range === "1Y" || range === "ALL") {
+  if (range === "1Y") {
     return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" });
   }
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
