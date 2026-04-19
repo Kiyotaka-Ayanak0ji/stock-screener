@@ -299,26 +299,35 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
 
   // Pointer interaction → crosshair (uses time-proportional mapping)
   const handleMove = useCallback((clientX: number) => {
-    if (!svgRef.current || renderPoints.length < 2) return;
+    if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+
+    if (showCandles) {
+      // Pick the nearest candle bucket
+      const idx = Math.min(candles.length - 1, Math.max(0, Math.floor(ratio * candles.length)));
+      setHoverCandleIdx(idx);
+      setHoverIdx(null);
+      return;
+    }
+
+    if (renderPoints.length < 2) return;
     const firstTs = renderPoints[0].ts;
     const lastTs = renderPoints[renderPoints.length - 1].ts;
     const targetTs = firstTs + ratio * (lastTs - firstTs);
-    // binary search for nearest point by ts
     let lo = 0, hi = renderPoints.length - 1;
     while (lo < hi) {
       const mid = (lo + hi) >>> 1;
       if (renderPoints[mid].ts < targetTs) lo = mid + 1;
       else hi = mid;
     }
-    // pick nearer of lo and lo-1
     let idx = lo;
     if (lo > 0 && Math.abs(renderPoints[lo - 1].ts - targetTs) < Math.abs(renderPoints[lo].ts - targetTs)) {
       idx = lo - 1;
     }
     setHoverIdx(idx);
-  }, [renderPoints]);
+    setHoverCandleIdx(null);
+  }, [renderPoints, showCandles, candles.length]);
 
   const stroke = positive ? "hsl(var(--gain))" : "hsl(var(--loss))";
   const gradientId = `pchart-grad-${ticker}-${exchange}-${positive ? "up" : "dn"}`;
