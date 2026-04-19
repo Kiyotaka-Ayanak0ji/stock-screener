@@ -2,14 +2,39 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
 export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "ALL";
+export type ChartMode = "line" | "candle";
 
 interface PricePoint {
   price: number;
   recorded_at: string;
   ts: number; // pre-parsed epoch ms for fast filtering / sorting
+}
+
+interface Candle {
+  ts: number;     // bucket start (midnight IST as epoch ms)
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+// Candle mode is only meaningful for ranges that span multiple days
+const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
+  "1D": false,
+  "1W": false,
+  "1M": true,
+  "1Y": true,
+  ALL: true,
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function dayBucket(ts: number): number {
+  // Bucket by UTC day — simple, monotonic, and consistent with recorded_at storage
+  return Math.floor(ts / DAY_MS) * DAY_MS;
 }
 
 interface PriceChartProps {
@@ -66,9 +91,18 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const [loading, setLoading] = useState(!cacheFresh);
   const [refreshing, setRefreshing] = useState(false);
   const [range, setRange] = useState<PriceRange>("1D");
+  const [mode, setMode] = useState<ChartMode>("line");
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const [hoverCandleIdx, setHoverCandleIdx] = useState<number | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Force back to line mode if user switches to a range that doesn't support candles
+  useEffect(() => {
+    if (mode === "candle" && !CANDLE_ELIGIBLE[range]) {
+      setMode("line");
+    }
+  }, [range, mode]);
 
   // Fetch history once per ticker, then filter by range client-side.
   useEffect(() => {
@@ -168,6 +202,64 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return out;
   }, [points]);
 
+  // Aggregate raw ticks (NOT downsampled) into daily OHLC candles for candle mode.
+  // Uses the unfiltered range `points` so each candle reflects every tick that day.
+  const candles = useMemo<Candle[]>(() => {
+    if (mode !== "candle" || !CANDLE_ELIGIBLE[range] || points.length === 0) return [];
+    const buckets = new Map<number, Candle>();
+    for (const p of points) {
+      const day = dayBucket(p.ts);
+      const existing = buckets.get(day);
+      if (!existing) {
+        buckets.set(day, { ts: day, open: p.price, high: p.price, low: p.price, close: p.price });
+      } else {
+        if (p.price > existing.high) existing.high = p.price;
+        if (p.price < existing.low) existing.low = p.price;
+        existing.close = p.price; // points are sorted, so last write is the close
+      }
+    }
+    return Array.from(buckets.values()).sort((a, b) => a.ts - b.ts);
+  }, [points, mode, range]);
+
+  // Scaling for candle mode (separate min/max so wicks fit cleanly)
+  const candleScale = useMemo(() => {
+    if (candles.length === 0) {
+      return { min: 0, max: 0, firstTs: 0, lastTs: 0, candleWidth: 0 };
+    }
+    let lo = Infinity, hi = -Infinity;
+    for (const c of candles) {
+      if (c.low < lo) lo = c.low;
+      if (c.high > hi) hi = c.high;
+    }
+    if (lo === hi) { lo -= 1; hi += 1; }
+    const pad = (hi - lo) * 0.08;
+    lo -= pad; hi += pad;
+    const firstTs = candles[0].ts;
+    const lastTs = candles[candles.length - 1].ts;
+    const usableW = WIDTH - PADDING_X * 2;
+    // Reserve ~70% of the per-bucket slot for the candle body
+    const slot = candles.length > 1 ? usableW / candles.length : usableW;
+    const candleWidth = Math.max(2, Math.min(14, slot * 0.65));
+    return { min: lo, max: hi, firstTs, lastTs, candleWidth };
+  }, [candles]);
+
+  const candleX = useCallback((ts: number) => {
+    if (candles.length <= 1) return WIDTH / 2;
+    const usableW = WIDTH - PADDING_X * 2;
+    // Center each candle in its time slot
+    const slot = usableW / candles.length;
+    const idx = candles.findIndex((c) => c.ts === ts);
+    return PADDING_X + slot * idx + slot / 2;
+  }, [candles]);
+
+  const candleY = useCallback((price: number) => {
+    const usableH = HEIGHT - PADDING_Y * 2;
+    const r = (candleScale.max - candleScale.min) || 1;
+    return PADDING_Y + usableH - ((price - candleScale.min) / r) * usableH;
+  }, [candleScale]);
+
+  const showCandles = mode === "candle" && CANDLE_ELIGIBLE[range] && candles.length >= 2;
+
   const { min, max, paths, baselineY } = useMemo(() => {
     if (renderPoints.length < 2) {
       return { min: 0, max: 0, paths: { line: "", area: "" }, baselineY: null as number | null };
@@ -207,26 +299,35 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
 
   // Pointer interaction → crosshair (uses time-proportional mapping)
   const handleMove = useCallback((clientX: number) => {
-    if (!svgRef.current || renderPoints.length < 2) return;
+    if (!svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+
+    if (showCandles) {
+      // Pick the nearest candle bucket
+      const idx = Math.min(candles.length - 1, Math.max(0, Math.floor(ratio * candles.length)));
+      setHoverCandleIdx(idx);
+      setHoverIdx(null);
+      return;
+    }
+
+    if (renderPoints.length < 2) return;
     const firstTs = renderPoints[0].ts;
     const lastTs = renderPoints[renderPoints.length - 1].ts;
     const targetTs = firstTs + ratio * (lastTs - firstTs);
-    // binary search for nearest point by ts
     let lo = 0, hi = renderPoints.length - 1;
     while (lo < hi) {
       const mid = (lo + hi) >>> 1;
       if (renderPoints[mid].ts < targetTs) lo = mid + 1;
       else hi = mid;
     }
-    // pick nearer of lo and lo-1
     let idx = lo;
     if (lo > 0 && Math.abs(renderPoints[lo - 1].ts - targetTs) < Math.abs(renderPoints[lo].ts - targetTs)) {
       idx = lo - 1;
     }
     setHoverIdx(idx);
-  }, [renderPoints]);
+    setHoverCandleIdx(null);
+  }, [renderPoints, showCandles, candles.length]);
 
   const stroke = positive ? "hsl(var(--gain))" : "hsl(var(--loss))";
   const gradientId = `pchart-grad-${ticker}-${exchange}-${positive ? "up" : "dn"}`;
@@ -269,8 +370,12 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const handleRefresh = () => {
     HISTORY_CACHE.delete(cacheKey);
     setHoverIdx(null);
+    setHoverCandleIdx(null);
     setRefreshNonce((n) => n + 1);
   };
+
+  const hoverCandle = hoverCandleIdx != null ? candles[hoverCandleIdx] : null;
+  const candleEligible = CANDLE_ELIGIBLE[range];
 
   return (
     <div className="rounded-xl border border-border bg-muted/10 p-3 select-none">
@@ -291,7 +396,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             <p className="text-xs text-muted-foreground">Building history…</p>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-wrap justify-end">
           <button
             onClick={handleRefresh}
             disabled={refreshing || loading}
@@ -304,11 +409,46 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
           >
             <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
           </button>
+
+          {/* Line / Candle mode toggle — only meaningful for multi-day ranges */}
+          <div className="flex items-center gap-0.5 bg-background/80 border border-border rounded-md p-0.5">
+            <button
+              onClick={() => { setMode("line"); setHoverIdx(null); setHoverCandleIdx(null); }}
+              className={cn(
+                "h-6 w-6 inline-flex items-center justify-center rounded transition-colors",
+                mode === "line"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              )}
+              aria-pressed={mode === "line"}
+              aria-label="Line chart"
+              title="Line chart"
+            >
+              <LineChart className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => { if (candleEligible) { setMode("candle"); setHoverIdx(null); setHoverCandleIdx(null); } }}
+              disabled={!candleEligible}
+              className={cn(
+                "h-6 w-6 inline-flex items-center justify-center rounded transition-colors",
+                mode === "candle" && candleEligible
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+                !candleEligible && "opacity-40 cursor-not-allowed hover:bg-transparent hover:text-muted-foreground"
+              )}
+              aria-pressed={mode === "candle"}
+              aria-label="Candlestick chart"
+              title={candleEligible ? "Daily candlesticks" : "Candlesticks available on 1M / 1Y / All"}
+            >
+              <CandlestickChart className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-0.5 bg-background/80 border border-border rounded-md p-0.5">
             {(Object.keys(RANGE_LABELS) as PriceRange[]).map((r) => (
               <button
                 key={r}
-                onClick={() => { setRange(r); setHoverIdx(null); }}
+                onClick={() => { setRange(r); setHoverIdx(null); setHoverCandleIdx(null); }}
                 className={cn(
                   "px-1.5 py-1 text-[11px] font-semibold rounded transition-colors",
                   range === r
@@ -329,9 +469,9 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
       <div className="relative">
         {loading && allPoints.length === 0 ? (
           <Skeleton className="w-full h-40 rounded-md" />
-        ) : renderPoints.length < 2 ? (
+        ) : (showCandles ? candles.length < 2 : renderPoints.length < 2) ? (
           <div className="h-40 flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
-            <span>No {RANGE_LABELS[range]} data yet.</span>
+            <span>No {RANGE_LABELS[range]} {showCandles ? "candles" : "data"} yet.</span>
             <span className="text-[10px]">Try a wider range or refresh — new ticks are recorded as the dashboard polls.</span>
           </div>
         ) : (
@@ -342,12 +482,12 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
               preserveAspectRatio="none"
               className="w-full h-40 touch-none cursor-crosshair"
               role="img"
-              aria-label={`${ticker} ${RANGE_LABELS[range]} price chart`}
+              aria-label={`${ticker} ${RANGE_LABELS[range]} ${mode === "candle" ? "candlestick" : "price"} chart`}
               onMouseMove={(e) => handleMove(e.clientX)}
-              onMouseLeave={() => setHoverIdx(null)}
+              onMouseLeave={() => { setHoverIdx(null); setHoverCandleIdx(null); }}
               onTouchStart={(e) => handleMove(e.touches[0].clientX)}
               onTouchMove={(e) => { e.preventDefault(); handleMove(e.touches[0].clientX); }}
-              onTouchEnd={() => setHoverIdx(null)}
+              onTouchEnd={() => { setHoverIdx(null); setHoverCandleIdx(null); }}
             >
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -356,63 +496,118 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                 </linearGradient>
               </defs>
 
-              {/* Previous close baseline (intraday only) */}
-              {baselineY != null && (
-                <line
-                  x1={PADDING_X}
-                  x2={WIDTH - PADDING_X}
-                  y1={baselineY}
-                  y2={baselineY}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeOpacity="0.35"
-                  strokeWidth="1"
-                  strokeDasharray="3 3"
-                />
-              )}
+              {showCandles ? (
+                <>
+                  {/* Candlestick render */}
+                  {candles.map((c, i) => {
+                    const isUp = c.close >= c.open;
+                    const color = isUp ? "hsl(var(--gain))" : "hsl(var(--loss))";
+                    const x = candleX(c.ts);
+                    const yHigh = candleY(c.high);
+                    const yLow = candleY(c.low);
+                    const yOpen = candleY(c.open);
+                    const yClose = candleY(c.close);
+                    const bodyTop = Math.min(yOpen, yClose);
+                    const bodyHeight = Math.max(1, Math.abs(yClose - yOpen));
+                    const w = candleScale.candleWidth;
+                    return (
+                      <g key={c.ts}>
+                        {/* Wick */}
+                        <line
+                          x1={x} x2={x} y1={yHigh} y2={yLow}
+                          stroke={color} strokeWidth="1" vectorEffect="non-scaling-stroke"
+                        />
+                        {/* Body */}
+                        <rect
+                          x={x - w / 2}
+                          y={bodyTop}
+                          width={w}
+                          height={bodyHeight}
+                          fill={isUp ? color : color}
+                          fillOpacity={isUp ? 0.85 : 0.85}
+                          stroke={color}
+                          strokeWidth="1"
+                          vectorEffect="non-scaling-stroke"
+                          rx="0.5"
+                        />
+                      </g>
+                    );
+                  })}
 
-              {/* Area */}
-              <path d={paths.area} fill={`url(#${gradientId})`} />
-              {/* Line */}
-              <path
-                d={paths.line}
-                fill="none"
-                stroke={stroke}
-                strokeWidth="1.75"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-              />
+                  {/* Candle hover crosshair */}
+                  {hoverCandle && (() => {
+                    const x = candleX(hoverCandle.ts);
+                    return (
+                      <g pointerEvents="none">
+                        <line
+                          x1={x} x2={x} y1={PADDING_Y} y2={HEIGHT - PADDING_Y}
+                          stroke="hsl(var(--foreground))" strokeOpacity="0.3" strokeWidth="1"
+                        />
+                      </g>
+                    );
+                  })()}
+                </>
+              ) : (
+                <>
+                  {/* Previous close baseline (intraday only) */}
+                  {baselineY != null && (
+                    <line
+                      x1={PADDING_X}
+                      x2={WIDTH - PADDING_X}
+                      y1={baselineY}
+                      y2={baselineY}
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeOpacity="0.35"
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                    />
+                  )}
 
-              {/* Crosshair */}
-              {hoverPoint && (
-                <g pointerEvents="none">
-                  <line
-                    x1={hoverX}
-                    x2={hoverX}
-                    y1={PADDING_Y}
-                    y2={HEIGHT - PADDING_Y}
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.25"
-                    strokeWidth="1"
+                  {/* Area */}
+                  <path d={paths.area} fill={`url(#${gradientId})`} />
+                  {/* Line */}
+                  <path
+                    d={paths.line}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="1.75"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
                   />
-                  <circle cx={hoverX} cy={hoverY} r="4" fill={stroke} stroke="hsl(var(--background))" strokeWidth="2" />
-                </g>
-              )}
 
-              {/* Latest point pulse */}
-              {!hoverPoint && lastXY && (
-                <g pointerEvents="none">
-                  <circle cx={lastXY.x} cy={lastXY.y} r="6" fill={stroke} fillOpacity="0.25">
-                    <animate attributeName="r" values="3;9;3" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="fill-opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={lastXY.x} cy={lastXY.y} r="3" fill={stroke} stroke="hsl(var(--background))" strokeWidth="1.5" />
-                </g>
+                  {/* Crosshair */}
+                  {hoverPoint && (
+                    <g pointerEvents="none">
+                      <line
+                        x1={hoverX}
+                        x2={hoverX}
+                        y1={PADDING_Y}
+                        y2={HEIGHT - PADDING_Y}
+                        stroke="hsl(var(--foreground))"
+                        strokeOpacity="0.25"
+                        strokeWidth="1"
+                      />
+                      <circle cx={hoverX} cy={hoverY} r="4" fill={stroke} stroke="hsl(var(--background))" strokeWidth="2" />
+                    </g>
+                  )}
+
+                  {/* Latest point pulse */}
+                  {!hoverPoint && lastXY && (
+                    <g pointerEvents="none">
+                      <circle cx={lastXY.x} cy={lastXY.y} r="6" fill={stroke} fillOpacity="0.25">
+                        <animate attributeName="r" values="3;9;3" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="fill-opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx={lastXY.x} cy={lastXY.y} r="3" fill={stroke} stroke="hsl(var(--background))" strokeWidth="1.5" />
+                    </g>
+                  )}
+                </>
               )}
             </svg>
 
-            {/* Hover tooltip */}
-            {hoverPoint && (
+            {/* Line-mode hover tooltip */}
+            {!showCandles && hoverPoint && (
               <div
                 className="pointer-events-none absolute -top-1 -translate-y-full bg-popover text-popover-foreground border border-border rounded-md px-2 py-1 text-xs shadow-lg whitespace-nowrap"
                 style={{
@@ -429,10 +624,49 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
               </div>
             )}
 
+            {/* Candle-mode hover tooltip — OHLC */}
+            {showCandles && hoverCandle && (() => {
+              const x = candleX(hoverCandle.ts);
+              const isUp = hoverCandle.close >= hoverCandle.open;
+              return (
+                <div
+                  className="pointer-events-none absolute -top-1 -translate-y-full bg-popover text-popover-foreground border border-border rounded-md px-2.5 py-1.5 text-[11px] shadow-lg whitespace-nowrap"
+                  style={{
+                    left: `calc(${(x / WIDTH) * 100}% )`,
+                    transform: `translate(-50%, -100%)`,
+                  }}
+                >
+                  <p className="text-[10px] text-muted-foreground mb-0.5">
+                    {formatTime(hoverCandle.ts, "1Y")}
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono">
+                    <span className="text-muted-foreground">O</span>
+                    <span>₹{hoverCandle.open.toFixed(2)}</span>
+                    <span className="text-muted-foreground">H</span>
+                    <span className="text-gain">₹{hoverCandle.high.toFixed(2)}</span>
+                    <span className="text-muted-foreground">L</span>
+                    <span className="text-loss">₹{hoverCandle.low.toFixed(2)}</span>
+                    <span className="text-muted-foreground">C</span>
+                    <span className={cn("font-semibold", isUp ? "text-gain" : "text-loss")}>
+                      ₹{hoverCandle.close.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Axis labels */}
             <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
-              <span>{firstPoint && formatTime(firstPoint.ts, range)}</span>
-              <span>{lastPoint && formatTime(lastPoint.ts, range)}</span>
+              <span>
+                {showCandles
+                  ? candles[0] && formatTime(candles[0].ts, range)
+                  : firstPoint && formatTime(firstPoint.ts, range)}
+              </span>
+              <span>
+                {showCandles
+                  ? candles[candles.length - 1] && formatTime(candles[candles.length - 1].ts, range)
+                  : lastPoint && formatTime(lastPoint.ts, range)}
+              </span>
             </div>
           </>
         )}
