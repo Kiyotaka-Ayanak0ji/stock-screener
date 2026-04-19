@@ -652,18 +652,65 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             })()}
 
             {/* Axis labels */}
-            <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
-              <span>
-                {showCandles
-                  ? candles[0] && formatTime(candles[0].ts, range)
-                  : firstPoint && formatTime(firstPoint.ts, range)}
-              </span>
-              <span>
-                {showCandles
-                  ? candles[candles.length - 1] && formatTime(candles[candles.length - 1].ts, range)
-                  : lastPoint && formatTime(lastPoint.ts, range)}
-              </span>
-            </div>
+            {(() => {
+              // Build an evenly-spaced time scale across the active window so the
+              // x-axis is always clearly readable (5 ticks: start, 25%, 50%, 75%, end).
+              const startTs = showCandles
+                ? candles[0]?.ts
+                : firstPoint?.ts;
+              const endTs = showCandles
+                ? candles[candles.length - 1]?.ts
+                : lastPoint?.ts;
+              if (startTs == null || endTs == null || endTs <= startTs) {
+                return (
+                  <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
+                    <span>{startTs != null && formatTime(startTs, range)}</span>
+                    <span>{endTs != null && formatTime(endTs, range)}</span>
+                  </div>
+                );
+              }
+              const TICKS = 5;
+              const ticks = Array.from({ length: TICKS }, (_, i) =>
+                startTs + ((endTs - startTs) * i) / (TICKS - 1)
+              );
+              return (
+                <div className="mt-1.5 px-1" aria-hidden>
+                  {/* Tick marks */}
+                  <div className="relative h-1.5">
+                    {ticks.map((t, i) => (
+                      <span
+                        key={i}
+                        className="absolute top-0 h-1.5 w-px bg-border"
+                        style={{
+                          left: `${(i / (TICKS - 1)) * 100}%`,
+                          transform: "translateX(-0.5px)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {/* Tick labels */}
+                  <div className="relative h-3 mt-0.5">
+                    {ticks.map((t, i) => (
+                      <span
+                        key={i}
+                        className="absolute top-0 text-[10px] text-muted-foreground font-mono whitespace-nowrap"
+                        style={{
+                          left: `${(i / (TICKS - 1)) * 100}%`,
+                          transform:
+                            i === 0
+                              ? "translateX(0)"
+                              : i === TICKS - 1
+                              ? "translateX(-100%)"
+                              : "translateX(-50%)",
+                        }}
+                      >
+                        {formatTime(t, range)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>
