@@ -202,6 +202,64 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return out;
   }, [points]);
 
+  // Aggregate raw ticks (NOT downsampled) into daily OHLC candles for candle mode.
+  // Uses the unfiltered range `points` so each candle reflects every tick that day.
+  const candles = useMemo<Candle[]>(() => {
+    if (mode !== "candle" || !CANDLE_ELIGIBLE[range] || points.length === 0) return [];
+    const buckets = new Map<number, Candle>();
+    for (const p of points) {
+      const day = dayBucket(p.ts);
+      const existing = buckets.get(day);
+      if (!existing) {
+        buckets.set(day, { ts: day, open: p.price, high: p.price, low: p.price, close: p.price });
+      } else {
+        if (p.price > existing.high) existing.high = p.price;
+        if (p.price < existing.low) existing.low = p.price;
+        existing.close = p.price; // points are sorted, so last write is the close
+      }
+    }
+    return Array.from(buckets.values()).sort((a, b) => a.ts - b.ts);
+  }, [points, mode, range]);
+
+  // Scaling for candle mode (separate min/max so wicks fit cleanly)
+  const candleScale = useMemo(() => {
+    if (candles.length === 0) {
+      return { min: 0, max: 0, firstTs: 0, lastTs: 0, candleWidth: 0 };
+    }
+    let lo = Infinity, hi = -Infinity;
+    for (const c of candles) {
+      if (c.low < lo) lo = c.low;
+      if (c.high > hi) hi = c.high;
+    }
+    if (lo === hi) { lo -= 1; hi += 1; }
+    const pad = (hi - lo) * 0.08;
+    lo -= pad; hi += pad;
+    const firstTs = candles[0].ts;
+    const lastTs = candles[candles.length - 1].ts;
+    const usableW = WIDTH - PADDING_X * 2;
+    // Reserve ~70% of the per-bucket slot for the candle body
+    const slot = candles.length > 1 ? usableW / candles.length : usableW;
+    const candleWidth = Math.max(2, Math.min(14, slot * 0.65));
+    return { min: lo, max: hi, firstTs, lastTs, candleWidth };
+  }, [candles]);
+
+  const candleX = useCallback((ts: number) => {
+    if (candles.length <= 1) return WIDTH / 2;
+    const usableW = WIDTH - PADDING_X * 2;
+    // Center each candle in its time slot
+    const slot = usableW / candles.length;
+    const idx = candles.findIndex((c) => c.ts === ts);
+    return PADDING_X + slot * idx + slot / 2;
+  }, [candles]);
+
+  const candleY = useCallback((price: number) => {
+    const usableH = HEIGHT - PADDING_Y * 2;
+    const r = (candleScale.max - candleScale.min) || 1;
+    return PADDING_Y + usableH - ((price - candleScale.min) / r) * usableH;
+  }, [candleScale]);
+
+  const showCandles = mode === "candle" && CANDLE_ELIGIBLE[range] && candles.length >= 2;
+
   const { min, max, paths, baselineY } = useMemo(() => {
     if (renderPoints.length < 2) {
       return { min: 0, max: 0, paths: { line: "", area: "" }, baselineY: null as number | null };
