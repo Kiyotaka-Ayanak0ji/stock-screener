@@ -469,9 +469,9 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
       <div className="relative">
         {loading && allPoints.length === 0 ? (
           <Skeleton className="w-full h-40 rounded-md" />
-        ) : renderPoints.length < 2 ? (
+        ) : (showCandles ? candles.length < 2 : renderPoints.length < 2) ? (
           <div className="h-40 flex flex-col items-center justify-center gap-1 text-xs text-muted-foreground">
-            <span>No {RANGE_LABELS[range]} data yet.</span>
+            <span>No {RANGE_LABELS[range]} {showCandles ? "candles" : "data"} yet.</span>
             <span className="text-[10px]">Try a wider range or refresh — new ticks are recorded as the dashboard polls.</span>
           </div>
         ) : (
@@ -482,12 +482,12 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
               preserveAspectRatio="none"
               className="w-full h-40 touch-none cursor-crosshair"
               role="img"
-              aria-label={`${ticker} ${RANGE_LABELS[range]} price chart`}
+              aria-label={`${ticker} ${RANGE_LABELS[range]} ${mode === "candle" ? "candlestick" : "price"} chart`}
               onMouseMove={(e) => handleMove(e.clientX)}
-              onMouseLeave={() => setHoverIdx(null)}
+              onMouseLeave={() => { setHoverIdx(null); setHoverCandleIdx(null); }}
               onTouchStart={(e) => handleMove(e.touches[0].clientX)}
               onTouchMove={(e) => { e.preventDefault(); handleMove(e.touches[0].clientX); }}
-              onTouchEnd={() => setHoverIdx(null)}
+              onTouchEnd={() => { setHoverIdx(null); setHoverCandleIdx(null); }}
             >
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
@@ -496,63 +496,118 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                 </linearGradient>
               </defs>
 
-              {/* Previous close baseline (intraday only) */}
-              {baselineY != null && (
-                <line
-                  x1={PADDING_X}
-                  x2={WIDTH - PADDING_X}
-                  y1={baselineY}
-                  y2={baselineY}
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeOpacity="0.35"
-                  strokeWidth="1"
-                  strokeDasharray="3 3"
-                />
-              )}
+              {showCandles ? (
+                <>
+                  {/* Candlestick render */}
+                  {candles.map((c, i) => {
+                    const isUp = c.close >= c.open;
+                    const color = isUp ? "hsl(var(--gain))" : "hsl(var(--loss))";
+                    const x = candleX(c.ts);
+                    const yHigh = candleY(c.high);
+                    const yLow = candleY(c.low);
+                    const yOpen = candleY(c.open);
+                    const yClose = candleY(c.close);
+                    const bodyTop = Math.min(yOpen, yClose);
+                    const bodyHeight = Math.max(1, Math.abs(yClose - yOpen));
+                    const w = candleScale.candleWidth;
+                    return (
+                      <g key={c.ts}>
+                        {/* Wick */}
+                        <line
+                          x1={x} x2={x} y1={yHigh} y2={yLow}
+                          stroke={color} strokeWidth="1" vectorEffect="non-scaling-stroke"
+                        />
+                        {/* Body */}
+                        <rect
+                          x={x - w / 2}
+                          y={bodyTop}
+                          width={w}
+                          height={bodyHeight}
+                          fill={isUp ? color : color}
+                          fillOpacity={isUp ? 0.85 : 0.85}
+                          stroke={color}
+                          strokeWidth="1"
+                          vectorEffect="non-scaling-stroke"
+                          rx="0.5"
+                        />
+                      </g>
+                    );
+                  })}
 
-              {/* Area */}
-              <path d={paths.area} fill={`url(#${gradientId})`} />
-              {/* Line */}
-              <path
-                d={paths.line}
-                fill="none"
-                stroke={stroke}
-                strokeWidth="1.75"
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
-              />
+                  {/* Candle hover crosshair */}
+                  {hoverCandle && (() => {
+                    const x = candleX(hoverCandle.ts);
+                    return (
+                      <g pointerEvents="none">
+                        <line
+                          x1={x} x2={x} y1={PADDING_Y} y2={HEIGHT - PADDING_Y}
+                          stroke="hsl(var(--foreground))" strokeOpacity="0.3" strokeWidth="1"
+                        />
+                      </g>
+                    );
+                  })()}
+                </>
+              ) : (
+                <>
+                  {/* Previous close baseline (intraday only) */}
+                  {baselineY != null && (
+                    <line
+                      x1={PADDING_X}
+                      x2={WIDTH - PADDING_X}
+                      y1={baselineY}
+                      y2={baselineY}
+                      stroke="hsl(var(--muted-foreground))"
+                      strokeOpacity="0.35"
+                      strokeWidth="1"
+                      strokeDasharray="3 3"
+                    />
+                  )}
 
-              {/* Crosshair */}
-              {hoverPoint && (
-                <g pointerEvents="none">
-                  <line
-                    x1={hoverX}
-                    x2={hoverX}
-                    y1={PADDING_Y}
-                    y2={HEIGHT - PADDING_Y}
-                    stroke="hsl(var(--foreground))"
-                    strokeOpacity="0.25"
-                    strokeWidth="1"
+                  {/* Area */}
+                  <path d={paths.area} fill={`url(#${gradientId})`} />
+                  {/* Line */}
+                  <path
+                    d={paths.line}
+                    fill="none"
+                    stroke={stroke}
+                    strokeWidth="1.75"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
                   />
-                  <circle cx={hoverX} cy={hoverY} r="4" fill={stroke} stroke="hsl(var(--background))" strokeWidth="2" />
-                </g>
-              )}
 
-              {/* Latest point pulse */}
-              {!hoverPoint && lastXY && (
-                <g pointerEvents="none">
-                  <circle cx={lastXY.x} cy={lastXY.y} r="6" fill={stroke} fillOpacity="0.25">
-                    <animate attributeName="r" values="3;9;3" dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="fill-opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <circle cx={lastXY.x} cy={lastXY.y} r="3" fill={stroke} stroke="hsl(var(--background))" strokeWidth="1.5" />
-                </g>
+                  {/* Crosshair */}
+                  {hoverPoint && (
+                    <g pointerEvents="none">
+                      <line
+                        x1={hoverX}
+                        x2={hoverX}
+                        y1={PADDING_Y}
+                        y2={HEIGHT - PADDING_Y}
+                        stroke="hsl(var(--foreground))"
+                        strokeOpacity="0.25"
+                        strokeWidth="1"
+                      />
+                      <circle cx={hoverX} cy={hoverY} r="4" fill={stroke} stroke="hsl(var(--background))" strokeWidth="2" />
+                    </g>
+                  )}
+
+                  {/* Latest point pulse */}
+                  {!hoverPoint && lastXY && (
+                    <g pointerEvents="none">
+                      <circle cx={lastXY.x} cy={lastXY.y} r="6" fill={stroke} fillOpacity="0.25">
+                        <animate attributeName="r" values="3;9;3" dur="2s" repeatCount="indefinite" />
+                        <animate attributeName="fill-opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
+                      </circle>
+                      <circle cx={lastXY.x} cy={lastXY.y} r="3" fill={stroke} stroke="hsl(var(--background))" strokeWidth="1.5" />
+                    </g>
+                  )}
+                </>
               )}
             </svg>
 
-            {/* Hover tooltip */}
-            {hoverPoint && (
+            {/* Line-mode hover tooltip */}
+            {!showCandles && hoverPoint && (
               <div
                 className="pointer-events-none absolute -top-1 -translate-y-full bg-popover text-popover-foreground border border-border rounded-md px-2 py-1 text-xs shadow-lg whitespace-nowrap"
                 style={{
@@ -569,10 +624,49 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
               </div>
             )}
 
+            {/* Candle-mode hover tooltip — OHLC */}
+            {showCandles && hoverCandle && (() => {
+              const x = candleX(hoverCandle.ts);
+              const isUp = hoverCandle.close >= hoverCandle.open;
+              return (
+                <div
+                  className="pointer-events-none absolute -top-1 -translate-y-full bg-popover text-popover-foreground border border-border rounded-md px-2.5 py-1.5 text-[11px] shadow-lg whitespace-nowrap"
+                  style={{
+                    left: `calc(${(x / WIDTH) * 100}% )`,
+                    transform: `translate(-50%, -100%)`,
+                  }}
+                >
+                  <p className="text-[10px] text-muted-foreground mb-0.5">
+                    {formatTime(hoverCandle.ts, "1Y")}
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono">
+                    <span className="text-muted-foreground">O</span>
+                    <span>₹{hoverCandle.open.toFixed(2)}</span>
+                    <span className="text-muted-foreground">H</span>
+                    <span className="text-gain">₹{hoverCandle.high.toFixed(2)}</span>
+                    <span className="text-muted-foreground">L</span>
+                    <span className="text-loss">₹{hoverCandle.low.toFixed(2)}</span>
+                    <span className="text-muted-foreground">C</span>
+                    <span className={cn("font-semibold", isUp ? "text-gain" : "text-loss")}>
+                      ₹{hoverCandle.close.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Axis labels */}
             <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
-              <span>{firstPoint && formatTime(firstPoint.ts, range)}</span>
-              <span>{lastPoint && formatTime(lastPoint.ts, range)}</span>
+              <span>
+                {showCandles
+                  ? candles[0] && formatTime(candles[0].ts, range)
+                  : firstPoint && formatTime(firstPoint.ts, range)}
+              </span>
+              <span>
+                {showCandles
+                  ? candles[candles.length - 1] && formatTime(candles[candles.length - 1].ts, range)
+                  : lastPoint && formatTime(lastPoint.ts, range)}
+              </span>
             </div>
           </>
         )}
