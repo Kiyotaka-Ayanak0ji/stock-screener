@@ -66,8 +66,6 @@ export const PREMIUM_EXTRAS = [
   "Shareable watchlist links",
   "Portfolio dashboard",
   "Sector allocation & diversity score",
-  "Stock-wise P&L charts",
-  "Priority email support",
 ] as const;
 
 // Premium Plus tier — everything in Premium plus these.
@@ -92,15 +90,25 @@ export function inferRequiredTier(featureName?: string): RequiredTier {
 
   // Premium-only features.
   const premiumKeywords = [
-    "filter", "advanced filter",
-    "price trigger", "trigger",
-    "event tag", "tag",
+    "filter",
+    "advanced filter",
+    "price trigger",
+    "trigger",
+    "event tag",
+    "tag",
     "note",
-    "detail", "chart", "stock detail",
-    "export", "image", "pdf",
-    "share", "shareable",
-    "portfolio", "sector",
-    "p/e", "pe ratio",
+    "detail",
+    "chart",
+    "stock detail",
+    "export",
+    "image",
+    "pdf",
+    "share",
+    "shareable",
+    "portfolio",
+    "sector",
+    "p/e",
+    "pe ratio",
   ];
   if (premiumKeywords.some((k) => f.includes(k))) return "premium";
 
