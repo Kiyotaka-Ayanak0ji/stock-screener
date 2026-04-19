@@ -56,7 +56,7 @@ const FEATURES = [
     icon: Activity,
     title: "Interactive Multi-Day Charts",
     description:
-      "Tap any stock to open a rich detail sheet with an interactive price chart — switch between 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch.",
+      "Tap any stock to open a rich detail sheet with an interactive price chart: switch between 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch.",
     badge: "Premium",
   },
   {
@@ -77,7 +77,7 @@ const FEATURES = [
     icon: Layers,
     title: "Multiple Watchlists",
     description:
-      "Organize stocks into separate watchlists — one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
+      "Organize stocks into separate watchlists : one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
   },
   {
     icon: SlidersHorizontal,
@@ -103,7 +103,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Smart Alerts",
     description:
-      "Automatic anomaly detection across your watchlist — 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
+      "Automatic anomaly detection across your watchlist: 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
     badge: "Pro",
   },
   {
@@ -117,12 +117,12 @@ const FEATURES = [
     icon: Briefcase,
     title: "Portfolio Dashboard",
     description:
-      "Track your actual holdings with buy price, quantity, and real-time P&L. Visualize sector allocation, company details, and stock-wise performance.",
+      "Track your actual holdings with buy price, quantity, and real-time P&L.",
     badge: "Premium",
   },
   {
     icon: Smartphone,
-    title: "Mobile PWA — Install Anywhere",
+    title: "Mobile PWA:  Install Anywhere",
     description:
       "Install EquityLens to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
@@ -388,7 +388,7 @@ const Landing = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold">Get started in 60 seconds</h2>
-            <p className="mt-3 text-muted-foreground">No credit card. No complicated setup.</p>
+            <p className="mt-3 text-muted-foreground">No complicated setup.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
