@@ -116,8 +116,7 @@ const FEATURES = [
   {
     icon: Briefcase,
     title: "Portfolio Dashboard",
-    description:
-      "Track your actual holdings with buy price, quantity, and real-time P&L.",
+    description: "Track your actual holdings with buy price, quantity, and real-time P&L.",
     badge: "Premium",
   },
   {
@@ -804,7 +803,7 @@ const Landing = () => {
                 },
                 {
                   q: "What do I get during the 15-day free trial?",
-                  a: "During your trial, you unlock full Pro access — multiple watchlists, column customization, real-time price updates, Smart Alerts, and mobile swipe gestures with Undo. Premium features like the interactive stock detail sheet, multi-day charts, price triggers, event tags, notes, sharing, and portfolio analytics remain exclusive to Premium subscribers.",
+                  a: "During your trial, you unlock full Pro access: multiple watchlists, column customization, real-time price updates, Smart Alerts, and mobile swipe gestures with Undo. Premium features like the interactive stock detail sheet, multi-day charts, price triggers, event tags, notes, sharing, and portfolio analytics remain exclusive to Premium subscribers.",
                 },
                 {
                   q: "What's included in the Premium plan?",
@@ -835,12 +834,8 @@ const Landing = () => {
                   a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio — directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
                 },
                 {
-                  q: "Can I share my watchlist with others?",
-                  a: "Yes! Premium users can generate a unique shareable link for any watchlist, or export it as a high-quality image or a professional PDF report — perfect for sharing with friends, family, or clients.",
-                },
-                {
                   q: "Is my data safe?",
-                  a: "Absolutely. All your data — watchlists, notes, custom columns, and triggers — is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
+                  a: "Absolutely. All your data: watchlists, notes, custom columns, and triggers — is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
                 },
                 {
                   q: "Can I cancel my subscription anytime?",
@@ -848,7 +843,7 @@ const Landing = () => {
                 },
                 {
                   q: "Does EquityLens work on mobile?",
-                  a: "Yes — EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
+                  a: "Yes, EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
                 },
                 {
                   q: "How does the interactive multi-day price chart work?",
@@ -888,7 +883,8 @@ const Landing = () => {
             </Badge>
             <h2 className="text-3xl sm:text-4xl font-bold">Need a hand?</h2>
             <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-              Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon as possible.
+              Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon
+              as possible.
             </p>
           </motion.div>
 
@@ -946,7 +942,10 @@ const Landing = () => {
             <button onClick={() => navigate("/subscribe")} className="hover:text-foreground transition-colors">
               Pricing
             </button>
-            <a href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support" className="hover:text-foreground transition-colors">
+            <a
+              href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support"
+              className="hover:text-foreground transition-colors"
+            >
               Support
             </a>
           </div>
