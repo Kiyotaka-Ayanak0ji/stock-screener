@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
-export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "ALL";
+export type PriceRange = "1D" | "1W" | "1M" | "1Y";
 export type ChartMode = "line" | "candle";
 
 interface PricePoint {
@@ -27,7 +27,6 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1W": false,
   "1M": true,
   "1Y": true,
-  ALL: true,
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -55,15 +54,13 @@ const RANGE_LABELS: Record<PriceRange, string> = {
   "1W": "1W",
   "1M": "1M",
   "1Y": "1Y",
-  ALL: "All",
 };
 
-const RANGE_MS: Record<PriceRange, number | null> = {
+const RANGE_MS: Record<PriceRange, number> = {
   "1D": 24 * 60 * 60 * 1000,
   "1W": 7 * 24 * 60 * 60 * 1000,
   "1M": 30 * 24 * 60 * 60 * 1000,
   "1Y": 365 * 24 * 60 * 60 * 1000,
-  ALL: null,
 };
 
 const WIDTH = 600;
@@ -76,7 +73,7 @@ function formatTime(ts: number, range: PriceRange): string {
   if (range === "1D") {
     return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
   }
-  if (range === "1Y" || range === "ALL") {
+  if (range === "1Y") {
     return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" });
   }
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
@@ -175,7 +172,6 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const points = useMemo(() => {
     if (allPoints.length === 0) return [];
     const cutoffMs = RANGE_MS[range];
-    if (cutoffMs == null) return allPoints;
     const cutoff = Date.now() - cutoffMs;
     // Binary search for first in-range index since data is sorted by ts
     let lo = 0, hi = allPoints.length;
@@ -656,18 +652,65 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             })()}
 
             {/* Axis labels */}
-            <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
-              <span>
-                {showCandles
-                  ? candles[0] && formatTime(candles[0].ts, range)
-                  : firstPoint && formatTime(firstPoint.ts, range)}
-              </span>
-              <span>
-                {showCandles
-                  ? candles[candles.length - 1] && formatTime(candles[candles.length - 1].ts, range)
-                  : lastPoint && formatTime(lastPoint.ts, range)}
-              </span>
-            </div>
+            {(() => {
+              // Build an evenly-spaced time scale across the active window so the
+              // x-axis is always clearly readable (5 ticks: start, 25%, 50%, 75%, end).
+              const startTs = showCandles
+                ? candles[0]?.ts
+                : firstPoint?.ts;
+              const endTs = showCandles
+                ? candles[candles.length - 1]?.ts
+                : lastPoint?.ts;
+              if (startTs == null || endTs == null || endTs <= startTs) {
+                return (
+                  <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-mono px-1">
+                    <span>{startTs != null && formatTime(startTs, range)}</span>
+                    <span>{endTs != null && formatTime(endTs, range)}</span>
+                  </div>
+                );
+              }
+              const TICKS = 5;
+              const ticks = Array.from({ length: TICKS }, (_, i) =>
+                startTs + ((endTs - startTs) * i) / (TICKS - 1)
+              );
+              return (
+                <div className="mt-1.5 px-1" aria-hidden>
+                  {/* Tick marks */}
+                  <div className="relative h-1.5">
+                    {ticks.map((t, i) => (
+                      <span
+                        key={i}
+                        className="absolute top-0 h-1.5 w-px bg-border"
+                        style={{
+                          left: `${(i / (TICKS - 1)) * 100}%`,
+                          transform: "translateX(-0.5px)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {/* Tick labels */}
+                  <div className="relative h-3 mt-0.5">
+                    {ticks.map((t, i) => (
+                      <span
+                        key={i}
+                        className="absolute top-0 text-[10px] text-muted-foreground font-mono whitespace-nowrap"
+                        style={{
+                          left: `${(i / (TICKS - 1)) * 100}%`,
+                          transform:
+                            i === 0
+                              ? "translateX(0)"
+                              : i === TICKS - 1
+                              ? "translateX(-100%)"
+                              : "translateX(-50%)",
+                        }}
+                      >
+                        {formatTime(t, range)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </>
         )}
       </div>
