@@ -88,7 +88,7 @@ serve(async (req) => {
         receipt: `rcpt_${user.id.substring(0, 8)}_${Date.now().toString(36)}`,
         notes: {
           user_id: user.id,
-          plan: is_test ? 'test' : plan,
+          plan: plan,
           amount_usd: amountUsd.toString(),
         },
       }),
@@ -108,7 +108,6 @@ serve(async (req) => {
       amount_usd: amountUsd,
       exchange_rate: rate,
       key_id: RAZORPAY_KEY_ID,
-      is_test,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
