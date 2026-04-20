@@ -55,9 +55,7 @@ serve(async (req) => {
     }
 
     let amountUsd: number;
-    if (is_test) {
-      amountUsd = 0.01; // 1 cent test
-    } else if (plan === 'monthly') {
+    if (plan === 'monthly') {
       amountUsd = 5;
     } else if (plan === 'yearly') {
       amountUsd = 50;
