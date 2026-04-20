@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Crown, CreditCard, Loader2, ArrowLeft, Zap, X } from "lucide-react";
+
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -58,14 +59,14 @@ const Subscribe = () => {
     });
   };
 
-  const handleRazorpayPayment = async (isTest = false) => {
+  const handleRazorpayPayment = async () => {
     setProcessing(true);
     try {
       const loaded = await loadRazorpayScript();
       if (!loaded) { toast.error("Failed to load Razorpay SDK"); return; }
 
       const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
-        body: { plan: selectedPlan, is_test: isTest },
+        body: { plan: selectedPlan },
       });
       if (error || !data) { toast.error("Failed to create order"); return; }
 
@@ -75,7 +76,7 @@ const Subscribe = () => {
         amount: data.amount_inr,
         currency: "INR",
         name: selectedTier === "premium_plus" ? "EquityIQ Premium Plus" : selectedTier === "premium" ? "EquityIQ Premium" : "EquityIQ Pro",
-        description: isTest ? "Test Payment (1 cent)" : `${planInfo.label} Subscription`,
+        description: `${planInfo.label} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
           const { error: verifyError } = await supabase.functions.invoke("razorpay-verify-payment", {
@@ -87,19 +88,14 @@ const Subscribe = () => {
               amount_usd: data.amount_usd,
               amount_inr: data.amount_inr / 100,
               payment_method: "razorpay",
-              is_test: isTest,
             },
           });
           if (verifyError) {
             toast.error("Payment verification failed");
           } else {
-            if (isTest) {
-              toast.success("Test payment successful! Gateway is working.");
-            } else {
-              toast.success(`${planInfo.label} subscription activated!`);
-              await refetch();
-              navigate("/dashboard");
-            }
+            toast.success(`${planInfo.label} subscription activated!`);
+            await refetch();
+            navigate("/dashboard");
           }
         },
         prefill: { email: user?.email },
@@ -321,23 +317,13 @@ const Subscribe = () => {
             <div className="space-y-2">
                 <Button
                   className="w-full gap-2 h-auto min-h-11 py-2 whitespace-normal text-center leading-tight text-sm sm:text-base"
-                  onClick={() => handleRazorpayPayment(false)}
+                  onClick={() => handleRazorpayPayment()}
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <Crown className="h-4 w-4 shrink-0" />}
                   <span className="break-words">
                     Subscribe to {PLAN_PRICES[selectedPlan].label} (${PLAN_PRICES[selectedPlan].usd}/{billingCycle === "yearly" ? "yr" : "mo"})
                   </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 text-xs"
-                  onClick={() => handleRazorpayPayment(true)}
-                  disabled={processing}
-                >
-                  <Zap className="h-3 w-3" />
-                  Send 1¢ test payment to verify gateway
                 </Button>
             </div>
 

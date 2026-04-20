@@ -43,7 +43,7 @@ serve(async (req) => {
       });
     }
 
-    const { plan, is_test } = await req.json();
+    const { plan } = await req.json();
 
     const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
     const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
@@ -55,9 +55,7 @@ serve(async (req) => {
     }
 
     let amountUsd: number;
-    if (is_test) {
-      amountUsd = 0.01; // 1 cent test
-    } else if (plan === 'monthly') {
+    if (plan === 'monthly') {
       amountUsd = 5;
     } else if (plan === 'yearly') {
       amountUsd = 50;
@@ -90,7 +88,7 @@ serve(async (req) => {
         receipt: `rcpt_${user.id.substring(0, 8)}_${Date.now().toString(36)}`,
         notes: {
           user_id: user.id,
-          plan: is_test ? 'test' : plan,
+          plan: plan,
           amount_usd: amountUsd.toString(),
         },
       }),
@@ -110,7 +108,6 @@ serve(async (req) => {
       amount_usd: amountUsd,
       exchange_rate: rate,
       key_id: RAZORPAY_KEY_ID,
-      is_test,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
