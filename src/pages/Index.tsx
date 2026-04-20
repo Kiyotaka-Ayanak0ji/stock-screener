@@ -4,6 +4,7 @@ import EmailVerificationGate from "@/components/EmailVerificationGate";
 import ReviewDialog from "@/components/ReviewDialog";
 import SubscriptionGate from "@/components/SubscriptionGate";
 import BottomNav from "@/components/BottomNav";
+import RebrandBanner from "@/components/RebrandBanner";
 
 const Index = () => {
   return (
@@ -11,6 +12,7 @@ const Index = () => {
       <EmailVerificationGate>
         <div className="min-h-screen bg-background pb-bottom-nav">
           <Header />
+          <RebrandBanner />
           <StockTable />
           <ReviewDialog />
           <BottomNav />
@@ -21,3 +23,4 @@ const Index = () => {
 };
 
 export default Index;
+
