@@ -157,7 +157,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <span className="text-base sm:text-lg font-bold tracking-tight">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
@@ -932,7 +932,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             <span className="font-bold">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">

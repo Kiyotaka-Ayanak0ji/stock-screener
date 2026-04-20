@@ -26,7 +26,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
       <Container style={container}>
         <Section style={headerSection}>
           <Text style={brandText}>
-            Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+            Equity<span style={{ color: '#22d3ee' }}>IQ</span>
           </Text>
         </Section>
 

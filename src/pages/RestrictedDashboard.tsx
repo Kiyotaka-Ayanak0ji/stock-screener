@@ -24,7 +24,7 @@ const RestrictedDashboard = () => {
           <div className="flex items-center gap-2">
             <TrendingUp className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-bold tracking-tight">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </h1>
           </div>
 
