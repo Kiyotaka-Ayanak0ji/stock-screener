@@ -78,6 +78,7 @@ const FEATURES = [
     title: "Multiple Watchlists",
     description:
       "Organize stocks into separate watchlists : one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
+    badge: "Pro",
   },
   {
     icon: SlidersHorizontal,
