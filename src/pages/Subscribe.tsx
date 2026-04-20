@@ -59,14 +59,14 @@ const Subscribe = () => {
     });
   };
 
-  const handleRazorpayPayment = async (isTest = false) => {
+  const handleRazorpayPayment = async () => {
     setProcessing(true);
     try {
       const loaded = await loadRazorpayScript();
       if (!loaded) { toast.error("Failed to load Razorpay SDK"); return; }
 
       const { data, error } = await supabase.functions.invoke("razorpay-create-order", {
-        body: { plan: selectedPlan, is_test: isTest },
+        body: { plan: selectedPlan },
       });
       if (error || !data) { toast.error("Failed to create order"); return; }
 
@@ -76,7 +76,7 @@ const Subscribe = () => {
         amount: data.amount_inr,
         currency: "INR",
         name: selectedTier === "premium_plus" ? "EquityIQ Premium Plus" : selectedTier === "premium" ? "EquityIQ Premium" : "EquityIQ Pro",
-        description: isTest ? "Test Payment (1 cent)" : `${planInfo.label} Subscription`,
+        description: `${planInfo.label} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {
           const { error: verifyError } = await supabase.functions.invoke("razorpay-verify-payment", {
@@ -88,19 +88,14 @@ const Subscribe = () => {
               amount_usd: data.amount_usd,
               amount_inr: data.amount_inr / 100,
               payment_method: "razorpay",
-              is_test: isTest,
             },
           });
           if (verifyError) {
             toast.error("Payment verification failed");
           } else {
-            if (isTest) {
-              toast.success("Test payment successful! Gateway is working.");
-            } else {
-              toast.success(`${planInfo.label} subscription activated!`);
-              await refetch();
-              navigate("/dashboard");
-            }
+            toast.success(`${planInfo.label} subscription activated!`);
+            await refetch();
+            navigate("/dashboard");
           }
         },
         prefill: { email: user?.email },
