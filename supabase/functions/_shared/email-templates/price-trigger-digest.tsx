@@ -31,7 +31,7 @@ export const PriceTriggerDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on EquityLens
+      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on EquityIQ
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -40,7 +40,7 @@ export const PriceTriggerDigestEmail = ({
             <tr>
               <td>
                 <Text style={brandText}>
-                  Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+                  Equity<span style={{ color: '#22d3ee' }}>IQ</span>
                 </Text>
               </td>
               <td style={{ textAlign: 'right' as const }}>
@@ -81,7 +81,7 @@ export const PriceTriggerDigestEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you set price triggers on EquityLens.
+          You're receiving this because you set price triggers on EquityIQ.
         </Text>
       </Container>
     </Body>

@@ -78,6 +78,7 @@ const FEATURES = [
     title: "Multiple Watchlists",
     description:
       "Organize stocks into separate watchlists : one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
+    badge: "Pro",
   },
   {
     icon: SlidersHorizontal,
@@ -123,7 +124,7 @@ const FEATURES = [
     icon: Smartphone,
     title: "Mobile PWA:  Install Anywhere",
     description:
-      "Install EquityLens to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
+      "Install EquityIQ to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
 ];
 
@@ -157,7 +158,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <span className="text-base sm:text-lg font-bold tracking-tight">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </span>
           </div>
           <div className="flex items-center gap-1 sm:gap-3">
@@ -239,7 +240,7 @@ const Landing = () => {
             variants={fadeUp}
             custom={2}
           >
-            EquityLens is the smarter way to manage and track all your stocks. Set custom price triggers, tag events,
+            EquityIQ is the smarter way to manage and track all your stocks. Set custom price triggers, tag events,
             build watchlists, track your portfolio performance — all in one clean, powerful dashboard.
           </motion.p>
 
@@ -332,7 +333,7 @@ const Landing = () => {
           >
             You check Groww for prices, set alarms in a notes app, maintain an Excel sheet for your watchlist, and
             screenshot charts to share with friends. Sound familiar?{" "}
-            <span className="text-foreground font-semibold">EquityLens brings everything into one place</span> — so you
+            <span className="text-foreground font-semibold">EquityIQ brings everything into one place</span> — so you
             spend less time managing tools and more time making decisions.
           </motion.p>
         </div>
@@ -405,7 +406,7 @@ const Landing = () => {
               {
                 step: "03",
                 title: "Set triggers & relax",
-                desc: "Configure price alerts and let EquityLens notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking.",
+                desc: "Configure price alerts and let EquityIQ notify you. Upgrade to Premium for price triggers, event tags, notes, and portfolio tracking.",
               },
             ].map((item, i) => (
               <motion.div
@@ -774,7 +775,7 @@ const Landing = () => {
             <Accordion type="single" collapsible className="space-y-3">
               {[
                 {
-                  q: "Is EquityLens free to use?",
+                  q: "Is EquityIQ free to use?",
                   a: "Yes! Sign up and get a 15-day free trial with full Pro-level access. No credit card required. After the trial, choose a plan that suits your needs or continue with the free Guest tier.",
                 },
                 {
@@ -807,7 +808,7 @@ const Landing = () => {
                 },
                 {
                   q: "What's included in the Premium plan?",
-                  a: "Premium unlocks the full EquityLens experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
+                  a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
                 },
                 {
                   q: "Is there an unlimited plan?",
@@ -819,7 +820,7 @@ const Landing = () => {
                 },
                 {
                   q: "Which stock exchanges are supported?",
-                  a: "EquityLens tracks stocks listed on both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities — including small-cap and micro-cap stocks.",
+                  a: "EquityIQ tracks stocks listed on both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities — including small-cap and micro-cap stocks.",
                 },
                 {
                   q: "How do price triggers work?",
@@ -842,8 +843,8 @@ const Landing = () => {
                   a: "Yes, cancel anytime with no questions asked. You'll retain access to all paid features until the end of your current billing period.",
                 },
                 {
-                  q: "Does EquityLens work on mobile?",
-                  a: "Yes, EquityLens is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
+                  q: "Does EquityIQ work on mobile?",
+                  a: "Yes, EquityIQ is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
                 },
                 {
                   q: "How does the interactive multi-day price chart work?",
@@ -903,7 +904,7 @@ const Landing = () => {
                   <div className="text-center sm:text-left">
                     <p className="text-sm text-muted-foreground">Product, pricing & customer support</p>
                     <a
-                      href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support"
+                      href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
                       className="text-lg sm:text-xl font-semibold text-foreground hover:text-primary transition-colors break-all"
                     >
                       aryanansik@gmail.com
@@ -913,7 +914,7 @@ const Landing = () => {
                 <Button
                   size="lg"
                   className="w-full sm:w-auto"
-                  onClick={() => (window.location.href = "mailto:aryanansik@gmail.com?subject=EquityLens%20Support")}
+                  onClick={() => (window.location.href = "mailto:aryanansik@gmail.com?subject=EquityIQ%20Support")}
                 >
                   <Mail className="h-4 w-4 mr-2" /> Email Support
                 </Button>
@@ -932,7 +933,7 @@ const Landing = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
             <span className="font-bold">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </span>
           </div>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
@@ -943,13 +944,13 @@ const Landing = () => {
               Pricing
             </button>
             <a
-              href="mailto:aryanansik@gmail.com?subject=EquityLens%20Support"
+              href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
               className="hover:text-foreground transition-colors"
             >
               Support
             </a>
           </div>
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EquityLens. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EquityIQ. All rights reserved.</p>
         </div>
       </footer>
       <DemoModal open={demoOpen} onOpenChange={setDemoOpen} />

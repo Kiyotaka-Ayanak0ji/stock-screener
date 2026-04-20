@@ -79,7 +79,7 @@ const Auth = () => {
         >
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
-            Equity<span className="text-primary">Lens</span>
+            Equity<span className="text-primary">IQ</span>
           </h1>
         </motion.div>
 

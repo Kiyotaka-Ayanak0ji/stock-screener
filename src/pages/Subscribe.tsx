@@ -74,7 +74,7 @@ const Subscribe = () => {
         key: data.key_id,
         amount: data.amount_inr,
         currency: "INR",
-        name: selectedTier === "premium_plus" ? "EquityLens Premium Plus" : selectedTier === "premium" ? "EquityLens Premium" : "EquityLens Pro",
+        name: selectedTier === "premium_plus" ? "EquityIQ Premium Plus" : selectedTier === "premium" ? "EquityIQ Premium" : "EquityIQ Pro",
         description: isTest ? "Test Payment (1 cent)" : `${planInfo.label} Subscription`,
         order_id: data.order_id,
         handler: async (response: any) => {

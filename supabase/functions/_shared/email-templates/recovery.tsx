@@ -26,18 +26,18 @@ export const RecoveryEmail = ({
 }: RecoveryEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Reset your EquityLens password</Preview>
+    <Preview>Reset your EquityIQ password</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
           <Text style={brandText}>
-            Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+            Equity<span style={{ color: '#22d3ee' }}>IQ</span>
           </Text>
         </Section>
 
         <Heading style={h1}>Reset your password 🔐</Heading>
         <Text style={text}>
-          We received a request to reset your EquityLens password. Click
+          We received a request to reset your EquityIQ password. Click
           the button below to choose a new password.
         </Text>
 

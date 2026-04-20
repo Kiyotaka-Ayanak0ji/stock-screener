@@ -43,7 +43,7 @@ const Header = () => {
           >
             <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <h1 className="text-lg sm:text-xl font-bold tracking-tight">
-              Equity<span className="text-primary">Lens</span>
+              Equity<span className="text-primary">IQ</span>
             </h1>
           </button>
           <div className="hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 rounded-full bg-secondary text-xs font-medium">
@@ -151,7 +151,7 @@ const Header = () => {
                 <div className="p-4 border-b border-border">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
-                    <span className="text-lg font-bold">Equity<span className="text-primary">Lens</span></span>
+                    <span className="text-lg font-bold">Equity<span className="text-primary">IQ</span></span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
                     <Activity className={`h-3 w-3 ${isMarketOpen ? "text-gain" : "text-loss"}`} />

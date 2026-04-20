@@ -1,6 +1,6 @@
 {
-  "name": "EquityLens - Stock Tracker",
-  "short_name": "EquityLens",
+  "name": "EquityIQ - Stock Tracker",
+  "short_name": "EquityIQ",
   "description": "Track and manage real-time NSE/BSE stocks with custom watchlists, price triggers, and portfolio analytics.",
   "start_url": "/",
   "display": "standalone",

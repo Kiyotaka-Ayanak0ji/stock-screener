@@ -26,12 +26,12 @@ export const WelcomeEmail = ({
 }: WelcomeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to EquityLens — your stock watchlist is ready!</Preview>
+    <Preview>Welcome to EquityIQ — your stock watchlist is ready!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
           <Text style={brandText}>
-            Equity<span style={{ color: '#22d3ee' }}>Lens</span>
+            Equity<span style={{ color: '#22d3ee' }}>IQ</span>
           </Text>
         </Section>
 
@@ -42,7 +42,7 @@ export const WelcomeEmail = ({
           Hey {displayName}! 👋
         </Text>
         <Text style={text}>
-          Thanks for joining EquityLens. Your account is set up and ready to go.
+          Thanks for joining EquityIQ. Your account is set up and ready to go.
         </Text>
 
         <Section style={featuresGrid}>
@@ -85,7 +85,7 @@ export const WelcomeEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you signed up on EquityLens.
+          You're receiving this because you signed up on EquityIQ.
           If you didn't create this account, please ignore this email.
         </Text>
       </Container>
