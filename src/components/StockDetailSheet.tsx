@@ -166,7 +166,7 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
           <SheetHeader className="px-5 pt-4 pb-3 sticky top-0 bg-background/95 backdrop-blur z-10 border-b border-border">
             <button
               onClick={() => onOpenChange(false)}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors -ml-1 mb-2 w-fit group px-[2px] py-[2px] border-sky-400 rounded-2xl"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground bg-muted/60 hover:bg-muted border border-border hover:border-primary/50 transition-colors -ml-1 mb-2 w-fit group px-2.5 py-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="Back to watchlist"
             >
               <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
