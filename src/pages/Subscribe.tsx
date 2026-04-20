@@ -317,23 +317,13 @@ const Subscribe = () => {
             <div className="space-y-2">
                 <Button
                   className="w-full gap-2 h-auto min-h-11 py-2 whitespace-normal text-center leading-tight text-sm sm:text-base"
-                  onClick={() => handleRazorpayPayment(false)}
+                  onClick={() => handleRazorpayPayment()}
                   disabled={processing}
                 >
                   {processing ? <Loader2 className="h-4 w-4 animate-spin shrink-0" /> : <Crown className="h-4 w-4 shrink-0" />}
                   <span className="break-words">
                     Subscribe to {PLAN_PRICES[selectedPlan].label} (${PLAN_PRICES[selectedPlan].usd}/{billingCycle === "yearly" ? "yr" : "mo"})
                   </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 text-xs"
-                  onClick={() => handleRazorpayPayment(true)}
-                  disabled={processing}
-                >
-                  <Zap className="h-3 w-3" />
-                  Send 1¢ test payment to verify gateway
                 </Button>
             </div>
 
