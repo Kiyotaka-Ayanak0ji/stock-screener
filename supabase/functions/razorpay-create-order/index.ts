@@ -43,7 +43,7 @@ serve(async (req) => {
       });
     }
 
-    const { plan, is_test } = await req.json();
+    const { plan } = await req.json();
 
     const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
     const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
