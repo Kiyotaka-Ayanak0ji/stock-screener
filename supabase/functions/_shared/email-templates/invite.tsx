@@ -29,7 +29,7 @@ export const InviteEmail = ({
 }: InviteEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>You've been invited to join EquityLens</Preview>
+    <Preview>You've been invited to join EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -41,7 +41,7 @@ export const InviteEmail = ({
         <Heading style={h1}>You're invited! 🎉</Heading>
         <Text style={text}>
           You've been invited to join{' '}
-          <Link href={siteUrl} style={link}><strong>EquityLens</strong></Link>.
+          <Link href={siteUrl} style={link}><strong>EquityIQ</strong></Link>.
           Click below to accept the invitation and create your account.
         </Text>
 

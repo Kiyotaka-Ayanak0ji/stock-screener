@@ -258,7 +258,7 @@ const Profile = () => {
                     {existingReview ? "Your Review" : "Leave a Review"}
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    {existingReview ? "Update your review — it's displayed on our landing page" : "Share your experience to help other investors discover EquityLens"}
+                    {existingReview ? "Update your review — it's displayed on our landing page" : "Share your experience to help other investors discover EquityIQ"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -278,7 +278,7 @@ const Profile = () => {
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="profile-review-text" className="text-xs">Your Review</Label>
-                    <Textarea id="profile-review-text" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Tell us what you love about EquityLens..." rows={3} maxLength={500} />
+                    <Textarea id="profile-review-text" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Tell us what you love about EquityIQ..." rows={3} maxLength={500} />
                   </div>
                   <Button onClick={handleSaveReview} disabled={savingReview || reviewRating === 0 || !reviewText.trim()} className="w-full active:scale-[0.98] transition-all" variant="secondary">
                     {savingReview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}

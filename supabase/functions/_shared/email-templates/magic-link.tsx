@@ -26,7 +26,7 @@ export const MagicLinkEmail = ({
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your EquityLens login link</Preview>
+    <Preview>Your EquityIQ login link</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -37,7 +37,7 @@ export const MagicLinkEmail = ({
 
         <Heading style={h1}>Your login link 🔗</Heading>
         <Text style={text}>
-          Click the button below to log in to EquityLens. This link will expire
+          Click the button below to log in to EquityIQ. This link will expire
           shortly.
         </Text>
 

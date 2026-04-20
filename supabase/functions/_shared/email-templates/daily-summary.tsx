@@ -48,7 +48,7 @@ export const DailySummaryEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      📊 Your EquityLens daily summary for {date}
+      📊 Your EquityIQ daily summary for {date}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -174,7 +174,7 @@ export const DailySummaryEmail = ({
         <Hr style={hr} />
         <Text style={footer}>
           You're receiving this daily summary because you're subscribed to
-          EquityLens updates. Manage your preferences in your profile settings.
+          EquityIQ updates. Manage your preferences in your profile settings.
         </Text>
       </Container>
     </Body>

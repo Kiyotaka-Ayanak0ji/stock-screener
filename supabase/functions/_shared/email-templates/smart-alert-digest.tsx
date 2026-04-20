@@ -50,7 +50,7 @@ export const SmartAlertDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      ⚡ {alerts.length} smart alert{alerts.length > 1 ? 's' : ''} detected on EquityLens
+      ⚡ {alerts.length} smart alert{alerts.length > 1 ? 's' : ''} detected on EquityIQ
     </Preview>
     <Body style={main}>
       <Container style={container}>

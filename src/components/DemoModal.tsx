@@ -89,7 +89,7 @@ const DemoModal = ({ open, onOpenChange }: DemoModalProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            EquityLens Demo
+            EquityIQ Demo
             <Badge variant="secondary" className="text-[10px]">Interactive</Badge>
           </DialogTitle>
         </DialogHeader>
@@ -308,7 +308,7 @@ const DemoModal = ({ open, onOpenChange }: DemoModalProps) => {
                   <p className="text-xs text-muted-foreground">
                     <strong>Share link preview:</strong>{" "}
                     <code className="bg-background px-1.5 py-0.5 rounded text-[10px]">
-                      equitylens.app/shared/abc123xyz
+                      equityiq.app/shared/abc123xyz
                     </code>
                   </p>
                 </div>

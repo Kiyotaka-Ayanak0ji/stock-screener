@@ -60,7 +60,7 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else if (data.user?.email_confirmed_at) {
-      toast({ title: "Email verified!", description: "Welcome to EquityLens." });
+      toast({ title: "Email verified!", description: "Welcome to EquityIQ." });
     } else {
       toast({ title: "Not yet verified", description: "Please check your inbox and click the verification link.", variant: "destructive" });
     }

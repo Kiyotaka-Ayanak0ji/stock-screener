@@ -21,7 +21,7 @@ interface ReauthenticationEmailProps {
 export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your EquityLens verification code</Preview>
+    <Preview>Your EquityIQ verification code</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>

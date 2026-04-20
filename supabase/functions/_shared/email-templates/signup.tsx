@@ -31,7 +31,7 @@ export const SignupEmail = ({
 }: SignupEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Confirm your email for EquityLens</Preview>
+    <Preview>Confirm your email for EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -61,7 +61,7 @@ export const SignupEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you didn't create an account on EquityLens, you can safely ignore this email.
+          If you didn't create an account on EquityIQ, you can safely ignore this email.
         </Text>
       </Container>
     </Body>
