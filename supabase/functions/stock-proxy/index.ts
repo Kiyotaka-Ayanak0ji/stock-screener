@@ -373,51 +373,47 @@ Deno.serve(async (req) => {
       return `${s.ticker}${suffix}`;
     }).join(',');
 
-    let data: any;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { crumb, cookie } = await getCrumbAndCookie();
-      const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
+    let data: any = null;
+    if (yahooTargets.length > 0) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { crumb, cookie } = await getCrumbAndCookie();
+        const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
 
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Cookie': cookie,
-        },
-      });
-
-      if (response.status === 401 && attempt === 0) {
-        await response.text();
-        cachedCrumb = null; cachedCookie = null; crumbExpiry = 0;
-        continue;
-      }
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Yahoo Finance error:', response.status, text);
-        return new Response(JSON.stringify({ error: 'Yahoo Finance error', status: response.status }), {
-          status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Cookie': cookie,
+          },
         });
+
+        if (response.status === 401 && attempt === 0) {
+          await response.text();
+          cachedCrumb = null; cachedCookie = null; crumbExpiry = 0;
+          continue;
+        }
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Yahoo Finance error:', response.status, text);
+          // Don't bail — Groww may already have resolved SME tickers, and the
+          // fallback chain below will handle the rest.
+          data = { quoteResponse: { result: [] } };
+          break;
+        }
+
+        data = await response.json();
+        break;
       }
-
-      data = await response.json();
-      break;
-    }
-
-    if (!data) {
-      return new Response(JSON.stringify({ error: 'Failed after retries' }), {
-        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    } else {
+      data = { quoteResponse: { result: [] } };
     }
 
     const quotes = data?.quoteResponse?.result || [];
-    const result: Record<string, Record<string, number>> = {};
 
     const yahooToKey = new Map<string, string>();
-    symbols.forEach((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+    yahooTargets.forEach((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
       if (s.yahooSymbol) yahooToKey.set(s.yahooSymbol, `${s.exchange}_${s.ticker}`);
     });
-
-    const resolvedKeys = new Set<string>();
 
     for (const q of quotes) {
       const symbol = q.symbol || '';
