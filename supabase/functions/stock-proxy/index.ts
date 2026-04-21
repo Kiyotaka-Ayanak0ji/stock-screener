@@ -44,6 +44,72 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
+// ─── Groww (official API) ───────────────────────────────────────────
+// Used as PRIMARY source for SME / small-cap Indian stocks where Yahoo coverage
+// is poor or stale. For mid/large caps we still prefer Yahoo → Screener → Google.
+
+const GROWW_TOKEN = Deno.env.get('GROWW_API_TOKEN') || '';
+
+// Heuristic: ticker patterns that strongly indicate an SME listing.
+// Real NSE SME suffix examples: ENVIRO_SM, BLSI-SM, ABC_SME. BSE SME often pure 6-digit codes
+// in the 540000-545000 / 776000+ ranges, but we keep this conservative — code-based detection
+// happens server-side after we know the marketCap.
+const SME_NAME_RE = /(_SM|-SM|_SME|-SME|SME$)/i;
+
+function isLikelySmeTicker(t: string): boolean {
+  return SME_NAME_RE.test(t);
+}
+
+// Small-cap threshold in raw INR: 5,000 Cr = 5e10
+const SMALL_CAP_THRESHOLD_RAW = 5e10;
+
+async function fetchGrowwQuote(
+  ticker: string,
+  exchange: 'NSE' | 'BSE',
+): Promise<Record<string, number> | null> {
+  if (!GROWW_TOKEN) return null;
+  try {
+    const u = new URL('https://api.groww.in/v1/live-data/quote');
+    u.searchParams.set('exchange', exchange);
+    u.searchParams.set('segment', 'CASH');
+    u.searchParams.set('trading_symbol', ticker);
+
+    const res = await fetch(u.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${GROWW_TOKEN}`,
+        'X-API-VERSION': '1.0',
+      },
+    });
+    if (!res.ok) {
+      console.log(`Groww ${exchange}:${ticker} -> ${res.status}`);
+      return null;
+    }
+    const json = await res.json();
+    // Groww v1 quote response shape: { status, payload: { last_price, day_change, ohlc:{...}, volume, market_cap, ... } }
+    const p = json?.payload ?? json?.data ?? json;
+    const ltp = Number(p?.last_price ?? p?.ltp ?? 0);
+    if (!ltp || isNaN(ltp) || ltp <= 0) return null;
+
+    const ohlc = p?.ohlc ?? {};
+    const open = Number(ohlc?.open ?? p?.open ?? ltp);
+    const high = Number(ohlc?.high ?? p?.high ?? ltp);
+    const low = Number(ohlc?.low ?? p?.low ?? ltp);
+    const close = Number(ohlc?.close ?? p?.close ?? p?.previous_close ?? ltp);
+    const volume = Math.round(Number(p?.volume ?? p?.day_volume ?? 0));
+    // Groww returns market_cap in INR (raw). Some responses are in Cr — normalise to raw.
+    let marketCap = Number(p?.market_cap ?? p?.marketCap ?? 0);
+    if (marketCap > 0 && marketCap < 1e7) marketCap = marketCap * 1e7; // looked like Cr
+    const pe = Number(p?.pe_ratio ?? p?.pe ?? 0);
+
+    console.log(`Groww OK ${exchange}:${ticker} ltp=${ltp} mcap=${marketCap} vol=${volume}`);
+    return { ltp, open, high, low, close, volume, marketCap, pe: isNaN(pe) ? 0 : pe };
+  } catch (err) {
+    console.error(`Groww error ${exchange}:${ticker}:`, (err as Error).message);
+    return null;
+  }
+}
+
 // Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
