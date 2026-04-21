@@ -53,6 +53,9 @@ interface StockContextType {
   loadedTickers: Set<string>;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  /** On-demand single-stock verify against Screener.in. Returns true on success. */
+  verifyStock: (ticker: string) => Promise<boolean>;
+  verifyingTickers: Set<string>;
   // Price triggers
   priceTriggers: Record<string, { price: number; createdAt: number }>;
   setPriceTrigger: (ticker: string, price: number | null) => void;
@@ -781,6 +784,61 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [saveCachedPrices]);
 
+  // --- On-demand single-stock verify against Screener.in ---
+  const [verifyingTickers, setVerifyingTickers] = useState<Set<string>>(new Set());
+
+  const verifyStock = useCallback(async (ticker: string): Promise<boolean> => {
+    setVerifyingTickers(prev => {
+      const next = new Set(prev);
+      next.add(ticker);
+      return next;
+    });
+    try {
+      const stock = stocksRef.current.find(s => s.ticker === ticker);
+      if (!stock) {
+        toast.error(`Stock ${ticker} not found`);
+        return false;
+      }
+
+      const { data, error } = await supabase.functions.invoke("verify-stock-screener", {
+        body: { ticker, exchange: stock.exchange },
+      });
+
+      if (error || !data?.ok || !data?.data) {
+        const msg = (error as { message?: string } | null)?.message
+          || (data as { error?: string } | null)?.error
+          || "Could not verify against Screener";
+        toast.error(`Verify failed for ${ticker}`, { description: msg });
+        return false;
+      }
+
+      // Apply returned data immediately
+      setStocks(prev => prev.map(s => {
+        if (s.ticker !== ticker) return s;
+        return applyLiveData(s, data.data);
+      }));
+      setLoadedTickers(prev => {
+        const next = new Set(prev);
+        next.add(ticker);
+        return next;
+      });
+      const sourceLabel = data.source === "google" ? "Google Finance" : "Screener.in";
+      toast.success(`${ticker} verified`, { description: `Refreshed from ${sourceLabel}` });
+      return true;
+    } catch (err) {
+      console.error("verifyStock error:", err);
+      toast.error(`Verify failed for ${ticker}`);
+      return false;
+    } finally {
+      setVerifyingTickers(prev => {
+        const next = new Set(prev);
+        next.delete(ticker);
+        return next;
+      });
+    }
+  }, []);
+
+
   // Wrapper for createWatchlist that copies current watchlist tickers
   const createWatchlist = useCallback(async (name: string) => {
     return createWl(name, []);
@@ -891,6 +949,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       customColumns, addCustomColumn, removeCustomColumn,
       customColumnData, updateCustomColumnData,
       prefsLoaded, pricesLoaded, loadedTickers, refreshPrices, isRefreshing,
+      verifyStock, verifyingTickers,
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
