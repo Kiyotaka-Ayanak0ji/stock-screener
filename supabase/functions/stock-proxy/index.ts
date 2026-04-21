@@ -337,7 +337,37 @@ Deno.serve(async (req) => {
       });
     }
 
-    const yahooSymbols = symbols.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+    // ── Step 0: Groww as PRIMARY for SME-named tickers ─────────────────
+    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
+    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
+    // else still goes through the Yahoo → Screener → Google chain unchanged.
+    const result: Record<string, Record<string, number>> = {};
+    const resolvedKeys = new Set<string>();
+
+    const growwPrimaryTargets = symbols.filter(
+      (s: { ticker: string; exchange: string }) =>
+        (s.exchange === 'NSE' || s.exchange === 'BSE') && isLikelySmeTicker(s.ticker),
+    );
+
+    if (GROWW_TOKEN && growwPrimaryTargets.length > 0) {
+      await Promise.all(
+        growwPrimaryTargets.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
+          const data = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), 4000).catch(() => null);
+          if (data) {
+            const key = `${s.exchange}_${s.ticker}`;
+            result[key] = data;
+            resolvedKeys.add(key);
+          }
+        }),
+      );
+    }
+
+    // Build the Yahoo batch only for tickers Groww didn't already resolve.
+    const yahooTargets = symbols.filter(
+      (s: { ticker: string; exchange: string }) => !resolvedKeys.has(`${s.exchange}_${s.ticker}`),
+    );
+
+    const yahooSymbols = yahooTargets.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
       if (s.yahooSymbol) return s.yahooSymbol;
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
