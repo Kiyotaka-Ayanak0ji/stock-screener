@@ -61,7 +61,16 @@ const AddStockDialog = () => {
       setIsSearching(true);
       try {
         const { data, error } = await supabase.functions.invoke("screener-search", { body: { query: search.trim() } });
-        if (!error && data?.results) setScreenerResults(data.results);
+        if (error) {
+          // Treat 401 as "needs sign-in" — older/guest sessions are no longer allowed.
+          const status = (error as any)?.context?.status ?? (error as any)?.status;
+          if (status === 401) {
+            console.warn("screener-search requires authentication");
+          }
+          setScreenerResults([]);
+        } else if (data?.results) {
+          setScreenerResults(data.results);
+        }
       } catch (err) { console.error("Screener search failed:", err); }
       finally { setIsSearching(false); }
     }, 400);
