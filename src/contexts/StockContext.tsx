@@ -53,6 +53,9 @@ interface StockContextType {
   loadedTickers: Set<string>;
   refreshPrices: () => Promise<void>;
   isRefreshing: boolean;
+  /** On-demand single-stock verify against Screener.in. Returns true on success. */
+  verifyStock: (ticker: string) => Promise<boolean>;
+  verifyingTickers: Set<string>;
   // Price triggers
   priceTriggers: Record<string, { price: number; createdAt: number }>;
   setPriceTrigger: (ticker: string, price: number | null) => void;
