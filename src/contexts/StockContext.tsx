@@ -953,7 +953,6 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
-      setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
     }}>
       {children}
     </StockContext.Provider>
