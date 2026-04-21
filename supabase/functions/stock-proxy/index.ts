@@ -514,10 +514,29 @@ Deno.serve(async (req) => {
 
     const SCRAPE_TIMEOUT = 4000; // 4s timeout per scrape
 
+    // ── Step A: For tickers Yahoo couldn't resolve, try Groww FIRST (best Indian
+    // small-cap/SME coverage), then fall back to Screener+Google for whatever remains.
+    const stillMissingAfterGroww: { ticker: string; exchange: 'NSE' | 'BSE' }[] = [];
+    if (GROWW_TOKEN && stillMissing.length > 0) {
+      await Promise.all(
+        stillMissing.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
+          const data = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), SCRAPE_TIMEOUT).catch(() => null);
+          if (data) {
+            result[`${s.exchange}_${s.ticker}`] = data;
+            resolvedKeys.add(`${s.exchange}_${s.ticker}`);
+          } else {
+            stillMissingAfterGroww.push(s);
+          }
+        }),
+      );
+    } else {
+      stillMissingAfterGroww.push(...stillMissing);
+    }
+
     // Run both fallback and enrichment in parallel
     await Promise.all([
       // Full fallback for still-missing stocks — race Screener vs Google Finance
-      ...stillMissing.map(async (s: { ticker: string; exchange: string }) => {
+      ...stillMissingAfterGroww.map(async (s: { ticker: string; exchange: string }) => {
         try {
           const [screener, gf] = await Promise.allSettled([
             withTimeout(fetchScreenerFallback(s.ticker), SCRAPE_TIMEOUT),
@@ -536,26 +555,43 @@ Deno.serve(async (req) => {
           }
         } catch { /* both timed out */ }
       }),
-      // Enrichment for stocks with missing marketCap, volume, or P/E — race both sources
-      ...needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
+      // Enrichment for stocks with missing marketCap, volume, or P/E.
+      // For SME-named or detected small-cap (<5,000 Cr) tickers we prefer Groww
+      // for enrichment; otherwise we keep the existing Screener+Google race.
+      ...needsEnrichment.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
         const key = `${s.exchange}_${s.ticker}`;
+        const current = result[key];
+        const isSmallCap =
+          isLikelySmeTicker(s.ticker) ||
+          (current?.marketCap > 0 && current.marketCap < SMALL_CAP_THRESHOLD_RAW);
+
         try {
+          if (GROWW_TOKEN && isSmallCap) {
+            const g = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), SCRAPE_TIMEOUT).catch(() => null);
+            if (g) {
+              if (current.marketCap === 0 && g.marketCap) current.marketCap = g.marketCap;
+              if (current.volume === 0 && g.volume) current.volume = g.volume;
+              if (current.pe === 0 && g.pe) current.pe = g.pe;
+              if (current.marketCap > 0 && current.volume > 0 && current.pe > 0) return;
+            }
+          }
+
           const [screener, gf] = await Promise.allSettled([
             withTimeout(fetchScreenerEnrichment(s.ticker), SCRAPE_TIMEOUT),
             withTimeout(fetchGoogleFinanceMarketCap(s.ticker, s.exchange), SCRAPE_TIMEOUT),
           ]);
           const sData = screener.status === 'fulfilled' ? screener.value : null;
           const gData = gf.status === 'fulfilled' ? gf.value : null;
-          if (result[key].marketCap === 0) {
-            result[key].marketCap = sData?.marketCap || gData?.marketCap || 0;
+          if (current.marketCap === 0) {
+            current.marketCap = sData?.marketCap || gData?.marketCap || 0;
           }
-          if (result[key].volume === 0) {
-            result[key].volume = sData?.volume || gData?.volume || 0;
+          if (current.volume === 0) {
+            current.volume = sData?.volume || gData?.volume || 0;
           }
-          if (result[key].pe === 0) {
-            result[key].pe = sData?.pe || gData?.pe || 0;
+          if (current.pe === 0) {
+            current.pe = sData?.pe || gData?.pe || 0;
           }
-        } catch { /* both timed out */ }
+        } catch { /* timed out */ }
       }),
     ]);
 
