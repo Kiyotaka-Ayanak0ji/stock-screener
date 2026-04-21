@@ -44,6 +44,72 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
+// ─── Groww (official API) ───────────────────────────────────────────
+// Used as PRIMARY source for SME / small-cap Indian stocks where Yahoo coverage
+// is poor or stale. For mid/large caps we still prefer Yahoo → Screener → Google.
+
+const GROWW_TOKEN = Deno.env.get('GROWW_API_TOKEN') || '';
+
+// Heuristic: ticker patterns that strongly indicate an SME listing.
+// Real NSE SME suffix examples: ENVIRO_SM, BLSI-SM, ABC_SME. BSE SME often pure 6-digit codes
+// in the 540000-545000 / 776000+ ranges, but we keep this conservative — code-based detection
+// happens server-side after we know the marketCap.
+const SME_NAME_RE = /(_SM|-SM|_SME|-SME|SME$)/i;
+
+function isLikelySmeTicker(t: string): boolean {
+  return SME_NAME_RE.test(t);
+}
+
+// Small-cap threshold in raw INR: 5,000 Cr = 5e10
+const SMALL_CAP_THRESHOLD_RAW = 5e10;
+
+async function fetchGrowwQuote(
+  ticker: string,
+  exchange: 'NSE' | 'BSE',
+): Promise<Record<string, number> | null> {
+  if (!GROWW_TOKEN) return null;
+  try {
+    const u = new URL('https://api.groww.in/v1/live-data/quote');
+    u.searchParams.set('exchange', exchange);
+    u.searchParams.set('segment', 'CASH');
+    u.searchParams.set('trading_symbol', ticker);
+
+    const res = await fetch(u.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${GROWW_TOKEN}`,
+        'X-API-VERSION': '1.0',
+      },
+    });
+    if (!res.ok) {
+      console.log(`Groww ${exchange}:${ticker} -> ${res.status}`);
+      return null;
+    }
+    const json = await res.json();
+    // Groww v1 quote response shape: { status, payload: { last_price, day_change, ohlc:{...}, volume, market_cap, ... } }
+    const p = json?.payload ?? json?.data ?? json;
+    const ltp = Number(p?.last_price ?? p?.ltp ?? 0);
+    if (!ltp || isNaN(ltp) || ltp <= 0) return null;
+
+    const ohlc = p?.ohlc ?? {};
+    const open = Number(ohlc?.open ?? p?.open ?? ltp);
+    const high = Number(ohlc?.high ?? p?.high ?? ltp);
+    const low = Number(ohlc?.low ?? p?.low ?? ltp);
+    const close = Number(ohlc?.close ?? p?.close ?? p?.previous_close ?? ltp);
+    const volume = Math.round(Number(p?.volume ?? p?.day_volume ?? 0));
+    // Groww returns market_cap in INR (raw). Some responses are in Cr — normalise to raw.
+    let marketCap = Number(p?.market_cap ?? p?.marketCap ?? 0);
+    if (marketCap > 0 && marketCap < 1e7) marketCap = marketCap * 1e7; // looked like Cr
+    const pe = Number(p?.pe_ratio ?? p?.pe ?? 0);
+
+    console.log(`Groww OK ${exchange}:${ticker} ltp=${ltp} mcap=${marketCap} vol=${volume}`);
+    return { ltp, open, high, low, close, volume, marketCap, pe: isNaN(pe) ? 0 : pe };
+  } catch (err) {
+    console.error(`Groww error ${exchange}:${ticker}:`, (err as Error).message);
+    return null;
+  }
+}
+
 // Fallback: scrape Screener.in for SME/unlisted stocks Yahoo doesn't cover
 async function fetchScreenerFallback(ticker: string): Promise<Record<string, number> | null> {
   try {
@@ -271,57 +337,83 @@ Deno.serve(async (req) => {
       });
     }
 
-    const yahooSymbols = symbols.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+    // ── Step 0: Groww as PRIMARY for SME-named tickers ─────────────────
+    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
+    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
+    // else still goes through the Yahoo → Screener → Google chain unchanged.
+    const result: Record<string, Record<string, number>> = {};
+    const resolvedKeys = new Set<string>();
+
+    const growwPrimaryTargets = symbols.filter(
+      (s: { ticker: string; exchange: string }) =>
+        (s.exchange === 'NSE' || s.exchange === 'BSE') && isLikelySmeTicker(s.ticker),
+    );
+
+    if (GROWW_TOKEN && growwPrimaryTargets.length > 0) {
+      await Promise.all(
+        growwPrimaryTargets.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
+          const data = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), 4000).catch(() => null);
+          if (data) {
+            const key = `${s.exchange}_${s.ticker}`;
+            result[key] = data;
+            resolvedKeys.add(key);
+          }
+        }),
+      );
+    }
+
+    // Build the Yahoo batch only for tickers Groww didn't already resolve.
+    const yahooTargets = symbols.filter(
+      (s: { ticker: string; exchange: string }) => !resolvedKeys.has(`${s.exchange}_${s.ticker}`),
+    );
+
+    const yahooSymbols = yahooTargets.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
       if (s.yahooSymbol) return s.yahooSymbol;
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
     }).join(',');
 
-    let data: any;
-    for (let attempt = 0; attempt < 2; attempt++) {
-      const { crumb, cookie } = await getCrumbAndCookie();
-      const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
+    let data: any = null;
+    if (yahooTargets.length > 0) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { crumb, cookie } = await getCrumbAndCookie();
+        const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(yahooSymbols)}&crumb=${encodeURIComponent(crumb)}`;
 
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Cookie': cookie,
-        },
-      });
-
-      if (response.status === 401 && attempt === 0) {
-        await response.text();
-        cachedCrumb = null; cachedCookie = null; crumbExpiry = 0;
-        continue;
-      }
-
-      if (!response.ok) {
-        const text = await response.text();
-        console.error('Yahoo Finance error:', response.status, text);
-        return new Response(JSON.stringify({ error: 'Yahoo Finance error', status: response.status }), {
-          status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Cookie': cookie,
+          },
         });
+
+        if (response.status === 401 && attempt === 0) {
+          await response.text();
+          cachedCrumb = null; cachedCookie = null; crumbExpiry = 0;
+          continue;
+        }
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Yahoo Finance error:', response.status, text);
+          // Don't bail — Groww may already have resolved SME tickers, and the
+          // fallback chain below will handle the rest.
+          data = { quoteResponse: { result: [] } };
+          break;
+        }
+
+        data = await response.json();
+        break;
       }
-
-      data = await response.json();
-      break;
-    }
-
-    if (!data) {
-      return new Response(JSON.stringify({ error: 'Failed after retries' }), {
-        status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    } else {
+      data = { quoteResponse: { result: [] } };
     }
 
     const quotes = data?.quoteResponse?.result || [];
-    const result: Record<string, Record<string, number>> = {};
 
     const yahooToKey = new Map<string, string>();
-    symbols.forEach((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+    yahooTargets.forEach((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
       if (s.yahooSymbol) yahooToKey.set(s.yahooSymbol, `${s.exchange}_${s.ticker}`);
     });
-
-    const resolvedKeys = new Set<string>();
 
     for (const q of quotes) {
       const symbol = q.symbol || '';
@@ -422,10 +514,29 @@ Deno.serve(async (req) => {
 
     const SCRAPE_TIMEOUT = 4000; // 4s timeout per scrape
 
+    // ── Step A: For tickers Yahoo couldn't resolve, try Groww FIRST (best Indian
+    // small-cap/SME coverage), then fall back to Screener+Google for whatever remains.
+    const stillMissingAfterGroww: { ticker: string; exchange: 'NSE' | 'BSE' }[] = [];
+    if (GROWW_TOKEN && stillMissing.length > 0) {
+      await Promise.all(
+        stillMissing.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
+          const data = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), SCRAPE_TIMEOUT).catch(() => null);
+          if (data) {
+            result[`${s.exchange}_${s.ticker}`] = data;
+            resolvedKeys.add(`${s.exchange}_${s.ticker}`);
+          } else {
+            stillMissingAfterGroww.push(s);
+          }
+        }),
+      );
+    } else {
+      stillMissingAfterGroww.push(...stillMissing);
+    }
+
     // Run both fallback and enrichment in parallel
     await Promise.all([
       // Full fallback for still-missing stocks — race Screener vs Google Finance
-      ...stillMissing.map(async (s: { ticker: string; exchange: string }) => {
+      ...stillMissingAfterGroww.map(async (s: { ticker: string; exchange: string }) => {
         try {
           const [screener, gf] = await Promise.allSettled([
             withTimeout(fetchScreenerFallback(s.ticker), SCRAPE_TIMEOUT),
@@ -444,26 +555,43 @@ Deno.serve(async (req) => {
           }
         } catch { /* both timed out */ }
       }),
-      // Enrichment for stocks with missing marketCap, volume, or P/E — race both sources
-      ...needsEnrichment.map(async (s: { ticker: string; exchange: string }) => {
+      // Enrichment for stocks with missing marketCap, volume, or P/E.
+      // For SME-named or detected small-cap (<5,000 Cr) tickers we prefer Groww
+      // for enrichment; otherwise we keep the existing Screener+Google race.
+      ...needsEnrichment.map(async (s: { ticker: string; exchange: 'NSE' | 'BSE' }) => {
         const key = `${s.exchange}_${s.ticker}`;
+        const current = result[key];
+        const isSmallCap =
+          isLikelySmeTicker(s.ticker) ||
+          (current?.marketCap > 0 && current.marketCap < SMALL_CAP_THRESHOLD_RAW);
+
         try {
+          if (GROWW_TOKEN && isSmallCap) {
+            const g = await withTimeout(fetchGrowwQuote(s.ticker, s.exchange), SCRAPE_TIMEOUT).catch(() => null);
+            if (g) {
+              if (current.marketCap === 0 && g.marketCap) current.marketCap = g.marketCap;
+              if (current.volume === 0 && g.volume) current.volume = g.volume;
+              if (current.pe === 0 && g.pe) current.pe = g.pe;
+              if (current.marketCap > 0 && current.volume > 0 && current.pe > 0) return;
+            }
+          }
+
           const [screener, gf] = await Promise.allSettled([
             withTimeout(fetchScreenerEnrichment(s.ticker), SCRAPE_TIMEOUT),
             withTimeout(fetchGoogleFinanceMarketCap(s.ticker, s.exchange), SCRAPE_TIMEOUT),
           ]);
           const sData = screener.status === 'fulfilled' ? screener.value : null;
           const gData = gf.status === 'fulfilled' ? gf.value : null;
-          if (result[key].marketCap === 0) {
-            result[key].marketCap = sData?.marketCap || gData?.marketCap || 0;
+          if (current.marketCap === 0) {
+            current.marketCap = sData?.marketCap || gData?.marketCap || 0;
           }
-          if (result[key].volume === 0) {
-            result[key].volume = sData?.volume || gData?.volume || 0;
+          if (current.volume === 0) {
+            current.volume = sData?.volume || gData?.volume || 0;
           }
-          if (result[key].pe === 0) {
-            result[key].pe = sData?.pe || gData?.pe || 0;
+          if (current.pe === 0) {
+            current.pe = sData?.pe || gData?.pe || 0;
           }
-        } catch { /* both timed out */ }
+        } catch { /* timed out */ }
       }),
     ]);
 
