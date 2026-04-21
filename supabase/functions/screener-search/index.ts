@@ -90,14 +90,10 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Require an authenticated Supabase user
-  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
-  if (!userId) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Auth is optional - guests can also search for stocks to add.
+  // We still attempt to read the user id for logging/rate-limiting purposes,
+  // but do not block unauthenticated callers.
+  await getUserIdFromAuthHeader(req.headers.get("Authorization")).catch(() => null);
 
   try {
     const { query } = await req.json();
