@@ -252,7 +252,7 @@ const Landing = () => {
               className="mb-6 px-4 py-1.5 text-xs font-medium border border-primary/20"
             >
               <Sparkles className="h-3 w-3 mr-1.5 text-primary" />
-              New · Full NSE + BSE + SME coverage with auto-verification
+              New · Improved stock coverage and data accuracy.
             </Badge>
           </motion.div>
 
@@ -322,7 +322,7 @@ const Landing = () => {
             variants={fadeUp}
             custom={4}
           >
-            No credit card required · Cancel anytime · Trusted by Indian retail investors
+            · User-friendly UI · Trusted by Indian retail investors
           </motion.p>
         </div>
       </section>
