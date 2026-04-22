@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import PremiumDialog from "@/components/PremiumDialog";
 import StockDetailSheet from "@/components/StockDetailSheet";
 import StockFreshnessBadge from "@/components/StockFreshnessBadge";
+import MissingDataTooltip from "@/components/MissingDataTooltip";
 
 interface StockRowProps {
   stock: Stock;
@@ -189,7 +190,9 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
             {isPriceAvailable ? (
               <div className="inline-flex items-center justify-end gap-1.5">
                 <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} />
-                <span>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <MissingDataTooltip missing={stock.price === 0} label="Price">
+                  <span>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                </MissingDataTooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -236,12 +239,28 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         )}
         {isVisible("volume") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-            {isPriceAvailable ? formatVolume(stock.volume) : <Skeleton className="h-3 w-14 ml-auto" />}
+            {isPriceAvailable ? (
+              <MissingDataTooltip
+                missing={!stock.volume || stock.volume === 0}
+                label="Volume"
+                hint="Some illiquid SME / micro-cap tickers report no trades."
+              >
+                {formatVolume(stock.volume)}
+              </MissingDataTooltip>
+            ) : <Skeleton className="h-3 w-14 ml-auto" />}
           </td>
         )}
         {isVisible("marketCap") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
-            {isPriceAvailable ? <>₹{formatMarketCap(stock.marketCap)}</> : <Skeleton className="h-3 w-18 ml-auto" />}
+            {isPriceAvailable ? (
+              <MissingDataTooltip
+                missing={!stock.marketCap || stock.marketCap === 0}
+                label="Market cap"
+                hint="Falls back to Groww when Yahoo returns nothing."
+              >
+                ₹{formatMarketCap(stock.marketCap)}
+              </MissingDataTooltip>
+            ) : <Skeleton className="h-3 w-18 ml-auto" />}
           </td>
         )}
         {isVisible("pe") && (
@@ -250,12 +269,13 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
               stock.pe > 0 ? (
                 <span>{stock.pe.toFixed(2)}</span>
               ) : (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-muted-foreground/50">N/A</span>
-                  </TooltipTrigger>
-                  <TooltipContent>P/E data not available for this stock</TooltipContent>
-                </Tooltip>
+                <MissingDataTooltip
+                  missing
+                  label="P/E ratio"
+                  hint="Common for loss-making companies, ETFs and indices."
+                >
+                  N/A
+                </MissingDataTooltip>
               )
             ) : (
               <Skeleton className="h-3 w-14 ml-auto" />

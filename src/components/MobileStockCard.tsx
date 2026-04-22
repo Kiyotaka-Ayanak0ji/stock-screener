@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import StockDetailSheet from "@/components/StockDetailSheet";
 import PremiumDialog from "@/components/PremiumDialog";
 import StockFreshnessBadge from "@/components/StockFreshnessBadge";
+import MissingDataTooltip from "@/components/MissingDataTooltip";
 import {
   Dialog,
   DialogContent,
@@ -245,9 +246,11 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                   <>
                     <div className="flex items-center justify-end gap-1.5">
                       <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} />
-                      <p className="font-mono font-bold text-base">
-                        ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                      </p>
+                      <MissingDataTooltip missing={stock.price === 0} label="Price">
+                        <p className="font-mono font-bold text-base">
+                          ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                        </p>
+                      </MissingDataTooltip>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); if (!isVerifying) verifyStock(stock.ticker); }}
@@ -286,7 +289,16 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-2.5 text-xs text-muted-foreground font-mono">
                 <span>H: ₹{stock.high.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
-                {stock.volume > 0 && <span>Vol: {formatVolume(stock.volume)}</span>}
+                <span>
+                  Vol:{" "}
+                  <MissingDataTooltip
+                    missing={!stock.volume || stock.volume === 0}
+                    label="Volume"
+                    hint="Some illiquid SME / micro-cap tickers report no trades."
+                  >
+                    {stock.volume > 0 ? formatVolume(stock.volume) : "0"}
+                  </MissingDataTooltip>
+                </span>
               </div>
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
                 <span>
@@ -299,15 +311,31 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
                 <span>
                   P/E:{" "}
-                  <span className="text-foreground/80 font-semibold">
-                    {stock.pe && stock.pe > 0 ? stock.pe.toFixed(2) : "—"}
-                  </span>
+                  {stock.pe && stock.pe > 0 ? (
+                    <span className="text-foreground/80 font-semibold">{stock.pe.toFixed(2)}</span>
+                  ) : (
+                    <MissingDataTooltip
+                      missing
+                      label="P/E ratio"
+                      hint="Common for loss-making companies, ETFs and indices."
+                    >
+                      —
+                    </MissingDataTooltip>
+                  )}
                 </span>
                 <span>
                   MCap:{" "}
-                  <span className="text-foreground/80 font-semibold">
-                    {formatMarketCap(stock.marketCap)}
-                  </span>
+                  {stock.marketCap && stock.marketCap > 0 ? (
+                    <span className="text-foreground/80 font-semibold">{formatMarketCap(stock.marketCap)}</span>
+                  ) : (
+                    <MissingDataTooltip
+                      missing
+                      label="Market cap"
+                      hint="Falls back to Groww when Yahoo returns nothing."
+                    >
+                      —
+                    </MissingDataTooltip>
+                  )}
                 </span>
               </div>
             </>

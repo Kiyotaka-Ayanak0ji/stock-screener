@@ -19,7 +19,6 @@ import {
   Smartphone,
   Star,
   TrendingUp,
-  Zap,
   Check,
   Crown,
   Tag,
@@ -129,10 +128,33 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: "5,000+", label: "Stocks Tracked" },
-  { value: "< 1s", label: "Price Refresh" },
-  { value: "NSE & BSE", label: "Exchanges" },
+  { value: "7,500+", label: "NSE + BSE + SME tickers" },
+  { value: "< 1s", label: "Live price refresh" },
+  { value: "24h", label: "Full universe sweep" },
   { value: "99.9%", label: "Uptime" },
+];
+
+const WHATS_NEW = [
+  {
+    icon: Activity,
+    title: "Verify against Screener",
+    desc: "One-click sanity check on any ticker. Cross-references Yahoo + Screener + Groww and rewrites stale prices instantly.",
+  },
+  {
+    icon: Layers,
+    title: "Full universe coverage",
+    desc: "We continuously seed all NSE, BSE and SME tickers (~7,500) every 24 hours so even illiquid micro-caps stay fresh.",
+  },
+  {
+    icon: Sparkles,
+    title: "Smart anomaly alerts",
+    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist — no manual setup, ever.",
+  },
+  {
+    icon: Shield,
+    title: "Transparent missing data",
+    desc: "Whenever a price, volume, market-cap or P/E can't be fetched, you see a clear tooltip — never a silent zero.",
+  },
 ];
 
 import {
@@ -213,12 +235,24 @@ const Landing = () => {
       </nav>
 
       {/* Hero */}
-      <section className="pt-24 sm:pt-32 pb-14 sm:pb-20 px-4">
+      <section className="relative pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 overflow-hidden">
+        {/* Decorative gradient orbs */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10"
+        >
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute -bottom-20 right-1/4 h-[280px] w-[280px] rounded-full bg-accent/10 blur-3xl" />
+        </div>
+
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-xs font-medium">
-              <Zap className="h-3 w-3 mr-1.5 text-primary" />
-              15 days free trial
+            <Badge
+              variant="secondary"
+              className="mb-6 px-4 py-1.5 text-xs font-medium border border-primary/20"
+            >
+              <Sparkles className="h-3 w-3 mr-1.5 text-primary" />
+              New · Full NSE + BSE + SME coverage with auto-verification
             </Badge>
           </motion.div>
 
@@ -230,7 +264,10 @@ const Landing = () => {
             custom={1}
           >
             Your Stocks. <br className="hidden sm:block" />
-            Your Rules. <span className="text-primary">Your Edge.</span>
+            Your Rules.{" "}
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Your Edge.
+            </span>
           </motion.h1>
 
           <motion.p
@@ -285,8 +322,45 @@ const Landing = () => {
             variants={fadeUp}
             custom={4}
           >
-            Join thousands of Indian investors making smarter decisions
+            No credit card required · Cancel anytime · Trusted by Indian retail investors
           </motion.p>
+        </div>
+      </section>
+
+      {/* What's New */}
+      <section className="py-14 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <Badge variant="secondary" className="mb-3">
+              <Sparkles className="h-3 w-3 mr-1 text-primary" /> Just shipped
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold">Fresh from the lab</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto">
+              Latest upgrades to make EquityIQ faster, broader and more transparent.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {WHATS_NEW.map((item, i) => (
+              <motion.div
+                key={item.title}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeUp}
+                custom={i}
+              >
+                <Card className="h-full border-border/60 bg-gradient-to-br from-card to-muted/30 hover:border-primary/40 transition-colors">
+                  <CardContent className="p-5">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                      <item.icon className="h-4.5 w-4.5 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm mb-1.5">{item.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
