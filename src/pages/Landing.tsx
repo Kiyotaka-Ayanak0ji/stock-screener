@@ -235,29 +235,29 @@ const Landing = () => {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 overflow-hidden">
+      <section className="relative pt-20 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 overflow-hidden">
         {/* Decorative gradient orbs */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10"
         >
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
-          <div className="absolute -bottom-20 right-1/4 h-[280px] w-[280px] rounded-full bg-accent/10 blur-3xl" />
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[320px] sm:h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute -bottom-20 right-1/4 h-[200px] sm:h-[280px] w-[200px] sm:w-[280px] rounded-full bg-accent/10 blur-3xl" />
         </div>
 
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <Badge
               variant="secondary"
-              className="mb-6 px-4 py-1.5 text-xs font-medium border border-primary/20"
+              className="mb-5 sm:mb-6 px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium border border-primary/20 max-w-[92vw] whitespace-normal sm:whitespace-nowrap text-center leading-snug"
             >
-              <Sparkles className="h-3 w-3 mr-1.5 text-primary" />
-              New · Improved stock coverage and data accuracy.
+              <Sparkles className="h-3 w-3 mr-1.5 text-primary shrink-0" />
+              <span>New · Improved stock coverage and data accuracy.</span>
             </Badge>
           </motion.div>
 
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight"
+            className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl font-extrabold tracking-tight"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -271,7 +271,7 @@ const Landing = () => {
           </motion.h1>
 
           <motion.p
-            className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-1"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -282,7 +282,7 @@ const Landing = () => {
           </motion.p>
 
           <motion.div
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
+            className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 max-w-sm sm:max-w-none mx-auto"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -290,23 +290,23 @@ const Landing = () => {
           >
             <Button
               size="lg"
-              className="px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all"
               onClick={() => navigate("/auth")}
             >
-              Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
+              Start Free Trial <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="px-8 text-base hover:bg-accent/10 active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base hover:bg-accent/10 active:scale-[0.97] transition-all"
               onClick={() => setDemoOpen(true)}
             >
-              <Eye className="h-5 w-5 mr-2" /> View Demo
+              <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2" /> View Demo
             </Button>
             <Button
               size="lg"
               variant="ghost"
-              className="px-8 text-base active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base active:scale-[0.97] transition-all"
               onClick={() => {
                 document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
               }}
@@ -316,7 +316,7 @@ const Landing = () => {
           </motion.div>
 
           <motion.p
-            className="mt-4 text-xs text-muted-foreground"
+            className="mt-5 sm:mt-4 text-[11px] sm:text-xs text-muted-foreground px-2"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -328,18 +328,18 @@ const Landing = () => {
       </section>
 
       {/* What's New */}
-      <section className="py-14 px-4">
+      <section className="py-12 sm:py-14 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 sm:mb-10">
             <Badge variant="secondary" className="mb-3">
               <Sparkles className="h-3 w-3 mr-1 text-primary" /> Just shipped
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold">Fresh from the lab</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Fresh from the lab</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
               Latest upgrades to make EquityIQ faster, broader and more transparent.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {WHATS_NEW.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -350,7 +350,7 @@ const Landing = () => {
                 custom={i}
               >
                 <Card className="h-full border-border/60 bg-gradient-to-br from-card to-muted/30 hover:border-primary/40 transition-colors">
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                       <item.icon className="h-4.5 w-4.5 text-primary" />
                     </div>
@@ -366,7 +366,7 @@ const Landing = () => {
 
       {/* Stats bar */}
       <section className="border-y border-border bg-muted/50">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 py-10 px-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 py-8 sm:py-10 px-4 sm:px-6">
           {STATS.map((s, i) => (
             <motion.div
               key={s.label}
@@ -377,18 +377,18 @@ const Landing = () => {
               variants={fadeUp}
               custom={i}
             >
-              <p className="text-3xl font-bold text-primary">{s.value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{s.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">{s.value}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{s.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Problem / Story */}
-      <section className="py-20 px-4">
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
-            className="text-3xl sm:text-4xl font-bold"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -398,7 +398,7 @@ const Landing = () => {
             Stop juggling five apps to track your stocks
           </motion.h2>
           <motion.p
-            className="mt-6 text-muted-foreground text-lg leading-relaxed"
+            className="mt-5 sm:mt-6 text-muted-foreground text-base sm:text-lg leading-relaxed"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -414,19 +414,21 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="py-20 px-4 bg-muted/30">
+      <section id="features" className="py-14 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <Star className="h-3 w-3 mr-1 text-primary" /> Features
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Everything you need. Nothing you don't.</h2>
-            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+              Everything you need. Nothing you don't.
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-2">
               Built by investors, for investors. Every feature is designed to give you an edge.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -443,12 +445,12 @@ const Landing = () => {
                       {(f as any).badge}
                     </Badge>
                   )}
-                  <CardContent className="p-6">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                       <f.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                    <h3 className="font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">{f.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -458,14 +460,14 @@ const Landing = () => {
       </section>
 
       {/* How it works */}
-      <section className="py-20 px-4">
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">Get started in 60 seconds</h2>
-            <p className="mt-3 text-muted-foreground">No complicated setup.</p>
+          <div className="text-center mb-10 sm:mb-14">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Get started in 60 seconds</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground">No complicated setup.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 step: "01",
@@ -492,11 +494,11 @@ const Landing = () => {
                 variants={fadeUp}
                 custom={i}
               >
-                <div className="text-5xl font-extrabold text-primary/15 mb-3 group-hover:text-primary/25 transition-colors">
+                <div className="text-4xl sm:text-5xl font-extrabold text-primary/15 mb-2 sm:mb-3 group-hover:text-primary/25 transition-colors">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
+                <h3 className="font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed px-2 sm:px-0">{item.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -504,14 +506,14 @@ const Landing = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4">
+      <section id="pricing" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <Crown className="h-3 w-3 mr-1 text-primary" /> Pricing
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Simple pricing. Serious value.</h2>
-            <p className="mt-3 text-muted-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Simple pricing. Serious value.</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">
               Start free for 15 days. Choose the plan that fits your trading style.
             </p>
 
@@ -554,7 +556,7 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
             {/* Free / Guest */}
             <Card className="border-border">
               <CardContent className="p-6">
@@ -835,14 +837,14 @@ const Landing = () => {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-20 px-4 bg-muted/30">
+      <section id="faq" className="py-14 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <HelpCircle className="h-3 w-3 mr-1 text-primary" /> FAQ
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Frequently Asked Questions</h2>
-            <p className="mt-3 text-muted-foreground">Everything you need to know before getting started</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">Everything you need to know before getting started</p>
           </div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
@@ -944,20 +946,20 @@ const Landing = () => {
       </section>
 
       {/* Support */}
-      <section id="support" className="py-20 px-4">
+      <section id="support" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-10"
+            className="text-center mb-8 sm:mb-10"
           >
             <Badge variant="secondary" className="mb-3">
               <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Need a hand?</h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Need a hand?</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
               Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon
               as possible.
             </p>
