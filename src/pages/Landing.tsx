@@ -460,14 +460,14 @@ const Landing = () => {
       </section>
 
       {/* How it works */}
-      <section className="py-20 px-4">
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold">Get started in 60 seconds</h2>
-            <p className="mt-3 text-muted-foreground">No complicated setup.</p>
+          <div className="text-center mb-10 sm:mb-14">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Get started in 60 seconds</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground">No complicated setup.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 step: "01",
@@ -494,11 +494,11 @@ const Landing = () => {
                 variants={fadeUp}
                 custom={i}
               >
-                <div className="text-5xl font-extrabold text-primary/15 mb-3 group-hover:text-primary/25 transition-colors">
+                <div className="text-4xl sm:text-5xl font-extrabold text-primary/15 mb-2 sm:mb-3 group-hover:text-primary/25 transition-colors">
                   {item.step}
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
+                <h3 className="font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed px-2 sm:px-0">{item.desc}</p>
               </motion.div>
             ))}
           </div>
