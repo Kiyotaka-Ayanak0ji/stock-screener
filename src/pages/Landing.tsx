@@ -328,18 +328,18 @@ const Landing = () => {
       </section>
 
       {/* What's New */}
-      <section className="py-14 px-4">
+      <section className="py-12 sm:py-14 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
+          <div className="text-center mb-8 sm:mb-10">
             <Badge variant="secondary" className="mb-3">
               <Sparkles className="h-3 w-3 mr-1 text-primary" /> Just shipped
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold">Fresh from the lab</h2>
-            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Fresh from the lab</h2>
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
               Latest upgrades to make EquityIQ faster, broader and more transparent.
             </p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {WHATS_NEW.map((item, i) => (
               <motion.div
                 key={item.title}
@@ -350,7 +350,7 @@ const Landing = () => {
                 custom={i}
               >
                 <Card className="h-full border-border/60 bg-gradient-to-br from-card to-muted/30 hover:border-primary/40 transition-colors">
-                  <CardContent className="p-5">
+                  <CardContent className="p-4 sm:p-5">
                     <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                       <item.icon className="h-4.5 w-4.5 text-primary" />
                     </div>
@@ -366,7 +366,7 @@ const Landing = () => {
 
       {/* Stats bar */}
       <section className="border-y border-border bg-muted/50">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 py-10 px-4">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 py-8 sm:py-10 px-4 sm:px-6">
           {STATS.map((s, i) => (
             <motion.div
               key={s.label}
@@ -377,18 +377,18 @@ const Landing = () => {
               variants={fadeUp}
               custom={i}
             >
-              <p className="text-3xl font-bold text-primary">{s.value}</p>
-              <p className="text-sm text-muted-foreground mt-1">{s.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-primary">{s.value}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">{s.label}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Problem / Story */}
-      <section className="py-20 px-4">
+      <section className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
-            className="text-3xl sm:text-4xl font-bold"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -398,7 +398,7 @@ const Landing = () => {
             Stop juggling five apps to track your stocks
           </motion.h2>
           <motion.p
-            className="mt-6 text-muted-foreground text-lg leading-relaxed"
+            className="mt-5 sm:mt-6 text-muted-foreground text-base sm:text-lg leading-relaxed"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -414,19 +414,21 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="py-20 px-4 bg-muted/30">
+      <section id="features" className="py-14 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <Star className="h-3 w-3 mr-1 text-primary" /> Features
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Everything you need. Nothing you don't.</h2>
-            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+              Everything you need. Nothing you don't.
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-2">
               Built by investors, for investors. Every feature is designed to give you an edge.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -443,12 +445,12 @@ const Landing = () => {
                       {(f as any).badge}
                     </Badge>
                   )}
-                  <CardContent className="p-6">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
+                  <CardContent className="p-5 sm:p-6">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                       <f.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                    <h3 className="font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">{f.title}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
