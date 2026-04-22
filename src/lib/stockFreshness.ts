@@ -5,6 +5,14 @@
 export type FreshnessState = "fresh" | "stale" | "very-stale" | "unknown";
 
 const HOUR = 60 * 60 * 1000;
+const MIN = 60 * 1000;
+
+// Background seeding cycle: full universe (~7,500 tickers) is refreshed
+// across a rolling 24h window. After the most recent refresh, the next
+// touch should land within roughly this window.
+const SEED_CYCLE_MS = 24 * HOUR;
+// Live polling cadence while market is open (matches StockContext interval).
+const LIVE_POLL_MS = 5 * 1000;
 
 export interface FreshnessInfo {
   state: FreshnessState;
@@ -13,6 +21,12 @@ export interface FreshnessInfo {
   label: string;
   /** Tooltip explanation tailored to state + market context. */
   tooltip: string;
+  /** Absolute "last updated" timestamp formatted for IST display. */
+  exactLabel: string;
+  /** Estimated time until the next automatic refresh (e.g. "in ~3h" or "in seconds"). */
+  etaLabel: string;
+  /** Why the ETA is what it is — used in tooltips. */
+  etaReason: string;
 }
 
 function formatAge(ms: number): string {
