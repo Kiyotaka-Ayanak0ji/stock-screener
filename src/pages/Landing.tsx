@@ -235,29 +235,29 @@ const Landing = () => {
       </nav>
 
       {/* Hero */}
-      <section className="relative pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 overflow-hidden">
+      <section className="relative pt-20 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 overflow-hidden">
         {/* Decorative gradient orbs */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10"
         >
-          <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
-          <div className="absolute -bottom-20 right-1/4 h-[280px] w-[280px] rounded-full bg-accent/10 blur-3xl" />
+          <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[320px] sm:h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute -bottom-20 right-1/4 h-[200px] sm:h-[280px] w-[200px] sm:w-[280px] rounded-full bg-accent/10 blur-3xl" />
         </div>
 
         <div className="max-w-4xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
             <Badge
               variant="secondary"
-              className="mb-6 px-4 py-1.5 text-xs font-medium border border-primary/20"
+              className="mb-5 sm:mb-6 px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium border border-primary/20 max-w-[92vw] whitespace-normal sm:whitespace-nowrap text-center leading-snug"
             >
-              <Sparkles className="h-3 w-3 mr-1.5 text-primary" />
-              New · Improved stock coverage and data accuracy.
+              <Sparkles className="h-3 w-3 mr-1.5 text-primary shrink-0" />
+              <span>New · Improved stock coverage and data accuracy.</span>
             </Badge>
           </motion.div>
 
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight"
+            className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl font-extrabold tracking-tight"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -271,7 +271,7 @@ const Landing = () => {
           </motion.h1>
 
           <motion.p
-            className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            className="mt-5 sm:mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed px-1"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -282,7 +282,7 @@ const Landing = () => {
           </motion.p>
 
           <motion.div
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
+            className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 sm:gap-3 max-w-sm sm:max-w-none mx-auto"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
@@ -290,23 +290,23 @@ const Landing = () => {
           >
             <Button
               size="lg"
-              className="px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.97] transition-all"
               onClick={() => navigate("/auth")}
             >
-              Start Free Trial <ArrowRight className="h-5 w-5 ml-2" />
+              Start Free Trial <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="px-8 text-base hover:bg-accent/10 active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base hover:bg-accent/10 active:scale-[0.97] transition-all"
               onClick={() => setDemoOpen(true)}
             >
-              <Eye className="h-5 w-5 mr-2" /> View Demo
+              <Eye className="h-4 w-4 sm:h-5 sm:w-5 mr-2" /> View Demo
             </Button>
             <Button
               size="lg"
               variant="ghost"
-              className="px-8 text-base active:scale-[0.97] transition-all"
+              className="w-full sm:w-auto px-6 sm:px-8 text-sm sm:text-base active:scale-[0.97] transition-all"
               onClick={() => {
                 document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
               }}
@@ -316,7 +316,7 @@ const Landing = () => {
           </motion.div>
 
           <motion.p
-            className="mt-4 text-xs text-muted-foreground"
+            className="mt-5 sm:mt-4 text-[11px] sm:text-xs text-muted-foreground px-2"
             initial="hidden"
             animate="visible"
             variants={fadeUp}
