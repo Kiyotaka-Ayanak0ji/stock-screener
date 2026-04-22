@@ -278,6 +278,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seed_job_progress: {
+        Row: {
+          cycle_started_at: string | null
+          failed: number
+          id: number
+          last_chunk_at: string | null
+          processed: number
+          status: string
+          succeeded: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          cycle_started_at?: string | null
+          failed?: number
+          id?: number
+          last_chunk_at?: string | null
+          processed?: number
+          status?: string
+          succeeded?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          cycle_started_at?: string | null
+          failed?: number
+          id?: number
+          last_chunk_at?: string | null
+          processed?: number
+          status?: string
+          succeeded?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shared_watchlists: {
         Row: {
           created_at: string
@@ -332,6 +368,48 @@ export type Database = {
           price?: number
           recorded_at?: string
           ticker?: string
+        }
+        Relationships: []
+      }
+      stock_universe: {
+        Row: {
+          bse_code: string | null
+          created_at: string
+          error_message: string | null
+          exchange: string
+          id: number
+          last_seeded_at: string | null
+          last_status: string
+          name: string | null
+          segment: string
+          ticker: string
+          updated_at: string
+        }
+        Insert: {
+          bse_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          exchange: string
+          id?: number
+          last_seeded_at?: string | null
+          last_status?: string
+          name?: string | null
+          segment?: string
+          ticker: string
+          updated_at?: string
+        }
+        Update: {
+          bse_code?: string | null
+          created_at?: string
+          error_message?: string | null
+          exchange?: string
+          id?: number
+          last_seeded_at?: string | null
+          last_status?: string
+          name?: string | null
+          segment?: string
+          ticker?: string
+          updated_at?: string
         }
         Relationships: []
       }
