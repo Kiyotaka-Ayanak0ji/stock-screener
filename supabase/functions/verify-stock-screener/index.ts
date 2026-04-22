@@ -1,6 +1,10 @@
 // Verify a single stock against Screener.in (and Google Finance fallback) on demand.
 // Public endpoint — market data is non-sensitive. Strict input validation,
 // short timeouts, single-ticker rate-friendly. Writes go through the service role.
+//
+// Resolves numeric BSE codes (e.g. AVAX → 543291) by hitting Screener's search API
+// first, so users can verify SME / numeric-coded BSE stocks. Volume falls back to
+// Groww (when the secret is set) for stocks where Screener returns 0.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -12,7 +16,8 @@ const corsHeaders = {
 
 const TICKER_RE = /^[A-Za-z0-9_\-.]{1,30}$/;
 const EXCHANGE_RE = /^(NSE|BSE)$/;
-const FETCH_TIMEOUT_MS = 6000;
+const FETCH_TIMEOUT_MS = 8000;
+const GROWW_TOKEN = Deno.env.get("GROWW_API_TOKEN") || "";
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -34,17 +39,62 @@ interface ScrapeResult {
   source: "screener" | "google";
 }
 
+const UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+// Resolve a Screener slug for a ticker. Numeric BSE codes (e.g. 543291) and
+// alphanumeric tickers like AVAX/BCCFUBA may not exist directly at /company/<ticker>/,
+// so we hit Screener's search endpoint to find the right slug.
+async function resolveScreenerSlug(ticker: string): Promise<string | null> {
+  // Try direct first — fastest path for well-known tickers like RELIANCE.
+  try {
+    const direct = await withTimeout(
+      fetch(`https://www.screener.in/company/${encodeURIComponent(ticker)}/`, {
+        method: "HEAD",
+        headers: { "User-Agent": UA },
+      }),
+      4000,
+    );
+    if (direct.ok) return ticker;
+  } catch { /* fall through to search */ }
+
+  // Search Screener for the ticker.
+  try {
+    const sres = await withTimeout(
+      fetch(
+        `https://www.screener.in/api/company/search/?q=${encodeURIComponent(ticker)}`,
+        { headers: { "User-Agent": UA, Accept: "application/json" } },
+      ),
+      5000,
+    );
+    if (!sres.ok) return null;
+    const arr = await sres.json();
+    if (!Array.isArray(arr) || arr.length === 0) return null;
+
+    // Prefer an exact ticker match in the URL, otherwise the first result.
+    const want = ticker.toUpperCase();
+    const exact = arr.find((it: { url?: string }) => {
+      const slug = (it?.url || "").split("/")[2] || "";
+      return slug.toUpperCase() === want;
+    });
+    const pick = exact || arr[0];
+    const slug = (pick?.url || "").split("/")[2] || null;
+    if (slug) console.log(`Resolved ${ticker} → Screener slug: ${slug}`);
+    return slug;
+  } catch (err) {
+    console.error(`resolveScreenerSlug failed for ${ticker}:`, (err as Error).message);
+    return null;
+  }
+}
+
 async function scrapeScreener(ticker: string): Promise<ScrapeResult | null> {
   try {
-    const url = `https://www.screener.in/company/${encodeURIComponent(ticker)}/`;
+    const slug = await resolveScreenerSlug(ticker);
+    if (!slug) return null;
+
+    const url = `https://www.screener.in/company/${encodeURIComponent(slug)}/`;
     const res = await withTimeout(
-      fetch(url, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept: "text/html",
-        },
-      }),
+      fetch(url, { headers: { "User-Agent": UA, Accept: "text/html" } }),
       FETCH_TIMEOUT_MS,
     );
     if (!res.ok) return null;
@@ -59,9 +109,20 @@ async function scrapeScreener(ticker: string): Promise<ScrapeResult | null> {
     const mc = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
     if (mc) marketCap = parseFloat(mc[1].replace(/,/g, "")) * 10000000; // Cr → raw
 
+    // Volume — try multiple shapes Screener uses across MAIN and SME pages.
     let volume = 0;
-    const vol = html.match(/Volume[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
-    if (vol) volume = Math.round(parseFloat(vol[1].replace(/,/g, "")));
+    const volPatterns = [
+      /Volume[\s\S]{0,400}?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i,
+      /<li[^>]*>[\s\S]{0,200}?Volume[\s\S]{0,200}?<span[^>]*>([\d,]+(?:\.\d+)?)<\/span>/i,
+      /"volume"\s*:\s*([\d.]+)/i,
+    ];
+    for (const re of volPatterns) {
+      const m = html.match(re);
+      if (m) {
+        const v = parseFloat(m[1].replace(/,/g, ""));
+        if (Number.isFinite(v) && v > 0) { volume = Math.round(v); break; }
+      }
+    }
 
     let pe = 0;
     const peLi = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
@@ -90,7 +151,8 @@ async function scrapeScreener(ticker: string): Promise<ScrapeResult | null> {
     if (titleMatch) name = titleMatch[1].trim().slice(0, 200);
 
     return { price, previousClose, high, low, open, volume, marketCap, pe, name, source: "screener" };
-  } catch {
+  } catch (err) {
+    console.error(`scrapeScreener error for ${ticker}:`, (err as Error).message);
     return null;
   }
 }
@@ -100,13 +162,7 @@ async function scrapeGoogleFinance(ticker: string, exchange: string): Promise<Sc
     const gfExchange = exchange === "BSE" ? "BOM" : "NSE";
     const url = `https://www.google.com/finance/quote/${encodeURIComponent(ticker)}:${gfExchange}`;
     const res = await withTimeout(
-      fetch(url, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept: "text/html",
-        },
-      }),
+      fetch(url, { headers: { "User-Agent": UA, Accept: "text/html" } }),
       FETCH_TIMEOUT_MS,
     );
     if (!res.ok) return null;
@@ -168,6 +224,40 @@ async function scrapeGoogleFinance(ticker: string, exchange: string): Promise<Sc
   }
 }
 
+// Groww quote — used as a volume / mcap fallback when Screener returns zero.
+async function fetchGrowwVolume(
+  ticker: string,
+  exchange: "NSE" | "BSE",
+): Promise<{ volume: number; marketCap: number; pe: number } | null> {
+  if (!GROWW_TOKEN) return null;
+  try {
+    const u = new URL("https://api.groww.in/v1/live-data/quote");
+    u.searchParams.set("exchange", exchange);
+    u.searchParams.set("segment", "CASH");
+    u.searchParams.set("trading_symbol", ticker);
+    const res = await withTimeout(
+      fetch(u.toString(), {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${GROWW_TOKEN}`,
+          "X-API-VERSION": "1.0",
+        },
+      }),
+      4000,
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const p = json?.payload ?? json?.data ?? json;
+    const volume = Math.round(Number(p?.volume ?? p?.day_volume ?? 0));
+    let marketCap = Number(p?.market_cap ?? p?.marketCap ?? 0);
+    if (marketCap > 0 && marketCap < 1e7) marketCap *= 1e7;
+    const pe = Number(p?.pe_ratio ?? p?.pe ?? 0);
+    return { volume, marketCap, pe: isNaN(pe) ? 0 : pe };
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -194,6 +284,16 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: "Could not verify against Screener or Google Finance", ticker }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
+    }
+
+    // Volume / mcap enrichment via Groww when Screener missed them.
+    if (scraped.volume === 0 || scraped.marketCap === 0) {
+      const groww = await fetchGrowwVolume(ticker, exchange as "NSE" | "BSE");
+      if (groww) {
+        if (scraped.volume === 0 && groww.volume > 0) scraped.volume = groww.volume;
+        if (scraped.marketCap === 0 && groww.marketCap > 0) scraped.marketCap = groww.marketCap;
+        if (scraped.pe === 0 && groww.pe > 0) scraped.pe = groww.pe;
+      }
     }
 
     const change = Math.round((scraped.price - scraped.previousClose) * 100) / 100;
@@ -237,14 +337,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Best-effort history point so freshness/sparkline reflects the verify
     try {
       await sb
         .from("stock_price_history")
         .insert({ ticker, exchange, price: scraped.price, recorded_at: now });
     } catch (_) { /* non-fatal */ }
 
-    // Return in the shape applyLiveData expects (matches stock-proxy)
     return new Response(
       JSON.stringify({
         ok: true,
