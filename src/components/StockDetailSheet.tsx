@@ -251,6 +251,8 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
               />
             </div>
 
+            <FreshnessPanel lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} />
+
             <Separator />
 
             {/* Price trigger */}
