@@ -189,7 +189,7 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
           <td className="px-4 py-3 text-right font-mono font-semibold text-sm">
             {isPriceAvailable ? (
               <div className="inline-flex items-center justify-end gap-1.5">
-                <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} showEta />
+                <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} />
                 <MissingDataTooltip missing={stock.price === 0} label="Price">
                   <span>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 </MissingDataTooltip>
