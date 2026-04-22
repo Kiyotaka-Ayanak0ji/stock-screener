@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import PremiumDialog from "@/components/PremiumDialog";
 import PriceChart from "@/components/PriceChart";
+import { getFreshness, type FreshnessState } from "@/lib/stockFreshness";
+import { cn } from "@/lib/utils";
 
 interface StockDetailSheetProps {
   stock: Stock | null;
