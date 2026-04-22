@@ -45,45 +45,92 @@ function formatAge(ms: number): string {
   return `${Math.floor(months / 12)}y ago`;
 }
 
+function formatEta(ms: number): string {
+  if (ms <= 0) return "any moment";
+  if (ms < 90 * 1000) return "in seconds";
+  const min = Math.round(ms / MIN);
+  if (min < 60) return `in ~${min} min`;
+  const hours = Math.round(min / 60);
+  if (hours < 24) return `in ~${hours}h`;
+  const days = Math.round(hours / 24);
+  return `in ~${days}d`;
+}
+
+function formatExact(ts: number): string {
+  try {
+    return new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "short",
+      hour12: true,
+    }).format(new Date(ts)) + " IST";
+  } catch {
+    return new Date(ts).toLocaleString();
+  }
+}
+
+function unknownInfo(tooltip: string): FreshnessInfo {
+  return {
+    state: "unknown",
+    ageMs: Infinity,
+    label: "no data yet",
+    tooltip,
+    exactLabel: "—",
+    etaLabel: "queued",
+    etaReason: "Waiting for its turn in the background refresh cycle.",
+  };
+}
+
 export function getFreshness(
   lastUpdated: Date | string | number | null | undefined,
   isMarketOpen: boolean,
 ): FreshnessInfo {
   if (!lastUpdated) {
-    return {
-      state: "unknown",
-      ageMs: Infinity,
-      label: "no data yet",
-      tooltip: "This stock hasn't been refreshed yet. Click the refresh icon to verify against Screener.",
-    };
+    return unknownInfo(
+      "This stock hasn't been refreshed yet. It's queued in the background cycle — click ↻ to verify against Screener now.",
+    );
   }
 
   const ts = lastUpdated instanceof Date ? lastUpdated.getTime() : new Date(lastUpdated).getTime();
   if (!Number.isFinite(ts)) {
-    return {
-      state: "unknown",
-      ageMs: Infinity,
-      label: "no data yet",
-      tooltip: "Last-updated timestamp is invalid.",
-    };
+    return unknownInfo("Last-updated timestamp is invalid.");
   }
 
   const ageMs = Math.max(0, Date.now() - ts);
   const label = formatAge(ageMs);
+  const exactLabel = formatExact(ts);
 
   // Stale thresholds: 4h intraday / 24h after close.
   const veryStaleThreshold = isMarketOpen ? 4 * HOUR : 24 * HOUR;
-  // "Stale" hint kicks in at half the very-stale threshold.
   const staleThreshold = veryStaleThreshold / 2;
+
+  // ETA: while market is open, live polling refreshes within seconds.
+  // When market is closed, the rolling 24h seed cycle is the next touch.
+  let etaMs: number;
+  let etaReason: string;
+  if (isMarketOpen) {
+    etaMs = LIVE_POLL_MS;
+    etaReason = "Live polling refreshes the watchlist every few seconds while the market is open.";
+  } else {
+    etaMs = Math.max(0, SEED_CYCLE_MS - ageMs);
+    etaReason =
+      "Background seeding refreshes every stock across a rolling 24h cycle. ETA is based on when this ticker was last touched.";
+  }
+  const etaLabel = formatEta(etaMs);
 
   if (ageMs >= veryStaleThreshold) {
     return {
       state: "very-stale",
       ageMs,
       label,
+      exactLabel,
+      etaLabel,
+      etaReason,
       tooltip: isMarketOpen
-        ? `Data is ${label} — older than 4h while the market is open. Click refresh to verify against Screener.`
-        : `Data is ${label} — older than 24h. Click refresh to verify against Screener.`,
+        ? `Updated ${label} — older than 4h while the market is open. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`
+        : `Updated ${label} — older than 24h. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`,
     };
   }
 
@@ -92,7 +139,10 @@ export function getFreshness(
       state: "stale",
       ageMs,
       label,
-      tooltip: `Updated ${label}. Live polling will refresh shortly; click the icon to force a Screener verify.`,
+      exactLabel,
+      etaLabel,
+      etaReason,
+      tooltip: `Updated ${label}. Next auto-refresh ${etaLabel}.`,
     };
   }
 
@@ -100,6 +150,10 @@ export function getFreshness(
     state: "fresh",
     ageMs,
     label,
-    tooltip: `Updated ${label}.`,
+    exactLabel,
+    etaLabel,
+    etaReason,
+    tooltip: `Updated ${label} (${exactLabel}). Next auto-refresh ${etaLabel}.`,
   };
 }
+

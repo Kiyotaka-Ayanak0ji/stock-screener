@@ -245,7 +245,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 {isPriceAvailable ? (
                   <>
                     <div className="flex items-center justify-end gap-1.5">
-                      <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} />
+                      <StockFreshnessBadge lastUpdated={stock.lastUpdated} isMarketOpen={isMarketOpen} showEta />
                       <MissingDataTooltip missing={stock.price === 0} label="Price">
                         <p className="font-mono font-bold text-base">
                           ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
