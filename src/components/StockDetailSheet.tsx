@@ -61,6 +61,7 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     removeStock,
     priceTriggers,
     setPriceTrigger,
+    isMarketOpen,
   } = useStocks();
   const { isGuest } = useAuth();
   const { subscription } = useSubscription();
