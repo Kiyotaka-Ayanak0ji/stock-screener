@@ -58,11 +58,17 @@ const AddStockDialog = () => {
     if (!search.trim() || search.trim().length < 2) { setScreenerResults([]); return; }
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
+      // Skip remote search when there is no active session — avoids 401 noise
+      // for expired sessions / guest mode. Local results still show.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session?.access_token) {
+        setScreenerResults([]);
+        return;
+      }
       setIsSearching(true);
       try {
         const { data, error } = await supabase.functions.invoke("screener-search", { body: { query: search.trim() } });
         if (error) {
-          // Treat 401 as "needs sign-in" — older/guest sessions are no longer allowed.
           const status = (error as any)?.context?.status ?? (error as any)?.status;
           if (status === 401) {
             console.warn("screener-search requires authentication");
