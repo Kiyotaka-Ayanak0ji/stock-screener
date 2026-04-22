@@ -7,6 +7,8 @@ interface StockFreshnessBadgeProps {
   isMarketOpen: boolean;
   /** "dot" = small status dot (used in row); "pill" = labelled chip (used in detail sheet). */
   variant?: "dot" | "pill";
+  /** Optional inline ETA chip alongside the dot — useful in the watchlist row/card. */
+  showEta?: boolean;
   className?: string;
 }
 
@@ -37,10 +39,24 @@ const StockFreshnessBadge = ({
   lastUpdated,
   isMarketOpen,
   variant = "dot",
+  showEta = false,
   className,
 }: StockFreshnessBadgeProps) => {
   const info = getFreshness(lastUpdated, isMarketOpen);
   const styles = STATE_STYLES[info.state];
+
+  const tooltipContent = (
+    <div className="space-y-1 text-[11px] leading-snug">
+      <div className="font-medium text-foreground">{info.tooltip}</div>
+      <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-muted-foreground">
+        <span className="opacity-70">Last updated</span>
+        <span className="font-mono text-foreground/90">{info.exactLabel}</span>
+        <span className="opacity-70">Next refresh</span>
+        <span className="font-mono text-foreground/90">{info.etaLabel}</span>
+      </div>
+      <div className="text-muted-foreground/80 italic">{info.etaReason}</div>
+    </div>
+  );
 
   if (variant === "pill") {
     return (
@@ -57,8 +73,8 @@ const StockFreshnessBadge = ({
             {info.label}
           </span>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[240px]">
-          {info.tooltip}
+        <TooltipContent side="top" className="max-w-[260px]">
+          {tooltipContent}
         </TooltipContent>
       </Tooltip>
     );
@@ -68,18 +84,35 @@ const StockFreshnessBadge = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <span
-          aria-label={`Data freshness: ${info.state}, ${info.label}`}
+          aria-label={`Data freshness: ${info.state}. Last updated ${info.label}, ${info.exactLabel}. Next refresh ${info.etaLabel}.`}
           className={cn(
-            "inline-block h-1.5 w-1.5 rounded-full ring-2 ring-offset-0 shrink-0",
-            styles.dot,
-            styles.ring,
-            (info.state === "stale" || info.state === "very-stale") && "animate-pulse",
+            "inline-flex items-center gap-1 align-middle",
             className,
           )}
-        />
+        >
+          <span
+            className={cn(
+              "inline-block h-1.5 w-1.5 rounded-full ring-2 ring-offset-0 shrink-0",
+              styles.dot,
+              styles.ring,
+              (info.state === "stale" || info.state === "very-stale") && "animate-pulse",
+            )}
+          />
+          {showEta && (
+            <span
+              className={cn(
+                "hidden sm:inline text-[9px] font-medium tabular-nums tracking-tight",
+                styles.text,
+                "opacity-80",
+              )}
+            >
+              {info.etaLabel}
+            </span>
+          )}
+        </span>
       </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[240px]">
-        {info.tooltip}
+      <TooltipContent side="top" className="max-w-[260px]">
+        {tooltipContent}
       </TooltipContent>
     </Tooltip>
   );
