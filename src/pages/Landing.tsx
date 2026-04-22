@@ -129,10 +129,33 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: "5,000+", label: "Stocks Tracked" },
-  { value: "< 1s", label: "Price Refresh" },
-  { value: "NSE & BSE", label: "Exchanges" },
+  { value: "7,500+", label: "NSE + BSE + SME tickers" },
+  { value: "< 1s", label: "Live price refresh" },
+  { value: "24h", label: "Full universe sweep" },
   { value: "99.9%", label: "Uptime" },
+];
+
+const WHATS_NEW = [
+  {
+    icon: Activity,
+    title: "Verify against Screener",
+    desc: "One-click sanity check on any ticker. Cross-references Yahoo + Screener + Groww and rewrites stale prices instantly.",
+  },
+  {
+    icon: Layers,
+    title: "Full universe coverage",
+    desc: "We continuously seed all NSE, BSE and SME tickers (~7,500) every 24 hours so even illiquid micro-caps stay fresh.",
+  },
+  {
+    icon: Sparkles,
+    title: "Smart anomaly alerts",
+    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist — no manual setup, ever.",
+  },
+  {
+    icon: Shield,
+    title: "Transparent missing data",
+    desc: "Whenever a price, volume, market-cap or P/E can't be fetched, you see a clear tooltip — never a silent zero.",
+  },
 ];
 
 import {
