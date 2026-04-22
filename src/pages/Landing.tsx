@@ -506,14 +506,14 @@ const Landing = () => {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-20 px-4">
+      <section id="pricing" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <Crown className="h-3 w-3 mr-1 text-primary" /> Pricing
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Simple pricing. Serious value.</h2>
-            <p className="mt-3 text-muted-foreground">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Simple pricing. Serious value.</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">
               Start free for 15 days. Choose the plan that fits your trading style.
             </p>
 
