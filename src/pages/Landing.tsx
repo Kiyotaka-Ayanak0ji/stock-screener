@@ -837,14 +837,14 @@ const Landing = () => {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-20 px-4 bg-muted/30">
+      <section id="faq" className="py-14 sm:py-20 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-10 sm:mb-14">
             <Badge variant="secondary" className="mb-3">
               <HelpCircle className="h-3 w-3 mr-1 text-primary" /> FAQ
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Frequently Asked Questions</h2>
-            <p className="mt-3 text-muted-foreground">Everything you need to know before getting started</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">Everything you need to know before getting started</p>
           </div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
