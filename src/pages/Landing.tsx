@@ -946,20 +946,20 @@ const Landing = () => {
       </section>
 
       {/* Support */}
-      <section id="support" className="py-20 px-4">
+      <section id="support" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-10"
+            className="text-center mb-8 sm:mb-10"
           >
             <Badge variant="secondary" className="mb-3">
               <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
             </Badge>
-            <h2 className="text-3xl sm:text-4xl font-bold">Need a hand?</h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Need a hand?</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
               Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon
               as possible.
             </p>
