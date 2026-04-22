@@ -415,4 +415,56 @@ const Metric = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
+const FRESHNESS_STYLES: Record<FreshnessState, { dot: string; ring: string; text: string; label: string }> = {
+  fresh: { dot: "bg-gain", ring: "ring-gain/30", text: "text-gain", label: "Fresh" },
+  stale: { dot: "bg-amber-400", ring: "ring-amber-400/30", text: "text-amber-500", label: "Aging" },
+  "very-stale": { dot: "bg-loss", ring: "ring-loss/40", text: "text-loss", label: "Stale" },
+  unknown: { dot: "bg-muted-foreground/40", ring: "ring-muted-foreground/20", text: "text-muted-foreground", label: "Pending" },
+};
+
+const FreshnessPanel = ({
+  lastUpdated,
+  isMarketOpen,
+}: {
+  lastUpdated: Date | string | number | null | undefined;
+  isMarketOpen: boolean;
+}) => {
+  const info = getFreshness(lastUpdated, isMarketOpen);
+  const styles = FRESHNESS_STYLES[info.state];
+
+  return (
+    <section
+      className="rounded-lg border border-border bg-card/40 px-3 py-2.5 space-y-2"
+      aria-label={`Data freshness: ${info.state}. ${info.tooltip}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className={cn(
+              "inline-block h-2 w-2 rounded-full ring-2 shrink-0",
+              styles.dot,
+              styles.ring,
+              (info.state === "stale" || info.state === "very-stale") && "animate-pulse",
+            )}
+          />
+          <h3 className="text-sm font-semibold">Data freshness</h3>
+        </div>
+        <span className={cn("text-[11px] font-medium tabular-nums", styles.text)}>
+          {styles.label} · {info.label}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[11px]">
+        <span className="text-muted-foreground">Last updated</span>
+        <span className="font-mono text-foreground/90 text-right sm:text-left">{info.exactLabel}</span>
+        <span className="text-muted-foreground">Next refresh</span>
+        <span className="font-mono text-foreground/90 text-right sm:text-left">{info.etaLabel}</span>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground leading-snug">{info.tooltip}</p>
+      <p className="text-[10px] text-muted-foreground/80 italic leading-snug">{info.etaReason}</p>
+    </section>
+  );
+};
+
 export default StockDetailSheet;
