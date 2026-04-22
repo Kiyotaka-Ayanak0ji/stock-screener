@@ -1,5 +1,3 @@
-import { getUserIdFromAuthHeader } from "../_shared/auth.ts";
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -88,17 +86,6 @@ async function resolveYahooIndexSymbol(screenerCode: string, html: string): Prom
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
-  }
-
-  // Require an authenticated Supabase user. This blocks unauthenticated
-  // callers AND clients running against stale/older builds whose anon-only
-  // (or expired) tokens no longer pass JWT verification.
-  const userId = await getUserIdFromAuthHeader(req.headers.get("Authorization"));
-  if (!userId) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized", code: "AUTH_REQUIRED" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
   }
 
   try {
