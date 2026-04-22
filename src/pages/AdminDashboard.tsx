@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { SeedUniverseWidget } from "@/components/admin/SeedUniverseWidget";
 
 interface AdminUser {
   id: string;
@@ -278,6 +279,11 @@ const AdminDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Stock Universe Seeding */}
+          <div className="mb-8">
+            <SeedUniverseWidget />
           </div>
 
           {/* Search + Table */}
