@@ -19,7 +19,6 @@ import {
   Smartphone,
   Star,
   TrendingUp,
-  Zap,
   Check,
   Crown,
   Tag,
