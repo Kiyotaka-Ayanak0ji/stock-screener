@@ -497,10 +497,10 @@ const AdminDashboard = () => {
 
       {/* Edit Subscription Dialog */}
       <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-lg p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>Edit Subscription</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Edit Subscription</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm break-words">
               Change plan for <strong>{editingUser?.display_name || editingUser?.email}</strong>
             </DialogDescription>
           </DialogHeader>
@@ -528,9 +528,9 @@ const AdminDashboard = () => {
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-            <Button onClick={handleSaveSubscription} disabled={savingSub}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setEditingUser(null)} className="w-full sm:w-auto">Cancel</Button>
+            <Button onClick={handleSaveSubscription} disabled={savingSub} className="w-full sm:w-auto">
               {savingSub && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
               Save Changes
             </Button>
