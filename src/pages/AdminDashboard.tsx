@@ -307,12 +307,12 @@ const AdminDashboard = () => {
 
           {/* Search + Table */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Users className="h-5 w-5 text-primary shrink-0" />
                 Registered Users
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 {filteredUsers.length} of {users.length} users shown
               </CardDescription>
               <div className="relative mt-2">
@@ -326,7 +326,82 @@ const AdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              {/* Mobile: card list */}
+              <div className="md:hidden divide-y divide-border">
+                {filteredUsers.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No users found
+                  </div>
+                )}
+                {filteredUsers.map((u) => (
+                  <div key={`${u.id}-m`} className="p-3 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-medium text-sm text-foreground truncate">{u.display_name || "—"}</p>
+                          {u.email_confirmed_at ? (
+                            <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                          ) : (
+                            <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
+                      </div>
+                      <div className="shrink-0">
+                        {getSubBadge(u.subscription_plan, u.subscription_status)}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                      <span>Joined {formatDate(u.created_at)}</span>
+                      <span>{u.watchlist_count} watchlist{u.watchlist_count === 1 ? "" : "s"}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      {u.email_opt_in ? (
+                        <Badge variant="secondary" className="text-[10px] h-5">Email opt-in</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] h-5">No email opt-in</Badge>
+                      )}
+                      {u.id !== user?.id ? (
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openSubEditor(u)} title="Edit subscription">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="max-w-[calc(100vw-1rem)] sm:max-w-lg">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete <strong>{u.display_name || u.email}</strong>? This action cannot be undone and will remove all their data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteUser(u.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  {deletingId === u.id ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] h-5">You</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: table */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
