@@ -58,8 +58,8 @@ const PLANS = [
   { value: "premium_yearly", label: "Premium (Yearly)" },
   { value: "premium_plus_monthly", label: "Premium Plus (Monthly)" },
   { value: "premium_plus_yearly", label: "Premium Plus (Yearly)" },
-  { value: "yearly", label: "Yearly (Legacy)" },
   { value: "lifetime", label: "Lifetime (Unlimited)" },
+  { value: "admin", label: "Admin (Full Access)" },
 ];
 
 // Plans that grant unlimited / premium-plus level access.
@@ -71,7 +71,6 @@ const PREMIUM_PLUS_PLANS = new Set([
 const PREMIUM_PLANS = new Set([
   "premium_monthly",
   "premium_yearly",
-  "yearly",
 ]);
 
 const STATUSES = [
