@@ -233,66 +233,67 @@ const AdminDashboard = () => {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background pb-bottom-nav">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <Button
           variant="ghost"
+          size="sm"
           onClick={() => navigate("/profile")}
-          className="mb-6 text-muted-foreground hover:text-foreground"
+          className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Profile
         </Button>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">Admin Dashboard</h1>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
+            <h1 className="text-xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
           </div>
-          <p className="text-muted-foreground mb-8">Manage all registered users and view platform statistics</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8">Manage all registered users and view platform statistics</p>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
                 <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-                    <p className="text-xs text-muted-foreground">Total Users</p>
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.total}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Total Users</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.verified}</p>
-                    <p className="text-xs text-muted-foreground">Verified</p>
+                  <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.verified}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Verified</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
                 <div className="flex items-center gap-2">
-                  <Crown className="h-5 w-5 text-amber-500" />
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.premium}</p>
-                    <p className="text-xs text-muted-foreground">Premium</p>
+                  <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.premium}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Premium</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6 pb-3 sm:pb-6">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-500" />
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stats.active}</p>
-                    <p className="text-xs text-muted-foreground">Active Subs</p>
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold text-foreground">{stats.active}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Active Subs</p>
                   </div>
                 </div>
               </CardContent>
