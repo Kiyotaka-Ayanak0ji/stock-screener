@@ -202,58 +202,60 @@ export const SeedUniverseWidget = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-primary" />
-              Stock Universe Seeding
+      <CardHeader className="px-4 sm:px-6">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <Database className="h-5 w-5 text-primary shrink-0" />
+              <span className="truncate">Stock Universe Seeding</span>
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Bulk-seeds NSE + BSE + SME tickers into the price cache over a 24-hour cycle
             </CardDescription>
           </div>
           <Badge
             variant={progress?.status === "running" ? "default" : "secondary"}
-            className="capitalize"
+            className="capitalize shrink-0"
           >
             {progress?.status ?? "idle"}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-5 px-4 sm:px-6">
         <div>
-          <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-muted-foreground">
-              {processed.toLocaleString()} / {total.toLocaleString()} processed this cycle
+          <div className="flex items-center justify-between text-xs sm:text-sm mb-2 gap-2">
+            <span className="text-muted-foreground truncate">
+              {processed.toLocaleString()} / {total.toLocaleString()} processed
             </span>
-            <span className="font-medium text-foreground">{pct}%</span>
+            <span className="font-medium text-foreground shrink-0">{pct}%</span>
           </div>
           <Progress value={pct} className="h-2" />
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-lg border border-border bg-card/50 p-3">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500" /> Succeeded
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="rounded-lg border border-border bg-card/50 p-2.5 sm:p-3 min-w-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground mb-1">
+              <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500 shrink-0" />
+              <span className="truncate">Succeeded</span>
             </div>
-            <p className="text-xl font-bold text-foreground">{succeeded.toLocaleString()}</p>
+            <p className="text-base sm:text-xl font-bold text-foreground truncate">{succeeded.toLocaleString()}</p>
           </div>
           <button
             type="button"
             onClick={openFailedDialog}
-            className="rounded-lg border border-border bg-card/50 p-3 text-left transition-colors hover:bg-destructive/10 hover:border-destructive/40 focus:outline-none focus:ring-2 focus:ring-destructive/40"
+            className="rounded-lg border border-border bg-card/50 p-2.5 sm:p-3 text-left transition-colors hover:bg-destructive/10 hover:border-destructive/40 focus:outline-none focus:ring-2 focus:ring-destructive/40 min-w-0"
             title="Click to view failed stock reports"
           >
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1">
-              <XCircle className="h-3.5 w-3.5 text-destructive" /> Failed
-              <span className="ml-auto text-[10px] text-muted-foreground/70">view →</span>
+            <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground mb-1">
+              <XCircle className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-destructive shrink-0" />
+              <span className="truncate">Failed</span>
+              <span className="ml-auto text-[9px] sm:text-[10px] text-muted-foreground/70 hidden sm:inline">view →</span>
             </div>
-            <p className="text-xl font-bold text-foreground">{failed.toLocaleString()}</p>
+            <p className="text-base sm:text-xl font-bold text-foreground truncate">{failed.toLocaleString()}</p>
           </button>
-          <div className="rounded-lg border border-border bg-card/50 p-3">
-            <div className="text-xs text-muted-foreground mb-1">Last chunk</div>
-            <p className="text-sm font-medium text-foreground">
+          <div className="rounded-lg border border-border bg-card/50 p-2.5 sm:p-3 min-w-0">
+            <div className="text-[10px] sm:text-xs text-muted-foreground mb-1 truncate">Last chunk</div>
+            <p className="text-xs sm:text-sm font-medium text-foreground truncate">
               {formatRelative(progress?.last_chunk_at ?? null)}
             </p>
           </div>
@@ -301,26 +303,27 @@ export const SeedUniverseWidget = () => {
 
       {/* Failed stocks dialog */}
       <Dialog open={failedOpen} onOpenChange={setFailedOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+        <DialogContent className="max-w-4xl w-[calc(100vw-1rem)] sm:w-full p-4 sm:p-6 max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
               Failed Stock Reports
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Tickers that failed to seed in the latest cycle. Use this to diagnose missing or
               incorrect data in the watchlist dashboard.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1 min-h-0 flex flex-col">
             {topErrors.length > 0 && (
-              <div className="rounded-md border border-border bg-muted/30 p-3">
-                <p className="text-xs font-semibold text-foreground mb-2">Top failure reasons</p>
+              <div className="rounded-md border border-border bg-muted/30 p-2.5 sm:p-3">
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground mb-2">Top failure reasons</p>
                 <div className="flex flex-wrap gap-1.5">
                   {topErrors.map(([msg, count]) => (
-                    <Badge key={msg} variant="outline" className="text-[11px] font-normal">
-                      {msg} <span className="ml-1 text-destructive">×{count}</span>
+                    <Badge key={msg} variant="outline" className="text-[10px] sm:text-[11px] font-normal max-w-full">
+                      <span className="truncate">{msg}</span>
+                      <span className="ml-1 text-destructive shrink-0">×{count}</span>
                     </Badge>
                   ))}
                 </div>
@@ -332,13 +335,14 @@ export const SeedUniverseWidget = () => {
                 placeholder="Search ticker, name, or error..."
                 value={failedSearch}
                 onChange={(e) => setFailedSearch(e.target.value)}
-                className="h-9"
+                className="h-9 text-sm"
               />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadFailedStocks}
                 disabled={failedLoading}
+                className="shrink-0"
               >
                 {failedLoading ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -348,13 +352,45 @@ export const SeedUniverseWidget = () => {
               </Button>
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className="text-[11px] sm:text-xs text-muted-foreground">
               {failedLoading
                 ? "Loading…"
                 : `${filteredFailed.length.toLocaleString()} of ${failedStocks.length.toLocaleString()} failed tickers`}
             </div>
 
-            <ScrollArea className="h-[420px] rounded-md border border-border">
+            {/* Mobile: card list */}
+            <ScrollArea className="sm:hidden flex-1 min-h-[300px] rounded-md border border-border">
+              <div className="divide-y divide-border">
+                {!failedLoading && filteredFailed.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No failed stocks found
+                  </div>
+                )}
+                {filteredFailed.map((s) => (
+                  <div key={`${s.exchange}:${s.ticker}-m`} className="p-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-xs font-semibold text-foreground truncate">{s.ticker}</span>
+                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 shrink-0">{s.exchange}</Badge>
+                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 shrink-0">{s.segment}</Badge>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {formatRelative(s.last_seeded_at)}
+                      </span>
+                    </div>
+                    {s.name && (
+                      <p className="text-[11px] text-muted-foreground truncate">{s.name}</p>
+                    )}
+                    <p className="text-[11px] text-destructive break-words">
+                      {s.error_message ?? "Unknown error"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {/* Desktop: table */}
+            <ScrollArea className="hidden sm:block h-[420px] rounded-md border border-border">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10">
                   <TableRow>
