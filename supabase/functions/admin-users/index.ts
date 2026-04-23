@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
       const { data: subscriptions } = await supabaseAdmin.from("user_subscriptions").select("user_id, plan, status, trial_ends_at, subscription_ends_at");
       const { data: watchlists } = await supabaseAdmin.from("user_watchlists").select("user_id, id");
       const { data: preferences } = await supabaseAdmin.from("user_preferences").select("user_id, updated_at");
+      const { data: roles } = await supabaseAdmin.from("user_roles").select("user_id, role").eq("role", "admin");
 
       const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
       const subMap = new Map((subscriptions || []).map(s => [s.user_id, s]));
@@ -57,11 +58,13 @@ Deno.serve(async (req) => {
         watchlistCounts.set(w.user_id, (watchlistCounts.get(w.user_id) || 0) + 1);
       });
       const prefMap = new Map((preferences || []).map(p => [p.user_id, p]));
+      const adminSet = new Set((roles || []).map(r => r.user_id));
 
       const enrichedUsers = users.map(u => {
         const profile = profileMap.get(u.id);
         const sub = subMap.get(u.id);
         const pref = prefMap.get(u.id);
+        const isAdmin = adminSet.has(u.id);
         return {
           id: u.id,
           email: u.email,
@@ -70,8 +73,10 @@ Deno.serve(async (req) => {
           created_at: u.created_at,
           last_sign_in_at: u.last_sign_in_at,
           email_opt_in: profile?.email_opt_in ?? false,
-          subscription_plan: sub?.plan || "free",
+          // Surface "admin" as a synthetic plan so the UI can show + select it.
+          subscription_plan: isAdmin ? "admin" : (sub?.plan || "free"),
           subscription_status: sub?.status || "none",
+          is_admin: isAdmin,
           trial_ends_at: sub?.trial_ends_at || null,
           subscription_ends_at: sub?.subscription_ends_at || null,
           watchlist_count: watchlistCounts.get(u.id) || 0,
@@ -107,19 +112,64 @@ Deno.serve(async (req) => {
       const validPlans = [
         "free",
         "monthly", "pro_monthly", "pro_yearly",
-        "premium_monthly", "premium_yearly", "yearly",
+        "premium_monthly", "premium_yearly",
         "premium_plus_monthly", "premium_plus_yearly",
         "lifetime",
+        "admin",
       ];
       const validStatuses = ["trial", "active", "expired", "cancelled", "lifetime"];
       if (!validPlans.includes(plan) || !validStatuses.includes(status)) {
         return new Response(JSON.stringify({ error: "Invalid plan or status" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // === Special handling: ADMIN ===
+      // Admin = full feature access (mapped to premium_plus_yearly + active) PLUS user_roles.admin entry.
+      if (plan === "admin") {
+        // Grant admin role (idempotent)
+        const { data: existingRole } = await supabaseAdmin
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (!existingRole) {
+          const { error: roleErr } = await supabaseAdmin
+            .from("user_roles")
+            .insert({ user_id: userId, role: "admin" });
+          if (roleErr) throw roleErr;
+        }
+
+        // Give them top-tier subscription so feature gates pass everywhere.
+        const { error: subErr } = await supabaseAdmin
+          .from("user_subscriptions")
+          .update({
+            plan: "premium_plus_yearly",
+            status: "active",
+            subscription_starts_at: new Date().toISOString(),
+            subscription_ends_at: null,
+            trial_ends_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId);
+        if (subErr) throw subErr;
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // For any non-admin plan change, revoke admin role if present.
+      // (Lifetime users explicitly do NOT receive admin privileges.)
+      await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .eq("role", "admin");
+
       const updateData: Record<string, unknown> = { plan, status, updated_at: new Date().toISOString() };
 
       const monthlyPlans = ["monthly", "pro_monthly", "premium_monthly", "premium_plus_monthly"];
-      const yearlyPlans = ["yearly", "pro_yearly", "premium_yearly", "premium_plus_yearly"];
+      const yearlyPlans = ["pro_yearly", "premium_yearly", "premium_plus_yearly"];
 
       if (status === "active" && plan !== "lifetime") {
         const now = new Date();
