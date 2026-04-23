@@ -303,26 +303,27 @@ export const SeedUniverseWidget = () => {
 
       {/* Failed stocks dialog */}
       <Dialog open={failedOpen} onOpenChange={setFailedOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+        <DialogContent className="max-w-4xl w-[calc(100vw-1rem)] sm:w-full p-4 sm:p-6 max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="space-y-1.5">
+            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
               Failed Stock Reports
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               Tickers that failed to seed in the latest cycle. Use this to diagnose missing or
               incorrect data in the watchlist dashboard.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1 min-h-0 flex flex-col">
             {topErrors.length > 0 && (
-              <div className="rounded-md border border-border bg-muted/30 p-3">
-                <p className="text-xs font-semibold text-foreground mb-2">Top failure reasons</p>
+              <div className="rounded-md border border-border bg-muted/30 p-2.5 sm:p-3">
+                <p className="text-[11px] sm:text-xs font-semibold text-foreground mb-2">Top failure reasons</p>
                 <div className="flex flex-wrap gap-1.5">
                   {topErrors.map(([msg, count]) => (
-                    <Badge key={msg} variant="outline" className="text-[11px] font-normal">
-                      {msg} <span className="ml-1 text-destructive">×{count}</span>
+                    <Badge key={msg} variant="outline" className="text-[10px] sm:text-[11px] font-normal max-w-full">
+                      <span className="truncate">{msg}</span>
+                      <span className="ml-1 text-destructive shrink-0">×{count}</span>
                     </Badge>
                   ))}
                 </div>
@@ -334,13 +335,14 @@ export const SeedUniverseWidget = () => {
                 placeholder="Search ticker, name, or error..."
                 value={failedSearch}
                 onChange={(e) => setFailedSearch(e.target.value)}
-                className="h-9"
+                className="h-9 text-sm"
               />
               <Button
                 variant="outline"
                 size="sm"
                 onClick={loadFailedStocks}
                 disabled={failedLoading}
+                className="shrink-0"
               >
                 {failedLoading ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -350,13 +352,45 @@ export const SeedUniverseWidget = () => {
               </Button>
             </div>
 
-            <div className="text-xs text-muted-foreground">
+            <div className="text-[11px] sm:text-xs text-muted-foreground">
               {failedLoading
                 ? "Loading…"
                 : `${filteredFailed.length.toLocaleString()} of ${failedStocks.length.toLocaleString()} failed tickers`}
             </div>
 
-            <ScrollArea className="h-[420px] rounded-md border border-border">
+            {/* Mobile: card list */}
+            <ScrollArea className="sm:hidden flex-1 min-h-[300px] rounded-md border border-border">
+              <div className="divide-y divide-border">
+                {!failedLoading && filteredFailed.length === 0 && (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    No failed stocks found
+                  </div>
+                )}
+                {filteredFailed.map((s) => (
+                  <div key={`${s.exchange}:${s.ticker}-m`} className="p-3 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-xs font-semibold text-foreground truncate">{s.ticker}</span>
+                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 shrink-0">{s.exchange}</Badge>
+                        <Badge variant="outline" className="text-[10px] h-4 px-1.5 shrink-0">{s.segment}</Badge>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {formatRelative(s.last_seeded_at)}
+                      </span>
+                    </div>
+                    {s.name && (
+                      <p className="text-[11px] text-muted-foreground truncate">{s.name}</p>
+                    )}
+                    <p className="text-[11px] text-destructive break-words">
+                      {s.error_message ?? "Unknown error"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            {/* Desktop: table */}
+            <ScrollArea className="hidden sm:block h-[420px] rounded-md border border-border">
               <Table>
                 <TableHeader className="sticky top-0 bg-card z-10">
                   <TableRow>
