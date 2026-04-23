@@ -35,14 +35,8 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const { priceTriggers, removeStock, addStock, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
   const isVerifying = verifyingTickers.has(stock.ticker);
   const { isGuest } = useAuth();
-  const { subscription } = useSubscription();
-  const isPremium =
-    !isGuest &&
-    (subscription?.plan === "premium_monthly" ||
-      subscription?.plan === "yearly" ||
-      subscription?.plan === "annual" ||
-      subscription?.plan === "lifetime") &&
-    subscription?.status === "active";
+  const { isPremium: isPremiumTier } = useSubscription();
+  const isPremium = !isGuest && isPremiumTier;
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [triggerOpen, setTriggerOpen] = useState(false);

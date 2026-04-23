@@ -30,8 +30,8 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
   const isVerifying = verifyingTickers.has(stock.ticker);
   const { isGuest } = useAuth();
-  const { subscription } = useSubscription();
-  const isPremium = !isGuest && (subscription?.plan === "premium_monthly" || subscription?.plan === "yearly" || subscription?.plan === "annual" || subscription?.plan === "lifetime") && (subscription?.status === "active");
+  const { isPremium: isPremiumTier } = useSubscription();
+  const isPremium = !isGuest && isPremiumTier;
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");
