@@ -58,8 +58,8 @@ const PLANS = [
   { value: "premium_yearly", label: "Premium (Yearly)" },
   { value: "premium_plus_monthly", label: "Premium Plus (Monthly)" },
   { value: "premium_plus_yearly", label: "Premium Plus (Yearly)" },
-  { value: "yearly", label: "Yearly (Legacy)" },
   { value: "lifetime", label: "Lifetime (Unlimited)" },
+  { value: "admin", label: "Admin (Full Access)" },
 ];
 
 // Plans that grant unlimited / premium-plus level access.
@@ -71,7 +71,6 @@ const PREMIUM_PLUS_PLANS = new Set([
 const PREMIUM_PLANS = new Set([
   "premium_monthly",
   "premium_yearly",
-  "yearly",
 ]);
 
 const STATUSES = [
@@ -212,6 +211,7 @@ const AdminDashboard = () => {
   };
 
   const getSubBadge = (plan: string, status: string) => {
+    if (plan === "admin") return <Badge className="bg-primary/20 text-primary border-primary/30">Admin</Badge>;
     if (plan === "lifetime") return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">Lifetime</Badge>;
     if (PREMIUM_PLUS_PLANS.has(plan)) return <Badge className="bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30">Premium Plus</Badge>;
     if (PREMIUM_PLANS.has(plan)) return <Badge className="bg-violet-500/20 text-violet-300 border-violet-500/30">Premium</Badge>;
