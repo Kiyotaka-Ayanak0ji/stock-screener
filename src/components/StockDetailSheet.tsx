@@ -64,14 +64,8 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     isMarketOpen,
   } = useStocks();
   const { isGuest } = useAuth();
-  const { subscription } = useSubscription();
-  const isPremium =
-    !isGuest &&
-    (subscription?.plan === "premium_monthly" ||
-      subscription?.plan === "yearly" ||
-      subscription?.plan === "annual" ||
-      subscription?.plan === "lifetime") &&
-    subscription?.status === "active";
+  const { subscription, isPremium: isPremiumTier } = useSubscription();
+  const isPremium = !isGuest && isPremiumTier;
 
   const [noteValue, setNoteValue] = useState("");
   const [triggerValue, setTriggerValue] = useState("");
