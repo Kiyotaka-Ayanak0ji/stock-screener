@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { HelpCircle, Mail, LifeBuoy } from "lucide-react";
 import {
   ArrowRight,
@@ -413,7 +414,7 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Features Grid - Tabbed by Plan */}
       <section id="features" className="py-10 sm:py-14 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-6 sm:mb-8">
@@ -424,38 +425,70 @@ const Landing = () => {
               Everything you need. Nothing you don't.
             </h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
-              Built by investors, for investors. Every feature is designed to give you an edge.
+              Switch between plans to see what's included — no scrolling required.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-            {FEATURES.map((f, i) => (
-              <motion.div
-                key={f.title}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeUp}
-                custom={i}
-              >
-                <Card className="h-full border-border hover:border-primary/40 hover:shadow-md transition-all duration-200 group relative">
-                  {(f as any).badge && (
-                    <Badge className="absolute top-2 right-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[9px]">
-                      <Crown className="h-2 w-2 mr-0.5" />
-                      {(f as any).badge}
-                    </Badge>
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="mx-auto mb-6 grid grid-cols-5 w-full max-w-2xl h-auto p-1">
+              <TabsTrigger value="all" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">All</TabsTrigger>
+              <TabsTrigger value="free" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Free</TabsTrigger>
+              <TabsTrigger value="pro" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Pro</TabsTrigger>
+              <TabsTrigger value="premium" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Premium</TabsTrigger>
+              <TabsTrigger value="premium_plus" className="text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 leading-tight">
+                Premium+
+              </TabsTrigger>
+            </TabsList>
+
+            {(["all", "free", "pro", "premium", "premium_plus"] as const).map((tab) => {
+              const tierRank: Record<string, number> = { Pro: 1, Premium: 2, "Premium Plus": 3 };
+              const filtered = FEATURES.filter((f) => {
+                const badge = (f as any).badge as string | undefined;
+                const featureRank = badge ? tierRank[badge] ?? 0 : 0;
+                if (tab === "all") return true;
+                if (tab === "free") return !badge;
+                if (tab === "pro") return featureRank <= 1;
+                if (tab === "premium") return featureRank <= 2;
+                if (tab === "premium_plus") return true;
+                return true;
+              });
+              return (
+                <TabsContent key={tab} value={tab} className="mt-0">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+                    {filtered.map((f, i) => (
+                      <motion.div
+                        key={f.title}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.25 }}
+                      >
+                        <Card className="h-full border-border hover:border-primary/40 hover:shadow-md transition-all duration-200 group relative">
+                          {(f as any).badge && (
+                            <Badge className="absolute top-2 right-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[9px]">
+                              <Crown className="h-2 w-2 mr-0.5" />
+                              {(f as any).badge}
+                            </Badge>
+                          )}
+                          <CardContent className="p-3 sm:p-4">
+                            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
+                              <f.icon className="h-4 w-4 text-primary" />
+                            </div>
+                            <h3 className="font-semibold text-sm mb-1">{f.title}</h3>
+                            <p className="text-[11px] text-muted-foreground leading-snug">{f.description}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                  {filtered.length === 0 && (
+                    <p className="text-center text-sm text-muted-foreground py-8">
+                      No features in this category.
+                    </p>
                   )}
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
-                      <f.icon className="h-4 w-4 text-primary" />
-                    </div>
-                    <h3 className="font-semibold text-sm mb-1">{f.title}</h3>
-                    <p className="text-[11px] text-muted-foreground leading-snug">{f.description}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
+                </TabsContent>
+              );
+            })}
+          </Tabs>
         </div>
       </section>
 
@@ -947,56 +980,28 @@ const Landing = () => {
 
       {/* Support */}
       <section id="support" className="py-14 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="text-center mb-8 sm:mb-10"
           >
             <Badge variant="secondary" className="mb-3">
               <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Need a hand?</h2>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
-              Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon
+              Questions about features, pricing, billing, or anything else? Reach out and we'll get back to you as soon
               as possible.
             </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="border border-border bg-gradient-to-br from-card to-muted/40 shadow-sm">
-              <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="text-center sm:text-left">
-                    <p className="text-sm text-muted-foreground">Product, pricing & customer support</p>
-                    <a
-                      href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
-                      className="text-lg sm:text-xl font-semibold text-foreground hover:text-primary transition-colors break-all"
-                    >
-                      support@equityiq.in
-                    </a>
-                  </div>
-                </div>
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto"
-                  onClick={() => (window.location.href = "mailto:support@equityiq.in?subject=EquityIQ%20Support")}
-                >
-                  <Mail className="h-4 w-4 mr-2" /> Email Support
-                </Button>
-              </CardContent>
-            </Card>
-            <p className="text-xs text-muted-foreground text-center mt-4">
+            <a
+              href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
+              className="inline-block mt-6 text-lg sm:text-xl font-semibold text-primary hover:text-primary/80 transition-colors break-all"
+            >
+              support@equityiq.in
+            </a>
+            <p className="text-xs text-muted-foreground mt-4">
               Typical response time: within 24 hours on business days.
             </p>
           </motion.div>
