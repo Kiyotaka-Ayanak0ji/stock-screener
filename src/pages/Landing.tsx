@@ -995,12 +995,9 @@ const Landing = () => {
               Questions about features, pricing, billing, or anything else? Reach out and we'll get back to you as soon
               as possible.
             </p>
-            <a
-              href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
-              className="inline-block mt-6 text-lg sm:text-xl font-semibold text-primary hover:text-primary/80 transition-colors break-all"
-            >
+            <p className="mt-6 text-lg sm:text-xl font-semibold text-primary break-all">
               support@equityiq.in
-            </a>
+            </p>
             <p className="text-xs text-muted-foreground mt-4">
               Typical response time: within 24 hours on business days.
             </p>
