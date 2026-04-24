@@ -414,21 +414,21 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section id="features" className="py-14 sm:py-20 px-4 sm:px-6 bg-muted/30">
+      <section id="features" className="py-10 sm:py-14 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-14">
-            <Badge variant="secondary" className="mb-3">
+          <div className="text-center mb-6 sm:mb-8">
+            <Badge variant="secondary" className="mb-2">
               <Star className="h-3 w-3 mr-1 text-primary" /> Features
             </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Everything you need. Nothing you don't.
             </h2>
-            <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto px-2">
+            <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
               Built by investors, for investors. Every feature is designed to give you an edge.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {FEATURES.map((f, i) => (
               <motion.div
                 key={f.title}
@@ -438,19 +438,19 @@ const Landing = () => {
                 variants={fadeUp}
                 custom={i}
               >
-                <Card className="h-full border-border hover:border-primary/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group relative">
+                <Card className="h-full border-border hover:border-primary/40 hover:shadow-md transition-all duration-200 group relative">
                   {(f as any).badge && (
-                    <Badge className="absolute top-3 right-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[10px]">
-                      <Crown className="h-2.5 w-2.5 mr-1" />
+                    <Badge className="absolute top-2 right-2 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-0 text-[9px]">
+                      <Crown className="h-2 w-2 mr-0.5" />
                       {(f as any).badge}
                     </Badge>
                   )}
-                  <CardContent className="p-5 sm:p-6">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-                      <f.icon className="h-5 w-5 text-primary" />
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
+                      <f.icon className="h-4 w-4 text-primary" />
                     </div>
-                    <h3 className="font-semibold text-base sm:text-lg mb-1.5 sm:mb-2">{f.title}</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                    <h3 className="font-semibold text-sm mb-1">{f.title}</h3>
+                    <p className="text-[11px] text-muted-foreground leading-snug">{f.description}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -980,17 +980,17 @@ const Landing = () => {
                   <div className="text-center sm:text-left">
                     <p className="text-sm text-muted-foreground">Product, pricing & customer support</p>
                     <a
-                      href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
+                      href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
                       className="text-lg sm:text-xl font-semibold text-foreground hover:text-primary transition-colors break-all"
                     >
-                      aryanansik@gmail.com
+                      support@equityiq.in
                     </a>
                   </div>
                 </div>
                 <Button
                   size="lg"
                   className="w-full sm:w-auto"
-                  onClick={() => (window.location.href = "mailto:aryanansik@gmail.com?subject=EquityIQ%20Support")}
+                  onClick={() => (window.location.href = "mailto:support@equityiq.in?subject=EquityIQ%20Support")}
                 >
                   <Mail className="h-4 w-4 mr-2" /> Email Support
                 </Button>
@@ -1020,7 +1020,7 @@ const Landing = () => {
               Pricing
             </button>
             <a
-              href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
+              href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
               className="hover:text-foreground transition-colors"
             >
               Support
