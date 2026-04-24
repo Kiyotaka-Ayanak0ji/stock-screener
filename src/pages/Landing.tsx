@@ -1020,7 +1020,7 @@ const Landing = () => {
               Pricing
             </button>
             <a
-              href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
+              href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
               className="hover:text-foreground transition-colors"
             >
               Support
