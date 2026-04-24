@@ -980,39 +980,6 @@ const Landing = () => {
 
       {/* Support */}
       <section id="support" className="py-14 sm:py-20 px-4 sm:px-6">
-        <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-8 sm:mb-10"
-          >
-            <Badge variant="secondary" className="mb-3">
-              <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Need a hand?</h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
-              Questions about features, pricing, billing, or anything else? Reach out and we’ll get back to you as soon
-              as possible.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <Card className="border border-border bg-gradient-to-br from-card to-muted/40 shadow-sm">
-              <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Mail className="h-6 w-6 text-primary" />
-                  </div>
-                  <div className="text-center sm:text-left">
-      {/* Support */}
-      <section id="support" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
