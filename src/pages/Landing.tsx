@@ -980,17 +980,17 @@ const Landing = () => {
                   <div className="text-center sm:text-left">
                     <p className="text-sm text-muted-foreground">Product, pricing & customer support</p>
                     <a
-                      href="mailto:aryanansik@gmail.com?subject=EquityIQ%20Support"
+                      href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
                       className="text-lg sm:text-xl font-semibold text-foreground hover:text-primary transition-colors break-all"
                     >
-                      aryanansik@gmail.com
+                      support@equityiq.in
                     </a>
                   </div>
                 </div>
                 <Button
                   size="lg"
                   className="w-full sm:w-auto"
-                  onClick={() => (window.location.href = "mailto:aryanansik@gmail.com?subject=EquityIQ%20Support")}
+                  onClick={() => (window.location.href = "mailto:support@equityiq.in?subject=EquityIQ%20Support")}
                 >
                   <Mail className="h-4 w-4 mr-2" /> Email Support
                 </Button>
