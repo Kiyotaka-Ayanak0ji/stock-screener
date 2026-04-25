@@ -41,6 +41,40 @@ function writeCache(userId: string, subscription: Subscription | null) {
   }
 }
 
+// Module-level in-flight request map: dedupes concurrent fetches across all
+// `useSubscription` callers. Without this, every component that calls the
+// hook (Header, BottomNav, StockTable, AlertsPanel, …) fired its own request
+// on mount, producing 15-20+ identical queries on each page load.
+const inflightFetches = new Map<string, Promise<Subscription | null>>();
+// Module-level subscriber registry so a single fetch updates every hook
+// instance simultaneously (no need for each to fetch on its own).
+type Listener = (sub: Subscription | null) => void;
+const listeners = new Map<string, Set<Listener>>();
+
+function notify(userId: string, sub: Subscription | null) {
+  listeners.get(userId)?.forEach((l) => l(sub));
+}
+
+async function fetchSubscriptionShared(userId: string): Promise<Subscription | null> {
+  const existing = inflightFetches.get(userId);
+  if (existing) return existing;
+  const promise = (async () => {
+    const { data } = await supabase
+      .from("user_subscriptions")
+      .select("plan, status, trial_ends_at, subscription_ends_at")
+      .eq("user_id", userId)
+      .single();
+    const next = (data as Subscription | null) ?? null;
+    writeCache(userId, next);
+    notify(userId, next);
+    return next;
+  })().finally(() => {
+    inflightFetches.delete(userId);
+  });
+  inflightFetches.set(userId, promise);
+  return promise;
+}
+
 export function useSubscription() {
   const { user } = useAuth();
 
@@ -60,14 +94,8 @@ export function useSubscription() {
       setLoading(false);
       return;
     }
-    const { data } = await supabase
-      .from("user_subscriptions")
-      .select("plan, status, trial_ends_at, subscription_ends_at")
-      .eq("user_id", user.id)
-      .single();
-    const next = (data as Subscription | null) ?? null;
+    const next = await fetchSubscriptionShared(user.id);
     setSubscription(next);
-    writeCache(user.id, next);
     setLoading(false);
   }, [user]);
 
@@ -77,14 +105,30 @@ export function useSubscription() {
       setLoading(false);
       return;
     }
+    // Subscribe to shared updates so a single network call hydrates every
+    // mounted instance of this hook.
+    const set = listeners.get(user.id) ?? new Set<Listener>();
+    const listener: Listener = (sub) => {
+      setSubscription(sub);
+      setLoading(false);
+    };
+    set.add(listener);
+    listeners.set(user.id, set);
+
     // Re-hydrate from cache when user changes (e.g. after sign-in)
     const cached = readCache(user.id);
     if (cached) {
       setSubscription(cached.subscription);
       setLoading(false);
     }
-    // Always re-validate in background so changes are picked up
+    // Always re-validate in background so changes are picked up.
+    // The shared fetcher dedupes concurrent calls automatically.
     fetchSubscription();
+
+    return () => {
+      set.delete(listener);
+      if (set.size === 0) listeners.delete(user.id);
+    };
   }, [user, fetchSubscription]);
 
   const isActive = (() => {
