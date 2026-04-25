@@ -31,9 +31,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         setTimeout(() => fetchProfile(session.user.id), 0);
 
-        // Send welcome email on first email confirmation
+        // First-time email confirmation: notify and send welcome email
         if (event === 'USER_UPDATED' && session.user.email_confirmed_at && !welcomeEmailSent.current.has(session.user.id)) {
           welcomeEmailSent.current.add(session.user.id);
+          toast.success("Verified Successfully", { description: "Check your app" });
           sendWelcomeEmail(session);
         }
       } else {
