@@ -1,10 +1,13 @@
-// Verify a single stock against Screener.in (and Google Finance fallback) on demand.
-// Public endpoint — market data is non-sensitive. Strict input validation,
+// Verify a single stock against Screener.in (and BSE India / Google Finance fallbacks)
+// on demand. Public endpoint — market data is non-sensitive. Strict input validation,
 // short timeouts, single-ticker rate-friendly. Writes go through the service role.
 //
-// Resolves numeric BSE codes (e.g. AVAX → 543291) by hitting Screener's search API
-// first, so users can verify SME / numeric-coded BSE stocks. Volume falls back to
-// Groww (when the secret is set) for stocks where Screener returns 0.
+// Resolves numeric BSE codes (e.g. AVAX → 544337) by hitting Screener's search API
+// first, so users can verify SME / numeric-coded BSE stocks. For SME and illiquid
+// counters where Screener does not expose intraday OHLC / Volume in HTML, we enrich
+// with the BSE India quote API (LTP, Open, High, Low, Prev Close, TTQ, MCap) — which
+// is the same data feed bseindia.com itself uses, so values are time-synced with the
+// official exchange rather than a rough cached snapshot.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
@@ -36,16 +39,54 @@ interface ScrapeResult {
   marketCap: number;
   pe: number;
   name: string;
-  source: "screener" | "google";
+  source: "screener" | "google" | "bse";
+  /** Resolved numeric BSE scrip code if we discovered one (used for BSE enrichment). */
+  bseCode?: string;
 }
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-// Resolve a Screener slug for a ticker. Numeric BSE codes (e.g. 543291) and
+// Extract a number from inside the first matching <li class="flex flex-space-between">
+// block whose <span class="name"> equals the given label. This is robust to the order
+// of items on Screener pages and avoids cross-block matches that the previous greedy
+// regex was vulnerable to.
+function extractRatio(html: string, label: string): string | null {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(
+    `<li[^>]*class="flex flex-space-between"[^>]*>\\s*<span class="name">\\s*${escaped}\\s*</span>[\\s\\S]{0,400}?</li>`,
+    "i",
+  );
+  const block = html.match(re);
+  return block ? block[0] : null;
+}
+
+function firstNumberIn(block: string | null): number {
+  if (!block) return 0;
+  const m = block.match(/<span class="number">\s*([\d,]+(?:\.\d+)?)\s*<\/span>/);
+  if (!m) return 0;
+  const v = parseFloat(m[1].replace(/,/g, ""));
+  return Number.isFinite(v) ? v : 0;
+}
+
+function allNumbersIn(block: string | null): number[] {
+  if (!block) return [];
+  const out: number[] = [];
+  const re = /<span class="number">\s*([\d,]+(?:\.\d+)?)\s*<\/span>/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(block)) !== null) {
+    const v = parseFloat(m[1].replace(/,/g, ""));
+    if (Number.isFinite(v)) out.push(v);
+  }
+  return out;
+}
+
+// Resolve a Screener slug for a ticker. Numeric BSE codes (e.g. 544337) and
 // alphanumeric tickers like AVAX/BCCFUBA may not exist directly at /company/<ticker>/,
 // so we hit Screener's search endpoint to find the right slug.
-async function resolveScreenerSlug(ticker: string): Promise<string | null> {
+async function resolveScreener(
+  ticker: string,
+): Promise<{ slug: string; bseCode?: string } | null> {
   // Try direct first — fastest path for well-known tickers like RELIANCE.
   try {
     const direct = await withTimeout(
@@ -55,7 +96,7 @@ async function resolveScreenerSlug(ticker: string): Promise<string | null> {
       }),
       4000,
     );
-    if (direct.ok) return ticker;
+    if (direct.ok) return { slug: ticker };
   } catch { /* fall through to search */ }
 
   // Search Screener for the ticker.
@@ -79,20 +120,24 @@ async function resolveScreenerSlug(ticker: string): Promise<string | null> {
     });
     const pick = exact || arr[0];
     const slug = (pick?.url || "").split("/")[2] || null;
-    if (slug) console.log(`Resolved ${ticker} → Screener slug: ${slug}`);
-    return slug;
+    if (!slug) return null;
+    // If the resolved slug is a numeric BSE scrip code (Screener uses this for
+    // BSE-only listings), capture it for the BSE India enrichment step.
+    const bseCode = /^\d{5,7}$/.test(slug) ? slug : undefined;
+    console.log(`Resolved ${ticker} → slug=${slug}${bseCode ? ` bseCode=${bseCode}` : ""}`);
+    return { slug, bseCode };
   } catch (err) {
-    console.error(`resolveScreenerSlug failed for ${ticker}:`, (err as Error).message);
+    console.error(`resolveScreener failed for ${ticker}:`, (err as Error).message);
     return null;
   }
 }
 
 async function scrapeScreener(ticker: string): Promise<ScrapeResult | null> {
   try {
-    const slug = await resolveScreenerSlug(ticker);
-    if (!slug) return null;
+    const resolved = await resolveScreener(ticker);
+    if (!resolved) return null;
 
-    const url = `https://www.screener.in/company/${encodeURIComponent(slug)}/`;
+    const url = `https://www.screener.in/company/${encodeURIComponent(resolved.slug)}/`;
     const res = await withTimeout(
       fetch(url, { headers: { "User-Agent": UA, Accept: "text/html" } }),
       FETCH_TIMEOUT_MS,
@@ -100,57 +145,44 @@ async function scrapeScreener(ticker: string): Promise<ScrapeResult | null> {
     if (!res.ok) return null;
     const html = await res.text();
 
-    const priceMatch = html.match(/₹\s*([\d,]+(?:\.\d+)?)/);
-    if (!priceMatch) return null;
-    const price = parseFloat(priceMatch[1].replace(/,/g, ""));
+    // Anchor each value to its labeled <li> block (much more reliable than
+    // grabbing the first ₹ on the page, which previously misread Market Cap as price).
+    const price = firstNumberIn(extractRatio(html, "Current Price"));
     if (!Number.isFinite(price) || price <= 0) return null;
 
-    let marketCap = 0;
-    const mc = html.match(/Market Cap[\s\S]*?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i);
-    if (mc) marketCap = parseFloat(mc[1].replace(/,/g, "")) * 10000000; // Cr → raw
+    const mcapCr = firstNumberIn(extractRatio(html, "Market Cap"));
+    const marketCap = mcapCr > 0 ? mcapCr * 1e7 : 0; // Cr → raw
 
-    // Volume — try multiple shapes Screener uses across MAIN and SME pages.
-    let volume = 0;
-    const volPatterns = [
-      /Volume[\s\S]{0,400}?<span class="number">([\d,]+(?:\.\d+)?)<\/span>/i,
-      /<li[^>]*>[\s\S]{0,200}?Volume[\s\S]{0,200}?<span[^>]*>([\d,]+(?:\.\d+)?)<\/span>/i,
-      /"volume"\s*:\s*([\d.]+)/i,
-    ];
-    for (const re of volPatterns) {
-      const m = html.match(re);
-      if (m) {
-        const v = parseFloat(m[1].replace(/,/g, ""));
-        if (Number.isFinite(v) && v > 0) { volume = Math.round(v); break; }
-      }
-    }
+    const peVal = firstNumberIn(extractRatio(html, "Stock P/E"));
+    const pe = peVal > 0 ? peVal : 0;
 
-    let pe = 0;
-    const peLi = html.match(/Stock P\/E[\s\S]*?<\/li>/i);
-    if (peLi) {
-      const peNum = peLi[0].match(/<span class="number">([\d,]+(?:\.\d+)?)<\/span>/);
-      if (peNum) {
-        const v = parseFloat(peNum[1].replace(/,/g, ""));
-        if (Number.isFinite(v) && v > 0) pe = v;
-      }
-    }
-
-    let high = price, low = price, open = price, previousClose = price;
-    const highMatch = html.match(/High[\s\S]*?₹\s*([\d,]+(?:\.\d+)?)/i);
-    if (highMatch) {
-      const v = parseFloat(highMatch[1].replace(/,/g, ""));
-      if (Number.isFinite(v) && v > 0) high = v;
-    }
-    const lowMatch = html.match(/Low[\s\S]*?₹\s*([\d,]+(?:\.\d+)?)/i);
-    if (lowMatch) {
-      const v = parseFloat(lowMatch[1].replace(/,/g, ""));
-      if (Number.isFinite(v) && v > 0) low = v;
-    }
+    // Screener exposes 52-week High / Low (not intraday). We capture these so the UI
+    // can show meaningful 52w range instead of falling silently back to LTP. Intraday
+    // OHLC is enriched from BSE India later when available.
+    const hl = allNumbersIn(extractRatio(html, "High / Low"));
+    const high = hl[0] || price;
+    const low = hl[1] || price;
 
     let name = ticker;
     const titleMatch = html.match(/<h1[^>]*>\s*([^<]+?)\s*<\/h1>/);
     if (titleMatch) name = titleMatch[1].trim().slice(0, 200);
 
-    return { price, previousClose, high, low, open, volume, marketCap, pe, name, source: "screener" };
+    // Open / previousClose / volume are not on the Screener company header for SME
+    // and illiquid counters. We leave them at sensible defaults; the BSE/Groww step
+    // below fills them in when possible.
+    return {
+      price,
+      previousClose: price,
+      high,
+      low,
+      open: price,
+      volume: 0,
+      marketCap,
+      pe,
+      name,
+      source: "screener",
+      bseCode: resolved.bseCode,
+    };
   } catch (err) {
     console.error(`scrapeScreener error for ${ticker}:`, (err as Error).message);
     return null;
@@ -258,6 +290,83 @@ async function fetchGrowwVolume(
   }
 }
 
+interface BseEnrichment {
+  ltp: number;
+  open: number;
+  high: number;
+  low: number;
+  previousClose: number;
+  volume: number;
+  marketCap: number;
+}
+
+// BSE India official quote API. Returns time-synced intraday OHLC + LTP + TTQ + MCap
+// for SME and main-board scrips. Used to fill the gaps Screener leaves (volume, open,
+// real intraday high/low, accurate previous close) so verified data matches what the
+// exchange shows right now.
+async function fetchBseQuote(scripCode: string): Promise<BseEnrichment | null> {
+  if (!/^\d{5,7}$/.test(scripCode)) return null;
+  try {
+    const headers = {
+      "User-Agent": UA,
+      Accept: "application/json, text/plain, */*",
+      Referer: "https://www.bseindia.com/",
+      Origin: "https://www.bseindia.com",
+    };
+    const [headerRes, tradingRes] = await Promise.all([
+      withTimeout(
+        fetch(
+          `https://api.bseindia.com/BseIndiaAPI/api/getScripHeaderData/w?Debtflag=&scripcode=${scripCode}&seriesid=`,
+          { headers },
+        ),
+        5000,
+      ),
+      withTimeout(
+        fetch(
+          `https://api.bseindia.com/BseIndiaAPI/api/StockTrading/w?quotetype=EQ&scripcode=${scripCode}`,
+          { headers },
+        ),
+        5000,
+      ).catch(() => null as Response | null),
+    ]);
+
+    if (!headerRes.ok) return null;
+    const hjson = await headerRes.json();
+    const head = hjson?.Header ?? {};
+    const ltp = parseFloat(head?.LTP ?? hjson?.CurrRate?.LTP ?? "0");
+    if (!Number.isFinite(ltp) || ltp <= 0) return null;
+
+    const open = parseFloat(head?.Open ?? "0") || ltp;
+    const high = parseFloat(head?.High ?? "0") || ltp;
+    const low = parseFloat(head?.Low ?? "0") || ltp;
+    const prev = parseFloat(head?.PrevClose ?? "0") || ltp;
+
+    let volume = 0;
+    let marketCap = 0;
+    if (tradingRes && tradingRes.ok) {
+      try {
+        const tjson = await tradingRes.json();
+        // TTQ is in Lakhs by default per BSE response.
+        const ttq = parseFloat(tjson?.TTQ ?? "0");
+        const ttqUnit = String(tjson?.TTQin ?? "").toLowerCase();
+        if (Number.isFinite(ttq) && ttq > 0) {
+          if (ttqUnit.includes("lakh")) volume = Math.round(ttq * 1e5);
+          else if (ttqUnit.includes("crore")) volume = Math.round(ttq * 1e7);
+          else volume = Math.round(ttq);
+        }
+        // MktCapFull is in Cr by default per BSE response.
+        const mcap = parseFloat(tjson?.MktCapFull ?? "0");
+        if (Number.isFinite(mcap) && mcap > 0) marketCap = mcap * 1e7;
+      } catch (_) { /* non-fatal */ }
+    }
+
+    return { ltp, open, high, low, previousClose: prev, volume, marketCap };
+  } catch (err) {
+    console.error(`fetchBseQuote failed for ${scripCode}:`, (err as Error).message);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -286,7 +395,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Volume / mcap enrichment via Groww when Screener missed them.
+    // BSE India enrichment — fills the intraday OHLC + Volume + MCap gaps Screener
+    // doesn't expose, and gives us a fresh, time-synced LTP straight from the exchange.
+    const bseCode = scraped.bseCode;
+    if (bseCode) {
+      const bse = await fetchBseQuote(bseCode);
+      if (bse) {
+        // Always trust BSE's intraday LTP/OHLC over Screener's cached HTML snapshot.
+        scraped.price = bse.ltp;
+        scraped.open = bse.open;
+        scraped.high = bse.high;
+        scraped.low = bse.low;
+        scraped.previousClose = bse.previousClose;
+        if (bse.volume > 0) scraped.volume = bse.volume;
+        if (bse.marketCap > 0) scraped.marketCap = bse.marketCap;
+        console.log(
+          `BSE enrichment ${ticker} (${bseCode}): LTP=${bse.ltp} O/H/L=${bse.open}/${bse.high}/${bse.low} Vol=${bse.volume} MCap=${bse.marketCap}`,
+        );
+      }
+    }
+
+    // Volume / mcap enrichment via Groww when both Screener and BSE missed them.
     if (scraped.volume === 0 || scraped.marketCap === 0) {
       const groww = await fetchGrowwVolume(ticker, exchange as "NSE" | "BSE");
       if (groww) {
