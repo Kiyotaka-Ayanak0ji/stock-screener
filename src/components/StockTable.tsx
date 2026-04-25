@@ -187,10 +187,12 @@ const StockTable = () => {
                 className="gap-1.5 text-xs px-3"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? "Refreshing..." : "Refresh"}
+                {isRefreshing ? "Refreshing..." : "Refresh Now"}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Fetch latest prices for all stocks</TooltipContent>
+            <TooltipContent>
+              Prices auto-refresh every few seconds. Click to fetch the latest now.
+            </TooltipContent>
           </Tooltip>
           <ShareExportButton tableRef={tableRef} />
           <ColumnVisibilityDropdown />
