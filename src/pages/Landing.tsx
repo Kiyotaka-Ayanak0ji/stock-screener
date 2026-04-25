@@ -122,7 +122,7 @@ const FEATURES = [
   },
   {
     icon: Smartphone,
-    title: "Mobile PWA:  Install Anywhere",
+    title: "Mobile PWA: install to home screen",
     description:
       "Install EquityIQ to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
@@ -149,12 +149,12 @@ const WHATS_NEW = [
   {
     icon: Sparkles,
     title: "Smart anomaly alerts",
-    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist — no manual setup, ever.",
+    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist:  No manual setup, ever.",
   },
   {
     icon: Shield,
     title: "Transparent missing data",
-    desc: "Whenever a price, volume, market-cap or P/E can't be fetched, you see a clear tooltip — never a silent zero.",
+    desc: "Whenever a price, volume, market-cap or P/E can't be fetched, you see a clear tooltip: Never a silent zero.",
   },
 ];
 
@@ -408,7 +408,7 @@ const Landing = () => {
           >
             You check Groww for prices, set alarms in a notes app, maintain an Excel sheet for your watchlist, and
             screenshot charts to share with friends. Sound familiar?{" "}
-            <span className="text-foreground font-semibold">EquityIQ brings everything into one place</span> — so you
+            <span className="text-foreground font-semibold">EquityIQ brings everything into one place</span>&nbsp;- So you
             spend less time managing tools and more time making decisions.
           </motion.p>
         </div>
@@ -505,7 +505,7 @@ const Landing = () => {
               {
                 step: "01",
                 title: "Create your free account",
-                desc: "Sign up with your email and get 15 days of Pro-level access — most features unlocked.",
+                desc: "Sign up with your email and get 15 days of Pro-level access: most features unlocked.",
               },
               {
                 step: "02",
