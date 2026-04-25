@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, CreditCard, Loader2, ArrowLeft, Zap, X } from "lucide-react";
+import { Check, Crown, CreditCard, Loader2, ArrowLeft, Zap, X, TrendingUp } from "lucide-react";
 
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -160,7 +160,13 @@ const Subscribe = () => {
         className="w-full max-w-3xl"
       >
         <div className="text-center mb-6">
-          <Crown className="h-10 w-10 text-amber-500 mx-auto mb-2" />
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <TrendingUp className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold tracking-tight">
+              Equity<span className="text-primary">IQ</span>
+            </span>
+          </div>
+          <Crown className="h-9 w-9 text-amber-500 mx-auto mb-2" />
           <h1 className="text-2xl font-bold">Choose Your Plan</h1>
           <p className="text-sm text-muted-foreground mt-1">Pick the plan that matches your investment style</p>
           {trialDaysLeft > 0 && (
