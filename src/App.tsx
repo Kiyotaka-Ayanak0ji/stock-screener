@@ -10,10 +10,12 @@ import SubscriptionGate from "@/components/SubscriptionGate";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import Landing from "./pages/Landing";
 import DevNoticeDialog from "./components/DevNoticeDialog";
 
-// Lazy-loaded routes — keeps the initial Landing bundle small for fast first paint.
+// Lazy-loaded routes — keeps the initial bundle small for fast first paint.
+// Landing is also lazy because it's a 1000+ line marketing page that should
+// not block /auth, /subscribe, or other lightweight routes.
+const Landing = lazy(() => import("./pages/Landing"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
@@ -32,33 +34,39 @@ const RouteFallback = () => (
   </div>
 );
 
+// StockProvider is heavy (loads watchlists, polls live prices, decrypts user
+// preferences). Only mount it for routes that actually render the stock table
+// or related UI. Auth, Subscribe, Landing, Profile and admin routes don't need
+// it and were paying its mount cost on every cold load.
+const WithStocks = ({ children }: { children: React.ReactNode }) => (
+  <StockProvider>{children}</StockProvider>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
-        <StockProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <DevNoticeDialog />
-            <BrowserRouter>
-              <Suspense fallback={<RouteFallback />}>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/dashboard" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/subscribe" element={<Subscribe />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/admin" element={<SubscriptionGate><AdminDashboard /></SubscriptionGate>} />
-                  <Route path="/portfolio" element={<SubscriptionGate><Portfolio /></SubscriptionGate>} />
-                  <Route path="/unsubscribe" element={<Unsubscribe />} />
-                  <Route path="/shared/:token" element={<SharedWatchlist />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </TooltipProvider>
-        </StockProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <DevNoticeDialog />
+          <BrowserRouter>
+            <Suspense fallback={<RouteFallback />}>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/dashboard" element={<WithStocks><Index /></WithStocks>} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/admin" element={<SubscriptionGate><AdminDashboard /></SubscriptionGate>} />
+                <Route path="/portfolio" element={<SubscriptionGate><WithStocks><Portfolio /></WithStocks></SubscriptionGate>} />
+                <Route path="/unsubscribe" element={<Unsubscribe />} />
+                <Route path="/shared/:token" element={<SharedWatchlist />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
       </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
