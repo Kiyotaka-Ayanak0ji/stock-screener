@@ -54,11 +54,11 @@ export function VerificationDebugWidget() {
 
   const loadToggle = useCallback(async () => {
     setToggleLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = (await supabase
       .from("app_settings" as any)
       .select("value")
       .eq("key", "verification_debug_enabled")
-      .maybeSingle();
+      .maybeSingle()) as { data: { value: unknown } | null; error: unknown };
     if (!error && data) {
       setEnabled(data.value === true || data.value === "true");
     }
