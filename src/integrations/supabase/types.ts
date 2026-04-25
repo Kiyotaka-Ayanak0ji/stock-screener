@@ -47,6 +47,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       cached_stock_prices: {
         Row: {
           change: number
@@ -575,6 +596,51 @@ export type Database = {
           tickers?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      verification_debug_logs: {
+        Row: {
+          bse_code: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          exchange: string
+          final_fields: Json
+          final_values: Json
+          id: string
+          primary_source: string | null
+          source_fields: Json
+          sources_used: Json
+          ticker: string
+        }
+        Insert: {
+          bse_code?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          exchange: string
+          final_fields?: Json
+          final_values?: Json
+          id?: string
+          primary_source?: string | null
+          source_fields?: Json
+          sources_used?: Json
+          ticker: string
+        }
+        Update: {
+          bse_code?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          exchange?: string
+          final_fields?: Json
+          final_values?: Json
+          id?: string
+          primary_source?: string | null
+          source_fields?: Json
+          sources_used?: Json
+          ticker?: string
         }
         Relationships: []
       }
