@@ -313,6 +313,24 @@ export function VerificationDebugWidget() {
                       </div>
                     )}
 
+                    {/* Why refresh didn't fully work */}
+                    {(() => {
+                      const reasons = computeRefreshReasons(log);
+                      const allGood = reasons.length === 1 && reasons[0].startsWith("Refresh completed");
+                      return (
+                        <div>
+                          <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
+                            Why refresh {allGood ? "succeeded" : "didn't fully work"}
+                          </div>
+                          <ul className={`text-xs space-y-1 list-disc pl-4 ${allGood ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"}`}>
+                            {reasons.map((r, i) => (
+                              <li key={i}>{r}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })()}
+
                     {/* Per-source field breakdown */}
                     <div>
                       <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">
