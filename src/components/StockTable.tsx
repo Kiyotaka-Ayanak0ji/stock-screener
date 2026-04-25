@@ -316,7 +316,7 @@ const StockTable = () => {
             aria-label="Refresh prices"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
-            Refresh
+            {isRefreshing ? "Refreshing..." : "Refresh Now"}
           </Button>
           <div className="[&>*]:w-full [&_button]:w-full [&_button]:h-9 [&_button]:text-[11px] [&_button]:px-2 [&_button]:gap-1.5">
             <AddStockDialog />
