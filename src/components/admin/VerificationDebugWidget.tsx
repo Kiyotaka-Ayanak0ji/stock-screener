@@ -237,7 +237,7 @@ export function VerificationDebugWidget() {
               className="h-8 text-destructive hover:text-destructive"
             >
               <Trash2 className="h-3.5 w-3.5 mr-1.5" />
-              Clear
+              Clear debug logs
             </Button>
           </div>
         </div>
