@@ -34,6 +34,63 @@ const SOURCE_COLORS: Record<string, string> = {
   none: "bg-destructive/15 text-destructive border-destructive/30",
 };
 
+const REQUIRED_FIELDS = ["price", "open", "high", "low", "previous_close", "volume", "pe", "market_cap"] as const;
+
+function computeRefreshReasons(log: DebugLog): string[] {
+  const reasons: string[] = [];
+
+  if (log.error_message) {
+    reasons.push(`Verification failed outright: ${log.error_message}`);
+    return reasons;
+  }
+
+  if (!log.sources_used || log.sources_used.length === 0) {
+    reasons.push("No data source responded — Screener, BSE, Groww and Google all returned nothing.");
+  }
+
+  if (log.primary_source === "none" || !log.primary_source) {
+    reasons.push("No primary source could be selected, so cached price was not refreshed.");
+  }
+
+  // Missing fields in the final cache row
+  const missingFinal = Object.entries(log.final_fields || {})
+    .filter(([, present]) => !present)
+    .map(([f]) => f);
+  const undefinedRequired = REQUIRED_FIELDS.filter(
+    (f) => !(f in (log.final_fields || {})),
+  );
+  const allMissing = [...new Set([...missingFinal, ...undefinedRequired])];
+  if (allMissing.length > 0) {
+    reasons.push(`Missing fields after merge: ${allMissing.join(", ")}.`);
+  }
+
+  // Per-source diagnostics
+  if (log.source_fields?.screener && log.source_fields.screener.filled.length === 0) {
+    reasons.push("Screener.in returned a page but no labelled ratios could be parsed (likely a layout change or a redirect to a consolidated page).");
+  }
+  if (log.exchange === "BSE" && !log.bse_code) {
+    reasons.push("BSE scrip code could not be resolved, so the BSE India intraday API was skipped.");
+  }
+  if (log.source_fields?.bse && log.source_fields.bse.missing.length > 0) {
+    reasons.push(`BSE India returned a partial quote — missing: ${log.source_fields.bse.missing.join(", ")}.`);
+  }
+  if (log.source_fields?.groww && log.source_fields.groww.filled.length === 0) {
+    reasons.push("Groww proxy responded but had no usable fields (often a 403 / rate limit).");
+  }
+  if (log.source_fields?.google && log.source_fields.google.filled.length === 0) {
+    reasons.push("Google Finance fallback returned no parseable values.");
+  }
+
+  if (log.duration_ms != null && log.duration_ms > 8000) {
+    reasons.push(`Run was slow (${log.duration_ms}ms) — upstream sources may have been timing out.`);
+  }
+
+  if (reasons.length === 0) {
+    reasons.push("Refresh completed successfully — all required fields were populated.");
+  }
+  return reasons;
+}
+
 function formatRelative(ts: string): string {
   const diff = Date.now() - new Date(ts).getTime();
   const s = Math.floor(diff / 1000);
