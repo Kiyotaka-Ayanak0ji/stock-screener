@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { SeedUniverseWidget } from "@/components/admin/SeedUniverseWidget";
+import { VerificationDebugWidget } from "@/components/admin/VerificationDebugWidget";
 
 interface AdminUser {
   id: string;
@@ -303,6 +304,11 @@ const AdminDashboard = () => {
           {/* Stock Universe Seeding */}
           <div className="mb-8">
             <SeedUniverseWidget />
+          </div>
+
+          {/* Verification Debug Mode */}
+          <div className="mb-8">
+            <VerificationDebugWidget />
           </div>
 
           {/* Search + Table */}
