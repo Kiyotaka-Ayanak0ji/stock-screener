@@ -367,15 +367,114 @@ async function fetchBseQuote(scripCode: string): Promise<BseEnrichment | null> {
   }
 }
 
+// Field set we track for debug logging. Keep in sync with the Admin UI.
+const TRACKED_FIELDS = [
+  "price",
+  "previousClose",
+  "open",
+  "high",
+  "low",
+  "volume",
+  "marketCap",
+  "pe",
+] as const;
+type TrackedField = (typeof TRACKED_FIELDS)[number];
+
+function fieldsFromScreener(s: ScrapeResult): {
+  filled: TrackedField[];
+  missing: TrackedField[];
+} {
+  // Screener exposes Price, PE, MCap and 52w High/Low; intraday Open/PrevClose/Volume
+  // are not on the company header so they default to LTP / 0 inside scrapeScreener.
+  const filled: TrackedField[] = [];
+  const missing: TrackedField[] = [];
+  const push = (f: TrackedField, ok: boolean) => (ok ? filled : missing).push(f);
+  push("price", s.price > 0);
+  push("previousClose", false); // never on the screener header
+  push("open", false);
+  push("high", s.high > 0 && s.high !== s.price);
+  push("low", s.low > 0 && s.low !== s.price);
+  push("volume", false);
+  push("marketCap", s.marketCap > 0);
+  push("pe", s.pe > 0);
+  return { filled, missing };
+}
+
+function fieldsFromBse(b: BseEnrichment): {
+  filled: TrackedField[];
+  missing: TrackedField[];
+} {
+  const filled: TrackedField[] = [];
+  const missing: TrackedField[] = [];
+  const push = (f: TrackedField, ok: boolean) => (ok ? filled : missing).push(f);
+  push("price", b.ltp > 0);
+  push("previousClose", b.previousClose > 0);
+  push("open", b.open > 0);
+  push("high", b.high > 0);
+  push("low", b.low > 0);
+  push("volume", b.volume > 0);
+  push("marketCap", b.marketCap > 0);
+  push("pe", false); // BSE API doesn't return PE
+  return { filled, missing };
+}
+
+function fieldsFromGroww(g: { volume: number; marketCap: number; pe: number }): {
+  filled: TrackedField[];
+  missing: TrackedField[];
+} {
+  const filled: TrackedField[] = [];
+  const missing: TrackedField[] = [];
+  const push = (f: TrackedField, ok: boolean) => (ok ? filled : missing).push(f);
+  // Groww is only consulted for these three.
+  for (const f of ["price", "previousClose", "open", "high", "low"] as TrackedField[]) {
+    missing.push(f);
+  }
+  push("volume", g.volume > 0);
+  push("marketCap", g.marketCap > 0);
+  push("pe", g.pe > 0);
+  return { filled, missing };
+}
+
+async function isDebugEnabled(
+  sb: ReturnType<typeof createClient>,
+): Promise<boolean> {
+  try {
+    const { data } = await sb
+      .from("app_settings")
+      .select("value")
+      .eq("key", "verification_debug_enabled")
+      .maybeSingle();
+    return data?.value === true || data?.value === "true";
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startedAt = Date.now();
+  const sb = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  // Per-run debug accumulator. Only persisted at the end if the toggle is on.
+  const sourcesUsed: string[] = [];
+  const sourceFields: Record<string, { filled: string[]; missing: string[] }> = {};
+  let primarySource: string | null = null;
+  let resolvedBseCode: string | null = null;
+  let errorMessage: string | null = null;
+
+  let ticker = "";
+  let exchange = "";
+
   try {
     const body = await req.json();
-    const ticker = typeof body?.ticker === "string" ? body.ticker.trim() : "";
-    const exchange = typeof body?.exchange === "string" ? body.exchange.trim() : "";
+    ticker = typeof body?.ticker === "string" ? body.ticker.trim() : "";
+    exchange = typeof body?.exchange === "string" ? body.exchange.trim() : "";
 
     if (!TICKER_RE.test(ticker) || !EXCHANGE_RE.test(exchange)) {
       return new Response(JSON.stringify({ error: "Invalid ticker or exchange" }), {
@@ -386,11 +485,47 @@ Deno.serve(async (req) => {
 
     // Screener first (best for Indian small/SME), Google Finance as fallback
     let scraped = await scrapeScreener(ticker);
-    if (!scraped) scraped = await scrapeGoogleFinance(ticker, exchange);
+    if (scraped) {
+      sourcesUsed.push("screener");
+      sourceFields.screener = fieldsFromScreener(scraped);
+      primarySource = "screener";
+    } else {
+      scraped = await scrapeGoogleFinance(ticker, exchange);
+      if (scraped) {
+        sourcesUsed.push("google");
+        // Google fallback: price/prev/mcap/volume/pe are best-effort, OHLC = price.
+        sourceFields.google = {
+          filled: [
+            ...(scraped.price > 0 ? ["price"] : []),
+            ...(scraped.previousClose > 0 ? ["previousClose"] : []),
+            ...(scraped.volume > 0 ? ["volume"] : []),
+            ...(scraped.marketCap > 0 ? ["marketCap"] : []),
+            ...(scraped.pe > 0 ? ["pe"] : []),
+          ],
+          missing: ["open", "high", "low"],
+        };
+        primarySource = "google";
+      }
+    }
 
     if (!scraped) {
+      errorMessage = "Could not verify against Screener or Google Finance";
+      // Persist a debug row even on failure if the toggle is on.
+      if (await isDebugEnabled(sb)) {
+        await sb.from("verification_debug_logs").insert({
+          ticker,
+          exchange,
+          primary_source: "none",
+          sources_used: sourcesUsed,
+          source_fields: sourceFields,
+          final_fields: {},
+          final_values: {},
+          duration_ms: Date.now() - startedAt,
+          error_message: errorMessage,
+        });
+      }
       return new Response(
-        JSON.stringify({ error: "Could not verify against Screener or Google Finance", ticker }),
+        JSON.stringify({ error: errorMessage, ticker }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
@@ -399,8 +534,11 @@ Deno.serve(async (req) => {
     // doesn't expose, and gives us a fresh, time-synced LTP straight from the exchange.
     const bseCode = scraped.bseCode;
     if (bseCode) {
+      resolvedBseCode = bseCode;
       const bse = await fetchBseQuote(bseCode);
       if (bse) {
+        sourcesUsed.push("bse");
+        sourceFields.bse = fieldsFromBse(bse);
         // Always trust BSE's intraday LTP/OHLC over Screener's cached HTML snapshot.
         scraped.price = bse.ltp;
         scraped.open = bse.open;
@@ -419,6 +557,8 @@ Deno.serve(async (req) => {
     if (scraped.volume === 0 || scraped.marketCap === 0) {
       const groww = await fetchGrowwVolume(ticker, exchange as "NSE" | "BSE");
       if (groww) {
+        sourcesUsed.push("groww");
+        sourceFields.groww = fieldsFromGroww(groww);
         if (scraped.volume === 0 && groww.volume > 0) scraped.volume = groww.volume;
         if (scraped.marketCap === 0 && groww.marketCap > 0) scraped.marketCap = groww.marketCap;
         if (scraped.pe === 0 && groww.pe > 0) scraped.pe = groww.pe;
@@ -449,18 +589,28 @@ Deno.serve(async (req) => {
       updated_at: now,
     };
 
-    const sb = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
     const { error: upsertErr } = await sb
       .from("cached_stock_prices")
       .upsert([row], { onConflict: "ticker,exchange" });
 
     if (upsertErr) {
       console.error("verify-stock-screener upsert error:", upsertErr);
-      return new Response(JSON.stringify({ error: "Failed to persist verified data" }), {
+      errorMessage = "Failed to persist verified data";
+      if (await isDebugEnabled(sb)) {
+        await sb.from("verification_debug_logs").insert({
+          ticker,
+          exchange,
+          primary_source: primarySource,
+          sources_used: sourcesUsed,
+          source_fields: sourceFields,
+          final_fields: {},
+          final_values: {},
+          bse_code: resolvedBseCode,
+          duration_ms: Date.now() - startedAt,
+          error_message: errorMessage,
+        });
+      }
+      return new Response(JSON.stringify({ error: errorMessage }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -471,6 +621,45 @@ Deno.serve(async (req) => {
         .from("stock_price_history")
         .insert({ ticker, exchange, price: scraped.price, recorded_at: now });
     } catch (_) { /* non-fatal */ }
+
+    // Persist the debug row for a successful run.
+    if (await isDebugEnabled(sb)) {
+      const finalFields: Record<string, boolean> = {
+        price: scraped.price > 0,
+        previousClose: scraped.previousClose > 0,
+        open: scraped.open > 0,
+        high: scraped.high > 0,
+        low: scraped.low > 0,
+        volume: scraped.volume > 0,
+        marketCap: scraped.marketCap > 0,
+        pe: scraped.pe > 0,
+      };
+      const finalValues = {
+        price: scraped.price,
+        previousClose: scraped.previousClose,
+        open: scraped.open,
+        high: scraped.high,
+        low: scraped.low,
+        volume: scraped.volume,
+        marketCap: scraped.marketCap,
+        pe: scraped.pe,
+      };
+      try {
+        await sb.from("verification_debug_logs").insert({
+          ticker,
+          exchange,
+          primary_source: primarySource,
+          sources_used: sourcesUsed,
+          source_fields: sourceFields,
+          final_fields: finalFields,
+          final_values: finalValues,
+          bse_code: resolvedBseCode,
+          duration_ms: Date.now() - startedAt,
+        });
+      } catch (logErr) {
+        console.error("verification_debug_logs insert failed:", (logErr as Error).message);
+      }
+    }
 
     return new Response(
       JSON.stringify({
@@ -492,6 +681,23 @@ Deno.serve(async (req) => {
     );
   } catch (err) {
     console.error("verify-stock-screener error:", err);
+    errorMessage = (err as Error)?.message || "Internal server error";
+    try {
+      if (ticker && exchange && (await isDebugEnabled(sb))) {
+        await sb.from("verification_debug_logs").insert({
+          ticker,
+          exchange,
+          primary_source: primarySource ?? "none",
+          sources_used: sourcesUsed,
+          source_fields: sourceFields,
+          final_fields: {},
+          final_values: {},
+          bse_code: resolvedBseCode,
+          duration_ms: Date.now() - startedAt,
+          error_message: errorMessage,
+        });
+      }
+    } catch (_) { /* swallow */ }
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
