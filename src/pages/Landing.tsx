@@ -77,7 +77,7 @@ const FEATURES = [
     icon: Layers,
     title: "Multiple Watchlists",
     description:
-      "Organize stocks into separate watchlists : one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
+      "Organize stocks into separate watchlists: one for swing trades, another for long-term picks, and more. Stay organized, stay sharp.",
     badge: "Pro",
   },
   {
@@ -179,7 +179,7 @@ const Landing = () => {
       <nav className="fixed top-0 inset-x-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-3 sm:px-4 h-14 sm:h-16">
           <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             <span className="text-base sm:text-lg font-bold tracking-tight">
               Equity<span className="text-primary">IQ</span>
             </span>
