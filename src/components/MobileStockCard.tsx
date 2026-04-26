@@ -32,8 +32,7 @@ interface MobileStockCardProps {
 const SWIPE_THRESHOLD = 90;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
-  const { priceTriggers, removeStock, addStock, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
-  const isVerifying = verifyingTickers.has(stock.ticker);
+  const { priceTriggers, removeStock, addStock, setPriceTrigger, isMarketOpen } = useStocks();
   const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
   const isPremium = !isGuest && isPremiumTier;
