@@ -863,15 +863,18 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Remaining missing after alt-exchange retry
-    const stillMissing = symbols.filter((s: { ticker: string; exchange: string }) => {
-      return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
+    // Remaining missing after alt-exchange retry — exclude indices (no Yahoo/Groww/Screener coverage).
+    const stillMissing = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
+      if (resolvedKeys.has(`${s.exchange}_${s.ticker}`)) return false;
+      return !(s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol));
     });
 
-    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0)
-    const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
+    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0).
+    // Skip indices — they legitimately have no marketCap / PE / per-day volume.
+    const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
       const key = `${s.exchange}_${s.ticker}`;
       if (!resolvedKeys.has(key)) return false;
+      if (s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol)) return false;
       const d = result[key];
       return (d.marketCap === 0 || d.volume === 0 || d.pe === 0);
     });
