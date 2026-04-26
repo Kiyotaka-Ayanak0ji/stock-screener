@@ -192,20 +192,6 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
                 <MissingDataTooltip missing={stock.price === 0} label="Price">
                   <span>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 </MissingDataTooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); if (!isVerifying) verifyStock(stock.ticker); }}
-                      disabled={isVerifying}
-                      aria-label={`Verify ${stock.ticker} against Screener`}
-                      className="text-muted-foreground/60 hover:text-primary disabled:opacity-50 transition-colors p-0.5 -mr-1 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    >
-                      <RefreshCw className={`h-3 w-3 ${isVerifying ? "animate-spin" : ""}`} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Verify against Screener.in</TooltipContent>
-                </Tooltip>
               </div>
             ) : (
               <Skeleton className="h-4 w-20 ml-auto" />
