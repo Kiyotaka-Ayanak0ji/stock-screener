@@ -971,7 +971,10 @@ Deno.serve(async (req) => {
     // hit the exchange's own quote API (NSE for NSE, BSE for BSE) which
     // exposes proper intraday open/high/low + total traded volume + actual
     // previous close, and merge the missing fields in.
-    const ohlcCandidates = symbols.filter((s: { ticker: string; exchange: string }) => {
+    const ohlcCandidates = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
+      // Skip indices — they don't have a quote-equity endpoint, and their
+      // open/close come from the index feed already.
+      if (s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol)) return false;
       const d = result[`${s.exchange}_${s.ticker}`];
       if (!d || !d.ltp) return false;
       const flatOhlc = d.open === d.ltp && d.high === d.ltp && d.low === d.ltp;
