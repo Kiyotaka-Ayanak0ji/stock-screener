@@ -726,7 +726,41 @@ Deno.serve(async (req) => {
       }),
     ]);
 
-    return new Response(JSON.stringify(result), {
+    // ── Final OHLC enrichment ─────────────────────────────────────────
+    // Several fallbacks (Screener, Google Finance) only give us a price and
+    // synthesise open/high/low/close = price as a placeholder. The same
+    // sources never carry per-day volume or previous close for SME / newly
+    // listed scrips (e.g. C2C, BCCFUBA, ONIXSOLAR, AVAX). For each resolved
+    // entry that still has placeholder OHLC or volume=0 / previousClose=ltp,
+    // hit the exchange's own quote API (NSE for NSE, BSE for BSE) which
+    // exposes proper intraday open/high/low + total traded volume + actual
+    // previous close, and merge the missing fields in.
+    const ohlcCandidates = symbols.filter((s: { ticker: string; exchange: string }) => {
+      const d = result[`${s.exchange}_${s.ticker}`];
+      if (!d || !d.ltp) return false;
+      const flatOhlc = d.open === d.ltp && d.high === d.ltp && d.low === d.ltp;
+      const flatPrev = !d.close || d.close === d.ltp;
+      return flatOhlc || flatPrev || d.volume === 0;
+    });
+
+    if (ohlcCandidates.length > 0) {
+      await Promise.all(
+        ohlcCandidates.map(async (s: { ticker: string; exchange: string }) => {
+          const key = `${s.exchange}_${s.ticker}`;
+          const current = result[key];
+          const ohlc = await withTimeout(fetchExchangeOhlc(s.ticker, s.exchange), SCRAPE_TIMEOUT).catch(() => null);
+          if (!ohlc) return;
+          // Only overwrite obviously placeholder / missing fields so we don't
+          // clobber better data from Yahoo or Groww.
+          if (ohlc.open && (current.open === current.ltp || !current.open)) current.open = ohlc.open;
+          if (ohlc.high && (current.high === current.ltp || !current.high)) current.high = ohlc.high;
+          if (ohlc.low && (current.low === current.ltp || !current.low)) current.low = ohlc.low;
+          if (ohlc.close && (!current.close || current.close === current.ltp)) current.close = ohlc.close;
+          if (ohlc.volume && (!current.volume || current.volume === 0)) current.volume = ohlc.volume;
+        }),
+      );
+    }
+
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
