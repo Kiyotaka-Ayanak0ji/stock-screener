@@ -44,6 +44,137 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
+// ─── NSE / BSE direct quote helpers ─────────────────────────────────
+// Indian exchanges expose proper OHLC + volume + previous-close for *every*
+// listed scrip including SME boards (e.g. C2C, BCCFUBA, ONIXSOLAR, AVAX),
+// where Yahoo / Groww frequently 404 and Screener doesn't carry intraday
+// numbers at all. We use them as a final OHLC enrichment pass.
+
+let nseCookieCache: string | null = null;
+let nseCookieExpiry = 0;
+
+async function getNseCookie(): Promise<string> {
+  if (nseCookieCache && Date.now() < nseCookieExpiry) return nseCookieCache;
+  try {
+    const res = await fetch('https://www.nseindia.com/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+    });
+    await res.text();
+    const sc = res.headers.get('set-cookie') || '';
+    // NSE sets several cookies — keep them all in one header value
+    const cookies = sc.split(/,(?=[^;]+=)/).map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
+    if (cookies) {
+      nseCookieCache = cookies;
+      nseCookieExpiry = Date.now() + 5 * 60 * 1000; // 5 min
+    }
+    return cookies;
+  } catch {
+    return '';
+  }
+}
+
+interface OhlcSlice {
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number;       // previous close
+  volume?: number;
+  ltp?: number;
+}
+
+async function fetchNseOhlc(ticker: string): Promise<OhlcSlice | null> {
+  try {
+    const cookie = await getNseCookie();
+    if (!cookie) return null;
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json, text/plain, */*',
+      'Referer': `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(ticker)}`,
+      'Cookie': cookie,
+    };
+    const sym = encodeURIComponent(ticker);
+    const [quoteRes, tradeRes] = await Promise.all([
+      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, { headers }),
+      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}&section=trade_info`, { headers }),
+    ]);
+    if (!quoteRes.ok) { await quoteRes.text(); await tradeRes.text(); return null; }
+    const q = await quoteRes.json();
+    const t = tradeRes.ok ? await tradeRes.json() : null;
+    const pi = q?.priceInfo;
+    if (!pi) return null;
+
+    const open = Number(pi.open) || 0;
+    const high = Number(pi.intraDayHighLow?.max) || 0;
+    const low = Number(pi.intraDayHighLow?.min) || 0;
+    const previousClose = Number(pi.previousClose) || 0;
+    const ltp = Number(pi.lastPrice) || 0;
+    const volume = Math.round(Number(t?.securityWiseDP?.quantityTraded ?? t?.marketDeptOrderBook?.tradeInfo?.totalTradedVolume ?? 0));
+
+    console.log(`NSE OHLC ${ticker}: open=${open} prev=${previousClose} vol=${volume}`);
+    return { open, high, low, close: previousClose, ltp, volume };
+  } catch (err) {
+    console.log(`NSE OHLC error ${ticker}: ${(err as Error).message}`);
+    return null;
+  }
+}
+
+async function fetchBseOhlc(ticker: string): Promise<OhlcSlice | null> {
+  // BSE's public stockreach API returns JSON without auth dance.
+  // We require a numeric scrip code; use the api.bseindia.com search to resolve.
+  try {
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      'Accept': 'application/json, text/plain, */*',
+      'Referer': 'https://www.bseindia.com/',
+    };
+    const lookup = await fetch(
+      `https://api.bseindia.com/BseIndiaAPI/api/PeerSmartSearch/w?Type=SS&text=${encodeURIComponent(ticker)}`,
+      { headers },
+    );
+    if (!lookup.ok) { await lookup.text(); return null; }
+    const html = await lookup.text();
+    // Returns inline HTML chunks containing scrip codes like (532540)
+    const codeMatch = html.match(/\((\d{6})\)/);
+    if (!codeMatch) return null;
+    const scripCode = codeMatch[1];
+
+    const headRes = await fetch(
+      `https://api.bseindia.com/BseIndiaAPI/api/StockReachGraph/w?scripcode=${scripCode}&flag=0`,
+      { headers },
+    );
+    await headRes.text(); // ignored — primarily used to warm CDN
+
+    const quoteRes = await fetch(
+      `https://api.bseindia.com/BseIndiaAPI/api/getScripHeaderData/w?Debtflag=&scripcode=${scripCode}&seriesid=`,
+      { headers },
+    );
+    if (!quoteRes.ok) { await quoteRes.text(); return null; }
+    const data = await quoteRes.json();
+
+    const open = Number(data?.CurrRate?.OpnRate ?? data?.OpenRate) || 0;
+    const high = Number(data?.CurrRate?.HighRate ?? data?.HighRate) || 0;
+    const low = Number(data?.CurrRate?.LowRate ?? data?.LowRate) || 0;
+    const previousClose = Number(data?.PrevClose) || 0;
+    const ltp = Number(data?.CurrRate?.LTP ?? data?.CurrentValue) || 0;
+    const volume = Math.round(Number(data?.Volume ?? data?.TotTrdQty ?? 0));
+
+    console.log(`BSE OHLC ${ticker}(${scripCode}): open=${open} prev=${previousClose} vol=${volume}`);
+    return { open, high, low, close: previousClose, ltp, volume };
+  } catch (err) {
+    console.log(`BSE OHLC error ${ticker}: ${(err as Error).message}`);
+    return null;
+  }
+}
+
+async function fetchExchangeOhlc(ticker: string, exchange: string): Promise<OhlcSlice | null> {
+  return exchange === 'BSE' ? fetchBseOhlc(ticker) : fetchNseOhlc(ticker);
+}
+
+
 // ─── Groww (official API) ───────────────────────────────────────────
 // Used as PRIMARY source for SME / small-cap Indian stocks where Yahoo coverage
 // is poor or stale. For mid/large caps we still prefer Yahoo → Screener → Google.
