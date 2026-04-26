@@ -3,7 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2, Crown, RefreshCw } from "lucide-react";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
