@@ -27,8 +27,7 @@ interface StockRowProps {
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
-  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
-  const isVerifying = verifyingTickers.has(stock.ticker);
+  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, isMarketOpen } = useStocks();
   const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
   const isPremium = !isGuest && isPremiumTier;
