@@ -244,15 +244,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                           ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </p>
                       </MissingDataTooltip>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); if (!isVerifying) verifyStock(stock.ticker); }}
-                        disabled={isVerifying}
-                        aria-label={`Verify ${stock.ticker} against Screener`}
-                        className="text-muted-foreground/60 active:text-primary disabled:opacity-50 transition-colors p-1 -mr-1 rounded"
-                      >
-                        <RefreshCw className={`h-3.5 w-3.5 ${isVerifying ? "animate-spin" : ""}`} />
-                      </button>
                     </div>
                     <motion.span
                       key={stock.change}
