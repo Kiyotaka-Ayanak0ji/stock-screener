@@ -247,7 +247,132 @@ async function fetchBseOhlc(ticker: string): Promise<OhlcSlice | null> {
 }
 
 async function fetchExchangeOhlc(ticker: string, exchange: string): Promise<OhlcSlice | null> {
-  return exchange === 'BSE' ? fetchBseOhlc(ticker) : fetchNseOhlc(ticker);
+  if (exchange === 'BSE') {
+    return (await fetchBseOhlc(ticker)) || (await fetchNseOhlc(ticker));
+  }
+  // For NSE, try NSE first; if NSE blocks/returns nothing, dual-listed SME stocks
+  // are still on BSE so we try BSE OHLC as a final fallback.
+  return (await fetchNseOhlc(ticker)) || (await fetchBseOhlc(ticker));
+}
+
+// ─── BSE / NSE INDEX support ────────────────────────────────────────
+// Indices (e.g. "BSE 250 LargeMidCap Index", "Nifty 50", "Sensex") aren't
+// listed scrips and never resolve via Yahoo's `.NS`/`.BO` suffix or Groww.
+// We rely on the public BSE IndexMovers feed (returns LTP + change for ALL
+// indices in one call) and fall back to NSE's All Indices feed.
+
+interface IndexSlice {
+  ltp: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number; // previous close (derived from change for BSE)
+  volume?: number;
+  marketCap?: number;
+  pe?: number;
+}
+
+// deno-lint-ignore no-explicit-any
+let bseIndexCache: { rows: any[]; expiry: number } | null = null;
+// deno-lint-ignore no-explicit-any
+let nseIndexCache: { rows: any[]; expiry: number } | null = null;
+
+// deno-lint-ignore no-explicit-any
+async function loadBseIndexTable(): Promise<any[]> {
+  if (bseIndexCache && Date.now() < bseIndexCache.expiry) return bseIndexCache.rows;
+  try {
+    const res = await fetch(
+      'https://api.bseindia.com/BseIndiaAPI/api/IndexMovers/w?indexcode=BSE250LMI',
+      { headers: { 'User-Agent': NSE_UA, 'Accept': 'application/json', 'Referer': 'https://www.bseindia.com/' } },
+    );
+    if (!res.ok) { await res.text(); return []; }
+    const json = await res.json();
+    const rows = Array.isArray(json?.Table) ? json.Table : [];
+    bseIndexCache = { rows, expiry: Date.now() + 60_000 }; // 1 min
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+async function loadNseIndexTable(): Promise<any[]> {
+  if (nseIndexCache && Date.now() < nseIndexCache.expiry) return nseIndexCache.rows;
+  try {
+    const cookie = await getNseCookie('NIFTY');
+    if (!cookie) return [];
+    const res = await fetch('https://www.nseindia.com/api/allIndices', {
+      headers: {
+        'User-Agent': NSE_UA,
+        'Accept': 'application/json',
+        'Referer': 'https://www.nseindia.com/market-data/live-market-indices',
+        'Cookie': cookie,
+      },
+    });
+    if (!res.ok) { await res.text(); return []; }
+    const json = await res.json();
+    const rows = Array.isArray(json?.data) ? json.data : [];
+    nseIndexCache = { rows, expiry: Date.now() + 60_000 };
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+// Normalise an index name for fuzzy matching (strip non-alphanumerics, uppercase).
+function normIdx(s: string): string {
+  return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexSlice | null> {
+  const needle = normIdx(ticker);
+  if (!needle) return null;
+
+  const order = exchange === 'NSE' ? ['NSE', 'BSE'] : ['BSE', 'NSE'];
+  for (const ex of order) {
+    const rows = ex === 'BSE' ? await loadBseIndexTable() : await loadNseIndexTable();
+    if (!rows.length) continue;
+
+    if (ex === 'BSE') {
+      const match = rows.find((r) => {
+        const name = normIdx(r.indexName);
+        const alias = normIdx(r.shortalias);
+        return name === needle || alias === needle ||
+               name.includes(needle) || needle.includes(name) ||
+               (alias && needle.includes(alias));
+      });
+      if (match) {
+        const ltp = Number(match.LTP) || 0;
+        const change = Number(match.change) || 0;
+        if (!ltp) continue;
+        const prev = ltp - change;
+        console.log(`BSE Index ${ticker} → ${match.indexName} ltp=${ltp}`);
+        return { ltp, close: prev, open: prev, high: ltp, low: ltp, volume: 0, marketCap: 0, pe: 0 };
+      }
+    } else {
+      const match = rows.find((r) => {
+        const name = normIdx(r.index ?? r.indexName);
+        return name === needle || name.includes(needle) || needle.includes(name);
+      });
+      if (match) {
+        const ltp = Number(match.last ?? match.lastPrice) || 0;
+        if (!ltp) continue;
+        const open = Number(match.open) || ltp;
+        const high = Number(match.high) || ltp;
+        const low = Number(match.low) || ltp;
+        const prev = Number(match.previousClose) || ltp;
+        console.log(`NSE Index ${ticker} → ${match.index} ltp=${ltp}`);
+        return { ltp, open, high, low, close: prev, volume: 0, marketCap: 0, pe: 0 };
+      }
+    }
+  }
+  return null;
+}
+
+function looksLikeIndex(ticker: string, yahooSymbol?: string): boolean {
+  if (yahooSymbol && yahooSymbol.startsWith('^')) return true;
+  const t = (ticker || '').toUpperCase();
+  return /(_INDEX$|^INDEX_|NIFTY|SENSEX|BSE_\d|BANKEX|MIDCAP|SMALLCAP|LARGECAP)/.test(t);
 }
 
 
