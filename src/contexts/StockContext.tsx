@@ -883,15 +883,28 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Throttled sequential verify — 800ms between calls keeps us well
       // under typical Screener rate limits even for large watchlists.
       (async () => {
+        let filled = 0;
         for (const ticker of candidates) {
           try {
-            await verifyStock(ticker);
+            const ok = await verifyStock(ticker);
+            if (ok) filled++;
           } catch (err) {
             console.warn(`Auto-tally failed for ${ticker}:`, err);
           }
           await new Promise(r => setTimeout(r, 800));
         }
         try { sessionStorage.setItem(sessionKey, "1"); } catch { /* ignore */ }
+
+        // Persist freshly-tallied prices to the cache so subsequent loads
+        // don't have to re-scrape Screener.
+        if (filled > 0) {
+          const wl = watchlistRef.current;
+          const fresh = stocksRef.current.filter(s => wl.includes(s.ticker));
+          try { await saveCachedPrices(fresh); } catch { /* ignore */ }
+          toast.success(`Auto-verified ${filled} stock${filled === 1 ? "" : "s"}`, {
+            description: "Filled missing fields from Screener.in",
+          });
+        }
       })();
     }, 2500);
 
