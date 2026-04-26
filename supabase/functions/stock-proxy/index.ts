@@ -329,18 +329,38 @@ async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexS
   if (!needle) return null;
 
   const order = exchange === 'NSE' ? ['NSE', 'BSE'] : ['BSE', 'NSE'];
+
+  // Score-based matcher: exact > startsWith/endsWith > contains, longest first.
+  // This avoids "MIDCAP" matching "BSE 250 LargeMidCap Index" before the exact
+  // "BSE 250 LargeMidCap Index" entry does.
+  // deno-lint-ignore no-explicit-any
+  function pickBest(rows: any[], nameKey: (r: any) => string, aliasKey?: (r: any) => string): any | null {
+    let best: { row: any; score: number; len: number } | null = null;
+    for (const r of rows) {
+      const name = normIdx(nameKey(r));
+      const alias = aliasKey ? normIdx(aliasKey(r)) : '';
+      let score = 0;
+      let candLen = 0;
+      if (name === needle || alias === needle) { score = 100; candLen = needle.length; }
+      else if (name && needle.startsWith(name)) { score = 80; candLen = name.length; }
+      else if (name && needle.endsWith(name)) { score = 70; candLen = name.length; }
+      else if (name && needle.includes(name)) { score = 60; candLen = name.length; }
+      else if (alias && needle.includes(alias)) { score = 50; candLen = alias.length; }
+      else if (name && name.includes(needle)) { score = 40; candLen = needle.length; }
+      if (score === 0) continue;
+      if (!best || score > best.score || (score === best.score && candLen > best.len)) {
+        best = { row: r, score, len: candLen };
+      }
+    }
+    return best?.row ?? null;
+  }
+
   for (const ex of order) {
     const rows = ex === 'BSE' ? await loadBseIndexTable() : await loadNseIndexTable();
     if (!rows.length) continue;
 
     if (ex === 'BSE') {
-      const match = rows.find((r) => {
-        const name = normIdx(r.indexName);
-        const alias = normIdx(r.shortalias);
-        return name === needle || alias === needle ||
-               name.includes(needle) || needle.includes(name) ||
-               (alias && needle.includes(alias));
-      });
+      const match = pickBest(rows, (r) => r.indexName, (r) => r.shortalias);
       if (match) {
         const ltp = Number(match.LTP) || 0;
         const change = Number(match.change) || 0;
@@ -350,10 +370,7 @@ async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexS
         return { ltp, close: prev, open: prev, high: ltp, low: ltp, volume: 0, marketCap: 0, pe: 0 };
       }
     } else {
-      const match = rows.find((r) => {
-        const name = normIdx(r.index ?? r.indexName);
-        return name === needle || name.includes(needle) || needle.includes(name);
-      });
+      const match = pickBest(rows, (r) => r.index ?? r.indexName);
       if (match) {
         const ltp = Number(match.last ?? match.lastPrice) || 0;
         if (!ltp) continue;
