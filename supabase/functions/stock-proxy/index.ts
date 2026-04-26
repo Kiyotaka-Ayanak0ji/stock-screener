@@ -669,15 +669,47 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ── Step 0: Groww as PRIMARY for SME-named tickers ─────────────────
-    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
-    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
-    // else still goes through the Yahoo → Screener → Google chain unchanged.
+    // ── Step 0a: Resolve INDEX tickers up-front ────────────────────────
+    // Indices have no Yahoo `.NS`/`.BO` suffix and Groww doesn't serve them.
+    // We hit BSE IndexMovers / NSE allIndices feeds and route accordingly.
     const result: Record<string, Record<string, number>> = {};
     const resolvedKeys = new Set<string>();
 
+    const indexTargets = symbols.filter(
+      (s: { ticker: string; exchange: string; yahooSymbol?: string; isIndex?: boolean }) =>
+        s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol),
+    );
+
+    if (indexTargets.length > 0) {
+      await Promise.all(
+        indexTargets.map(async (s: { ticker: string; exchange: string }) => {
+          const idx = await withTimeout(fetchIndexQuote(s.ticker, s.exchange), 5000).catch(() => null);
+          if (idx) {
+            const key = `${s.exchange}_${s.ticker}`;
+            result[key] = {
+              ltp: idx.ltp,
+              open: idx.open ?? idx.ltp,
+              high: idx.high ?? idx.ltp,
+              low: idx.low ?? idx.ltp,
+              close: idx.close ?? idx.ltp,
+              volume: idx.volume ?? 0,
+              marketCap: 0,
+              pe: 0,
+            };
+            resolvedKeys.add(key);
+          }
+        }),
+      );
+    }
+
+    // ── Step 0b: Groww as PRIMARY for SME-named tickers ────────────────
+    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
+    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
+    // else still goes through the Yahoo → Screener → Google chain unchanged.
     const growwPrimaryTargets = symbols.filter(
-      (s: { ticker: string; exchange: string }) =>
+      (s: { ticker: string; exchange: string; isIndex?: boolean }) =>
+        !resolvedKeys.has(`${s.exchange}_${s.ticker}`) &&
+        !s.isIndex && !looksLikeIndex(s.ticker) &&
         (s.exchange === 'NSE' || s.exchange === 'BSE') && isLikelySmeTicker(s.ticker),
     );
 
