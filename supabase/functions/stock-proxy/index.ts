@@ -53,20 +53,73 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 let nseCookieCache: string | null = null;
 let nseCookieExpiry = 0;
 
-async function getNseCookie(): Promise<string> {
+const NSE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+function extractCookies(res: Response): string {
+  // Deno fetch lets us read multiple Set-Cookie via getSetCookie()
+  // (older runtimes only expose .get('set-cookie') concatenated by commas).
+  // deno-lint-ignore no-explicit-any
+  const headers: any = res.headers;
+  let cookieList: string[] = [];
+  if (typeof headers.getSetCookie === 'function') {
+    cookieList = headers.getSetCookie();
+  } else {
+    const raw = res.headers.get('set-cookie') || '';
+    cookieList = raw.split(/,(?=[^;]+=)/);
+  }
+  return cookieList
+    .map((c) => c.split(';')[0].trim())
+    .filter(Boolean)
+    .join('; ');
+}
+
+async function getNseCookie(symbolForReferer?: string): Promise<string> {
   if (nseCookieCache && Date.now() < nseCookieExpiry) return nseCookieCache;
   try {
-    const res = await fetch('https://www.nseindia.com/', {
+    // Step 1: hit homepage to seed the basic cookies
+    const homeRes = await fetch('https://www.nseindia.com/', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': NSE_UA,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
         'Accept-Language': 'en-US,en;q=0.9',
       },
     });
-    await res.text();
-    const sc = res.headers.get('set-cookie') || '';
-    // NSE sets several cookies — keep them all in one header value
-    const cookies = sc.split(/,(?=[^;]+=)/).map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
+    await homeRes.text();
+    let cookies = extractCookies(homeRes);
+
+    // Step 2: warm a symbol-specific page (NSE rejects API calls until a
+    // get-quotes/equity page has been visited with the same cookie jar).
+    // We use a well-known liquid scrip when no specific symbol is provided.
+    const warmSym = symbolForReferer || 'RELIANCE';
+    const warmRes = await fetch(
+      `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(warmSym)}`,
+      {
+        headers: {
+          'User-Agent': NSE_UA,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cookie': cookies,
+          'Referer': 'https://www.nseindia.com/',
+        },
+        redirect: 'manual',
+      },
+    );
+    await warmRes.text();
+    const extra = extractCookies(warmRes);
+    if (extra) {
+      // merge: symbol-page cookies override homepage ones with the same name
+      const map = new Map<string, string>();
+      for (const c of cookies.split('; ').filter(Boolean)) {
+        const eq = c.indexOf('=');
+        if (eq > 0) map.set(c.slice(0, eq), c.slice(eq + 1));
+      }
+      for (const c of extra.split('; ').filter(Boolean)) {
+        const eq = c.indexOf('=');
+        if (eq > 0) map.set(c.slice(0, eq), c.slice(eq + 1));
+      }
+      cookies = Array.from(map.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+    }
+
     if (cookies) {
       nseCookieCache = cookies;
       nseCookieExpiry = Date.now() + 5 * 60 * 1000; // 5 min
