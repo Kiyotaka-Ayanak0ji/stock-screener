@@ -53,20 +53,73 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 let nseCookieCache: string | null = null;
 let nseCookieExpiry = 0;
 
-async function getNseCookie(): Promise<string> {
+const NSE_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+
+function extractCookies(res: Response): string {
+  // Deno fetch lets us read multiple Set-Cookie via getSetCookie()
+  // (older runtimes only expose .get('set-cookie') concatenated by commas).
+  // deno-lint-ignore no-explicit-any
+  const headers: any = res.headers;
+  let cookieList: string[] = [];
+  if (typeof headers.getSetCookie === 'function') {
+    cookieList = headers.getSetCookie();
+  } else {
+    const raw = res.headers.get('set-cookie') || '';
+    cookieList = raw.split(/,(?=[^;]+=)/);
+  }
+  return cookieList
+    .map((c) => c.split(';')[0].trim())
+    .filter(Boolean)
+    .join('; ');
+}
+
+async function getNseCookie(symbolForReferer?: string): Promise<string> {
   if (nseCookieCache && Date.now() < nseCookieExpiry) return nseCookieCache;
   try {
-    const res = await fetch('https://www.nseindia.com/', {
+    // Step 1: hit homepage to seed the basic cookies
+    const homeRes = await fetch('https://www.nseindia.com/', {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': NSE_UA,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
         'Accept-Language': 'en-US,en;q=0.9',
       },
     });
-    await res.text();
-    const sc = res.headers.get('set-cookie') || '';
-    // NSE sets several cookies — keep them all in one header value
-    const cookies = sc.split(/,(?=[^;]+=)/).map(c => c.split(';')[0].trim()).filter(Boolean).join('; ');
+    await homeRes.text();
+    let cookies = extractCookies(homeRes);
+
+    // Step 2: warm a symbol-specific page (NSE rejects API calls until a
+    // get-quotes/equity page has been visited with the same cookie jar).
+    // We use a well-known liquid scrip when no specific symbol is provided.
+    const warmSym = symbolForReferer || 'RELIANCE';
+    const warmRes = await fetch(
+      `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(warmSym)}`,
+      {
+        headers: {
+          'User-Agent': NSE_UA,
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cookie': cookies,
+          'Referer': 'https://www.nseindia.com/',
+        },
+        redirect: 'manual',
+      },
+    );
+    await warmRes.text();
+    const extra = extractCookies(warmRes);
+    if (extra) {
+      // merge: symbol-page cookies override homepage ones with the same name
+      const map = new Map<string, string>();
+      for (const c of cookies.split('; ').filter(Boolean)) {
+        const eq = c.indexOf('=');
+        if (eq > 0) map.set(c.slice(0, eq), c.slice(eq + 1));
+      }
+      for (const c of extra.split('; ').filter(Boolean)) {
+        const eq = c.indexOf('=');
+        if (eq > 0) map.set(c.slice(0, eq), c.slice(eq + 1));
+      }
+      cookies = Array.from(map.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+    }
+
     if (cookies) {
       nseCookieCache = cookies;
       nseCookieExpiry = Date.now() + 5 * 60 * 1000; // 5 min
@@ -88,22 +141,40 @@ interface OhlcSlice {
 
 async function fetchNseOhlc(ticker: string): Promise<OhlcSlice | null> {
   try {
-    const cookie = await getNseCookie();
+    // Warm cookies for THIS specific symbol — NSE rejects API calls otherwise.
+    const cookie = await getNseCookie(ticker);
     if (!cookie) return null;
     const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent': NSE_UA,
       'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
       'Referer': `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(ticker)}`,
       'Cookie': cookie,
+      'X-Requested-With': 'XMLHttpRequest',
     };
     const sym = encodeURIComponent(ticker);
-    const [quoteRes, tradeRes] = await Promise.all([
-      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, { headers }),
-      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}&section=trade_info`, { headers }),
-    ]);
-    if (!quoteRes.ok) { await quoteRes.text(); await tradeRes.text(); return null; }
+    let quoteRes = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, { headers });
+
+    // 401/403 → invalidate cache, warm again with this symbol, retry once.
+    if (quoteRes.status === 401 || quoteRes.status === 403) {
+      await quoteRes.text();
+      nseCookieCache = null;
+      nseCookieExpiry = 0;
+      const fresh = await getNseCookie(ticker);
+      if (!fresh) return null;
+      quoteRes = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, {
+        headers: { ...headers, Cookie: fresh },
+      });
+    }
+    if (!quoteRes.ok) { await quoteRes.text(); return null; }
     const q = await quoteRes.json();
-    const t = tradeRes.ok ? await tradeRes.json() : null;
+
+    const tradeRes = await fetch(
+      `https://www.nseindia.com/api/quote-equity?symbol=${sym}&section=trade_info`,
+      { headers: { ...headers, Cookie: nseCookieCache || cookie } },
+    );
+    const t = tradeRes.ok ? await tradeRes.json() : (await tradeRes.text(), null);
+
     const pi = q?.priceInfo;
     if (!pi) return null;
 
@@ -112,9 +183,14 @@ async function fetchNseOhlc(ticker: string): Promise<OhlcSlice | null> {
     const low = Number(pi.intraDayHighLow?.min) || 0;
     const previousClose = Number(pi.previousClose) || 0;
     const ltp = Number(pi.lastPrice) || 0;
-    const volume = Math.round(Number(t?.securityWiseDP?.quantityTraded ?? t?.marketDeptOrderBook?.tradeInfo?.totalTradedVolume ?? 0));
+    const volume = Math.round(Number(
+      t?.securityWiseDP?.quantityTraded ??
+      t?.marketDeptOrderBook?.tradeInfo?.totalTradedVolume ??
+      0,
+    ));
 
     console.log(`NSE OHLC ${ticker}: open=${open} prev=${previousClose} vol=${volume}`);
+    if (open === 0 && previousClose === 0 && volume === 0) return null;
     return { open, high, low, close: previousClose, ltp, volume };
   } catch (err) {
     console.log(`NSE OHLC error ${ticker}: ${(err as Error).message}`);
@@ -171,7 +247,149 @@ async function fetchBseOhlc(ticker: string): Promise<OhlcSlice | null> {
 }
 
 async function fetchExchangeOhlc(ticker: string, exchange: string): Promise<OhlcSlice | null> {
-  return exchange === 'BSE' ? fetchBseOhlc(ticker) : fetchNseOhlc(ticker);
+  if (exchange === 'BSE') {
+    return (await fetchBseOhlc(ticker)) || (await fetchNseOhlc(ticker));
+  }
+  // For NSE, try NSE first; if NSE blocks/returns nothing, dual-listed SME stocks
+  // are still on BSE so we try BSE OHLC as a final fallback.
+  return (await fetchNseOhlc(ticker)) || (await fetchBseOhlc(ticker));
+}
+
+// ─── BSE / NSE INDEX support ────────────────────────────────────────
+// Indices (e.g. "BSE 250 LargeMidCap Index", "Nifty 50", "Sensex") aren't
+// listed scrips and never resolve via Yahoo's `.NS`/`.BO` suffix or Groww.
+// We rely on the public BSE IndexMovers feed (returns LTP + change for ALL
+// indices in one call) and fall back to NSE's All Indices feed.
+
+interface IndexSlice {
+  ltp: number;
+  open?: number;
+  high?: number;
+  low?: number;
+  close?: number; // previous close (derived from change for BSE)
+  volume?: number;
+  marketCap?: number;
+  pe?: number;
+}
+
+// deno-lint-ignore no-explicit-any
+let bseIndexCache: { rows: any[]; expiry: number } | null = null;
+// deno-lint-ignore no-explicit-any
+let nseIndexCache: { rows: any[]; expiry: number } | null = null;
+
+// deno-lint-ignore no-explicit-any
+async function loadBseIndexTable(): Promise<any[]> {
+  if (bseIndexCache && Date.now() < bseIndexCache.expiry) return bseIndexCache.rows;
+  try {
+    const res = await fetch(
+      'https://api.bseindia.com/BseIndiaAPI/api/IndexMovers/w?indexcode=BSE250LMI',
+      { headers: { 'User-Agent': NSE_UA, 'Accept': 'application/json', 'Referer': 'https://www.bseindia.com/' } },
+    );
+    if (!res.ok) { await res.text(); return []; }
+    const json = await res.json();
+    const rows = Array.isArray(json?.Table) ? json.Table : [];
+    bseIndexCache = { rows, expiry: Date.now() + 60_000 }; // 1 min
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+// deno-lint-ignore no-explicit-any
+async function loadNseIndexTable(): Promise<any[]> {
+  if (nseIndexCache && Date.now() < nseIndexCache.expiry) return nseIndexCache.rows;
+  try {
+    const cookie = await getNseCookie('NIFTY');
+    if (!cookie) return [];
+    const res = await fetch('https://www.nseindia.com/api/allIndices', {
+      headers: {
+        'User-Agent': NSE_UA,
+        'Accept': 'application/json',
+        'Referer': 'https://www.nseindia.com/market-data/live-market-indices',
+        'Cookie': cookie,
+      },
+    });
+    if (!res.ok) { await res.text(); return []; }
+    const json = await res.json();
+    const rows = Array.isArray(json?.data) ? json.data : [];
+    nseIndexCache = { rows, expiry: Date.now() + 60_000 };
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+// Normalise an index name for fuzzy matching (strip non-alphanumerics, uppercase).
+function normIdx(s: string): string {
+  return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexSlice | null> {
+  const needle = normIdx(ticker);
+  if (!needle) return null;
+
+  const order = exchange === 'NSE' ? ['NSE', 'BSE'] : ['BSE', 'NSE'];
+
+  // Score-based matcher: exact > startsWith/endsWith > contains, longest first.
+  // This avoids "MIDCAP" matching "BSE 250 LargeMidCap Index" before the exact
+  // "BSE 250 LargeMidCap Index" entry does.
+  // deno-lint-ignore no-explicit-any
+  function pickBest(rows: any[], nameKey: (r: any) => string, aliasKey?: (r: any) => string): any | null {
+    let best: { row: any; score: number; len: number } | null = null;
+    for (const r of rows) {
+      const name = normIdx(nameKey(r));
+      const alias = aliasKey ? normIdx(aliasKey(r)) : '';
+      let score = 0;
+      let candLen = 0;
+      if (name === needle || alias === needle) { score = 100; candLen = needle.length; }
+      else if (name && needle.startsWith(name)) { score = 80; candLen = name.length; }
+      else if (name && needle.endsWith(name)) { score = 70; candLen = name.length; }
+      else if (name && needle.includes(name)) { score = 60; candLen = name.length; }
+      else if (alias && needle.includes(alias)) { score = 50; candLen = alias.length; }
+      else if (name && name.includes(needle)) { score = 40; candLen = needle.length; }
+      if (score === 0) continue;
+      if (!best || score > best.score || (score === best.score && candLen > best.len)) {
+        best = { row: r, score, len: candLen };
+      }
+    }
+    return best?.row ?? null;
+  }
+
+  for (const ex of order) {
+    const rows = ex === 'BSE' ? await loadBseIndexTable() : await loadNseIndexTable();
+    if (!rows.length) continue;
+
+    if (ex === 'BSE') {
+      const match = pickBest(rows, (r) => r.indexName, (r) => r.shortalias);
+      if (match) {
+        const ltp = Number(match.LTP) || 0;
+        const change = Number(match.change) || 0;
+        if (!ltp) continue;
+        const prev = ltp - change;
+        console.log(`BSE Index ${ticker} → ${match.indexName} ltp=${ltp}`);
+        return { ltp, close: prev, open: prev, high: ltp, low: ltp, volume: 0, marketCap: 0, pe: 0 };
+      }
+    } else {
+      const match = pickBest(rows, (r) => r.index ?? r.indexName);
+      if (match) {
+        const ltp = Number(match.last ?? match.lastPrice) || 0;
+        if (!ltp) continue;
+        const open = Number(match.open) || ltp;
+        const high = Number(match.high) || ltp;
+        const low = Number(match.low) || ltp;
+        const prev = Number(match.previousClose) || ltp;
+        console.log(`NSE Index ${ticker} → ${match.index} ltp=${ltp}`);
+        return { ltp, open, high, low, close: prev, volume: 0, marketCap: 0, pe: 0 };
+      }
+    }
+  }
+  return null;
+}
+
+function looksLikeIndex(ticker: string, yahooSymbol?: string): boolean {
+  if (yahooSymbol && yahooSymbol.startsWith('^')) return true;
+  const t = (ticker || '').toUpperCase();
+  return /(_INDEX$|^INDEX_|NIFTY|SENSEX|BSE_\d|BANKEX|MIDCAP|SMALLCAP|LARGECAP)/.test(t);
 }
 
 
@@ -468,15 +686,47 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ── Step 0: Groww as PRIMARY for SME-named tickers ─────────────────
-    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
-    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
-    // else still goes through the Yahoo → Screener → Google chain unchanged.
+    // ── Step 0a: Resolve INDEX tickers up-front ────────────────────────
+    // Indices have no Yahoo `.NS`/`.BO` suffix and Groww doesn't serve them.
+    // We hit BSE IndexMovers / NSE allIndices feeds and route accordingly.
     const result: Record<string, Record<string, number>> = {};
     const resolvedKeys = new Set<string>();
 
+    const indexTargets = symbols.filter(
+      (s: { ticker: string; exchange: string; yahooSymbol?: string; isIndex?: boolean }) =>
+        s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol),
+    );
+
+    if (indexTargets.length > 0) {
+      await Promise.all(
+        indexTargets.map(async (s: { ticker: string; exchange: string }) => {
+          const idx = await withTimeout(fetchIndexQuote(s.ticker, s.exchange), 5000).catch(() => null);
+          if (idx) {
+            const key = `${s.exchange}_${s.ticker}`;
+            result[key] = {
+              ltp: idx.ltp,
+              open: idx.open ?? idx.ltp,
+              high: idx.high ?? idx.ltp,
+              low: idx.low ?? idx.ltp,
+              close: idx.close ?? idx.ltp,
+              volume: idx.volume ?? 0,
+              marketCap: 0,
+              pe: 0,
+            };
+            resolvedKeys.add(key);
+          }
+        }),
+      );
+    }
+
+    // ── Step 0b: Groww as PRIMARY for SME-named tickers ────────────────
+    // Yahoo coverage of NSE/BSE SME boards is poor and often returns stale or zero data.
+    // For tickers whose symbol matches an SME pattern we hit Groww first; everything
+    // else still goes through the Yahoo → Screener → Google chain unchanged.
     const growwPrimaryTargets = symbols.filter(
-      (s: { ticker: string; exchange: string }) =>
+      (s: { ticker: string; exchange: string; isIndex?: boolean }) =>
+        !resolvedKeys.has(`${s.exchange}_${s.ticker}`) &&
+        !s.isIndex && !looksLikeIndex(s.ticker) &&
         (s.exchange === 'NSE' || s.exchange === 'BSE') && isLikelySmeTicker(s.ticker),
     );
 
@@ -630,15 +880,18 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Remaining missing after alt-exchange retry
-    const stillMissing = symbols.filter((s: { ticker: string; exchange: string }) => {
-      return !resolvedKeys.has(`${s.exchange}_${s.ticker}`);
+    // Remaining missing after alt-exchange retry — exclude indices (no Yahoo/Groww/Screener coverage).
+    const stillMissing = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
+      if (resolvedKeys.has(`${s.exchange}_${s.ticker}`)) return false;
+      return !(s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol));
     });
 
-    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0)
-    const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string }) => {
+    // Identify resolved tickers that need enrichment (marketCap=0, volume=0, or pe=0).
+    // Skip indices — they legitimately have no marketCap / PE / per-day volume.
+    const needsEnrichment = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
       const key = `${s.exchange}_${s.ticker}`;
       if (!resolvedKeys.has(key)) return false;
+      if (s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol)) return false;
       const d = result[key];
       return (d.marketCap === 0 || d.volume === 0 || d.pe === 0);
     });
@@ -735,7 +988,10 @@ Deno.serve(async (req) => {
     // hit the exchange's own quote API (NSE for NSE, BSE for BSE) which
     // exposes proper intraday open/high/low + total traded volume + actual
     // previous close, and merge the missing fields in.
-    const ohlcCandidates = symbols.filter((s: { ticker: string; exchange: string }) => {
+    const ohlcCandidates = symbols.filter((s: { ticker: string; exchange: string; isIndex?: boolean; yahooSymbol?: string }) => {
+      // Skip indices — they don't have a quote-equity endpoint, and their
+      // open/close come from the index feed already.
+      if (s.isIndex || looksLikeIndex(s.ticker, s.yahooSymbol)) return false;
       const d = result[`${s.exchange}_${s.ticker}`];
       if (!d || !d.ltp) return false;
       const flatOhlc = d.open === d.ltp && d.high === d.ltp && d.low === d.ltp;
