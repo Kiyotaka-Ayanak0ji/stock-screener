@@ -795,10 +795,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     try {
       const stock = stocksRef.current.find(s => s.ticker === ticker);
-      if (!stock) {
-        toast.error(`Stock ${ticker} not found`);
-        return false;
-      }
+      if (!stock) return false;
 
       const { data, error } = await supabase.functions.invoke("verify-stock-screener", {
         body: { ticker, exchange: stock.exchange },
@@ -808,7 +805,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const msg = (error as { message?: string } | null)?.message
           || (data as { error?: string } | null)?.error
           || "Could not verify against Screener";
-        toast.error(`Verify failed for ${ticker}`, { description: msg });
+        console.warn(`Auto-tally verify failed for ${ticker}: ${msg}`);
         return false;
       }
 
@@ -822,12 +819,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         next.add(ticker);
         return next;
       });
-      const sourceLabel = data.source === "google" ? "Google Finance" : "Screener.in";
-      toast.success(`${ticker} verified`, { description: `Refreshed from ${sourceLabel}` });
       return true;
     } catch (err) {
       console.error("verifyStock error:", err);
-      toast.error(`Verify failed for ${ticker}`);
       return false;
     } finally {
       setVerifyingTickers(prev => {
