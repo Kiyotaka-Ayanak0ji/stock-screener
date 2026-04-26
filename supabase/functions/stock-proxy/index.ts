@@ -141,22 +141,40 @@ interface OhlcSlice {
 
 async function fetchNseOhlc(ticker: string): Promise<OhlcSlice | null> {
   try {
-    const cookie = await getNseCookie();
+    // Warm cookies for THIS specific symbol — NSE rejects API calls otherwise.
+    const cookie = await getNseCookie(ticker);
     if (!cookie) return null;
     const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent': NSE_UA,
       'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en;q=0.9',
       'Referer': `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(ticker)}`,
       'Cookie': cookie,
+      'X-Requested-With': 'XMLHttpRequest',
     };
     const sym = encodeURIComponent(ticker);
-    const [quoteRes, tradeRes] = await Promise.all([
-      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, { headers }),
-      fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}&section=trade_info`, { headers }),
-    ]);
-    if (!quoteRes.ok) { await quoteRes.text(); await tradeRes.text(); return null; }
+    let quoteRes = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, { headers });
+
+    // 401/403 → invalidate cache, warm again with this symbol, retry once.
+    if (quoteRes.status === 401 || quoteRes.status === 403) {
+      await quoteRes.text();
+      nseCookieCache = null;
+      nseCookieExpiry = 0;
+      const fresh = await getNseCookie(ticker);
+      if (!fresh) return null;
+      quoteRes = await fetch(`https://www.nseindia.com/api/quote-equity?symbol=${sym}`, {
+        headers: { ...headers, Cookie: fresh },
+      });
+    }
+    if (!quoteRes.ok) { await quoteRes.text(); return null; }
     const q = await quoteRes.json();
-    const t = tradeRes.ok ? await tradeRes.json() : null;
+
+    const tradeRes = await fetch(
+      `https://www.nseindia.com/api/quote-equity?symbol=${sym}&section=trade_info`,
+      { headers: { ...headers, Cookie: nseCookieCache || cookie } },
+    );
+    const t = tradeRes.ok ? await tradeRes.json() : (await tradeRes.text(), null);
+
     const pi = q?.priceInfo;
     if (!pi) return null;
 
@@ -165,9 +183,14 @@ async function fetchNseOhlc(ticker: string): Promise<OhlcSlice | null> {
     const low = Number(pi.intraDayHighLow?.min) || 0;
     const previousClose = Number(pi.previousClose) || 0;
     const ltp = Number(pi.lastPrice) || 0;
-    const volume = Math.round(Number(t?.securityWiseDP?.quantityTraded ?? t?.marketDeptOrderBook?.tradeInfo?.totalTradedVolume ?? 0));
+    const volume = Math.round(Number(
+      t?.securityWiseDP?.quantityTraded ??
+      t?.marketDeptOrderBook?.tradeInfo?.totalTradedVolume ??
+      0,
+    ));
 
     console.log(`NSE OHLC ${ticker}: open=${open} prev=${previousClose} vol=${volume}`);
+    if (open === 0 && previousClose === 0 && volume === 0) return null;
     return { open, high, low, close: previousClose, ltp, volume };
   } catch (err) {
     console.log(`NSE OHLC error ${ticker}: ${(err as Error).message}`);
