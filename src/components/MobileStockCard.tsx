@@ -3,7 +3,7 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2, Crown, RefreshCw } from "lucide-react";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,8 +32,7 @@ interface MobileStockCardProps {
 const SWIPE_THRESHOLD = 90;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
-  const { priceTriggers, removeStock, addStock, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
-  const isVerifying = verifyingTickers.has(stock.ticker);
+  const { priceTriggers, removeStock, addStock, setPriceTrigger, isMarketOpen } = useStocks();
   const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
   const isPremium = !isGuest && isPremiumTier;
@@ -245,15 +244,6 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                           ₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                         </p>
                       </MissingDataTooltip>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); if (!isVerifying) verifyStock(stock.ticker); }}
-                        disabled={isVerifying}
-                        aria-label={`Verify ${stock.ticker} against Screener`}
-                        className="text-muted-foreground/60 active:text-primary disabled:opacity-50 transition-colors p-1 -mr-1 rounded"
-                      >
-                        <RefreshCw className={`h-3.5 w-3.5 ${isVerifying ? "animate-spin" : ""}`} />
-                      </button>
                     </div>
                     <motion.span
                       key={stock.change}

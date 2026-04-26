@@ -795,10 +795,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     try {
       const stock = stocksRef.current.find(s => s.ticker === ticker);
-      if (!stock) {
-        toast.error(`Stock ${ticker} not found`);
-        return false;
-      }
+      if (!stock) return false;
 
       const { data, error } = await supabase.functions.invoke("verify-stock-screener", {
         body: { ticker, exchange: stock.exchange },
@@ -808,7 +805,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const msg = (error as { message?: string } | null)?.message
           || (data as { error?: string } | null)?.error
           || "Could not verify against Screener";
-        toast.error(`Verify failed for ${ticker}`, { description: msg });
+        console.warn(`Auto-tally verify failed for ${ticker}: ${msg}`);
         return false;
       }
 
@@ -822,12 +819,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         next.add(ticker);
         return next;
       });
-      const sourceLabel = data.source === "google" ? "Google Finance" : "Screener.in";
-      toast.success(`${ticker} verified`, { description: `Refreshed from ${sourceLabel}` });
       return true;
     } catch (err) {
       console.error("verifyStock error:", err);
-      toast.error(`Verify failed for ${ticker}`);
       return false;
     } finally {
       setVerifyingTickers(prev => {
@@ -838,8 +832,85 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
+  // --- Auto-tally: once per login session, scan watchlist for stocks with
+  // missing/empty fields after Yahoo + Groww live data has loaded, then
+  // silently verify them against Screener.in (with throttling to avoid
+  // rate limiting). Results are merged into state and persisted via the
+  // normal cache flow. The session guard prevents repeat scrapes on every
+  // re-render or navigation back to the dashboard.
+  const autoTallyStartedRef = useRef(false);
+  useEffect(() => {
+    if (!prefsLoaded || !pricesLoaded) return;
+    if (autoTallyStartedRef.current) return;
 
-  // Wrapper for createWatchlist that copies current watchlist tickers
+    const sessionKey = `st_auto_tally_done_${user?.id ?? "guest"}`;
+    try {
+      if (sessionStorage.getItem(sessionKey) === "1") {
+        autoTallyStartedRef.current = true;
+        return;
+      }
+    } catch {
+      // sessionStorage may be unavailable; proceed without guard
+    }
+
+    // Wait a short moment after pricesLoaded so the first live fetch can
+    // populate fields; then evaluate which tickers still look incomplete.
+    const timer = setTimeout(() => {
+      const currentStocks = stocksRef.current;
+      const currentWatchlist = watchlistRef.current;
+
+      const isIncomplete = (s: Stock) =>
+        !s.isIndex && (
+          !s.price || s.price === 0 ||
+          !s.volume || s.volume === 0 ||
+          !s.marketCap || s.marketCap === 0 ||
+          !s.pe || s.pe === 0
+        );
+
+      const candidates = currentStocks
+        .filter(s => currentWatchlist.includes(s.ticker))
+        .filter(isIncomplete)
+        .map(s => s.ticker);
+
+      if (candidates.length === 0) {
+        try { sessionStorage.setItem(sessionKey, "1"); } catch { /* ignore */ }
+        autoTallyStartedRef.current = true;
+        return;
+      }
+
+      autoTallyStartedRef.current = true;
+
+      // Throttled sequential verify — 800ms between calls keeps us well
+      // under typical Screener rate limits even for large watchlists.
+      (async () => {
+        let filled = 0;
+        for (const ticker of candidates) {
+          try {
+            const ok = await verifyStock(ticker);
+            if (ok) filled++;
+          } catch (err) {
+            console.warn(`Auto-tally failed for ${ticker}:`, err);
+          }
+          await new Promise(r => setTimeout(r, 800));
+        }
+        try { sessionStorage.setItem(sessionKey, "1"); } catch { /* ignore */ }
+
+        // Persist freshly-tallied prices to the cache so subsequent loads
+        // don't have to re-scrape Screener.
+        if (filled > 0) {
+          const wl = watchlistRef.current;
+          const fresh = stocksRef.current.filter(s => wl.includes(s.ticker));
+          try { await saveCachedPrices(fresh); } catch { /* ignore */ }
+          toast.success(`Auto-verified ${filled} stock${filled === 1 ? "" : "s"}`, {
+            description: "Filled missing fields from Screener.in",
+          });
+        }
+      })();
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [prefsLoaded, pricesLoaded, user?.id, verifyStock]);
+
   const createWatchlist = useCallback(async (name: string) => {
     return createWl(name, []);
   }, [createWl]);

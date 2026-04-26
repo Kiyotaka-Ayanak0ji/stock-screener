@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info, RefreshCw } from "lucide-react";
+import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -27,8 +27,7 @@ interface StockRowProps {
 const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", "AGM", "Buyback", "Watch", "Target Hit"];
 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
-  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, verifyStock, verifyingTickers, isMarketOpen } = useStocks();
-  const isVerifying = verifyingTickers.has(stock.ticker);
+  const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, isMarketOpen } = useStocks();
   const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
   const isPremium = !isGuest && isPremiumTier;
@@ -193,20 +192,6 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
                 <MissingDataTooltip missing={stock.price === 0} label="Price">
                   <span>₹{stock.price.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 </MissingDataTooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); if (!isVerifying) verifyStock(stock.ticker); }}
-                      disabled={isVerifying}
-                      aria-label={`Verify ${stock.ticker} against Screener`}
-                      className="text-muted-foreground/60 hover:text-primary disabled:opacity-50 transition-colors p-0.5 -mr-1 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    >
-                      <RefreshCw className={`h-3 w-3 ${isVerifying ? "animate-spin" : ""}`} />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">Verify against Screener.in</TooltipContent>
-                </Tooltip>
               </div>
             ) : (
               <Skeleton className="h-4 w-20 ml-auto" />
