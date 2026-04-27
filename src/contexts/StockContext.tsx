@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, generateStockData, ALL_AVAILABLE_STOCKS, encrypt, decrypt } from "@/lib/stockData";
-import { fetchLivePrices, applyLiveData } from "@/lib/growwApi";
+import { fetchLivePrices, applyLiveData, looksLikeIndexTicker } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -606,7 +606,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (missing.length === 0) return prev;
       const newStocks = missing.map(ticker => {
         const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
-        const meta = getTickerMeta(ticker);
+        const meta = getTickerMeta(ticker) || {};
+        // Auto-detect indices from the ticker pattern so legacy entries (added
+        // before isIndex metadata was tracked) still render with the INDEX
+        // badge and skip Screener verification on the next session load.
+        if (!meta.isIndex && looksLikeIndexTicker(ticker, meta.yahooSymbol)) {
+          meta.isIndex = true;
+        }
         return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE", meta);
       });
       return [...prev, ...newStocks];
@@ -859,13 +865,20 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const currentStocks = stocksRef.current;
       const currentWatchlist = watchlistRef.current;
 
-      const isIncomplete = (s: Stock) =>
-        !s.isIndex && (
+      const isIncomplete = (s: Stock) => {
+        // Indices genuinely don't expose Volume / P/E / MarketCap, so don't
+        // queue them for Screener verification (which would always fail with
+        // "Could not verify" and pollute the debug panel). Detect both via
+        // the explicit isIndex flag and the heuristic ticker pattern, so
+        // legacy entries added before isIndex was tracked are still skipped.
+        if (s.isIndex || looksLikeIndexTicker(s.ticker, s.yahooSymbol)) return false;
+        return (
           !s.price || s.price === 0 ||
           !s.volume || s.volume === 0 ||
           !s.marketCap || s.marketCap === 0 ||
           !s.pe || s.pe === 0
         );
+      };
 
       const candidates = currentStocks
         .filter(s => currentWatchlist.includes(s.ticker))
