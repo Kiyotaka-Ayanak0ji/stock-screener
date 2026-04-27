@@ -295,6 +295,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCustomColumns(data.custom_columns ? JSON.parse(decrypt(data.custom_columns)) : []);
         setCustomColumnData(data.custom_column_data ? JSON.parse(decrypt(data.custom_column_data)) : {});
         setPriceTriggers(data.price_triggers ? JSON.parse(decrypt(data.price_triggers)) : {});
+        // Premium Plus auto-refresh preference (server is source of truth for
+        // logged-in users; localStorage stays in sync as a fast fallback).
+        const autoRefresh = !!(data as { auto_refresh_on_load?: boolean }).auto_refresh_on_load;
+        setAutoRefreshOnLoadState(autoRefresh);
+        try { localStorage.setItem("st_auto_refresh_on_load", autoRefresh ? "1" : "0"); } catch { /* ignore */ }
       }
     } catch (err) {
       console.error("Failed to load preferences from database:", err);
