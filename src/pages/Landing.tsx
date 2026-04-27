@@ -33,6 +33,7 @@ import {
   Hand,
   Undo2,
   Activity,
+  Zap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
