@@ -132,6 +132,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loadedTickers, setLoadedTickers] = useState<Set<string>>(new Set());
   const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
+  // Premium Plus toggle — when on, every cache read triggers an immediate
+  // live-price refetch so the UI never shows stale data on reload / nav.
+  const [autoRefreshOnLoad, setAutoRefreshOnLoadState] = useState<boolean>(() => {
+    try { return localStorage.getItem("st_auto_refresh_on_load") === "1"; } catch { return false; }
+  });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Persistent ticker metadata (screenerCode, yahooSymbol, isIndex) — survives reloads
