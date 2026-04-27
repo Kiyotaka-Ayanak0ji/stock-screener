@@ -16,6 +16,7 @@ import PremiumDialog from "@/components/PremiumDialog";
 import StockDetailSheet from "@/components/StockDetailSheet";
 import StockFreshnessBadge from "@/components/StockFreshnessBadge";
 import MissingDataTooltip from "@/components/MissingDataTooltip";
+import { looksLikeIndexTicker } from "@/lib/growwApi";
 
 interface StockRowProps {
   stock: Stock;
