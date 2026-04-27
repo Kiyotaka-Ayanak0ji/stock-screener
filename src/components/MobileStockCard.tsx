@@ -301,10 +301,10 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
                 <span>
                   P/E:{" "}
-                  {isIndexLike ? (
-                    <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
-                  ) : stock.pe && stock.pe > 0 ? (
+                  {stock.pe && stock.pe > 0 ? (
                     <span className="text-foreground/80 font-semibold">{stock.pe.toFixed(2)}</span>
+                  ) : isIndexLike ? (
+                    <span className="text-muted-foreground/60" title="Index P/E not published by the exchange feed">—</span>
                   ) : (
                     <MissingDataTooltip
                       missing

@@ -262,10 +262,10 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         {isVisible("pe") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              isIndexLike ? (
-                <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
-              ) : stock.pe > 0 ? (
+              stock.pe > 0 ? (
                 <span>{stock.pe.toFixed(2)}</span>
+              ) : isIndexLike ? (
+                <span className="text-muted-foreground/60" title="Index P/E not published by the exchange feed">—</span>
               ) : (
                 <MissingDataTooltip
                   missing
