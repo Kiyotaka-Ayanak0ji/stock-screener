@@ -70,6 +70,10 @@ interface StockContextType {
   createWatchlist: (name: string) => Promise<Watchlist | null>;
   renameWatchlist: (id: string, name: string) => Promise<void>;
   deleteWatchlist: (id: string) => Promise<void>;
+  // Premium Plus: auto-refresh prices the moment cached data is read from memory
+  // (page reload, watchlist switch, etc.) on top of the normal background polling.
+  autoRefreshOnLoad: boolean;
+  setAutoRefreshOnLoad: (enabled: boolean) => Promise<void>;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
