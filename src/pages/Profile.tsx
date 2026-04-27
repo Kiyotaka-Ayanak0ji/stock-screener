@@ -120,6 +120,25 @@ const Profile = () => {
     }
   };
 
+  const handleToggleAutoRefresh = async (enabled: boolean) => {
+    if (!isPremiumPlus) {
+      toast.error("Auto-refresh on reload is a Premium Plus feature", {
+        description: "Upgrade to Premium Plus to unlock this setting.",
+        action: { label: "Upgrade", onClick: () => navigate("/subscribe") },
+      });
+      return;
+    }
+    setSavingAutoRefresh(true);
+    try {
+      await setAutoRefreshOnLoad(enabled);
+      toast.success(enabled ? "Auto-refresh enabled" : "Auto-refresh disabled");
+    } catch {
+      toast.error("Failed to update preference");
+    } finally {
+      setSavingAutoRefresh(false);
+    }
+  };
+
   const handleSaveReview = async () => {
     if (!user || reviewRating === 0 || !reviewText.trim()) {
       toast.error("Please provide a rating and review.");
