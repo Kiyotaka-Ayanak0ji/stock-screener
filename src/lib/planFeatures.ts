@@ -88,6 +88,7 @@ export function inferRequiredTier(featureName?: string): RequiredTier {
 
   // Premium Plus only.
   if (f.includes("unlimited")) return "premium_plus";
+  if (f.includes("auto-refresh") || f.includes("auto refresh")) return "premium_plus";
 
   // Premium-only features.
   const premiumKeywords = [
