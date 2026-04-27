@@ -275,13 +275,17 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 <span>
                   Vol:{" "}
-                  <MissingDataTooltip
-                    missing={!stock.volume || stock.volume === 0}
-                    label="Volume"
-                    hint="Some illiquid SME / micro-cap tickers report no trades."
-                  >
-                    {stock.volume > 0 ? formatVolume(stock.volume) : "0"}
-                  </MissingDataTooltip>
+                  {stock.isIndex ? (
+                    <span className="text-muted-foreground/60" title="Indices don't report a single trade volume">—</span>
+                  ) : (
+                    <MissingDataTooltip
+                      missing={!stock.volume || stock.volume === 0}
+                      label="Volume"
+                      hint="Some illiquid SME / micro-cap tickers report no trades."
+                    >
+                      {stock.volume > 0 ? formatVolume(stock.volume) : "0"}
+                    </MissingDataTooltip>
+                  )}
                 </span>
               </div>
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
@@ -295,7 +299,9 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
                 <span>
                   P/E:{" "}
-                  {stock.pe && stock.pe > 0 ? (
+                  {stock.isIndex ? (
+                    <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
+                  ) : stock.pe && stock.pe > 0 ? (
                     <span className="text-foreground/80 font-semibold">{stock.pe.toFixed(2)}</span>
                   ) : (
                     <MissingDataTooltip
@@ -309,7 +315,9 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 </span>
                 <span>
                   MCap:{" "}
-                  {stock.marketCap && stock.marketCap > 0 ? (
+                  {stock.isIndex ? (
+                    <span className="text-muted-foreground/60" title="Indices don't have a market cap">—</span>
+                  ) : stock.marketCap && stock.marketCap > 0 ? (
                     <span className="text-foreground/80 font-semibold">{formatMarketCap(stock.marketCap)}</span>
                   ) : (
                     <MissingDataTooltip
