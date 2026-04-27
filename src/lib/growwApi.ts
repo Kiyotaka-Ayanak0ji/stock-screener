@@ -35,6 +35,17 @@ export async function fetchLivePrices(
 }
 
 /**
+ * Mirrors the server-side `looksLikeIndex` heuristic in stock-proxy so the
+ * client can apply index-aware logic even when the local Stock metadata
+ * doesn't have isIndex set yet (e.g. legacy entries from before tracking).
+ */
+export function looksLikeIndexTicker(ticker: string, yahooSymbol?: string): boolean {
+  if (yahooSymbol && yahooSymbol.startsWith("^")) return true;
+  const t = (ticker || "").toUpperCase();
+  return /(_INDEX$|^INDEX_|NIFTY|SENSEX|BSE_\d|BANKEX|MIDCAP|SMALLCAP|LARGECAP)/.test(t);
+}
+
+/**
  * Pick the new value if it's a valid positive number; otherwise keep the
  * previously-cached one. This prevents a partial proxy response (e.g. Yahoo
  * resolved LTP but Groww 403'd marketCap, or NSE OHLC returned vol=0 for an
