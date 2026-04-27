@@ -71,8 +71,9 @@ export function applyLiveData(
   const changePercent = previousClose > 0 ? Math.round((change / previousClose) * 10000) / 100 : 0;
 
   // Indices genuinely don't have volume / pe / marketCap — don't try to
-  // preserve "old" values for them, just keep zero.
-  const isIdx = !!stock.isIndex;
+  // preserve "old" values for them, just keep zero. Also covers indices added
+  // before isIndex metadata was tracked (BSE_250_LARGEMIDCAP_INDEX, NIFTY*, etc.).
+  const isIdx = !!stock.isIndex || looksLikeIndexTicker(stock.ticker, stock.yahooSymbol);
 
   return {
     ...stock,
