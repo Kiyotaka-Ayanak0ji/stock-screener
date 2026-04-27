@@ -330,7 +330,7 @@ async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexS
   const needle = normIdx(ticker);
   if (!needle) return null;
 
-  const order = exchange === 'NSE' ? ['NSE', 'BSE'] : ['BSE', 'NSE'];
+  // (BSE preferred when `exchange === 'BSE'`, otherwise NSE preferred — merge logic below handles fallbacks)
 
   // Score-based matcher: exact > startsWith/endsWith > contains, longest first.
   // This avoids "MIDCAP" matching "BSE 250 LargeMidCap Index" before the exact
