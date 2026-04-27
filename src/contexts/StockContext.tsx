@@ -606,7 +606,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (missing.length === 0) return prev;
       const newStocks = missing.map(ticker => {
         const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
-        const meta = getTickerMeta(ticker);
+        const meta = getTickerMeta(ticker) || {};
+        // Auto-detect indices from the ticker pattern so legacy entries (added
+        // before isIndex metadata was tracked) still render with the INDEX
+        // badge and skip Screener verification on the next session load.
+        if (!meta.isIndex && looksLikeIndexTicker(ticker, meta.yahooSymbol)) {
+          meta.isIndex = true;
+        }
         return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE", meta);
       });
       return [...prev, ...newStocks];
