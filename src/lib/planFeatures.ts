@@ -19,7 +19,7 @@ export const GUEST_FEATURES = [
   "Up to 20 stocks in 1 watchlist",
   "Basic price data (NSE & BSE)",
   "Light & dark mode",
-  "Mobile PWA — install to home screen",
+  "Mobile PWA  (Install to home screen)",
 ] as const;
 
 // Features Guest does NOT have (used for cross-out lists on Landing).
