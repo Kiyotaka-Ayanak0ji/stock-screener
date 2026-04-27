@@ -16,6 +16,7 @@ import PremiumDialog from "@/components/PremiumDialog";
 import StockDetailSheet from "@/components/StockDetailSheet";
 import StockFreshnessBadge from "@/components/StockFreshnessBadge";
 import MissingDataTooltip from "@/components/MissingDataTooltip";
+import { looksLikeIndexTicker } from "@/lib/growwApi";
 
 interface StockRowProps {
   stock: Stock;
@@ -110,6 +111,8 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   };
 
   const isPriceAvailable = !priceLoading || stock.price !== 0;
+  // Indices don't have volume / pe / marketCap — show "—" instead of "missing"
+  const isIndexLike = !!stock.isIndex || looksLikeIndexTicker(stock.ticker, stock.yahooSymbol);
   const isPositive = stock.change > 0;
   const isNegative = stock.change < 0;
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-unchanged";
@@ -225,33 +228,43 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         {isVisible("volume") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              <MissingDataTooltip
-                missing={!stock.volume || stock.volume === 0}
-                label="Volume"
-                hint="Some illiquid SME / micro-cap tickers report no trades."
-              >
-                {formatVolume(stock.volume)}
-              </MissingDataTooltip>
+              isIndexLike ? (
+                <span className="text-muted-foreground/60" title="Indices don't report a single trade volume">—</span>
+              ) : (
+                <MissingDataTooltip
+                  missing={!stock.volume || stock.volume === 0}
+                  label="Volume"
+                  hint="Some illiquid SME / micro-cap tickers report no trades."
+                >
+                  {formatVolume(stock.volume)}
+                </MissingDataTooltip>
+              )
             ) : <Skeleton className="h-3 w-14 ml-auto" />}
           </td>
         )}
         {isVisible("marketCap") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              <MissingDataTooltip
-                missing={!stock.marketCap || stock.marketCap === 0}
-                label="Market cap"
-                hint="Falls back to Groww when Yahoo returns nothing."
-              >
-                ₹{formatMarketCap(stock.marketCap)}
-              </MissingDataTooltip>
+              isIndexLike ? (
+                <span className="text-muted-foreground/60" title="Indices don't have a market cap">—</span>
+              ) : (
+                <MissingDataTooltip
+                  missing={!stock.marketCap || stock.marketCap === 0}
+                  label="Market cap"
+                  hint="Falls back to Groww when Yahoo returns nothing."
+                >
+                  ₹{formatMarketCap(stock.marketCap)}
+                </MissingDataTooltip>
+              )
             ) : <Skeleton className="h-3 w-18 ml-auto" />}
           </td>
         )}
         {isVisible("pe") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              stock.pe > 0 ? (
+              isIndexLike ? (
+                <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
+              ) : stock.pe > 0 ? (
                 <span>{stock.pe.toFixed(2)}</span>
               ) : (
                 <MissingDataTooltip
