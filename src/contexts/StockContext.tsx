@@ -70,6 +70,10 @@ interface StockContextType {
   createWatchlist: (name: string) => Promise<Watchlist | null>;
   renameWatchlist: (id: string, name: string) => Promise<void>;
   deleteWatchlist: (id: string) => Promise<void>;
+  // Premium Plus: auto-refresh prices the moment cached data is read from memory
+  // (page reload, watchlist switch, etc.) on top of the normal background polling.
+  autoRefreshOnLoad: boolean;
+  setAutoRefreshOnLoad: (enabled: boolean) => Promise<void>;
 }
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
@@ -128,6 +132,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [loadedTickers, setLoadedTickers] = useState<Set<string>>(new Set());
   const [priceTriggers, setPriceTriggers] = useState<Record<string, { price: number; createdAt: number }>>({});
   const [triggeredAlerts, setTriggeredAlerts] = useState<TriggeredAlert[]>([]);
+  // Premium Plus toggle — when on, every cache read triggers an immediate
+  // live-price refetch so the UI never shows stale data on reload / nav.
+  const [autoRefreshOnLoad, setAutoRefreshOnLoadState] = useState<boolean>(() => {
+    try { return localStorage.getItem("st_auto_refresh_on_load") === "1"; } catch { return false; }
+  });
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Persistent ticker metadata (screenerCode, yahooSymbol, isIndex) — survives reloads
@@ -286,6 +295,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCustomColumns(data.custom_columns ? JSON.parse(decrypt(data.custom_columns)) : []);
         setCustomColumnData(data.custom_column_data ? JSON.parse(decrypt(data.custom_column_data)) : {});
         setPriceTriggers(data.price_triggers ? JSON.parse(decrypt(data.price_triggers)) : {});
+        // Premium Plus auto-refresh preference (server is source of truth for
+        // logged-in users; localStorage stays in sync as a fast fallback).
+        const autoRefresh = !!(data as { auto_refresh_on_load?: boolean }).auto_refresh_on_load;
+        setAutoRefreshOnLoadState(autoRefresh);
+        try { localStorage.setItem("st_auto_refresh_on_load", autoRefresh ? "1" : "0"); } catch { /* ignore */ }
       }
     } catch (err) {
       console.error("Failed to load preferences from database:", err);
@@ -735,6 +749,76 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   }, []);
 
+  // Premium Plus: persist the auto-refresh-on-load toggle. Writes to
+  // user_preferences for logged-in users and mirrors to localStorage so the
+  // setting survives a hard reload before the DB roundtrip completes.
+  const setAutoRefreshOnLoad = useCallback(async (enabled: boolean) => {
+    setAutoRefreshOnLoadState(enabled);
+    try { localStorage.setItem("st_auto_refresh_on_load", enabled ? "1" : "0"); } catch { /* ignore */ }
+    if (user) {
+      const { error } = await supabase
+        .from("user_preferences")
+        .update({ auto_refresh_on_load: enabled })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("Failed to persist auto-refresh preference:", error);
+        throw error;
+      }
+    }
+  }, [user]);
+
+  // Silent live-price refetch (no toast). Used by the Premium Plus
+  // auto-refresh-on-load behavior so the UI updates instantly when cached
+  // prices are pulled from memory (page reload, watchlist switch, etc.).
+  const silentRefresh = useCallback(async () => {
+    try {
+      const currentStocks = stocksRef.current;
+      const currentWatchlist = watchlistRef.current;
+      const tickerInfo = currentStocks
+        .filter(s => currentWatchlist.includes(s.ticker))
+        .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
+      if (tickerInfo.length === 0) return;
+      const liveData = await fetchLivePrices(tickerInfo);
+      if (!liveData || Object.keys(liveData).length === 0) return;
+      const updatedStocks = currentStocks.map(s => {
+        const key = `${s.exchange}_${s.ticker}`;
+        const live = liveData[key];
+        return live ? applyLiveData(s, live) : s;
+      });
+      const flashes: Record<string, "up" | "down" | null> = {};
+      updatedStocks.forEach(s => {
+        const prevPrice = prevPrices.current[s.ticker] || s.price;
+        if (s.price > prevPrice) flashes[s.ticker] = "up";
+        else if (s.price < prevPrice) flashes[s.ticker] = "down";
+        else flashes[s.ticker] = null;
+        prevPrices.current[s.ticker] = s.price;
+      });
+      setLastFlash(flashes);
+      setStocks(updatedStocks);
+      const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+      if (watchlistStocks.length > 0) saveCachedPrices(watchlistStocks);
+    } catch (err) {
+      console.error("Auto-refresh-on-load failed:", err);
+    }
+  }, [saveCachedPrices]);
+
+  // Auto-refresh-on-load: when prices have just been loaded from the cache
+  // (i.e. re-fetched from memory) and the Premium Plus toggle is on, kick off
+  // a silent live refetch so the user sees fresh values immediately rather
+  // than waiting for the next polling tick.
+  const autoRefreshFiredRef = useRef(false);
+  useEffect(() => {
+    if (!pricesLoaded || !prefsLoaded) return;
+    if (!autoRefreshOnLoad) return;
+    if (autoRefreshFiredRef.current) return;
+    autoRefreshFiredRef.current = true;
+    silentRefresh();
+  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh]);
+
+  // Reset the one-shot guard when the watchlist changes — switching watchlists
+  // counts as another "fetched from memory" event for the new ticker set.
+  useEffect(() => { autoRefreshFiredRef.current = false; }, [activeWatchlistId]);
+
   // Manual refresh: fetches live prices regardless of market status
   const refreshPrices = useCallback(async () => {
     setIsRefreshing(true);
@@ -1037,6 +1121,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       priceTriggers, setPriceTrigger, triggeredAlerts, clearAlert, clearAllAlerts,
       userWatchlists, activeWatchlist, activeWatchlistId,
       setActiveWatchlistId, createWatchlist, renameWatchlist, deleteWatchlist,
+      autoRefreshOnLoad, setAutoRefreshOnLoad,
     }}>
       {children}
     </StockContext.Provider>

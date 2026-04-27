@@ -33,6 +33,7 @@ import {
   Hand,
   Undo2,
   Activity,
+  Zap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -119,6 +120,13 @@ const FEATURES = [
     title: "Portfolio Dashboard",
     description: "Track your actual holdings with buy price, quantity, and real-time P&L.",
     badge: "Premium",
+  },
+  {
+    icon: Zap,
+    title: "Auto-Refresh on Reload",
+    description:
+      "Every page reload and watchlist switch forces an instant live fetch for every stock — on top of the normal background polling. Toggle it on from your Profile.",
+    badge: "Premium Plus",
   },
   {
     icon: Smartphone,

@@ -73,6 +73,7 @@ export const PREMIUM_PLUS_EXTRAS = [
   "Unlimited watchlists",
   "Unlimited stocks per watchlist",
   "Unlimited price trigger alerts",
+  "Auto-refresh prices on reload (toggle in Profile)",
   "Beta access to new features",
   "Priority customer support",
 ] as const;
@@ -87,6 +88,7 @@ export function inferRequiredTier(featureName?: string): RequiredTier {
 
   // Premium Plus only.
   if (f.includes("unlimited")) return "premium_plus";
+  if (f.includes("auto-refresh") || f.includes("auto refresh")) return "premium_plus";
 
   // Premium-only features.
   const premiumKeywords = [

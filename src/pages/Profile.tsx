@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useStocks } from "@/contexts/StockContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -17,6 +19,9 @@ import { motion } from "framer-motion";
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
   const { isAdmin } = useAdminRole();
+  const { isPremiumPlus } = useSubscription();
+  const { autoRefreshOnLoad, setAutoRefreshOnLoad } = useStocks();
+  const [savingAutoRefresh, setSavingAutoRefresh] = useState(false);
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [emailOptIn, setEmailOptIn] = useState(false);
@@ -112,6 +117,25 @@ const Profile = () => {
       toast.success("Password changed successfully");
       setNewPassword("");
       setConfirmPassword("");
+    }
+  };
+
+  const handleToggleAutoRefresh = async (enabled: boolean) => {
+    if (!isPremiumPlus) {
+      toast.error("Auto-refresh on reload is a Premium Plus feature", {
+        description: "Upgrade to Premium Plus to unlock this setting.",
+        action: { label: "Upgrade", onClick: () => navigate("/subscribe") },
+      });
+      return;
+    }
+    setSavingAutoRefresh(true);
+    try {
+      await setAutoRefreshOnLoad(enabled);
+      toast.success(enabled ? "Auto-refresh enabled" : "Auto-refresh disabled");
+    } catch {
+      toast.error("Failed to update preference");
+    } finally {
+      setSavingAutoRefresh(false);
     }
   };
 
@@ -217,6 +241,55 @@ const Profile = () => {
                   </div>
                   <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Live Data — Premium Plus auto-refresh-on-load */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+            <Card className={`shadow-sm hover:shadow-md transition-shadow ${isPremiumPlus ? "border-primary/30 bg-gradient-to-br from-primary/5 to-orange-500/5" : "border-border"}`}>
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
+                    <Zap className="h-4 w-4 text-orange-500" />
+                  </div>
+                  Live Data
+                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                    <Sparkles className="h-3 w-3" /> Premium Plus
+                  </span>
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  {isPremiumPlus
+                    ? "Automatically pull a fresh quote for every stock the moment the dashboard loads or cached prices are re-read from memory — on top of the normal background polling."
+                    : "Upgrade to Premium Plus to auto-refresh every stock price the moment the dashboard reloads or pulls from cache."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                  <div className="space-y-0.5 pr-3">
+                    <Label htmlFor="auto-refresh" className="text-sm font-medium">Auto-refresh on reload</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Forces an immediate live fetch on every page load and watchlist switch.
+                    </p>
+                  </div>
+                  <Switch
+                    id="auto-refresh"
+                    checked={isPremiumPlus && autoRefreshOnLoad}
+                    disabled={!isPremiumPlus || savingAutoRefresh}
+                    onCheckedChange={handleToggleAutoRefresh}
+                  />
+                </div>
+                {!isPremiumPlus && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-3 active:scale-[0.98] transition-all"
+                    onClick={() => navigate("/subscribe")}
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
+                    Unlock with Premium Plus
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </motion.div>
