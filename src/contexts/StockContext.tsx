@@ -859,13 +859,20 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const currentStocks = stocksRef.current;
       const currentWatchlist = watchlistRef.current;
 
-      const isIncomplete = (s: Stock) =>
-        !s.isIndex && (
+      const isIncomplete = (s: Stock) => {
+        // Indices genuinely don't expose Volume / P/E / MarketCap, so don't
+        // queue them for Screener verification (which would always fail with
+        // "Could not verify" and pollute the debug panel). Detect both via
+        // the explicit isIndex flag and the heuristic ticker pattern, so
+        // legacy entries added before isIndex was tracked are still skipped.
+        if (s.isIndex || looksLikeIndexTicker(s.ticker, s.yahooSymbol)) return false;
+        return (
           !s.price || s.price === 0 ||
           !s.volume || s.volume === 0 ||
           !s.marketCap || s.marketCap === 0 ||
           !s.pe || s.pe === 0
         );
+      };
 
       const candidates = currentStocks
         .filter(s => currentWatchlist.includes(s.ticker))
