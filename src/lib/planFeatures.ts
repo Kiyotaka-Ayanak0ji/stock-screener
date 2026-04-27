@@ -73,6 +73,7 @@ export const PREMIUM_PLUS_EXTRAS = [
   "Unlimited watchlists",
   "Unlimited stocks per watchlist",
   "Unlimited price trigger alerts",
+  "Auto-refresh prices on reload (toggle in Profile)",
   "Beta access to new features",
   "Priority customer support",
 ] as const;
