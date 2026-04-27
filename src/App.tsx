@@ -57,7 +57,7 @@ const App = () => (
                 <Route path="/dashboard" element={<WithStocks><Index /></WithStocks>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path="/profile" element={<WithStocks><Profile /></WithStocks>} />
                 <Route path="/admin" element={<SubscriptionGate><AdminDashboard /></SubscriptionGate>} />
                 <Route path="/portfolio" element={<SubscriptionGate><WithStocks><Portfolio /></WithStocks></SubscriptionGate>} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
