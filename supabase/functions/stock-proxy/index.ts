@@ -366,9 +366,32 @@ async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexS
   const bseMatch = bseRows.length
     ? pickBest(bseRows, (r) => r.indexName, (r) => r.shortalias)
     : null;
-  const nseMatch = nseRows.length
+  let nseMatch = nseRows.length
     ? pickBest(nseRows, (r) => r.index ?? r.indexName)
     : null;
+
+  // Cross-exchange equivalence map — when the BSE ticker is well-known, pull
+  // valuations from its NSE analogue (the index methodologies are similar
+  // enough that PE/PB/DivYield are directionally identical).
+  if (!nseMatch && nseRows.length) {
+    const NSE_EQUIV: Record<string, string> = {
+      'BSE250LARGEMIDCAPINDEX': 'NIFTYLARGEMIDCAP250',
+      'BSE100': 'NIFTY100',
+      'BSE200': 'NIFTY200',
+      'BSE500': 'NIFTY500',
+      'BSEMIDCAP': 'NIFTYMIDCAP100',
+      'BSESMALLCAP': 'NIFTYSMALLCAP100',
+      'BSESENSEX': 'NIFTY50',
+      'SENSEX': 'NIFTY50',
+      'BSEBANKEX': 'NIFTYBANK',
+    };
+    const aliasNeedle = NSE_EQUIV[needle];
+    if (aliasNeedle) {
+      // deno-lint-ignore no-explicit-any
+      nseMatch = nseRows.find((r: any) => normIdx(r.index ?? r.indexName) === aliasNeedle) ?? null;
+      if (nseMatch) console.log(`Index alias resolved: ${needle} → ${aliasNeedle}`);
+    }
+  }
 
   // Prefer the exchange the user asked for, but always merge valuations from NSE.
   const preferBse = exchange === 'BSE' && bseMatch;
