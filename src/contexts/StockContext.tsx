@@ -749,6 +749,76 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }));
   }, []);
 
+  // Premium Plus: persist the auto-refresh-on-load toggle. Writes to
+  // user_preferences for logged-in users and mirrors to localStorage so the
+  // setting survives a hard reload before the DB roundtrip completes.
+  const setAutoRefreshOnLoad = useCallback(async (enabled: boolean) => {
+    setAutoRefreshOnLoadState(enabled);
+    try { localStorage.setItem("st_auto_refresh_on_load", enabled ? "1" : "0"); } catch { /* ignore */ }
+    if (user) {
+      const { error } = await supabase
+        .from("user_preferences")
+        .update({ auto_refresh_on_load: enabled })
+        .eq("user_id", user.id);
+      if (error) {
+        console.error("Failed to persist auto-refresh preference:", error);
+        throw error;
+      }
+    }
+  }, [user]);
+
+  // Silent live-price refetch (no toast). Used by the Premium Plus
+  // auto-refresh-on-load behavior so the UI updates instantly when cached
+  // prices are pulled from memory (page reload, watchlist switch, etc.).
+  const silentRefresh = useCallback(async () => {
+    try {
+      const currentStocks = stocksRef.current;
+      const currentWatchlist = watchlistRef.current;
+      const tickerInfo = currentStocks
+        .filter(s => currentWatchlist.includes(s.ticker))
+        .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
+      if (tickerInfo.length === 0) return;
+      const liveData = await fetchLivePrices(tickerInfo);
+      if (!liveData || Object.keys(liveData).length === 0) return;
+      const updatedStocks = currentStocks.map(s => {
+        const key = `${s.exchange}_${s.ticker}`;
+        const live = liveData[key];
+        return live ? applyLiveData(s, live) : s;
+      });
+      const flashes: Record<string, "up" | "down" | null> = {};
+      updatedStocks.forEach(s => {
+        const prevPrice = prevPrices.current[s.ticker] || s.price;
+        if (s.price > prevPrice) flashes[s.ticker] = "up";
+        else if (s.price < prevPrice) flashes[s.ticker] = "down";
+        else flashes[s.ticker] = null;
+        prevPrices.current[s.ticker] = s.price;
+      });
+      setLastFlash(flashes);
+      setStocks(updatedStocks);
+      const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+      if (watchlistStocks.length > 0) saveCachedPrices(watchlistStocks);
+    } catch (err) {
+      console.error("Auto-refresh-on-load failed:", err);
+    }
+  }, [saveCachedPrices]);
+
+  // Auto-refresh-on-load: when prices have just been loaded from the cache
+  // (i.e. re-fetched from memory) and the Premium Plus toggle is on, kick off
+  // a silent live refetch so the user sees fresh values immediately rather
+  // than waiting for the next polling tick.
+  const autoRefreshFiredRef = useRef(false);
+  useEffect(() => {
+    if (!pricesLoaded || !prefsLoaded) return;
+    if (!autoRefreshOnLoad) return;
+    if (autoRefreshFiredRef.current) return;
+    autoRefreshFiredRef.current = true;
+    silentRefresh();
+  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh]);
+
+  // Reset the one-shot guard when the watchlist changes — switching watchlists
+  // counts as another "fetched from memory" event for the new ticker set.
+  useEffect(() => { autoRefreshFiredRef.current = false; }, [activeWatchlistId]);
+
   // Manual refresh: fetches live prices regardless of market status
   const refreshPrices = useCallback(async () => {
     setIsRefreshing(true);
