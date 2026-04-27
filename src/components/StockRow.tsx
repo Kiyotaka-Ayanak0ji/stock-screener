@@ -111,6 +111,8 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   };
 
   const isPriceAvailable = !priceLoading || stock.price !== 0;
+  // Indices don't have volume / pe / marketCap — show "—" instead of "missing"
+  const isIndexLike = !!stock.isIndex || looksLikeIndexTicker(stock.ticker, stock.yahooSymbol);
   const isPositive = stock.change > 0;
   const isNegative = stock.change < 0;
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-unchanged";
