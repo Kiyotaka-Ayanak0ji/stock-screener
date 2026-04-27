@@ -460,6 +460,7 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          auto_refresh_on_load: boolean
           column_visibility: string | null
           created_at: string
           custom_column_data: string | null
@@ -473,6 +474,7 @@ export type Database = {
           watchlist: string | null
         }
         Insert: {
+          auto_refresh_on_load?: boolean
           column_visibility?: string | null
           created_at?: string
           custom_column_data?: string | null
@@ -486,6 +488,7 @@ export type Database = {
           watchlist?: string | null
         }
         Update: {
+          auto_refresh_on_load?: boolean
           column_visibility?: string | null
           created_at?: string
           custom_column_data?: string | null
