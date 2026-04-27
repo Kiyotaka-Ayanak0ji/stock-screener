@@ -357,32 +357,74 @@ async function fetchIndexQuote(ticker: string, exchange: string): Promise<IndexS
     return best?.row ?? null;
   }
 
-  for (const ex of order) {
-    const rows = ex === 'BSE' ? await loadBseIndexTable() : await loadNseIndexTable();
-    if (!rows.length) continue;
+  // Try BOTH exchanges and merge — NSE allIndices reliably carries pe/pb/dy
+  // (which BSE IndexMovers omits), while BSE IndexMovers gives the live LTP for
+  // BSE-only indices. We use BSE for price, NSE for valuations when both match.
+  const bseRows = await loadBseIndexTable();
+  const nseRows = await loadNseIndexTable();
 
-    if (ex === 'BSE') {
-      const match = pickBest(rows, (r) => r.indexName, (r) => r.shortalias);
-      if (match) {
-        const ltp = Number(match.LTP) || 0;
-        const change = Number(match.change) || 0;
-        if (!ltp) continue;
-        const prev = ltp - change;
-        console.log(`BSE Index ${ticker} → ${match.indexName} ltp=${ltp}`);
-        return { ltp, close: prev, open: prev, high: ltp, low: ltp, volume: 0, marketCap: 0, pe: 0 };
+  const bseMatch = bseRows.length
+    ? pickBest(bseRows, (r) => r.indexName, (r) => r.shortalias)
+    : null;
+  const nseMatch = nseRows.length
+    ? pickBest(nseRows, (r) => r.index ?? r.indexName)
+    : null;
+
+  // Prefer the exchange the user asked for, but always merge valuations from NSE.
+  const preferBse = exchange === 'BSE' && bseMatch;
+
+  if (preferBse && bseMatch) {
+    const ltp = Number(bseMatch.LTP) || 0;
+    const change = Number(bseMatch.change) || 0;
+    if (ltp) {
+      const prev = ltp - change;
+      console.log(`BSE Index ${ticker} → ${bseMatch.indexName} ltp=${ltp}`);
+      const slice: IndexSlice = {
+        ltp, close: prev, open: prev, high: ltp, low: ltp,
+        volume: 0, marketCap: 0, pe: 0,
+      };
+      // Borrow valuations from a matching NSE index if one exists.
+      if (nseMatch) {
+        const pe = Number(nseMatch.pe) || 0;
+        const pb = Number(nseMatch.pb) || 0;
+        const dy = Number(nseMatch.dy) || 0;
+        if (pe > 0) slice.pe = pe;
+        if (pb > 0) slice.pb = pb;
+        if (dy > 0) slice.divYield = dy;
       }
-    } else {
-      const match = pickBest(rows, (r) => r.index ?? r.indexName);
-      if (match) {
-        const ltp = Number(match.last ?? match.lastPrice) || 0;
-        if (!ltp) continue;
-        const open = Number(match.open) || ltp;
-        const high = Number(match.high) || ltp;
-        const low = Number(match.low) || ltp;
-        const prev = Number(match.previousClose) || ltp;
-        console.log(`NSE Index ${ticker} → ${match.index} ltp=${ltp}`);
-        return { ltp, open, high, low, close: prev, volume: 0, marketCap: 0, pe: 0 };
-      }
+      return slice;
+    }
+  }
+
+  if (nseMatch) {
+    const ltp = Number(nseMatch.last ?? nseMatch.lastPrice) || 0;
+    if (ltp) {
+      const open = Number(nseMatch.open) || ltp;
+      const high = Number(nseMatch.high) || ltp;
+      const low = Number(nseMatch.low) || ltp;
+      const prev = Number(nseMatch.previousClose) || ltp;
+      const pe = Number(nseMatch.pe) || 0;
+      const pb = Number(nseMatch.pb) || 0;
+      const dy = Number(nseMatch.dy) || 0;
+      console.log(`NSE Index ${ticker} → ${nseMatch.index} ltp=${ltp} pe=${pe}`);
+      return {
+        ltp, open, high, low, close: prev,
+        volume: 0, marketCap: 0,
+        pe: pe > 0 ? pe : 0,
+        pb: pb > 0 ? pb : undefined,
+        divYield: dy > 0 ? dy : undefined,
+      };
+    }
+  }
+
+  // Fallback: BSE-only index with no NSE analogue → return price-only slice.
+  if (bseMatch) {
+    const ltp = Number(bseMatch.LTP) || 0;
+    const change = Number(bseMatch.change) || 0;
+    if (ltp) {
+      const prev = ltp - change;
+      console.log(`BSE Index ${ticker} → ${bseMatch.indexName} ltp=${ltp} (no NSE valuations)`);
+      return { ltp, close: prev, open: prev, high: ltp, low: ltp, volume: 0, marketCap: 0, pe: 0 };
     }
   }
   return null;
