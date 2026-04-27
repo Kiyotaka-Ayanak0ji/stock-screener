@@ -121,6 +121,13 @@ const FEATURES = [
     badge: "Premium",
   },
   {
+    icon: Zap,
+    title: "Auto-Refresh on Reload",
+    description:
+      "Every page reload and watchlist switch forces an instant live fetch for every stock — on top of the normal background polling. Toggle it on from your Profile.",
+    badge: "Premium Plus",
+  },
+  {
     icon: Smartphone,
     title: "Mobile PWA: Install to home screen",
     description:
