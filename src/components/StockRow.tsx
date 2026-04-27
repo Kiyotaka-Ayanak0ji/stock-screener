@@ -225,33 +225,43 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
         {isVisible("volume") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              <MissingDataTooltip
-                missing={!stock.volume || stock.volume === 0}
-                label="Volume"
-                hint="Some illiquid SME / micro-cap tickers report no trades."
-              >
-                {formatVolume(stock.volume)}
-              </MissingDataTooltip>
+              stock.isIndex ? (
+                <span className="text-muted-foreground/60" title="Indices don't report a single trade volume">—</span>
+              ) : (
+                <MissingDataTooltip
+                  missing={!stock.volume || stock.volume === 0}
+                  label="Volume"
+                  hint="Some illiquid SME / micro-cap tickers report no trades."
+                >
+                  {formatVolume(stock.volume)}
+                </MissingDataTooltip>
+              )
             ) : <Skeleton className="h-3 w-14 ml-auto" />}
           </td>
         )}
         {isVisible("marketCap") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              <MissingDataTooltip
-                missing={!stock.marketCap || stock.marketCap === 0}
-                label="Market cap"
-                hint="Falls back to Groww when Yahoo returns nothing."
-              >
-                ₹{formatMarketCap(stock.marketCap)}
-              </MissingDataTooltip>
+              stock.isIndex ? (
+                <span className="text-muted-foreground/60" title="Indices don't have a market cap">—</span>
+              ) : (
+                <MissingDataTooltip
+                  missing={!stock.marketCap || stock.marketCap === 0}
+                  label="Market cap"
+                  hint="Falls back to Groww when Yahoo returns nothing."
+                >
+                  ₹{formatMarketCap(stock.marketCap)}
+                </MissingDataTooltip>
+              )
             ) : <Skeleton className="h-3 w-18 ml-auto" />}
           </td>
         )}
         {isVisible("pe") && (
           <td className="px-4 py-3 text-right font-mono text-xs text-muted-foreground hidden md:table-cell">
             {isPriceAvailable ? (
-              stock.pe > 0 ? (
+              stock.isIndex ? (
+                <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
+              ) : stock.pe > 0 ? (
                 <span>{stock.pe.toFixed(2)}</span>
               ) : (
                 <MissingDataTooltip
