@@ -130,7 +130,7 @@ const FEATURES = [
   },
   {
     icon: Smartphone,
-    title: "Mobile PWA: Install to home screen",
+    title: "Mobile PWA  (Install to home screen)",
     description:
       "Install EquityIQ to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
