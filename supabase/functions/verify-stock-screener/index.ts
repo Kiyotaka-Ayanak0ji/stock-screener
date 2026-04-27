@@ -483,6 +483,44 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Indices (e.g. BSE_250_LARGEMIDCAP_INDEX, NIFTY50, ^BSESN) cannot be
+    // verified against Screener.in — they have no company page, no Volume,
+    // no P/E, no Market Cap. The stock-proxy already serves a fresh quote
+    // for them via fetchIndexQuote() (BSE IndexMovers / NSE allIndices feeds),
+    // so for verification we simply mark them as "OK, nothing to verify"
+    // instead of returning 404 + "Could not verify against Screener" — which
+    // was polluting the admin Stock Debug Panel and making the auto-tally
+    // think these tickers were broken.
+    const looksLikeIndex =
+      /(_INDEX$|^INDEX_|NIFTY|SENSEX|BSE_\d|BANKEX|MIDCAP|SMALLCAP|LARGECAP)/.test(
+        ticker.toUpperCase(),
+      );
+    if (looksLikeIndex) {
+      if (await isDebugEnabled(sb)) {
+        await sb.from("verification_debug_logs").insert({
+          ticker,
+          exchange,
+          primary_source: "index",
+          sources_used: ["index"],
+          source_fields: { index: { filled: ["price"], missing: ["volume", "pe", "marketCap"] } },
+          final_fields: { price: "index", previousClose: "index" },
+          final_values: {},
+          duration_ms: Date.now() - startedAt,
+          error_message: null,
+        });
+      }
+      return new Response(
+        JSON.stringify({
+          ticker,
+          exchange,
+          isIndex: true,
+          message: "Indices are served live by the stock-proxy and don't need Screener verification",
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+
     // Screener first (best for Indian small/SME), Google Finance as fallback
     let scraped = await scrapeScreener(ticker);
     if (scraped) {
