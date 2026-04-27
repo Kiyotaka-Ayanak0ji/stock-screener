@@ -270,6 +270,8 @@ interface IndexSlice {
   volume?: number;
   marketCap?: number;
   pe?: number;
+  pb?: number;
+  divYield?: number;
 }
 
 // deno-lint-ignore no-explicit-any
