@@ -51,6 +51,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   const rightActionOpacity = useTransform(x, [0, 20, SWIPE_THRESHOLD], [0, 0.3, 1]);
 
   const isPriceAvailable = !priceLoading || stock.price !== 0;
+  const isIndexLike = !!stock.isIndex || looksLikeIndexTicker(stock.ticker, stock.yahooSymbol);
   const isPositive = stock.change > 0;
   const isNegative = stock.change < 0;
   const changeColor = isPositive ? "text-gain" : isNegative ? "text-loss" : "text-muted-foreground";
