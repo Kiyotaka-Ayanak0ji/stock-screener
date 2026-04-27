@@ -754,8 +754,8 @@ Deno.serve(async (req) => {
               low: idx.low ?? idx.ltp,
               close: idx.close ?? idx.ltp,
               volume: idx.volume ?? 0,
-              marketCap: 0,
-              pe: 0,
+              marketCap: idx.marketCap ?? 0,
+              pe: idx.pe ?? 0,
             };
             resolvedKeys.add(key);
           }
