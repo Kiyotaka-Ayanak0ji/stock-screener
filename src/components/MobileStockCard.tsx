@@ -277,7 +277,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 <span>L: ₹{stock.low.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
                 <span>
                   Vol:{" "}
-                  {stock.isIndex ? (
+                  {isIndexLike ? (
                     <span className="text-muted-foreground/60" title="Indices don't report a single trade volume">—</span>
                   ) : (
                     <MissingDataTooltip
@@ -301,7 +301,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
               <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1 text-xs text-muted-foreground font-mono">
                 <span>
                   P/E:{" "}
-                  {stock.isIndex ? (
+                  {isIndexLike ? (
                     <span className="text-muted-foreground/60" title="Indices don't have a P/E ratio">—</span>
                   ) : stock.pe && stock.pe > 0 ? (
                     <span className="text-foreground/80 font-semibold">{stock.pe.toFixed(2)}</span>
@@ -317,7 +317,7 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 </span>
                 <span>
                   MCap:{" "}
-                  {stock.isIndex ? (
+                  {isIndexLike ? (
                     <span className="text-muted-foreground/60" title="Indices don't have a market cap">—</span>
                   ) : stock.marketCap && stock.marketCap > 0 ? (
                     <span className="text-foreground/80 font-semibold">{formatMarketCap(stock.marketCap)}</span>
