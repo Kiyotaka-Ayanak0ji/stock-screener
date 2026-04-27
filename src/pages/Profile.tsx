@@ -19,6 +19,9 @@ import { motion } from "framer-motion";
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
   const { isAdmin } = useAdminRole();
+  const { isPremiumPlus } = useSubscription();
+  const { autoRefreshOnLoad, setAutoRefreshOnLoad } = useStocks();
+  const [savingAutoRefresh, setSavingAutoRefresh] = useState(false);
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [emailOptIn, setEmailOptIn] = useState(false);
