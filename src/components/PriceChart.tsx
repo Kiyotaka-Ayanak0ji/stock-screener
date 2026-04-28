@@ -21,10 +21,10 @@ interface Candle {
   close: number;
 }
 
-// Candle mode is only meaningful for ranges that span multiple days
+// Candle mode is offered for any range with enough ticks (1D excluded — too noisy).
 const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1D": false,
-  "1W": false,
+  "1W": true,
   "1M": true,
   "1Y": true,
 };
