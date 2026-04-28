@@ -221,6 +221,7 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
               livePrice={stock.price}
               previousClose={stock.previousClose}
               positive={!isNegative}
+              isMarketOpen={isMarketOpen}
             />
 
             {/* Metrics grid */}
