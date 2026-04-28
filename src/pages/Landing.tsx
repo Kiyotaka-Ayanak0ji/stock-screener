@@ -928,8 +928,8 @@ const Landing = () => {
                   a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
                 },
                 {
-                  q: "Is there an unlimited plan?",
-                  a: "Yes! Premium Plus ($40/mo or $450/yr) gives you unlimited watchlists, unlimited stocks per watchlist, unlimited price trigger alerts, everything in Premium, and early beta access to new features as they launch.",
+                  q: "Is there a higher-tier plan?",
+                  a: "Yes! Premium Plus ($40/mo or $450/yr) gives you up to 50 watchlists with 100 stocks each, unlimited price trigger alerts, everything in Premium, and early beta access to new features as they launch.",
                 },
                 {
                   q: "Does the portfolio dashboard update in real time?",

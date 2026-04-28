@@ -5,7 +5,7 @@ export const PLAN_LIMITS = {
   guest: { watchlists: 1, stocks: 20 },
   pro: { watchlists: 5, stocks: 20 },
   premium: { watchlists: 20, stocks: 50 },
-  premium_plus: { watchlists: Infinity, stocks: Infinity },
+  premium_plus: { watchlists: 50, stocks: 100 },
 } as const;
 
 export const PLAN_PRICING = {
@@ -70,8 +70,7 @@ export const PREMIUM_EXTRAS = [
 
 // Premium Plus tier — everything in Premium plus these.
 export const PREMIUM_PLUS_EXTRAS = [
-  "Unlimited watchlists",
-  "Unlimited stocks per watchlist",
+  "Up to 50 watchlists × 100 stocks each",
   "Unlimited price trigger alerts",
   "Auto-refresh prices on reload (toggle in Profile)",
   "Beta access to new features",
