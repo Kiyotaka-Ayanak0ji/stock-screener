@@ -5,7 +5,7 @@ export const PLAN_LIMITS = {
   guest: { watchlists: 1, stocks: 20 },
   pro: { watchlists: 5, stocks: 20 },
   premium: { watchlists: 20, stocks: 50 },
-  premium_plus: { watchlists: Infinity, stocks: Infinity },
+  premium_plus: { watchlists: 50, stocks: 100 },
 } as const;
 
 export const PLAN_PRICING = {
