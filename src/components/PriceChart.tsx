@@ -224,16 +224,20 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return out;
   }, [points]);
 
-  // Aggregate raw ticks (NOT downsampled) into daily OHLC candles for candle mode.
-  // Uses the unfiltered range `points` so each candle reflects every tick that day.
+  // Aggregate raw ticks (NOT downsampled) into OHLC candles for candle mode.
+  // Bucket size is chosen adaptively from the actual data span so candle mode
+  // works even when only intraday ticks exist (no need to wait for multi-day
+  // history to accumulate before users can see candlesticks).
   const candles = useMemo<Candle[]>(() => {
     if (mode !== "candle" || !CANDLE_ELIGIBLE[range] || points.length === 0) return [];
+    const span = points[points.length - 1].ts - points[0].ts;
+    const bucketMs = pickBucketMs(span);
     const buckets = new Map<number, Candle>();
     for (const p of points) {
-      const day = dayBucket(p.ts);
-      const existing = buckets.get(day);
+      const b = bucketStart(p.ts, bucketMs);
+      const existing = buckets.get(b);
       if (!existing) {
-        buckets.set(day, { ts: day, open: p.price, high: p.price, low: p.price, close: p.price });
+        buckets.set(b, { ts: b, open: p.price, high: p.price, low: p.price, close: p.price });
       } else {
         if (p.price > existing.high) existing.high = p.price;
         if (p.price < existing.low) existing.low = p.price;
