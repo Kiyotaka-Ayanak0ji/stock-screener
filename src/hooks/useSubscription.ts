@@ -170,8 +170,8 @@ export function useSubscription() {
   const isPremium = planTier === "premium" || isPremiumPlus;
 
   // Plan limits
-  const maxWatchlists = isPremiumPlus ? Infinity : isPremium ? 20 : isPro ? 5 : 1;
-  const maxStocksPerWatchlist = isPremiumPlus ? Infinity : isPremium ? 50 : isPro ? 20 : 20;
+  const maxWatchlists = isPremiumPlus ? 50 : isPremium ? 20 : isPro ? 5 : 1;
+  const maxStocksPerWatchlist = isPremiumPlus ? 100 : isPremium ? 50 : isPro ? 20 : 20;
 
   return {
     subscription, loading, isActive, trialDaysLeft,
