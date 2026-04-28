@@ -663,7 +663,20 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                   }}
                 >
                   <p className="text-[10px] text-muted-foreground mb-0.5">
-                    {formatTime(hoverCandle.ts, "1Y")}
+                    {(() => {
+                      // Choose label format based on the candle bucket size,
+                      // not the visual range — intraday candles need a time.
+                      const span = candles.length >= 2
+                        ? candles[candles.length - 1].ts - candles[0].ts
+                        : 0;
+                      const bucketMs = pickBucketMs(span);
+                      if (bucketMs >= DAY_MS) return formatTime(hoverCandle.ts, "1Y");
+                      const d = new Date(hoverCandle.ts);
+                      return d.toLocaleString("en-IN", {
+                        day: "2-digit", month: "short",
+                        hour: "2-digit", minute: "2-digit", hour12: false,
+                      });
+                    })()}
                   </p>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono">
                     <span className="text-muted-foreground">O</span>
