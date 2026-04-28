@@ -817,10 +817,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     if (!pricesLoaded || !prefsLoaded) return;
     if (!autoRefreshOnLoad) return;
+    // Respect market hours — closed market means cached values stay frozen.
+    if (!isMarketOpen) return;
     if (autoRefreshFiredRef.current) return;
     autoRefreshFiredRef.current = true;
     silentRefresh();
-  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh]);
+  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh, isMarketOpen]);
 
   // Reset the one-shot guard when the watchlist changes — switching watchlists
   // counts as another "fetched from memory" event for the new ticker set.
