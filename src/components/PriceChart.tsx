@@ -140,7 +140,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             const ts = new Date(d.recorded_at).getTime();
             return { price: Number(d.price), recorded_at: d.recorded_at, ts };
           })
-          .filter((p) => Number.isFinite(p.price) && Number.isFinite(p.ts));
+          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts) && p.ts >= HISTORY_EPOCH_MS);
         parsed.sort((a, b) => a.ts - b.ts);
         const clean: PricePoint[] = [];
         for (const p of parsed) {
