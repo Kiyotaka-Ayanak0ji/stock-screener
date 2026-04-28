@@ -42,7 +42,14 @@ interface PriceChartProps {
   livePrice?: number;
   previousClose?: number;
   positive?: boolean;
+  /** When false, live ticks are NOT appended to the chart so closed-market data stays frozen. */
+  isMarketOpen?: boolean;
 }
+
+// Hard floor: only consider chart history recorded on/after Jan 1, 2025 IST.
+// Earlier rows are ignored on the client (DB rows untouched) to keep the
+// series consistent with the current data pipeline.
+const HISTORY_EPOCH_MS = Date.UTC(2024, 11, 31, 18, 30, 0); // 2025-01-01 00:00 IST
 
 // Module-level cache so re-opening the sheet for the same stock is instant.
 // Keyed by `${ticker}|${exchange}`, valid for 60 seconds.
