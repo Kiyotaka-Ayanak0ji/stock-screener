@@ -287,7 +287,7 @@ const Subscribe = () => {
             }`}
           >
             <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
-              Unlimited
+              50 × 100
             </Badge>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
