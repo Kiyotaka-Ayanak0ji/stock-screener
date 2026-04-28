@@ -29,11 +29,26 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1Y": true,
 };
 
+const MIN_MS = 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function dayBucket(ts: number): number {
-  // Bucket by UTC day — simple, monotonic, and consistent with recorded_at storage
-  return Math.floor(ts / DAY_MS) * DAY_MS;
+function bucketStart(ts: number, sizeMs: number): number {
+  return Math.floor(ts / sizeMs) * sizeMs;
+}
+
+/**
+ * Choose a candle bucket size that always produces a usable number of candles
+ * for the current data span. We prefer daily candles once we have ≥ ~10 days
+ * of history; otherwise we fall back to hourly / 15-minute intraday buckets so
+ * candle mode is never empty when ticks exist.
+ */
+function pickBucketMs(spanMs: number): number {
+  if (spanMs >= 10 * DAY_MS) return DAY_MS;
+  if (spanMs >= 2 * DAY_MS) return 4 * HOUR_MS;
+  if (spanMs >= 6 * HOUR_MS) return HOUR_MS;
+  if (spanMs >= HOUR_MS) return 15 * MIN_MS;
+  return 5 * MIN_MS;
 }
 
 interface PriceChartProps {
