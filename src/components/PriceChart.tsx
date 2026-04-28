@@ -162,18 +162,22 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   }, [ticker, exchange, cacheKey, refreshNonce]);
 
   // Append live ticks to the in-memory series so the chart updates in real time.
+  // When the market is closed, we DO NOT mutate the chart — closed-market data
+  // must remain frozen until the next session opens.
   useEffect(() => {
-    if (!livePrice) return;
+    if (!livePrice || livePrice <= 0) return;
+    if (!isMarketOpen) return;
     setAllPoints((prev) => {
       const last = prev[prev.length - 1];
       if (last && Math.abs(last.price - livePrice) < 0.0001) return prev;
       const now = Date.now();
+      if (now < HISTORY_EPOCH_MS) return prev;
       const next = [...prev, { price: livePrice, recorded_at: new Date(now).toISOString(), ts: now }];
       // Update cache too, but mark slightly stale so a refetch still happens
       HISTORY_CACHE.set(cacheKey, { points: next, at: Date.now() - CACHE_TTL_MS / 2 });
       return next;
     });
-  }, [livePrice, cacheKey]);
+  }, [livePrice, cacheKey, isMarketOpen]);
 
   // Filter to selected range using pre-parsed timestamps
   const points = useMemo(() => {
