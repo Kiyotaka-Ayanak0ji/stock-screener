@@ -30,6 +30,30 @@ function num(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+/**
+ * Returns true only when the Indian equity market is open
+ * (Mon–Fri, 09:15–15:30 IST). Used to gate chart-history writes so
+ * `stock_price_history` only accumulates real intraday ticks.
+ */
+function isMarketOpenIST(date: Date = new Date()): boolean {
+  // Convert "now" to IST wall-clock components without depending on server TZ.
+  const istParts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+  const get = (t: string) => istParts.find((p) => p.type === t)?.value ?? "";
+  const weekday = get("weekday"); // Mon, Tue, ...
+  if (weekday === "Sat" || weekday === "Sun") return false;
+  const hour = parseInt(get("hour"), 10);
+  const minute = parseInt(get("minute"), 10);
+  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return false;
+  const minutes = hour * 60 + minute;
+  return minutes >= 555 && minutes <= 930; // 09:15 – 15:30 IST
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -101,7 +125,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Append history points for sparklines (multi-day trend)
+    // Append history points for sparklines / detail-sheet chart.
+    // GATED: only record while the IST market is open AND the cached prices
+    // upsert above succeeded (i.e. we just wrote fresh, validated quotes).
+    // Outside market hours the chart stays frozen so off-hours noise / stale
+    // proxy responses don't pollute the time series.
+    if (!isMarketOpenIST()) {
+      return new Response(JSON.stringify({ ok: true, written: cleaned.length, history: "skipped_market_closed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Only record when price actually changed since the last point to avoid bloat.
     try {
       const tickers = cleaned.map((c) => c.ticker);
@@ -120,6 +154,8 @@ Deno.serve(async (req) => {
 
       const historyRows = cleaned
         .filter((c) => {
+          // Require a valid positive price — never persist a zero/NaN tick.
+          if (!Number.isFinite(c.price) || c.price <= 0) return false;
           const key = `${c.exchange}|${c.ticker}`;
           const last = lastByKey.get(key);
           // Always store first point; otherwise store only on actual change
