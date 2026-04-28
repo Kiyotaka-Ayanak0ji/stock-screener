@@ -86,7 +86,7 @@ function formatTime(ts: number, range: PriceRange): string {
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
 }
 
-const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = true }: PriceChartProps) => {
+const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = true, isMarketOpen = true }: PriceChartProps) => {
   const cacheKey = `${ticker}|${exchange}`;
   const cached = HISTORY_CACHE.get(cacheKey);
   const cacheFresh = cached && Date.now() - cached.at < CACHE_TTL_MS;
