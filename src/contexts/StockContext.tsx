@@ -359,15 +359,22 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Unified live data fetcher — replaces cached prices with fresh data automatically
   // Cached prices are loaded first (via loadCachedPrices effect above), then this
   // effect kicks in to fetch live prices and seamlessly update the UI.
+  //
+  // IMPORTANT: All automatic updates are GATED by `isMarketOpen`. When the
+  // Indian market is closed (outside 9:15–15:30 IST Mon–Fri) we never mutate
+  // cached prices — users see the last in-session snapshot until the next
+  // session opens, or until they explicitly hit the manual ↻ button.
   useEffect(() => {
     if (!prefsLoaded) return;
+    if (!isMarketOpen) return; // freeze data outside market hours
 
     let consecutiveFailures = 0;
     const MAX_FAILURES = 3;
 
     const fetchLive = async () => {
-      if (liveDataFailed.current && isMarketOpen) {
-        // Fallback to simulation only during market hours
+      if (liveDataFailed.current) {
+        // Fallback to simulation only during market hours (this effect is
+        // already gated by isMarketOpen, so we know we're live).
         setStocks(prev => {
           const updated = prev.map(s => simulatePriceUpdate(s));
           const flashes: Record<string, "up" | "down" | null> = {};
@@ -402,7 +409,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (!liveData || Object.keys(liveData).length === 0) {
           consecutiveFailures++;
-          if (consecutiveFailures >= MAX_FAILURES && isMarketOpen) {
+          if (consecutiveFailures >= MAX_FAILURES) {
             liveDataFailed.current = true;
           }
           return;
@@ -447,15 +454,15 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       } catch (err) {
         console.error("Live data fetch failed:", err);
         consecutiveFailures++;
-        if (consecutiveFailures >= MAX_FAILURES && isMarketOpen) {
+        if (consecutiveFailures >= MAX_FAILURES) {
           liveDataFailed.current = true;
         }
       }
     };
 
-    // Fetch immediately, then poll — faster when market is open
+    // Fetch immediately, then poll every 5s while market is open
     fetchLive();
-    const interval = setInterval(fetchLive, isMarketOpen ? 5000 : 15000);
+    const interval = setInterval(fetchLive, 5000);
     return () => clearInterval(interval);
   }, [isMarketOpen, prefsLoaded]);
 
@@ -810,10 +817,12 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     if (!pricesLoaded || !prefsLoaded) return;
     if (!autoRefreshOnLoad) return;
+    // Respect market hours — closed market means cached values stay frozen.
+    if (!isMarketOpen) return;
     if (autoRefreshFiredRef.current) return;
     autoRefreshFiredRef.current = true;
     silentRefresh();
-  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh]);
+  }, [pricesLoaded, prefsLoaded, autoRefreshOnLoad, silentRefresh, isMarketOpen]);
 
   // Reset the one-shot guard when the watchlist changes — switching watchlists
   // counts as another "fetched from memory" event for the new ticker set.

@@ -42,7 +42,14 @@ interface PriceChartProps {
   livePrice?: number;
   previousClose?: number;
   positive?: boolean;
+  /** When false, live ticks are NOT appended to the chart so closed-market data stays frozen. */
+  isMarketOpen?: boolean;
 }
+
+// Hard floor: only consider chart history recorded on/after Jan 1, 2025 IST.
+// Earlier rows are ignored on the client (DB rows untouched) to keep the
+// series consistent with the current data pipeline.
+const HISTORY_EPOCH_MS = Date.UTC(2024, 11, 31, 18, 30, 0); // 2025-01-01 00:00 IST
 
 // Module-level cache so re-opening the sheet for the same stock is instant.
 // Keyed by `${ticker}|${exchange}`, valid for 60 seconds.
@@ -79,7 +86,7 @@ function formatTime(ts: number, range: PriceRange): string {
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
 }
 
-const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = true }: PriceChartProps) => {
+const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = true, isMarketOpen = true }: PriceChartProps) => {
   const cacheKey = `${ticker}|${exchange}`;
   const cached = HISTORY_CACHE.get(cacheKey);
   const cacheFresh = cached && Date.now() - cached.at < CACHE_TTL_MS;
@@ -133,7 +140,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             const ts = new Date(d.recorded_at).getTime();
             return { price: Number(d.price), recorded_at: d.recorded_at, ts };
           })
-          .filter((p) => Number.isFinite(p.price) && Number.isFinite(p.ts));
+          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts) && p.ts >= HISTORY_EPOCH_MS);
         parsed.sort((a, b) => a.ts - b.ts);
         const clean: PricePoint[] = [];
         for (const p of parsed) {
@@ -155,18 +162,22 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   }, [ticker, exchange, cacheKey, refreshNonce]);
 
   // Append live ticks to the in-memory series so the chart updates in real time.
+  // When the market is closed, we DO NOT mutate the chart — closed-market data
+  // must remain frozen until the next session opens.
   useEffect(() => {
-    if (!livePrice) return;
+    if (!livePrice || livePrice <= 0) return;
+    if (!isMarketOpen) return;
     setAllPoints((prev) => {
       const last = prev[prev.length - 1];
       if (last && Math.abs(last.price - livePrice) < 0.0001) return prev;
       const now = Date.now();
+      if (now < HISTORY_EPOCH_MS) return prev;
       const next = [...prev, { price: livePrice, recorded_at: new Date(now).toISOString(), ts: now }];
       // Update cache too, but mark slightly stale so a refetch still happens
       HISTORY_CACHE.set(cacheKey, { points: next, at: Date.now() - CACHE_TTL_MS / 2 });
       return next;
     });
-  }, [livePrice, cacheKey]);
+  }, [livePrice, cacheKey, isMarketOpen]);
 
   // Filter to selected range using pre-parsed timestamps
   const points = useMemo(() => {
