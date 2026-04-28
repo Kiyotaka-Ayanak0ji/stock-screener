@@ -21,19 +21,34 @@ interface Candle {
   close: number;
 }
 
-// Candle mode is only meaningful for ranges that span multiple days
+// Candle mode is offered for any range with enough ticks (1D excluded — too noisy).
 const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1D": false,
-  "1W": false,
+  "1W": true,
   "1M": true,
   "1Y": true,
 };
 
+const MIN_MS = 60 * 1000;
+const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function dayBucket(ts: number): number {
-  // Bucket by UTC day — simple, monotonic, and consistent with recorded_at storage
-  return Math.floor(ts / DAY_MS) * DAY_MS;
+function bucketStart(ts: number, sizeMs: number): number {
+  return Math.floor(ts / sizeMs) * sizeMs;
+}
+
+/**
+ * Choose a candle bucket size that always produces a usable number of candles
+ * for the current data span. We prefer daily candles once we have ≥ ~10 days
+ * of history; otherwise we fall back to hourly / 15-minute intraday buckets so
+ * candle mode is never empty when ticks exist.
+ */
+function pickBucketMs(spanMs: number): number {
+  if (spanMs >= 10 * DAY_MS) return DAY_MS;
+  if (spanMs >= 2 * DAY_MS) return 4 * HOUR_MS;
+  if (spanMs >= 6 * HOUR_MS) return HOUR_MS;
+  if (spanMs >= HOUR_MS) return 15 * MIN_MS;
+  return 5 * MIN_MS;
 }
 
 interface PriceChartProps {
@@ -209,16 +224,20 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return out;
   }, [points]);
 
-  // Aggregate raw ticks (NOT downsampled) into daily OHLC candles for candle mode.
-  // Uses the unfiltered range `points` so each candle reflects every tick that day.
+  // Aggregate raw ticks (NOT downsampled) into OHLC candles for candle mode.
+  // Bucket size is chosen adaptively from the actual data span so candle mode
+  // works even when only intraday ticks exist (no need to wait for multi-day
+  // history to accumulate before users can see candlesticks).
   const candles = useMemo<Candle[]>(() => {
     if (mode !== "candle" || !CANDLE_ELIGIBLE[range] || points.length === 0) return [];
+    const span = points[points.length - 1].ts - points[0].ts;
+    const bucketMs = pickBucketMs(span);
     const buckets = new Map<number, Candle>();
     for (const p of points) {
-      const day = dayBucket(p.ts);
-      const existing = buckets.get(day);
+      const b = bucketStart(p.ts, bucketMs);
+      const existing = buckets.get(b);
       if (!existing) {
-        buckets.set(day, { ts: day, open: p.price, high: p.price, low: p.price, close: p.price });
+        buckets.set(b, { ts: b, open: p.price, high: p.price, low: p.price, close: p.price });
       } else {
         if (p.price > existing.high) existing.high = p.price;
         if (p.price < existing.low) existing.low = p.price;
@@ -644,7 +663,20 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                   }}
                 >
                   <p className="text-[10px] text-muted-foreground mb-0.5">
-                    {formatTime(hoverCandle.ts, "1Y")}
+                    {(() => {
+                      // Choose label format based on the candle bucket size,
+                      // not the visual range — intraday candles need a time.
+                      const span = candles.length >= 2
+                        ? candles[candles.length - 1].ts - candles[0].ts
+                        : 0;
+                      const bucketMs = pickBucketMs(span);
+                      if (bucketMs >= DAY_MS) return formatTime(hoverCandle.ts, "1Y");
+                      const d = new Date(hoverCandle.ts);
+                      return d.toLocaleString("en-IN", {
+                        day: "2-digit", month: "short",
+                        hour: "2-digit", minute: "2-digit", hour12: false,
+                      });
+                    })()}
                   </p>
                   <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono">
                     <span className="text-muted-foreground">O</span>
