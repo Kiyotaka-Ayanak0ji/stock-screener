@@ -125,7 +125,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Append history points for sparklines (multi-day trend)
+    // Append history points for sparklines / detail-sheet chart.
+    // GATED: only record while the IST market is open AND the cached prices
+    // upsert above succeeded (i.e. we just wrote fresh, validated quotes).
+    // Outside market hours the chart stays frozen so off-hours noise / stale
+    // proxy responses don't pollute the time series.
+    if (!isMarketOpenIST()) {
+      return new Response(JSON.stringify({ ok: true, written: cleaned.length, history: "skipped_market_closed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Only record when price actually changed since the last point to avoid bloat.
     try {
       const tickers = cleaned.map((c) => c.ticker);
@@ -144,6 +154,8 @@ Deno.serve(async (req) => {
 
       const historyRows = cleaned
         .filter((c) => {
+          // Require a valid positive price — never persist a zero/NaN tick.
+          if (!Number.isFinite(c.price) || c.price <= 0) return false;
           const key = `${c.exchange}|${c.ticker}`;
           const last = lastByKey.get(key);
           // Always store first point; otherwise store only on actual change
