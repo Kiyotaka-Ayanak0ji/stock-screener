@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
   }
 
   // For non-critical templates (e.g. price alerts, digests), respect email_opt_in preference
-  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest']
+  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest', 'smart_alert_digest', 'daily_summary']
   if (NON_CRITICAL_TEMPLATES.includes(template)) {
     // Find the user by email and check their opt-in preference
     const { data: authUsers } = await supabaseAuth.auth.admin.listUsers()
