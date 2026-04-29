@@ -41,21 +41,49 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
   const { user } = useAuth();
   const trackers = useRef<Record<string, Tracker>>({});
   const [emailOptIn, setEmailOptIn] = useState<boolean | null>(null);
+  // Ref mirror so the debounced flush and async callbacks always see the latest value
+  // without needing to be re-created when state changes.
+  const emailOptInRef = useRef<boolean | null>(null);
+  const pendingEmailAlerts = useRef<SmartAlert[]>([]);
+  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const cancelPendingEmail = useCallback(() => {
+    if (emailTimer.current) {
+      clearTimeout(emailTimer.current);
+      emailTimer.current = undefined;
+    }
+    pendingEmailAlerts.current = [];
+  }, []);
+
+  const applyOptIn = useCallback(
+    (next: boolean | null) => {
+      emailOptInRef.current = next;
+      setEmailOptIn(next);
+      // The moment opt-in becomes false, drop any queued (debounced) alerts so
+      // nothing leaks out after the user toggles off — even mid-debounce.
+      if (next === false) cancelPendingEmail();
+    },
+    [cancelPendingEmail],
+  );
 
   // Fetch user's email opt-in preference (live)
   useEffect(() => {
     if (!user?.id) {
-      setEmailOptIn(null);
+      applyOptIn(null);
       return;
     }
     let cancelled = false;
+    // Treat unknown as "do not send" until we confirm — prevents a race where
+    // alerts fire before the profile row loads and slip past the opt-out check.
+    applyOptIn(null);
+
     supabase
       .from("profiles")
       .select("email_opt_in")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (!cancelled) setEmailOptIn(data?.email_opt_in ?? false);
+        if (!cancelled) applyOptIn(data?.email_opt_in ?? false);
       });
 
     // Listen for realtime profile updates so toggling opt-in takes effect immediately
@@ -66,16 +94,17 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
         { event: "UPDATE", schema: "public", table: "profiles", filter: `user_id=eq.${user.id}` },
         (payload) => {
           const next = (payload.new as any)?.email_opt_in;
-          if (typeof next === "boolean") setEmailOptIn(next);
+          if (typeof next === "boolean") applyOptIn(next);
         },
       )
       .subscribe();
 
     return () => {
       cancelled = true;
+      cancelPendingEmail();
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, [user?.id, applyOptIn, cancelPendingEmail]);
 
   const checkAlerts = useCallback(() => {
     if (!isMarketOpen) return;
@@ -180,14 +209,14 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
   }, [checkAlerts]);
 
   // Send email digest for smart alerts (batched, dedup'd, respects opt-in)
-  const pendingEmailAlerts = useRef<SmartAlert[]>([]);
   const sentDedupKeys = useRef<Set<string>>(new Set());
-  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const sendSmartAlertEmail = useCallback(
     (alert: SmartAlert) => {
       if (!user?.email || !user.email_confirmed_at) return;
-      if (emailOptIn === false) return; // user opted out — never queue email
+      // Strict gate: only send when we have explicitly confirmed opt-in === true.
+      // Unknown (null, still loading) and false both block sending.
+      if (emailOptInRef.current !== true) return;
 
       // Per-day dedup key prevents duplicate digest entries for the same event
       const dedupKey = `${alert.type}_${alert.ticker}_${todayKey()}`;
@@ -200,8 +229,10 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
       emailTimer.current = setTimeout(() => {
         const alerts = [...pendingEmailAlerts.current];
         pendingEmailAlerts.current = [];
+        emailTimer.current = undefined;
         if (alerts.length === 0) return;
-        // Note: opt-in is also re-validated server-side before send.
+        // Re-check opt-in at flush time — user may have toggled off during the debounce window.
+        if (emailOptInRef.current !== true) return;
 
         supabase.functions
           .invoke("send-transactional-email", {
