@@ -57,7 +57,7 @@ const FEATURES = [
     icon: Activity,
     title: "Interactive Multi-Day Charts",
     description:
-      "Tap any stock to open a rich detail sheet with an interactive price chart: switch between 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch.",
+      "Tap any stock to open a rich detail sheet with an interactive price chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch. Built on a clean, validated price history from 2025 onward.",
     badge: "Premium",
   },
   {
