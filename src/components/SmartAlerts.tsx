@@ -209,14 +209,14 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
   }, [checkAlerts]);
 
   // Send email digest for smart alerts (batched, dedup'd, respects opt-in)
-  const pendingEmailAlerts = useRef<SmartAlert[]>([]);
   const sentDedupKeys = useRef<Set<string>>(new Set());
-  const emailTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const sendSmartAlertEmail = useCallback(
     (alert: SmartAlert) => {
       if (!user?.email || !user.email_confirmed_at) return;
-      if (emailOptIn === false) return; // user opted out — never queue email
+      // Strict gate: only send when we have explicitly confirmed opt-in === true.
+      // Unknown (null, still loading) and false both block sending.
+      if (emailOptInRef.current !== true) return;
 
       // Per-day dedup key prevents duplicate digest entries for the same event
       const dedupKey = `${alert.type}_${alert.ticker}_${todayKey()}`;
@@ -229,8 +229,10 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
       emailTimer.current = setTimeout(() => {
         const alerts = [...pendingEmailAlerts.current];
         pendingEmailAlerts.current = [];
+        emailTimer.current = undefined;
         if (alerts.length === 0) return;
-        // Note: opt-in is also re-validated server-side before send.
+        // Re-check opt-in at flush time — user may have toggled off during the debounce window.
+        if (emailOptInRef.current !== true) return;
 
         supabase.functions
           .invoke("send-transactional-email", {
