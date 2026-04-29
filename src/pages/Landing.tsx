@@ -970,7 +970,7 @@ const Landing = () => {
                 },
                 {
                   q: "How does the interactive multi-day price chart work?",
-                  a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts load instantly thanks to client-side caching, and price history is persisted to our database — so you see real multi-day trends, not session-reset sparklines.",
+                  a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts run on a clean, validated price history from 2025 onward — new points are recorded only during live market hours, so what you see reflects real market activity, not session-reset sparklines or stale data.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
