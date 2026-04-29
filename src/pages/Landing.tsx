@@ -57,7 +57,7 @@ const FEATURES = [
     icon: Activity,
     title: "Interactive Multi-Day Charts",
     description:
-      "Tap any stock to open a rich detail sheet with an interactive price chart: switch between 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch.",
+      "Tap any stock to open a rich detail sheet with an interactive price chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch. Built on a clean, validated price history from 2025 onward.",
     badge: "Premium",
   },
   {
@@ -105,7 +105,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Smart Alerts",
     description:
-      "Automatic anomaly detection across your watchlist: 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
+      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes — with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
     badge: "Pro",
   },
   {
@@ -915,6 +915,11 @@ const Landing = () => {
                           × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio
                           dashboard with sector analysis.
                         </li>
+                        <li>
+                          <strong className="text-foreground">Premium Plus ($40/mo or $450/yr)</strong> — Up to 50
+                          watchlists × 100 stocks, unlimited price trigger alerts, auto-refresh on reload, and
+                          everything in Premium.
+                        </li>
                       </ul>
                     </div>
                   ),
@@ -941,11 +946,11 @@ const Landing = () => {
                 },
                 {
                   q: "How do price triggers work?",
-                  a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. This feature is available on Premium and Premium Plus plans.",
+                  a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox. This feature is available on Premium and Premium Plus plans.",
                 },
                 {
                   q: "What are Smart Alerts?",
-                  a: "Smart Alerts automatically scan your watchlist for meaningful market events — 52-week highs and lows, unusual volume spikes, and other anomalies — and surface them in real time. No setup required. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+                  a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events — strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
                 },
                 {
                   q: "Can I filter stocks by price, volume, market cap, or P/E ratio?",
@@ -965,7 +970,7 @@ const Landing = () => {
                 },
                 {
                   q: "How does the interactive multi-day price chart work?",
-                  a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts load instantly thanks to client-side caching, and price history is persisted to our database — so you see real multi-day trends, not session-reset sparklines.",
+                  a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts run on a clean, validated price history from 2025 onward — new points are recorded only during live market hours, so what you see reflects real market activity, not session-reset sparklines or stale data.",
                 },
               ].map((faq, i) => (
                 <AccordionItem
