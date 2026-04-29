@@ -946,11 +946,11 @@ const Landing = () => {
                 },
                 {
                   q: "How do price triggers work?",
-                  a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. This feature is available on Premium and Premium Plus plans.",
+                  a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox. This feature is available on Premium and Premium Plus plans.",
                 },
                 {
                   q: "What are Smart Alerts?",
-                  a: "Smart Alerts automatically scan your watchlist for meaningful market events — 52-week highs and lows, unusual volume spikes, and other anomalies — and surface them in real time. No setup required. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+                  a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events — strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
                 },
                 {
                   q: "Can I filter stocks by price, volume, market cap, or P/E ratio?",
