@@ -201,8 +201,7 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
         const alerts = [...pendingEmailAlerts.current];
         pendingEmailAlerts.current = [];
         if (alerts.length === 0) return;
-        // Re-check opt-in at flush time in case user toggled off during the debounce window
-        if (emailOptIn === false) return;
+        // Note: opt-in is also re-validated server-side before send.
 
         supabase.functions
           .invoke("send-transactional-email", {
