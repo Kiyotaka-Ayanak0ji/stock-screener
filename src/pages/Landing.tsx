@@ -246,10 +246,7 @@ const Landing = () => {
       {/* Hero */}
       <section className="relative pt-20 sm:pt-28 md:pt-32 pb-12 sm:pb-16 md:pb-20 px-4 sm:px-6 overflow-hidden">
         {/* Decorative gradient orbs */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10"
-        >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute top-10 left-1/2 -translate-x-1/2 h-[320px] sm:h-[420px] w-[680px] max-w-[90vw] rounded-full bg-primary/15 blur-3xl" />
           <div className="absolute -bottom-20 right-1/4 h-[200px] sm:h-[280px] w-[200px] sm:w-[280px] rounded-full bg-accent/10 blur-3xl" />
         </div>
@@ -274,9 +271,7 @@ const Landing = () => {
           >
             Your Stocks. <br className="hidden sm:block" />
             Your Rules.{" "}
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Your Edge.
-            </span>
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Your Edge.</span>
           </motion.h1>
 
           <motion.p
@@ -429,9 +424,7 @@ const Landing = () => {
             <Badge variant="secondary" className="mb-2">
               <Star className="h-3 w-3 mr-1 text-primary" /> Features
             </Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Everything you need. Nothing you don't.
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Everything you need. Nothing you don't.</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
               Switch between plans to see what's included — no scrolling required.
             </p>
@@ -439,10 +432,18 @@ const Landing = () => {
 
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="mx-auto mb-6 grid grid-cols-5 w-full max-w-2xl h-auto p-1">
-              <TabsTrigger value="all" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">All</TabsTrigger>
-              <TabsTrigger value="free" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Free</TabsTrigger>
-              <TabsTrigger value="pro" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Pro</TabsTrigger>
-              <TabsTrigger value="premium" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">Premium</TabsTrigger>
+              <TabsTrigger value="all" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="free" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">
+                Free
+              </TabsTrigger>
+              <TabsTrigger value="pro" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">
+                Pro
+              </TabsTrigger>
+              <TabsTrigger value="premium" className="text-[11px] sm:text-sm px-1 sm:px-3 py-1.5">
+                Premium
+              </TabsTrigger>
               <TabsTrigger value="premium_plus" className="text-[10px] sm:text-sm px-1 sm:px-3 py-1.5 leading-tight">
                 Premium+
               </TabsTrigger>
@@ -452,7 +453,7 @@ const Landing = () => {
               const tierRank: Record<string, number> = { Pro: 1, Premium: 2, "Premium Plus": 3 };
               const filtered = FEATURES.filter((f) => {
                 const badge = (f as any).badge as string | undefined;
-                const featureRank = badge ? tierRank[badge] ?? 0 : 0;
+                const featureRank = badge ? (tierRank[badge] ?? 0) : 0;
                 if (tab === "all") return true;
                 if (tab === "free") return !badge;
                 if (tab === "pro") return featureRank <= 1;
@@ -489,9 +490,7 @@ const Landing = () => {
                     ))}
                   </div>
                   {filtered.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      No features in this category.
-                    </p>
+                    <p className="text-center text-sm text-muted-foreground py-8">No features in this category.</p>
                   )}
                 </TabsContent>
               );
@@ -553,7 +552,9 @@ const Landing = () => {
             <Badge variant="secondary" className="mb-3">
               <Crown className="h-3 w-3 mr-1 text-primary" /> Pricing
             </Badge>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Simple pricing. Serious value.</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+              Simple pricing. Serious value.
+            </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">
               Start free for 15 days. Choose the plan that fits your trading style.
             </p>
@@ -885,7 +886,9 @@ const Landing = () => {
               <HelpCircle className="h-3 w-3 mr-1 text-primary" /> FAQ
             </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Frequently Asked Questions</h2>
-            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">Everything you need to know before getting started</p>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">
+              Everything you need to know before getting started
+            </p>
           </div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
@@ -933,10 +936,6 @@ const Landing = () => {
                   a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
                 },
                 {
-                  q: "Is there a higher-tier plan?",
-                  a: "Yes! Premium Plus ($40/mo or $450/yr) gives you up to 50 watchlists with 100 stocks each, unlimited price trigger alerts, everything in Premium, and early beta access to new features as they launch.",
-                },
-                {
                   q: "Does the portfolio dashboard update in real time?",
                   a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments — all in real time.",
                 },
@@ -953,7 +952,7 @@ const Landing = () => {
                   a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events — strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
                 },
                 {
-                  q: "Can I filter stocks by price, volume, market cap, or P/E ratio?",
+                  q: "Is there an option available to filter stocks?",
                   a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio — directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
                 },
                 {
@@ -1008,9 +1007,7 @@ const Landing = () => {
               Questions about features, pricing, billing, or anything else? Reach out and we'll get back to you as soon
               as possible.
             </p>
-            <p className="mt-6 text-lg sm:text-xl font-semibold text-primary break-all">
-              support@equityiq.in
-            </p>
+            <p className="mt-6 text-lg sm:text-xl font-semibold text-primary break-all">support@equityiq.in</p>
             <p className="text-xs text-muted-foreground mt-4">
               Typical response time: within 24 hours on business days.
             </p>
