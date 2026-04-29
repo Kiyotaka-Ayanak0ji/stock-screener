@@ -105,7 +105,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Smart Alerts",
     description:
-      "Automatic anomaly detection across your watchlist: 52-week highs/lows and unusual volume spikes flagged in real time so you spot moves the moment they happen.",
+      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes — with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
     badge: "Pro",
   },
   {
