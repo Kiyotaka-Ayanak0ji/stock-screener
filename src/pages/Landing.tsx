@@ -915,6 +915,11 @@ const Landing = () => {
                           × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio
                           dashboard with sector analysis.
                         </li>
+                        <li>
+                          <strong className="text-foreground">Premium Plus ($40/mo or $450/yr)</strong> — Up to 50
+                          watchlists × 100 stocks, unlimited price trigger alerts, auto-refresh on reload, and
+                          everything in Premium.
+                        </li>
                       </ul>
                     </div>
                   ),
