@@ -108,7 +108,7 @@ function formatTime(ts: number, range: PriceRange): string {
   if (range === "1D") {
     return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
   }
-  if (range === "1Y") {
+  if (range === "1Y" || range === "5Y" || range === "10Y" || range === "ALL") {
     return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" });
   }
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
@@ -150,13 +150,16 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     else setLoading(true);
 
     (async () => {
+      // Fetch up to ~10 years of points. Pulled in one shot since the row
+      // size is tiny (price + timestamp) and the table is pruned server-side
+      // to a 10-year horizon by upsert-stock-prices.
       const { data, error } = await supabase
         .from("stock_price_history")
         .select("price, recorded_at")
         .eq("ticker", ticker)
         .eq("exchange", exchange)
         .order("recorded_at", { ascending: true })
-        .limit(5000);
+        .limit(50000);
       if (cancelled) return;
       if (error) {
         console.error("Price history fetch failed:", error);
@@ -168,7 +171,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             const ts = new Date(d.recorded_at).getTime();
             return { price: Number(d.price), recorded_at: d.recorded_at, ts };
           })
-          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts) && p.ts >= HISTORY_EPOCH_MS);
+          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts));
         parsed.sort((a, b) => a.ts - b.ts);
         const clean: PricePoint[] = [];
         for (const p of parsed) {
@@ -199,7 +202,6 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
       const last = prev[prev.length - 1];
       if (last && Math.abs(last.price - livePrice) < 0.0001) return prev;
       const now = Date.now();
-      if (now < HISTORY_EPOCH_MS) return prev;
       const next = [...prev, { price: livePrice, recorded_at: new Date(now).toISOString(), ts: now }];
       // Update cache too, but mark slightly stale so a refetch still happens
       HISTORY_CACHE.set(cacheKey, { points: next, at: Date.now() - CACHE_TTL_MS / 2 });
@@ -211,6 +213,10 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const points = useMemo(() => {
     if (allPoints.length === 0) return [];
     const cutoffMs = RANGE_MS[range];
+    if (!Number.isFinite(cutoffMs)) {
+      // "ALL" — show every recorded tick
+      return allPoints;
+    }
     const cutoff = Date.now() - cutoffMs;
     // Binary search for first in-range index since data is sorted by ts
     let lo = 0, hi = allPoints.length;
