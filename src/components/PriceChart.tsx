@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
-export type PriceRange = "1D" | "1W" | "1M" | "1Y";
+export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "5Y" | "10Y" | "ALL";
 export type ChartMode = "line" | "candle";
 
 interface PricePoint {
@@ -27,6 +27,17 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1W": true,
   "1M": true,
   "1Y": true,
+  "5Y": true,
+  "10Y": true,
+  "ALL": true,
+};
+
+// Ranges wider than ~1Y render in a horizontally scrollable container so a
+// decade of data stays legible without squishing every candle / point.
+const SCROLLABLE_RANGES: Partial<Record<PriceRange, number>> = {
+  "5Y": 1800,
+  "10Y": 3200,
+  "ALL": 3200,
 };
 
 const MIN_MS = 60 * 1000;
@@ -61,11 +72,6 @@ interface PriceChartProps {
   isMarketOpen?: boolean;
 }
 
-// Hard floor: only consider chart history recorded on/after Jan 1, 2025 IST.
-// Earlier rows are ignored on the client (DB rows untouched) to keep the
-// series consistent with the current data pipeline.
-const HISTORY_EPOCH_MS = Date.UTC(2024, 11, 31, 18, 30, 0); // 2025-01-01 00:00 IST
-
 // Module-level cache so re-opening the sheet for the same stock is instant.
 // Keyed by `${ticker}|${exchange}`, valid for 60 seconds.
 const HISTORY_CACHE = new Map<string, { points: PricePoint[]; at: number }>();
@@ -76,13 +82,20 @@ const RANGE_LABELS: Record<PriceRange, string> = {
   "1W": "1W",
   "1M": "1M",
   "1Y": "1Y",
+  "5Y": "5Y",
+  "10Y": "10Y",
+  "ALL": "All",
 };
 
+const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const RANGE_MS: Record<PriceRange, number> = {
   "1D": 24 * 60 * 60 * 1000,
   "1W": 7 * 24 * 60 * 60 * 1000,
   "1M": 30 * 24 * 60 * 60 * 1000,
-  "1Y": 365 * 24 * 60 * 60 * 1000,
+  "1Y": YEAR_MS,
+  "5Y": 5 * YEAR_MS,
+  "10Y": 10 * YEAR_MS,
+  "ALL": Number.POSITIVE_INFINITY,
 };
 
 const WIDTH = 600;
