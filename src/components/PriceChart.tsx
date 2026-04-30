@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
-export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "5Y" | "10Y" | "ALL";
+export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "5Y" | "10Y";
 export type ChartMode = "line" | "candle";
 
 interface PricePoint {
@@ -29,7 +29,6 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1Y": true,
   "5Y": true,
   "10Y": true,
-  "ALL": true,
 };
 
 // Ranges wider than ~1Y render in a horizontally scrollable container so a
@@ -37,7 +36,6 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
 const SCROLLABLE_RANGES: Partial<Record<PriceRange, number>> = {
   "5Y": 1800,
   "10Y": 3200,
-  "ALL": 3200,
 };
 
 const MIN_MS = 60 * 1000;
@@ -84,7 +82,6 @@ const RANGE_LABELS: Record<PriceRange, string> = {
   "1Y": "1Y",
   "5Y": "5Y",
   "10Y": "10Y",
-  "ALL": "All",
 };
 
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
@@ -95,7 +92,6 @@ const RANGE_MS: Record<PriceRange, number> = {
   "1Y": YEAR_MS,
   "5Y": 5 * YEAR_MS,
   "10Y": 10 * YEAR_MS,
-  "ALL": Number.POSITIVE_INFINITY,
 };
 
 const WIDTH = 600;
