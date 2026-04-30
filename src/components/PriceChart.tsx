@@ -233,15 +233,17 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return filtered;
   }, [allPoints, range]);
 
-  // Downsample very dense series for smooth rendering (max ~250 points)
+  // Downsample very dense series for smooth rendering. Wider ranges render in
+  // a horizontally scrollable container, so they get a higher point budget.
   const renderPoints = useMemo(() => {
-    if (points.length <= 250) return points;
-    const stride = Math.ceil(points.length / 250);
+    const cap = SCROLLABLE_RANGES[range] ? 1500 : 250;
+    if (points.length <= cap) return points;
+    const stride = Math.ceil(points.length / cap);
     const out: PricePoint[] = [];
     for (let i = 0; i < points.length; i += stride) out.push(points[i]);
     if (out[out.length - 1] !== points[points.length - 1]) out.push(points[points.length - 1]);
     return out;
-  }, [points]);
+  }, [points, range]);
 
   // Aggregate raw ticks (NOT downsampled) into OHLC candles for candle mode.
   // Bucket size is chosen adaptively from the actual data span so candle mode
