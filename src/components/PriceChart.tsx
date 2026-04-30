@@ -783,4 +783,30 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   );
 };
 
+/**
+ * Wraps the chart in a horizontally-scrollable container for wide ranges
+ * (5Y / 10Y / All). For shorter ranges it renders children inline so the
+ * existing full-width responsive behaviour is preserved.
+ */
+const ChartScrollWrapper = ({
+  scrollWidth,
+  children,
+}: {
+  scrollWidth?: number;
+  children: React.ReactNode;
+}) => {
+  if (!scrollWidth) {
+    return <>{children}</>;
+  }
+  return (
+    <div
+      className="overflow-x-auto overflow-y-hidden -mx-1 px-1 pb-1 [scrollbar-width:thin]"
+      role="region"
+      aria-label="Scroll chart horizontally"
+    >
+      <div style={{ width: scrollWidth, minWidth: "100%" }}>{children}</div>
+    </div>
+  );
+};
+
 export default PriceChart;
