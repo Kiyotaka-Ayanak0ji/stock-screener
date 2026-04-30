@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { RefreshCw, LineChart, CandlestickChart } from "lucide-react";
 
-export type PriceRange = "1D" | "1W" | "1M" | "1Y";
+export type PriceRange = "1D" | "1W" | "1M" | "1Y" | "5Y" | "10Y" | "ALL";
 export type ChartMode = "line" | "candle";
 
 interface PricePoint {
@@ -27,6 +27,17 @@ const CANDLE_ELIGIBLE: Record<PriceRange, boolean> = {
   "1W": true,
   "1M": true,
   "1Y": true,
+  "5Y": true,
+  "10Y": true,
+  "ALL": true,
+};
+
+// Ranges wider than ~1Y render in a horizontally scrollable container so a
+// decade of data stays legible without squishing every candle / point.
+const SCROLLABLE_RANGES: Partial<Record<PriceRange, number>> = {
+  "5Y": 1800,
+  "10Y": 3200,
+  "ALL": 3200,
 };
 
 const MIN_MS = 60 * 1000;
@@ -61,11 +72,6 @@ interface PriceChartProps {
   isMarketOpen?: boolean;
 }
 
-// Hard floor: only consider chart history recorded on/after Jan 1, 2025 IST.
-// Earlier rows are ignored on the client (DB rows untouched) to keep the
-// series consistent with the current data pipeline.
-const HISTORY_EPOCH_MS = Date.UTC(2024, 11, 31, 18, 30, 0); // 2025-01-01 00:00 IST
-
 // Module-level cache so re-opening the sheet for the same stock is instant.
 // Keyed by `${ticker}|${exchange}`, valid for 60 seconds.
 const HISTORY_CACHE = new Map<string, { points: PricePoint[]; at: number }>();
@@ -76,13 +82,20 @@ const RANGE_LABELS: Record<PriceRange, string> = {
   "1W": "1W",
   "1M": "1M",
   "1Y": "1Y",
+  "5Y": "5Y",
+  "10Y": "10Y",
+  "ALL": "All",
 };
 
+const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 const RANGE_MS: Record<PriceRange, number> = {
   "1D": 24 * 60 * 60 * 1000,
   "1W": 7 * 24 * 60 * 60 * 1000,
   "1M": 30 * 24 * 60 * 60 * 1000,
-  "1Y": 365 * 24 * 60 * 60 * 1000,
+  "1Y": YEAR_MS,
+  "5Y": 5 * YEAR_MS,
+  "10Y": 10 * YEAR_MS,
+  "ALL": Number.POSITIVE_INFINITY,
 };
 
 const WIDTH = 600;
@@ -95,7 +108,7 @@ function formatTime(ts: number, range: PriceRange): string {
   if (range === "1D") {
     return date.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: false });
   }
-  if (range === "1Y") {
+  if (range === "1Y" || range === "5Y" || range === "10Y" || range === "ALL") {
     return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" });
   }
   return date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
@@ -137,13 +150,16 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     else setLoading(true);
 
     (async () => {
+      // Fetch up to ~10 years of points. Pulled in one shot since the row
+      // size is tiny (price + timestamp) and the table is pruned server-side
+      // to a 10-year horizon by upsert-stock-prices.
       const { data, error } = await supabase
         .from("stock_price_history")
         .select("price, recorded_at")
         .eq("ticker", ticker)
         .eq("exchange", exchange)
         .order("recorded_at", { ascending: true })
-        .limit(5000);
+        .limit(50000);
       if (cancelled) return;
       if (error) {
         console.error("Price history fetch failed:", error);
@@ -155,7 +171,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             const ts = new Date(d.recorded_at).getTime();
             return { price: Number(d.price), recorded_at: d.recorded_at, ts };
           })
-          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts) && p.ts >= HISTORY_EPOCH_MS);
+          .filter((p) => Number.isFinite(p.price) && p.price > 0 && Number.isFinite(p.ts));
         parsed.sort((a, b) => a.ts - b.ts);
         const clean: PricePoint[] = [];
         for (const p of parsed) {
@@ -186,7 +202,6 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
       const last = prev[prev.length - 1];
       if (last && Math.abs(last.price - livePrice) < 0.0001) return prev;
       const now = Date.now();
-      if (now < HISTORY_EPOCH_MS) return prev;
       const next = [...prev, { price: livePrice, recorded_at: new Date(now).toISOString(), ts: now }];
       // Update cache too, but mark slightly stale so a refetch still happens
       HISTORY_CACHE.set(cacheKey, { points: next, at: Date.now() - CACHE_TTL_MS / 2 });
@@ -198,6 +213,10 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const points = useMemo(() => {
     if (allPoints.length === 0) return [];
     const cutoffMs = RANGE_MS[range];
+    if (!Number.isFinite(cutoffMs)) {
+      // "ALL" — show every recorded tick
+      return allPoints;
+    }
     const cutoff = Date.now() - cutoffMs;
     // Binary search for first in-range index since data is sorted by ts
     let lo = 0, hi = allPoints.length;
@@ -214,15 +233,17 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
     return filtered;
   }, [allPoints, range]);
 
-  // Downsample very dense series for smooth rendering (max ~250 points)
+  // Downsample very dense series for smooth rendering. Wider ranges render in
+  // a horizontally scrollable container, so they get a higher point budget.
   const renderPoints = useMemo(() => {
-    if (points.length <= 250) return points;
-    const stride = Math.ceil(points.length / 250);
+    const cap = SCROLLABLE_RANGES[range] ? 1500 : 250;
+    if (points.length <= cap) return points;
+    const stride = Math.ceil(points.length / cap);
     const out: PricePoint[] = [];
     for (let i = 0; i < points.length; i += stride) out.push(points[i]);
     if (out[out.length - 1] !== points[points.length - 1]) out.push(points[points.length - 1]);
     return out;
-  }, [points]);
+  }, [points, range]);
 
   // Aggregate raw ticks (NOT downsampled) into OHLC candles for candle mode.
   // Bucket size is chosen adaptively from the actual data span so candle mode
@@ -493,6 +514,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
 
       {/* Chart */}
       <div className="relative">
+        
         {loading && allPoints.length === 0 ? (
           <Skeleton className="w-full h-40 rounded-md" />
         ) : (showCandles ? candles.length < 2 : renderPoints.length < 2) ? (
@@ -501,7 +523,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
             <span className="text-[10px]">Try a wider range or refresh — new ticks are recorded as the dashboard polls.</span>
           </div>
         ) : (
-          <>
+          <ChartScrollWrapper scrollWidth={SCROLLABLE_RANGES[range]}>
             <svg
               ref={svgRef}
               viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -754,9 +776,35 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                 </div>
               );
             })()}
-          </>
+          </ChartScrollWrapper>
         )}
       </div>
+    </div>
+  );
+};
+
+/**
+ * Wraps the chart in a horizontally-scrollable container for wide ranges
+ * (5Y / 10Y / All). For shorter ranges it renders children inline so the
+ * existing full-width responsive behaviour is preserved.
+ */
+const ChartScrollWrapper = ({
+  scrollWidth,
+  children,
+}: {
+  scrollWidth?: number;
+  children: React.ReactNode;
+}) => {
+  if (!scrollWidth) {
+    return <>{children}</>;
+  }
+  return (
+    <div
+      className="overflow-x-auto overflow-y-hidden -mx-1 px-1 pb-1 [scrollbar-width:thin]"
+      role="region"
+      aria-label="Scroll chart horizontally"
+    >
+      <div style={{ width: scrollWidth, minWidth: "100%" }}>{children}</div>
     </div>
   );
 };

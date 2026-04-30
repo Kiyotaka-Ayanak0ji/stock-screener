@@ -172,8 +172,10 @@ Deno.serve(async (req) => {
         await sb.from("stock_price_history").insert(historyRows);
       }
 
-      // Prune points older than 30 days (best-effort, ignore errors)
-      const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      // Prune points older than ~10 years (best-effort, ignore errors).
+      // Keeping a long horizon lets the detail chart render multi-year history
+      // (5Y / 10Y / All ranges) instead of being capped at one month.
+      const cutoff = new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000).toISOString();
       await sb.from("stock_price_history").delete().lt("recorded_at", cutoff);
     } catch (historyErr) {
       console.error("price history append failed:", historyErr);
