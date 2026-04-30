@@ -209,10 +209,6 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
   const points = useMemo(() => {
     if (allPoints.length === 0) return [];
     const cutoffMs = RANGE_MS[range];
-    if (!Number.isFinite(cutoffMs)) {
-      // "ALL" — show every recorded tick
-      return allPoints;
-    }
     const cutoff = Date.now() - cutoffMs;
     // Binary search for first in-range index since data is sorted by ts
     let lo = 0, hi = allPoints.length;
