@@ -514,7 +514,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
 
       {/* Chart */}
       <div className="relative">
-        {(() => { /* no-op IIFE retained for clarity below */ return null; })()}
+        
         {loading && allPoints.length === 0 ? (
           <Skeleton className="w-full h-40 rounded-md" />
         ) : (showCandles ? candles.length < 2 : renderPoints.length < 2) ? (
