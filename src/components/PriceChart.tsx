@@ -776,7 +776,7 @@ const PriceChart = ({ ticker, exchange, livePrice, previousClose, positive = tru
                 </div>
               );
             })()}
-          </>
+          </ChartScrollWrapper>
         )}
       </div>
     </div>
