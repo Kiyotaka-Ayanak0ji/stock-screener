@@ -39,7 +39,7 @@ export const PRO_FEATURES = [
   "Up to 5 watchlists × 20 stocks each",
   "Real-time NSE & BSE price updates",
   "Column visibility customization",
-  "Smart Alerts (52-week highs/lows & volume spikes)",
+  "Smart Alerts (session high/low breaks & volume spikes, with cooldowns)",
   "Mobile swipe gestures with Undo",
 ] as const;
 
