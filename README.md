@@ -93,11 +93,16 @@ The app supports both **Guest Mode** (local-only) and **Authenticated Mode** (cl
 
 ## 🎯 Use Case Scenarios
 
+> 🖼 The screenshots below illustrate the core surfaces referenced in each scenario. Click any image to view it full-size.
+
 ### 1. The Long-Term Investor
 - Build a watchlist of 50–100 fundamentally strong stocks.
 - Tag them by thesis: `Compounder`, `Dividend`, `Long-term Hold`.
 - Use **10-year historical charts** to evaluate cyclical patterns.
 - Track actual holdings via **Portfolio** to see lifetime P&L and sector mix.
+
+![Dashboard watchlist view](public/docs/dashboard.png)
+*The main dashboard — a sortable, filterable watchlist with live prices, market cap, P/E, and per-row actions.*
 
 ### 2. The Active Swing Trader
 - Maintain focused watchlists per setup: `Breakout Watch`, `Reversal`, `Earnings Soon`.
@@ -105,16 +110,25 @@ The app supports both **Guest Mode** (local-only) and **Authenticated Mode** (cl
 - Enable **Smart Alerts** for 52-week breakouts and volume spikes.
 - Monitor real-time price movement during market hours.
 
+![Alerts panel with Price and Smart tabs](public/docs/alerts.png)
+*The Alerts panel surfaces Price triggers and Smart anomaly alerts in a single dropdown from the header bell.*
+
 ### 3. The Research Analyst
 - Use **inline column customization** (Premium) to surface custom metrics.
 - Export watchlists as **PDF reports** for client distribution.
 - Generate **read-only share links** for collaborators.
 - Cross-reference tickers with **Screener.in** via integrated external links.
 
+![Share and export menu](public/docs/share-export.png)
+*One-click export to Image, PDF, or a copyable read-only share link from the Share menu.*
+
 ### 4. The Casual Tracker / Beginner
 - Start in **Guest Mode** — no signup needed; data stored locally and encrypted.
 - Use the **interactive demo** to learn the workflow.
 - Upgrade later by signing up; data carries over after authentication.
+
+![Stock detail sheet with chart and metrics](public/docs/stock-detail.png)
+*The Stock Detail sheet shows live price, OHLC, market cap, P/E, day range, and a scrollable chart spanning 1D → 10Y.*
 
 ### 5. The Mobile-First User
 - Install the **PWA** from the browser.
@@ -125,6 +139,7 @@ The app supports both **Guest Mode** (local-only) and **Authenticated Mode** (cl
 - Unlock **Premium Plus**: up to **50 watchlists × 100 stocks each**.
 - Get advanced exports, priority email queue, and full Smart Alert coverage.
 - Use the **Admin Dashboard** (admin role only) to manage subscriptions and users.
+
 
 ---
 
