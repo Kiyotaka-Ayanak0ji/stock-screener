@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { SeedUniverseWidget } from "@/components/admin/SeedUniverseWidget";
 import { VerificationDebugWidget } from "@/components/admin/VerificationDebugWidget";
+import { HistoryImportWidget } from "@/components/admin/HistoryImportWidget";
 
 interface AdminUser {
   id: string;
@@ -304,6 +305,11 @@ const AdminDashboard = () => {
           {/* Stock Universe Seeding */}
           <div className="mb-8">
             <SeedUniverseWidget />
+          </div>
+
+          {/* Historical Price Importer */}
+          <div className="mb-8">
+            <HistoryImportWidget />
           </div>
 
           {/* Verification Debug Mode */}
