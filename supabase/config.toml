@@ -23,3 +23,5 @@ project_id = "szkezahvdumeiqmnlugj"
     verify_jwt = false
   [functions.get-shared-watchlist]
     verify_jwt = false
+  [functions.daily-price-snapshot]
+    verify_jwt = false
