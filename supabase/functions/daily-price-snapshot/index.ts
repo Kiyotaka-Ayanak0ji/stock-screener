@@ -43,12 +43,61 @@ function istParts(date = new Date()) {
   };
 }
 
-/** Returns true Mon–Fri IST. (NSE holiday calendar is not consulted — those days
- *  simply produce a no-op snapshot since cached prices won't have moved.) */
-function isTradingDayIST(date = new Date()): boolean {
-  const { weekday } = istParts(date);
-  return weekday !== "Sat" && weekday !== "Sun";
+/**
+ * NSE trading holidays (full-day equity market closures).
+ * Source: NSE official holiday calendar. Update yearly.
+ * Format: "YYYY-MM-DD" in IST.
+ */
+const NSE_HOLIDAYS: ReadonlySet<string> = new Set([
+  // 2025
+  "2025-02-26", // Mahashivratri
+  "2025-03-14", // Holi
+  "2025-03-31", // Id-Ul-Fitr (Ramzan Id)
+  "2025-04-10", // Shri Mahavir Jayanti
+  "2025-04-14", // Dr. Baba Saheb Ambedkar Jayanti
+  "2025-04-18", // Good Friday
+  "2025-05-01", // Maharashtra Day
+  "2025-08-15", // Independence Day
+  "2025-08-27", // Shri Ganesh Chaturthi
+  "2025-10-02", // Mahatma Gandhi Jayanti / Dussehra
+  "2025-10-21", // Diwali Laxmi Pujan (special muhurat session — treat as holiday for daily close)
+  "2025-10-22", // Balipratipada
+  "2025-11-05", // Prakash Gurpurb Sri Guru Nanak Dev
+  "2025-12-25", // Christmas
+  // 2026
+  "2026-01-26", // Republic Day
+  "2026-03-03", // Mahashivratri
+  "2026-03-04", // Holi
+  "2026-03-21", // Id-Ul-Fitr
+  "2026-04-01", // Shri Mahavir Jayanti
+  "2026-04-03", // Good Friday
+  "2026-04-14", // Dr. Baba Saheb Ambedkar Jayanti
+  "2026-05-01", // Maharashtra Day
+  "2026-05-27", // Bakri Id
+  "2026-06-26", // Moharram
+  "2026-08-15", // Independence Day
+  "2026-09-15", // Shri Ganesh Chaturthi
+  "2026-10-02", // Mahatma Gandhi Jayanti
+  "2026-10-22", // Dussehra
+  "2026-11-09", // Diwali Balipratipada
+  "2026-11-24", // Prakash Gurpurb Sri Guru Nanak Dev
+  "2026-12-25", // Christmas
+]);
+
+function istDateKey(date = new Date()): string {
+  const { year, month, day } = istParts(date);
+  return `${year}-${month}-${day}`;
 }
+
+/** True only on NSE equity trading days: Mon–Fri IST and not in the holiday set. */
+function isTradingDayIST(date = new Date()): { ok: boolean; reason?: string } {
+  const { weekday } = istParts(date);
+  if (weekday === "Sat" || weekday === "Sun") return { ok: false, reason: "weekend_ist" };
+  const key = istDateKey(date);
+  if (NSE_HOLIDAYS.has(key)) return { ok: false, reason: `nse_holiday_${key}` };
+  return { ok: true };
+}
+
 
 /** Returns the ISO timestamp for 15:30 IST of "today" in IST. */
 function todayCloseIso(date = new Date()): string {
