@@ -34,6 +34,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { SeedUniverseWidget } from "@/components/admin/SeedUniverseWidget";
 import { VerificationDebugWidget } from "@/components/admin/VerificationDebugWidget";
+import { HistoryImportWidget } from "@/components/admin/HistoryImportWidget";
 
 interface AdminUser {
   id: string;
