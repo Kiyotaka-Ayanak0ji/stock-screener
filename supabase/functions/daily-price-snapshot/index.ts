@@ -112,9 +112,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    if (!isTradingDayIST()) {
+    const tradingDay = isTradingDayIST();
+    if (!tradingDay.ok) {
       return new Response(
-        JSON.stringify({ ok: true, skipped: "weekend_ist", inserted: 0 }),
+        JSON.stringify({ ok: true, skipped: tradingDay.reason, inserted: 0 }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
