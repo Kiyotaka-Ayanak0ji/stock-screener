@@ -307,11 +307,6 @@ const AdminDashboard = () => {
             <SeedUniverseWidget />
           </div>
 
-          {/* Historical Price Importer */}
-          <div className="mb-8">
-            <HistoryImportWidget />
-          </div>
-
           {/* Verification Debug Mode */}
           <div className="mb-8">
             <VerificationDebugWidget />
