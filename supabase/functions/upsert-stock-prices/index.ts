@@ -30,29 +30,6 @@ function num(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-/**
- * Returns true only when the Indian equity market is open
- * (Mon–Fri, 09:15–15:30 IST). Used to gate chart-history writes so
- * `stock_price_history` only accumulates real intraday ticks.
- */
-function isMarketOpenIST(date: Date = new Date()): boolean {
-  // Convert "now" to IST wall-clock components without depending on server TZ.
-  const istParts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(date);
-  const get = (t: string) => istParts.find((p) => p.type === t)?.value ?? "";
-  const weekday = get("weekday"); // Mon, Tue, ...
-  if (weekday === "Sat" || weekday === "Sun") return false;
-  const hour = parseInt(get("hour"), 10);
-  const minute = parseInt(get("minute"), 10);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return false;
-  const minutes = hour * 60 + minute;
-  return minutes >= 555 && minutes <= 930; // 09:15 – 15:30 IST
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -123,63 +100,6 @@ Deno.serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    }
-
-    // Append history points for sparklines / detail-sheet chart.
-    // GATED: only record while the IST market is open AND the cached prices
-    // upsert above succeeded (i.e. we just wrote fresh, validated quotes).
-    // Outside market hours the chart stays frozen so off-hours noise / stale
-    // proxy responses don't pollute the time series.
-    if (!isMarketOpenIST()) {
-      return new Response(JSON.stringify({ ok: true, written: cleaned.length, history: "skipped_market_closed" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Only record when price actually changed since the last point to avoid bloat.
-    try {
-      const tickers = cleaned.map((c) => c.ticker);
-      const { data: lastPoints } = await sb
-        .from("stock_price_history")
-        .select("ticker, exchange, price, recorded_at")
-        .in("ticker", tickers)
-        .order("recorded_at", { ascending: false })
-        .limit(500);
-
-      const lastByKey = new Map<string, number>();
-      (lastPoints ?? []).forEach((p: any) => {
-        const key = `${p.exchange}|${p.ticker}`;
-        if (!lastByKey.has(key)) lastByKey.set(key, Number(p.price));
-      });
-
-      const historyRows = cleaned
-        .filter((c) => {
-          // Require a valid positive price — never persist a zero/NaN tick.
-          if (!Number.isFinite(c.price) || c.price <= 0) return false;
-          const key = `${c.exchange}|${c.ticker}`;
-          const last = lastByKey.get(key);
-          // Always store first point; otherwise store only on actual change
-          return last === undefined || Math.abs(last - c.price) > 0.0001;
-        })
-        .map((c) => ({
-          ticker: c.ticker,
-          exchange: c.exchange,
-          price: c.price,
-          recorded_at: now,
-        }));
-
-      if (historyRows.length > 0) {
-        await sb.from("stock_price_history").insert(historyRows);
-      }
-
-      // Prune points older than ~10 years (best-effort, ignore errors).
-      // Keeping a long horizon lets the detail chart render multi-year history
-      // (5Y / 10Y / All ranges) instead of being capped at one month.
-      const cutoff = new Date(Date.now() - 10 * 365 * 24 * 60 * 60 * 1000).toISOString();
-      await sb.from("stock_price_history").delete().lt("recorded_at", cutoff);
-    } catch (historyErr) {
-      console.error("price history append failed:", historyErr);
-      // Non-fatal — primary upsert already succeeded
     }
 
     return new Response(JSON.stringify({ ok: true, written: cleaned.length }), {

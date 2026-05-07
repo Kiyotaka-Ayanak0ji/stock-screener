@@ -29,7 +29,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import PremiumDialog from "@/components/PremiumDialog";
-import PriceChart from "@/components/PriceChart";
 import { getFreshness, type FreshnessState } from "@/lib/stockFreshness";
 import { cn } from "@/lib/utils";
 
@@ -214,22 +213,7 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
               </div>
             </div>
 
-            {/* Interactive price chart — wrapped in a horizontally scrollable
-                container so wide ranges (5Y/10Y) and dense intraday ticks
-                stay legible without squishing the data. PriceChart still
-                manages its own inner widths for scrollable ranges. */}
-            <div className="overflow-x-auto overflow-y-hidden -mx-1 px-1 [scrollbar-width:thin]">
-              <div className="min-w-full">
-                <PriceChart
-                  ticker={stock.ticker}
-                  exchange={stock.exchange}
-                  livePrice={stock.price}
-                  previousClose={stock.previousClose}
-                  positive={!isNegative}
-                  isMarketOpen={isMarketOpen}
-                />
-              </div>
-            </div>
+
 
             {/* Metrics grid */}
             <div className="grid grid-cols-2 gap-2 text-xs">
