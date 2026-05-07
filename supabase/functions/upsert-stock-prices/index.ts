@@ -30,29 +30,6 @@ function num(v: unknown, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-/**
- * Returns true only when the Indian equity market is open
- * (Mon–Fri, 09:15–15:30 IST). Used to gate chart-history writes so
- * `stock_price_history` only accumulates real intraday ticks.
- */
-function isMarketOpenIST(date: Date = new Date()): boolean {
-  // Convert "now" to IST wall-clock components without depending on server TZ.
-  const istParts = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(date);
-  const get = (t: string) => istParts.find((p) => p.type === t)?.value ?? "";
-  const weekday = get("weekday"); // Mon, Tue, ...
-  if (weekday === "Sat" || weekday === "Sun") return false;
-  const hour = parseInt(get("hour"), 10);
-  const minute = parseInt(get("minute"), 10);
-  if (!Number.isFinite(hour) || !Number.isFinite(minute)) return false;
-  const minutes = hour * 60 + minute;
-  return minutes >= 555 && minutes <= 930; // 09:15 – 15:30 IST
-}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
