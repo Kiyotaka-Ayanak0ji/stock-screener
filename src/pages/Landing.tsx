@@ -805,14 +805,14 @@ const Landing = () => {
                 <div className="mt-3 flex items-baseline gap-1">
                   <AnimatePresence mode="wait">
                     <motion.span
-                      key={billingCycle === "yearly" ? "450" : "40"}
+                      key={billingCycle === "yearly" ? "400" : "40"}
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.2 }}
                       className="text-4xl font-extrabold"
                     >
-                      ${billingCycle === "yearly" ? "450" : "40"}
+                      ${billingCycle === "yearly" ? "400" : "40"}
                     </motion.span>
                   </AnimatePresence>
                   <AnimatePresence mode="wait">
@@ -838,7 +838,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$37.50/mo — save $30/year
+                      ~$33.33/mo — save $80/year
                     </motion.p>
                   ) : (
                     <motion.p
@@ -849,7 +849,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-muted-foreground mt-1"
                     >
-                      or <strong>$450/year</strong> (save ~6%)
+                      or <strong>$400/year</strong> (save ~17%)
                     </motion.p>
                   )}
                 </AnimatePresence>
@@ -919,7 +919,7 @@ const Landing = () => {
                           dashboard with sector analysis.
                         </li>
                         <li>
-                          <strong className="text-foreground">Premium Plus ($40/mo or $450/yr)</strong> — Up to 50
+                          <strong className="text-foreground">Premium Plus ($40/mo or $400/yr)</strong> — Up to 50
                           watchlists × 100 stocks, unlimited price trigger alerts, auto-refresh on reload, and
                           everything in Premium.
                         </li>
