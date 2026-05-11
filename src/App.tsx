@@ -64,6 +64,8 @@ const App = () => (
                 <Route path="/portfolio" element={<SubscriptionGate><WithStocks><Portfolio /></WithStocks></SubscriptionGate>} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/support" element={<Support />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
