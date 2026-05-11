@@ -25,6 +25,8 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Support = lazy(() => import("./pages/Support"));
 
 const queryClient = new QueryClient();
 
@@ -62,6 +64,8 @@ const App = () => (
                 <Route path="/portfolio" element={<SubscriptionGate><WithStocks><Portfolio /></WithStocks></SubscriptionGate>} />
                 <Route path="/unsubscribe" element={<Unsubscribe />} />
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/support" element={<Support />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
