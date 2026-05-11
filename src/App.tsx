@@ -25,6 +25,8 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Support = lazy(() => import("./pages/Support"));
 
 const queryClient = new QueryClient();
 
