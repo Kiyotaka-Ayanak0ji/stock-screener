@@ -300,7 +300,7 @@ const Subscribe = () => {
               <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
             {billingCycle === "yearly" && (
-              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$37.50/mo — save $30/year</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$33.33/mo — save $80/year</p>
             )}
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs">
