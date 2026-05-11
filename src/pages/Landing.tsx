@@ -207,20 +207,10 @@ const Landing = () => {
             >
               Pricing
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:inline-flex"
-              onClick={() => navigate("/faq")}
-            >
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/faq")}>
               FAQ
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden sm:inline-flex"
-              onClick={() => navigate("/support")}
-            >
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/support")}>
               Support
             </Button>
             {user ? (
@@ -876,7 +866,6 @@ const Landing = () => {
         </div>
       </section>
 
-
       {/* Footer */}
       <footer className="border-t border-border py-10 px-4">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -885,20 +874,6 @@ const Landing = () => {
             <span className="font-bold">
               Equity<span className="text-primary">IQ</span>
             </span>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <button onClick={() => navigate("/auth")} className="hover:text-foreground transition-colors">
-              Sign In
-            </button>
-            <button onClick={() => navigate("/subscribe")} className="hover:text-foreground transition-colors">
-              Pricing
-            </button>
-            <a
-              href="mailto:support@equityiq.in?subject=EquityIQ%20Support"
-              className="hover:text-foreground transition-colors"
-            >
-              Support
-            </a>
           </div>
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EquityIQ. All rights reserved.</p>
         </div>
