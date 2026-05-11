@@ -211,7 +211,7 @@ const Landing = () => {
               variant="ghost"
               size="sm"
               className="hidden sm:inline-flex"
-              onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => navigate("/faq")}
             >
               FAQ
             </Button>
@@ -219,7 +219,7 @@ const Landing = () => {
               variant="ghost"
               size="sm"
               className="hidden sm:inline-flex"
-              onClick={() => document.getElementById("support")?.scrollIntoView({ behavior: "smooth" })}
+              onClick={() => navigate("/support")}
             >
               Support
             </Button>
