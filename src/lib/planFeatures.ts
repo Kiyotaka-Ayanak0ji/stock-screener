@@ -11,7 +11,7 @@ export const PLAN_LIMITS = {
 export const PLAN_PRICING = {
   pro: { monthlyUsd: 5, yearlyUsd: 50 },
   premium: { monthlyUsd: 20, yearlyUsd: 200 },
-  premium_plus: { monthlyUsd: 40, yearlyUsd: 450 },
+  premium_plus: { monthlyUsd: 40, yearlyUsd: 400 },
 } as const;
 
 // Guest / Free tier — no signup payment.

@@ -46,7 +46,7 @@ const TIER_COPY: Record<RequiredTier, {
     title: "Premium Plus Feature",
     cta: "Get Premium Plus (from $40/mo)",
     badgeIcon: Zap,
-    priceLabel: "Premium Plus plan ($40/mo or $450/yr)",
+    priceLabel: "Premium Plus plan ($40/mo or $400/yr)",
   },
 };
 

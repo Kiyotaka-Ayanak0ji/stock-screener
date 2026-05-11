@@ -31,7 +31,7 @@ const PLAN_PRICES: Record<PlanKey, { usd: number; label: string }> = {
   premium_monthly: { usd: 20, label: "Premium Monthly" },
   premium_yearly: { usd: 200, label: "Premium Yearly" },
   premium_plus_monthly: { usd: 40, label: "Premium Plus Monthly" },
-  premium_plus_yearly: { usd: 450, label: "Premium Plus Yearly" },
+  premium_plus_yearly: { usd: 400, label: "Premium Plus Yearly" },
 };
 
 const Subscribe = () => {
@@ -296,7 +296,7 @@ const Subscribe = () => {
               <Badge variant="outline" className="text-xs">{billingCycle === "yearly" ? "Yearly" : "Monthly"}</Badge>
             </div>
             <div className="flex items-baseline gap-1 mb-3">
-              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "450" : "40"}</span>
+              <span className="text-3xl font-bold">${billingCycle === "yearly" ? "400" : "40"}</span>
               <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
             {billingCycle === "yearly" && (
