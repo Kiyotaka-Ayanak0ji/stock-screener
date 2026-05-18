@@ -32,7 +32,7 @@ EquityIQ helps Indian market participants:
 - Export and share watchlists as PDF, image, or read-only links.
 - Use the app as a **PWA** on mobile or as a desktop **Electron** app.
 
-The app supports both **Guest Mode** (local-only) and **Authenticated Mode** (cloud-synced) workflows, with subscription tiers (Free / Premium / Premium Plus / Lifetime) gating advanced functionality.
+The app supports only **Authenticated Mode** (cloud-synced) workflow, with subscription tiers (Free / Premium / Premium Plus / Lifetime) gating advanced functionality.
 
 ---
 
