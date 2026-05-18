@@ -2,7 +2,7 @@
 
 > A premium, real-time stock screening, watchlist, portfolio tracking, and alerts platform for **NSE & BSE** listed equities. Built for retail investors, traders, and analysts who want a fast, focused, and beautifully designed research workflow.
 
-🌐 **Live App:** [https://equityiq.in](https://equityiq.in/)
+🌐 **Live App:** [https://www.equityiq.in](https://www.equityiq.in/)
 
 ---
 
