@@ -30,8 +30,19 @@ const ProfileSubscription = () => {
   const { user } = useAuth();
   const { subscription, loading, isActive, trialDaysLeft, planTier, isPremiumPlus, isPremium, isPro } = useSubscription();
   const navigate = useNavigate();
+  const [details, setDetails] = useState<{ subscription_starts_at?: string | null; payment_method?: string | null; amount_usd?: number | null; amount_inr?: number | null } | null>(null);
 
-  useEffect(() => { if (!user) navigate("/auth"); }, [user, navigate]);
+  useEffect(() => {
+    if (!user) { navigate("/auth"); return; }
+    (async () => {
+      const { data } = await supabase
+        .from("user_subscriptions")
+        .select("subscription_starts_at, payment_method, amount_usd, amount_inr")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data) setDetails(data as any);
+    })();
+  }, [user, navigate]);
 
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
