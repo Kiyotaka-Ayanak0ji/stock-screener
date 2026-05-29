@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles, CreditCard, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
