@@ -815,8 +815,25 @@ Deno.serve(async (req) => {
       (s: { ticker: string; exchange: string }) => !resolvedKeys.has(`${s.exchange}_${s.ticker}`),
     );
 
-    const yahooSymbols = yahooTargets.map((s: { ticker: string; exchange: string; yahooSymbol?: string }) => {
+    // Known-index → Yahoo "^" symbol fallback. Ensures indices the BSE/NSE
+    // feeds couldn't match still get a live price from Yahoo.
+    const INDEX_YAHOO_FALLBACK: Record<string, string> = {
+      NIFTY: '^NSEI', NIFTY50: '^NSEI',
+      NIFTYBANK: '^NSEBANK', BANKNIFTY: '^NSEBANK',
+      NIFTYIT: '^CNXIT', NIFTYMIDCAP100: '^CNXMIDCAP',
+      NIFTYNEXT50: '^NSMIDCP', NIFTY500: '^CRSLDX',
+      SENSEX: '^BSESN', BSESENSEX: '^BSESN',
+      BSE100: '^BSE100', BSE200: '^BSE200', BSE500: '^BSE500',
+      BSEBANKEX: '^BSEBANK',
+    };
+
+    const yahooSymbols = yahooTargets.map((s: { ticker: string; exchange: string; yahooSymbol?: string; isIndex?: boolean }) => {
       if (s.yahooSymbol) return s.yahooSymbol;
+      if (s.isIndex || looksLikeIndex(s.ticker)) {
+        const key = (s.ticker || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const mapped = INDEX_YAHOO_FALLBACK[key];
+        if (mapped) return mapped;
+      }
       const suffix = s.exchange === 'BSE' ? '.BO' : '.NS';
       return `${s.ticker}${suffix}`;
     }).join(',');
