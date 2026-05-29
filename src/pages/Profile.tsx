@@ -97,34 +97,7 @@ const Profile = () => {
     }
   };
 
-  const handleSaveReview = async () => {
-    if (!user || reviewRating === 0 || !reviewText.trim()) {
-      toast.error("Please provide a rating and review.");
-      return;
-    }
-    setSavingReview(true);
-    const reviewData = {
-      user_id: user.id,
-      display_name: displayName.trim() || user.email?.split("@")[0] || "User",
-      designation: reviewDesignation.trim() || null,
-      rating: reviewRating,
-      review: reviewText.trim(),
-    };
-
-    let error;
-    if (existingReview) {
-      ({ error } = await supabase.from("app_reviews").update(reviewData).eq("id", existingReview.id));
-    } else {
-      ({ error } = await supabase.from("app_reviews").insert(reviewData));
-    }
-    setSavingReview(false);
-    if (error) {
-      toast.error("Failed to save review.");
-      return;
-    }
-    toast.success(existingReview ? "Review updated!" : "Review submitted! Thank you!");
-    setExistingReview({ ...existingReview, ...reviewData });
-  };
+  // Review form moved to /profile/reviews
 
   if (loading) {
     return (
