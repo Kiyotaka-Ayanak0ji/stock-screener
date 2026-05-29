@@ -27,6 +27,9 @@ const Portfolio = lazy(() => import("./pages/Portfolio"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Support = lazy(() => import("./pages/Support"));
+const ProfileSubscription = lazy(() => import("./pages/ProfileSubscription"));
+const ProfilePassword = lazy(() => import("./pages/ProfilePassword"));
+const ProfileReviews = lazy(() => import("./pages/ProfileReviews"));
 
 const queryClient = new QueryClient();
 
