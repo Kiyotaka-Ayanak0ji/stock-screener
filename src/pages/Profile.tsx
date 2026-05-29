@@ -7,11 +7,11 @@ import { useStocks } from "@/contexts/StockContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles, CreditCard, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -27,16 +27,9 @@ const Profile = () => {
   const [emailOptIn, setEmailOptIn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [changingPassword, setChangingPassword] = useState(false);
-  // Review state
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewHover, setReviewHover] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewDesignation, setReviewDesignation] = useState("");
-  const [existingReview, setExistingReview] = useState<any>(null);
-  const [savingReview, setSavingReview] = useState(false);
+  // Password change & reviews are now on dedicated subpages —
+  // /profile/password and /profile/reviews. Subscription mgmt lives at
+  // /profile/subscription. This page only handles core profile/preferences.
 
   useEffect(() => {
     if (!user) {
@@ -56,18 +49,6 @@ const Profile = () => {
     if (data) {
       setDisplayName(data.display_name || "");
       setEmailOptIn(data.email_opt_in ?? false);
-    }
-    // Fetch existing review
-    const { data: review } = await supabase
-      .from("app_reviews")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (review) {
-      setExistingReview(review);
-      setReviewRating(review.rating);
-      setReviewText(review.review);
-      setReviewDesignation(review.designation || "");
     }
     setLoading(false);
   };
@@ -95,30 +76,7 @@ const Profile = () => {
     }
   };
 
-  const handleChangePassword = async () => {
-    if (!newPassword || !confirmPassword) {
-      toast.error("Please fill in both password fields");
-      return;
-    }
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    setChangingPassword(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setChangingPassword(false);
-    if (error) {
-      toast.error(error.message || "Failed to change password");
-    } else {
-      toast.success("Password changed successfully");
-      setNewPassword("");
-      setConfirmPassword("");
-    }
-  };
+  // Password change moved to /profile/password
 
   const handleToggleAutoRefresh = async (enabled: boolean) => {
     if (!isPremiumPlus) {
@@ -139,34 +97,7 @@ const Profile = () => {
     }
   };
 
-  const handleSaveReview = async () => {
-    if (!user || reviewRating === 0 || !reviewText.trim()) {
-      toast.error("Please provide a rating and review.");
-      return;
-    }
-    setSavingReview(true);
-    const reviewData = {
-      user_id: user.id,
-      display_name: displayName.trim() || user.email?.split("@")[0] || "User",
-      designation: reviewDesignation.trim() || null,
-      rating: reviewRating,
-      review: reviewText.trim(),
-    };
-
-    let error;
-    if (existingReview) {
-      ({ error } = await supabase.from("app_reviews").update(reviewData).eq("id", existingReview.id));
-    } else {
-      ({ error } = await supabase.from("app_reviews").insert(reviewData));
-    }
-    setSavingReview(false);
-    if (error) {
-      toast.error("Failed to save review.");
-      return;
-    }
-    toast.success(existingReview ? "Review updated!" : "Review submitted! Thank you!");
-    setExistingReview({ ...existingReview, ...reviewData });
-  };
+  // Review form moved to /profile/reviews
 
   if (loading) {
     return (
@@ -294,73 +225,62 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          {/* Change Password */}
+          {/* Quick links — subscription, password, reviews live on dedicated pages */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+            <Card className="border-border shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-foreground text-base">
-                  <div className="p-1.5 rounded-lg bg-primary/10"><Lock className="h-4 w-4 text-primary" /></div>
-                  Change Password
-                </CardTitle>
-                <CardDescription className="text-xs">Update your account password</CardDescription>
+                <CardTitle className="text-foreground text-base">Account & Activity</CardTitle>
+                <CardDescription className="text-xs">Manage subscription, security and reviews on their own pages</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword" className="text-xs">New Password</Label>
-                  <Input id="newPassword" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" minLength={6} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword" className="text-xs">Confirm New Password</Label>
-                  <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" minLength={6} />
-                </div>
-                <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword || !confirmPassword} variant="secondary" className="w-full active:scale-[0.98] transition-all">
-                  {changingPassword ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
-                  Change Password
-                </Button>
+              <CardContent className="space-y-2">
+                <button
+                  onClick={() => navigate("/profile/subscription")}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/40 hover:border-primary/40 transition-all text-left group active:scale-[0.99]"
+                >
+                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                    <CreditCard className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">My Subscription</p>
+                    <p className="text-xs text-muted-foreground">View current plan, billing dates and manage your subscription</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </button>
+
+                <button
+                  onClick={() => navigate("/profile/password")}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/40 hover:border-primary/40 transition-all text-left group active:scale-[0.99]"
+                >
+                  <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                    <Lock className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">Change Password</p>
+                    <p className="text-xs text-muted-foreground">Update your account password</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </button>
+
+                {!isAdmin && (
+                  <button
+                    onClick={() => navigate("/profile/reviews")}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-muted/40 hover:border-primary/40 transition-all text-left group active:scale-[0.99]"
+                  >
+                    <div className="p-2 rounded-lg bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                      <MessageSquare className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                        Your Review <Star className="h-3 w-3 text-primary" />
+                      </p>
+                      <p className="text-xs text-muted-foreground">Leave or update your review on EquityIQ</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </button>
+                )}
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Review Section */}
-          {!isAdmin && (
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-foreground text-base">
-                    <div className="p-1.5 rounded-lg bg-primary/10"><MessageSquare className="h-4 w-4 text-primary" /></div>
-                    {existingReview ? "Your Review" : "Leave a Review"}
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    {existingReview ? "Update your review — it's displayed on our landing page" : "Share your experience to help other investors discover EquityIQ"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Rating</Label>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} type="button" className="transition-transform hover:scale-125 active:scale-95" onMouseEnter={() => setReviewHover(star)} onMouseLeave={() => setReviewHover(0)} onClick={() => setReviewRating(star)}>
-                          <Star className={`h-7 w-7 transition-colors ${star <= (reviewHover || reviewRating) ? "fill-primary text-primary" : "text-muted-foreground/40"}`} />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="profile-review-designation" className="text-xs">Designation (optional)</Label>
-                    <Input id="profile-review-designation" value={reviewDesignation} onChange={(e) => setReviewDesignation(e.target.value)} placeholder="e.g. Swing Trader, Long-term Investor" maxLength={60} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="profile-review-text" className="text-xs">Your Review</Label>
-                    <Textarea id="profile-review-text" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Tell us what you love about EquityIQ..." rows={3} maxLength={500} />
-                  </div>
-                  <Button onClick={handleSaveReview} disabled={savingReview || reviewRating === 0 || !reviewText.trim()} className="w-full active:scale-[0.98] transition-all" variant="secondary">
-                    {savingReview ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
-                    {existingReview ? "Update Review" : "Submit Review"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
 
           {isAdmin && (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
