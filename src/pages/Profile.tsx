@@ -27,16 +27,9 @@ const Profile = () => {
   const [emailOptIn, setEmailOptIn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [changingPassword, setChangingPassword] = useState(false);
-  // Review state
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewHover, setReviewHover] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewDesignation, setReviewDesignation] = useState("");
-  const [existingReview, setExistingReview] = useState<any>(null);
-  const [savingReview, setSavingReview] = useState(false);
+  // Password change & reviews are now on dedicated subpages —
+  // /profile/password and /profile/reviews. Subscription mgmt lives at
+  // /profile/subscription. This page only handles core profile/preferences.
 
   useEffect(() => {
     if (!user) {
