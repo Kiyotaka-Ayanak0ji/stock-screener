@@ -104,10 +104,10 @@ const ProfileSubscription = () => {
                     <div className="text-xs text-muted-foreground mt-0.5">{trialDaysLeft > 0 ? `${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} left` : "Expired"}</div>
                   </div>
                 )}
-                {!isLifetime && subscription?.subscription_starts_at && (
+                {!isLifetime && details?.subscription_starts_at && (
                   <div className="rounded-lg border border-border p-3">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><Calendar className="h-3.5 w-3.5" /> Started</div>
-                    <div className="text-sm font-medium text-foreground">{formatDate(subscription.subscription_starts_at)}</div>
+                    <div className="text-sm font-medium text-foreground">{formatDate(details.subscription_starts_at)}</div>
                   </div>
                 )}
                 {!isLifetime && subscription?.subscription_ends_at && (
@@ -116,17 +116,17 @@ const ProfileSubscription = () => {
                     <div className="text-sm font-medium text-foreground">{formatDate(subscription.subscription_ends_at)}</div>
                   </div>
                 )}
-                {subscription?.payment_method && (
+                {details?.payment_method && (
                   <div className="rounded-lg border border-border p-3">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><CreditCard className="h-3.5 w-3.5" /> Payment Method</div>
-                    <div className="text-sm font-medium text-foreground capitalize">{subscription.payment_method}</div>
+                    <div className="text-sm font-medium text-foreground capitalize">{details.payment_method}</div>
                   </div>
                 )}
-                {(subscription?.amount_usd || subscription?.amount_inr) && (
+                {(details?.amount_usd || details?.amount_inr) && (
                   <div className="rounded-lg border border-border p-3">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-1"><CreditCard className="h-3.5 w-3.5" /> Last Paid</div>
                     <div className="text-sm font-medium text-foreground">
-                      {subscription.amount_usd ? `$${subscription.amount_usd}` : `₹${subscription.amount_inr}`}
+                      {details.amount_usd ? `$${details.amount_usd}` : `₹${details.amount_inr}`}
                     </div>
                   </div>
                 )}
