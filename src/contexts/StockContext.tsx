@@ -843,56 +843,24 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const refreshPrices = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const currentStocks = stocksRef.current;
+      // Reset failure state so a manual click always attempts a real fetch,
+      // not the simulation fallback.
+      liveDataFailed.current = false;
+      consecutiveFailuresRef.current = 0;
+
       const currentWatchlist = watchlistRef.current;
-      const tickerInfo = currentStocks
-        .filter(s => currentWatchlist.includes(s.ticker))
-        .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
+      if (currentWatchlist.length === 0) return;
 
-      if (tickerInfo.length === 0) {
-        setIsRefreshing(false);
-        return;
-      }
-
-      const liveData = await fetchLivePrices(tickerInfo);
-
-      if (liveData && Object.keys(liveData).length > 0) {
-        // Compute updated stocks synchronously from current ref
-        const updatedStocks = currentStocks.map(s => {
-          const key = `${s.exchange}_${s.ticker}`;
-          const live = liveData[key];
-          if (live) return applyLiveData(s, live);
-          return s;
-        });
-
-        // Update flash indicators
-        const flashes: Record<string, "up" | "down" | null> = {};
-        updatedStocks.forEach(s => {
-          const prevPrice = prevPrices.current[s.ticker] || s.price;
-          if (s.price > prevPrice) flashes[s.ticker] = "up";
-          else if (s.price < prevPrice) flashes[s.ticker] = "down";
-          else flashes[s.ticker] = null;
-          prevPrices.current[s.ticker] = s.price;
-        });
-        setLastFlash(flashes);
-        setStocks(updatedStocks);
-
-        // Persist refreshed prices to the database cache
-        const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
-        if (watchlistStocks.length > 0) {
-          await saveCachedPrices(watchlistStocks);
-        }
-        toast.success("Prices refreshed and saved");
-      } else {
-        toast.info("No live data available right now");
-      }
+      const ok = await fetchAndApplyLive();
+      if (ok) toast.success("Prices refreshed and saved");
+      else toast.info("No live data available right now");
     } catch (err) {
       console.error("Manual refresh failed:", err);
       toast.error("Failed to refresh prices");
     } finally {
       setIsRefreshing(false);
     }
-  }, [saveCachedPrices]);
+  }, [fetchAndApplyLive]);
 
   // --- On-demand single-stock verify against Screener.in ---
   const [verifyingTickers, setVerifyingTickers] = useState<Set<string>>(new Set());
