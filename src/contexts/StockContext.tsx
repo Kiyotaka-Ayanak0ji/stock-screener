@@ -364,107 +364,118 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Indian market is closed (outside 9:15–15:30 IST Mon–Fri) we never mutate
   // cached prices — users see the last in-session snapshot until the next
   // session opens, or until they explicitly hit the manual ↻ button.
-  useEffect(() => {
-    if (!prefsLoaded) return;
-    if (!isMarketOpen) return; // freeze data outside market hours
+  // Shared live-data fetcher — used by both the polling effect AND the manual
+  // "Refresh Now" button so they always produce identical results. The only
+  // difference between auto and manual is *when* this runs (polling cadence vs
+  // user click); the actual fetch/apply/cache logic is the same code path.
+  const consecutiveFailuresRef = useRef(0);
+  const MAX_FAILURES = 3;
 
-    let consecutiveFailures = 0;
-    const MAX_FAILURES = 3;
-
-    const fetchLive = async () => {
-      if (liveDataFailed.current) {
-        // Fallback to simulation only during market hours (this effect is
-        // already gated by isMarketOpen, so we know we're live).
-        setStocks(prev => {
-          const updated = prev.map(s => simulatePriceUpdate(s));
-          const flashes: Record<string, "up" | "down" | null> = {};
-          updated.forEach(s => {
-            const prevPrice = prevPrices.current[s.ticker] || s.price;
-            if (s.price > prevPrice) flashes[s.ticker] = "up";
-            else if (s.price < prevPrice) flashes[s.ticker] = "down";
-            else flashes[s.ticker] = null;
-            prevPrices.current[s.ticker] = s.price;
-          });
-          setLastFlash(flashes);
-          setLoadedTickers(prev => {
-            const next = new Set(prev);
-            updated.forEach(s => next.add(s.ticker));
-            return next;
-          });
-          return updated;
+  const fetchAndApplyLive = useCallback(async (): Promise<boolean> => {
+    // Simulation fallback only kicks in during market hours after repeated
+    // network failures, matching the original behavior.
+    if (liveDataFailed.current && checkMarketOpen()) {
+      setStocks(prev => {
+        const updated = prev.map(s => simulatePriceUpdate(s));
+        const flashes: Record<string, "up" | "down" | null> = {};
+        updated.forEach(s => {
+          const prevPrice = prevPrices.current[s.ticker] || s.price;
+          if (s.price > prevPrice) flashes[s.ticker] = "up";
+          else if (s.price < prevPrice) flashes[s.ticker] = "down";
+          else flashes[s.ticker] = null;
+          prevPrices.current[s.ticker] = s.price;
         });
-        return;
-      }
-
-      try {
-        const currentStocks = stocksRef.current;
-        const currentWatchlist = watchlistRef.current;
-        const tickerInfo = currentStocks
-          .filter(s => currentWatchlist.includes(s.ticker))
-          .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
-
-        if (tickerInfo.length === 0) return;
-
-        const liveData = await fetchLivePrices(tickerInfo);
-
-        if (!liveData || Object.keys(liveData).length === 0) {
-          consecutiveFailures++;
-          if (consecutiveFailures >= MAX_FAILURES) {
-            liveDataFailed.current = true;
-          }
-          return;
-        }
-
-        consecutiveFailures = 0;
-
-        setStocks(prev => {
-          const newlyLoaded = new Set<string>();
-          const updated = prev.map(s => {
-            const key = `${s.exchange}_${s.ticker}`;
-            const live = liveData[key];
-            if (live) {
-              newlyLoaded.add(s.ticker);
-              return applyLiveData(s, live);
-            }
-            return s;
-          });
-          const flashes: Record<string, "up" | "down" | null> = {};
-          updated.forEach(s => {
-            const prevPrice = prevPrices.current[s.ticker] || s.price;
-            if (s.price > prevPrice) flashes[s.ticker] = "up";
-            else if (s.price < prevPrice) flashes[s.ticker] = "down";
-            else flashes[s.ticker] = null;
-            prevPrices.current[s.ticker] = s.price;
-          });
-          setLastFlash(flashes);
-          if (newlyLoaded.size > 0) {
-            setLoadedTickers(prev => {
-              const next = new Set(prev);
-              newlyLoaded.forEach(t => next.add(t));
-              return next;
-            });
-          }
-
-          // Cache the updated prices
-          const watchlistStocks = updated.filter(s => currentWatchlist.includes(s.ticker));
-          if (watchlistStocks.length > 0) saveCachedPrices(watchlistStocks);
-
-          return updated;
+        setLastFlash(flashes);
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          updated.forEach(s => next.add(s.ticker));
+          return next;
         });
-      } catch (err) {
-        console.error("Live data fetch failed:", err);
-        consecutiveFailures++;
-        if (consecutiveFailures >= MAX_FAILURES) {
+        return updated;
+      });
+      return true;
+    }
+
+    try {
+      const currentStocks = stocksRef.current;
+      const currentWatchlist = watchlistRef.current;
+      const tickerInfo = currentStocks
+        .filter(s => currentWatchlist.includes(s.ticker))
+        .map(s => ({ ticker: s.ticker, exchange: s.exchange, yahooSymbol: s.yahooSymbol }));
+
+      if (tickerInfo.length === 0) return false;
+
+      const liveData = await fetchLivePrices(tickerInfo);
+
+      if (!liveData || Object.keys(liveData).length === 0) {
+        consecutiveFailuresRef.current++;
+        if (consecutiveFailuresRef.current >= MAX_FAILURES) {
           liveDataFailed.current = true;
         }
+        return false;
       }
-    };
 
-    // Fetch immediately, then poll every 5s while market is open
-    fetchLive();
-    const interval = setInterval(fetchLive, 5000);
+      consecutiveFailuresRef.current = 0;
+      liveDataFailed.current = false;
+
+      const updatedStocks = currentStocks.map(s => {
+        const key = `${s.exchange}_${s.ticker}`;
+        const live = liveData[key];
+        if (live) return applyLiveData(s, live);
+        return s;
+      });
+
+      const newlyLoaded = new Set<string>();
+      const flashes: Record<string, "up" | "down" | null> = {};
+      updatedStocks.forEach(s => {
+        const key = `${s.exchange}_${s.ticker}`;
+        if (liveData[key]) newlyLoaded.add(s.ticker);
+        const prevPrice = prevPrices.current[s.ticker] || s.price;
+        if (s.price > prevPrice) flashes[s.ticker] = "up";
+        else if (s.price < prevPrice) flashes[s.ticker] = "down";
+        else flashes[s.ticker] = null;
+        prevPrices.current[s.ticker] = s.price;
+      });
+
+      setLastFlash(flashes);
+      setStocks(updatedStocks);
+      if (newlyLoaded.size > 0) {
+        setLoadedTickers(prev => {
+          const next = new Set(prev);
+          newlyLoaded.forEach(t => next.add(t));
+          return next;
+        });
+      }
+
+      const watchlistStocks = updatedStocks.filter(s => currentWatchlist.includes(s.ticker));
+      if (watchlistStocks.length > 0) {
+        await saveCachedPrices(watchlistStocks);
+      }
+      return true;
+    } catch (err) {
+      console.error("Live data fetch failed:", err);
+      consecutiveFailuresRef.current++;
+      if (consecutiveFailuresRef.current >= MAX_FAILURES) {
+        liveDataFailed.current = true;
+      }
+      return false;
+    }
+  }, [saveCachedPrices]);
+
+  // Auto-refresh: always do an initial live fetch on session start so the user
+  // never sees stale cached data, regardless of market hours. After that, only
+  // poll on a 5s interval while the market is open.
+  useEffect(() => {
+    if (!prefsLoaded) return;
+
+    // Always fetch once on mount/prefsLoaded — matches manual Refresh Now.
+    fetchAndApplyLive();
+
+    if (!isMarketOpen) return; // no interval polling outside market hours
+
+    const interval = setInterval(() => { fetchAndApplyLive(); }, 5000);
     return () => clearInterval(interval);
-  }, [isMarketOpen, prefsLoaded]);
+  }, [isMarketOpen, prefsLoaded, fetchAndApplyLive]);
 
   // Sync active watchlist tickers → local watchlist state (for logged-in users)
   useEffect(() => {
