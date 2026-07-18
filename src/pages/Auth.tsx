@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle } from "lucide-react";
+import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,17 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [accountExists, setAccountExists] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordChecks = [
+    { label: "At least 8 characters", ok: password.length >= 8 },
+    { label: "One uppercase letter (A–Z)", ok: /[A-Z]/.test(password) },
+    { label: "One lowercase letter (a–z)", ok: /[a-z]/.test(password) },
+    { label: "One number (0–9)", ok: /\d/.test(password) },
+    { label: "One special character (e.g. ! @ # $)", ok: /[^A-Za-z0-9]/.test(password) },
+    { label: "Not a common or breached password", ok: password.length > 0 && !/^(password|test@?\d{2,4}|qwerty|12345|abc123|letmein|admin)$/i.test(password) },
+  ];
+
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -184,22 +195,51 @@ const Auth = () => {
                   <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
                     minLength={6}
                     maxLength={128}
-                    className="pl-9"
+                    className="pl-9 pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground rounded-md transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 {!isLogin && (
-                  <p className="text-xs text-muted-foreground">
-                    Use at least 8 characters. Avoid common or previously-breached passwords (e.g. <code>test@2026</code>, <code>password123</code>).
-                  </p>
+                  <div className="rounded-md border border-border/60 bg-muted/30 p-3 space-y-2">
+                    <p className="text-xs font-medium text-foreground">
+                      Your password should include:
+                    </p>
+                    <ul className="space-y-1">
+                      {passwordChecks.map((c) => (
+                        <li key={c.label} className="flex items-center gap-2 text-xs">
+                          {c.ok ? (
+                            <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                          ) : (
+                            <X className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          )}
+                          <span className={c.ok ? "text-foreground" : "text-muted-foreground"}>
+                            {c.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-[11px] text-muted-foreground pt-1 border-t border-border/40">
+                      Tip: avoid personal info, dictionary words, or patterns like <code>test@2026</code>. A short passphrase such as <code>Trout-Piano-Kite!92</code> works well.
+                    </p>
+                  </div>
                 )}
               </div>
+
 
               <Button type="submit" className="w-full h-11 text-sm font-semibold transition-all active:scale-[0.98]" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
