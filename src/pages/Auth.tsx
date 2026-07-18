@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle } from "lucide-react";
+import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +16,17 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [accountExists, setAccountExists] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const passwordChecks = [
+    { label: "At least 8 characters", ok: password.length >= 8 },
+    { label: "One uppercase letter (A–Z)", ok: /[A-Z]/.test(password) },
+    { label: "One lowercase letter (a–z)", ok: /[a-z]/.test(password) },
+    { label: "One number (0–9)", ok: /\d/.test(password) },
+    { label: "One special character (e.g. ! @ # $)", ok: /[^A-Za-z0-9]/.test(password) },
+    { label: "Not a common or breached password", ok: password.length > 0 && !/^(password|test@?\d{2,4}|qwerty|12345|abc123|letmein|admin)$/i.test(password) },
+  ];
+
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
