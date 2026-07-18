@@ -879,7 +879,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // counts as another "fetched from memory" event for the new ticker set.
   useEffect(() => { autoRefreshFiredRef.current = false; }, [activeWatchlistId]);
 
-  // Manual refresh: fetches live prices regardless of market status
+  // Manual refresh ("Refresh Now"): on-demand sync for maximum accuracy.
+  // Independent of the auto-refresh interval — if an auto fetch is in flight
+  // we briefly wait for it to complete, then issue a fresh fetch so the user
+  // always gets the freshest prices they explicitly asked for.
   const refreshPrices = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -890,6 +893,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const currentWatchlist = watchlistRef.current;
       if (currentWatchlist.length === 0) return;
+
+      // Wait up to ~1s for an in-flight auto refresh to finish, avoiding
+      // duplicate concurrent requests to the same upstream endpoints.
+      const start = Date.now();
+      while (inFlightRef.current && Date.now() - start < 1000) {
+        await new Promise(r => setTimeout(r, 50));
+      }
 
       const ok = await fetchAndApplyLive();
       if (ok) toast.success("Prices refreshed and saved");
