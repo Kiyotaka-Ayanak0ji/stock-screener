@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback, use
 import { Stock, StockNote, StockEvent, SAMPLE_STOCKS, simulatePriceUpdate, generateStockData, ALL_AVAILABLE_STOCKS, encrypt, decrypt } from "@/lib/stockData";
 import { fetchLivePrices, applyLiveData, looksLikeIndexTicker } from "@/lib/growwApi";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useWatchlists, Watchlist } from "@/hooks/useWatchlists";
@@ -95,6 +96,7 @@ function saveEncrypted(key: string, data: unknown) {
 
 export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
+  const { isPremium } = useSubscription();
   const {
     watchlists: userWatchlists,
     activeWatchlist,
@@ -370,8 +372,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // user click); the actual fetch/apply/cache logic is the same code path.
   const consecutiveFailuresRef = useRef(0);
   const MAX_FAILURES = 3;
+  const inFlightRef = useRef(false);
 
   const fetchAndApplyLive = useCallback(async (): Promise<boolean> => {
+    // Prevent overlapping fetches (auto + manual, or slow network re-entry).
+    if (inFlightRef.current) return false;
+    inFlightRef.current = true;
+    try {
     // Simulation fallback only kicks in during market hours after repeated
     // network failures, matching the original behavior.
     if (liveDataFailed.current && checkMarketOpen()) {
@@ -460,22 +467,55 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       return false;
     }
+    } finally {
+      inFlightRef.current = false;
+    }
   }, [saveCachedPrices]);
 
   // Auto-refresh: always do an initial live fetch on session start so the user
-  // never sees stale cached data, regardless of market hours. After that, only
-  // poll on a 5s interval while the market is open.
+  // never sees stale cached data. Polling cadence:
+  //   • Premium / Premium Plus users → every 5s regardless of market hours
+  //     (they explicitly pay for near-real-time updates).
+  //   • Free / Pro users → every 5s only while the market is open.
+  // The interval pauses when the tab is hidden and resumes on visibility,
+  // preventing wasted API calls and memory pressure in background tabs.
   useEffect(() => {
     if (!prefsLoaded) return;
 
     // Always fetch once on mount/prefsLoaded — matches manual Refresh Now.
     fetchAndApplyLive();
 
-    if (!isMarketOpen) return; // no interval polling outside market hours
+    const shouldPoll = isPremium || isMarketOpen;
+    if (!shouldPoll) return;
 
-    const interval = setInterval(() => { fetchAndApplyLive(); }, 5000);
-    return () => clearInterval(interval);
-  }, [isMarketOpen, prefsLoaded, fetchAndApplyLive]);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return;
+        fetchAndApplyLive();
+      }, 5000);
+    };
+    const stop = () => {
+      if (interval) { clearInterval(interval); interval = null; }
+    };
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        // Immediate catch-up fetch, then resume polling.
+        fetchAndApplyLive();
+        start();
+      }
+    };
+
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isMarketOpen, isPremium, prefsLoaded, fetchAndApplyLive]);
 
   // Sync active watchlist tickers → local watchlist state (for logged-in users)
   useEffect(() => {
@@ -839,7 +879,10 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // counts as another "fetched from memory" event for the new ticker set.
   useEffect(() => { autoRefreshFiredRef.current = false; }, [activeWatchlistId]);
 
-  // Manual refresh: fetches live prices regardless of market status
+  // Manual refresh ("Refresh Now"): on-demand sync for maximum accuracy.
+  // Independent of the auto-refresh interval — if an auto fetch is in flight
+  // we briefly wait for it to complete, then issue a fresh fetch so the user
+  // always gets the freshest prices they explicitly asked for.
   const refreshPrices = useCallback(async () => {
     setIsRefreshing(true);
     try {
@@ -850,6 +893,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       const currentWatchlist = watchlistRef.current;
       if (currentWatchlist.length === 0) return;
+
+      // Wait up to ~1s for an in-flight auto refresh to finish, avoiding
+      // duplicate concurrent requests to the same upstream endpoints.
+      const start = Date.now();
+      while (inFlightRef.current && Date.now() - start < 1000) {
+        await new Promise(r => setTimeout(r, 50));
+      }
 
       const ok = await fetchAndApplyLive();
       if (ok) toast.success("Prices refreshed and saved");
