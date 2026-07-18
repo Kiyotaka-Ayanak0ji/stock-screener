@@ -57,11 +57,13 @@ function preferNonZero(next: number | undefined | null, prev: number): number {
 }
 
 /**
- * Normalise market cap to Crores. The proxy mostly returns raw INR (e.g.
- * Yahoo: 1.91e8) but some upstreams already deliver crores (e.g. cached rows
- * we wrote ourselves, or Groww in some responses). Heuristic: any value
- * >= 1e7 (10 million) is treated as raw INR and divided down to Cr; smaller
- * values are assumed to already be in Cr.
+ * Normalise market cap to Crores. The proxy usually returns raw INR (e.g.
+ * Yahoo: 1.91e12) but some upstreams already deliver crores (e.g. cached rows
+ * we wrote ourselves, or Groww in some responses). We use a wider heuristic:
+ *   - values >= 1e7 (>=1 Cr in raw INR) are treated as raw INR
+ *   - anything smaller is assumed to already be in Cr
+ * This keeps small-caps (<1 Cr) rare-edge stable and prevents 100× spikes
+ * where a cached Cr value got re-multiplied.
  */
 function toCrores(raw: number): number {
   if (!Number.isFinite(raw) || raw <= 0) return 0;
@@ -100,7 +102,7 @@ export function applyLiveData(
       ? 0
       : (liveData.marketCap && liveData.marketCap > 0
           ? toCrores(liveData.marketCap)
-          : stock.marketCap),
+          : (stock.marketCap > 0 ? stock.marketCap : 0)),
     pe: isIdx ? 0 : preferNonZero(liveData.pe, stock.pe),
     lastUpdated: new Date(),
   };
