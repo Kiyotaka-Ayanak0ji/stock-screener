@@ -49,7 +49,13 @@ const Auth = () => {
         setAccountExists(true);
         return;
       }
-      toast({ title: "Error", description: result.error, variant: "destructive" });
+      const raw = result.error.toLowerCase();
+      let friendly = result.error;
+      if (raw.includes("pwned") || raw.includes("compromised") || raw.includes("leaked") || raw.includes("weak") || (raw.includes("password") && raw.includes("known"))) {
+        friendly = "This password has appeared in a known data breach. Please choose a longer, unique password you haven't used elsewhere (avoid common patterns like 'test@2026' or 'password123').";
+      }
+      toast({ title: "Error", description: friendly, variant: "destructive" });
+
     } else {
       if (isLogin) {
         navigate("/dashboard");
@@ -188,7 +194,13 @@ const Auth = () => {
                     className="pl-9"
                   />
                 </div>
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground">
+                    Use at least 8 characters. Avoid common or previously-breached passwords (e.g. <code>test@2026</code>, <code>password123</code>).
+                  </p>
+                )}
               </div>
+
               <Button type="submit" className="w-full h-11 text-sm font-semibold transition-all active:scale-[0.98]" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isLogin ? "Sign In" : "Sign Up"}
