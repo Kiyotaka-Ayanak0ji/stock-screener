@@ -278,6 +278,79 @@ const Profile = () => {
             </Card>
           </motion.div>
 
+          {/* Linked sign-in methods */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}>
+            <Card className="border-border shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-foreground text-base">
+                  <div className="p-1.5 rounded-lg bg-primary/10"><Link2 className="h-4 w-4 text-primary" /></div>
+                  Linked Accounts
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Link a Google account to sign in either with your password or with Google. Accounts sharing a verified email are linked automatically on first Google sign-in.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {(() => {
+                  const google = identities.find((i) => i.provider === "google");
+                  const googleEmail = (google?.identity_data as any)?.email as string | undefined;
+                  return (
+                    <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A10.99 10.99 0 0 0 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.1A6.63 6.63 0 0 1 5.5 12c0-.73.12-1.44.34-2.1V7.06H2.18A10.99 10.99 0 0 0 1 12c0 1.78.43 3.46 1.18 4.94l3.66-2.84z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
+                        </svg>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-foreground">Google</p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {google ? (googleEmail ? `Connected · ${googleEmail}` : "Connected") : "Not connected"}
+                          </p>
+                        </div>
+                      </div>
+                      {google ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleUnlinkGoogle}
+                          disabled={linkingProvider === "google" || identities.length <= 1}
+                          className="shrink-0"
+                        >
+                          {linkingProvider === "google" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <><Unlink className="h-3.5 w-3.5 mr-1.5" />Unlink</>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleLinkGoogle}
+                          disabled={linkingProvider === "google"}
+                          className="shrink-0"
+                        >
+                          {linkingProvider === "google" ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <><Link2 className="h-3.5 w-3.5 mr-1.5" />Link Google</>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })()}
+                {identities.length <= 1 && identities.some((i) => i.provider === "google") && (
+                  <p className="text-[11px] text-muted-foreground px-1">
+                    Google is currently your only sign-in method. Set a password first before unlinking.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
           {/* Quick links — subscription, password, reviews live on dedicated pages */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <Card className="border-border shadow-sm">
