@@ -194,7 +194,13 @@ const Auth = () => {
                     className="pl-9"
                   />
                 </div>
+                {!isLogin && (
+                  <p className="text-xs text-muted-foreground">
+                    Use at least 8 characters. Avoid common or previously-breached passwords (e.g. <code>test@2026</code>, <code>password123</code>).
+                  </p>
+                )}
               </div>
+
               <Button type="submit" className="w-full h-11 text-sm font-semibold transition-all active:scale-[0.98]" disabled={loading}>
                 {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                 {isLogin ? "Sign In" : "Sign Up"}
