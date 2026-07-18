@@ -473,19 +473,49 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [saveCachedPrices]);
 
   // Auto-refresh: always do an initial live fetch on session start so the user
-  // never sees stale cached data, regardless of market hours. After that, only
-  // poll on a 5s interval while the market is open.
+  // never sees stale cached data. Polling cadence:
+  //   • Premium / Premium Plus users → every 5s regardless of market hours
+  //     (they explicitly pay for near-real-time updates).
+  //   • Free / Pro users → every 5s only while the market is open.
+  // The interval pauses when the tab is hidden and resumes on visibility,
+  // preventing wasted API calls and memory pressure in background tabs.
   useEffect(() => {
     if (!prefsLoaded) return;
 
     // Always fetch once on mount/prefsLoaded — matches manual Refresh Now.
     fetchAndApplyLive();
 
-    if (!isMarketOpen) return; // no interval polling outside market hours
+    const shouldPoll = isPremium || isMarketOpen;
+    if (!shouldPoll) return;
 
-    const interval = setInterval(() => { fetchAndApplyLive(); }, 5000);
-    return () => clearInterval(interval);
-  }, [isMarketOpen, prefsLoaded, fetchAndApplyLive]);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return;
+        fetchAndApplyLive();
+      }, 5000);
+    };
+    const stop = () => {
+      if (interval) { clearInterval(interval); interval = null; }
+    };
+    const onVisibility = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        // Immediate catch-up fetch, then resume polling.
+        fetchAndApplyLive();
+        start();
+      }
+    };
+
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isMarketOpen, isPremium, prefsLoaded, fetchAndApplyLive]);
 
   // Sync active watchlist tickers → local watchlist state (for logged-in users)
   useEffect(() => {
