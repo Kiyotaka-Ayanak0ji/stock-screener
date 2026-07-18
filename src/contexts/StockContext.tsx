@@ -96,6 +96,7 @@ function saveEncrypted(key: string, data: unknown) {
 
 export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading: authLoading } = useAuth();
+  const { isPremiumPlus } = useSubscription();
   const {
     watchlists: userWatchlists,
     activeWatchlist,
