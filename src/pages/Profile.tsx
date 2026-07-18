@@ -27,6 +27,8 @@ const Profile = () => {
   const [emailOptIn, setEmailOptIn] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [identities, setIdentities] = useState<Array<{ id: string; identity_id?: string; provider: string; identity_data?: Record<string, unknown> }>>([]);
+  const [linkingProvider, setLinkingProvider] = useState<string | null>(null);
   // Password change & reviews are now on dedicated subpages —
   // /profile/password and /profile/reviews. Subscription mgmt lives at
   // /profile/subscription. This page only handles core profile/preferences.
