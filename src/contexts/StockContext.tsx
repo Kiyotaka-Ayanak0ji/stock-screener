@@ -467,6 +467,9 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       return false;
     }
+    } finally {
+      inFlightRef.current = false;
+    }
   }, [saveCachedPrices]);
 
   // Auto-refresh: always do an initial live fetch on session start so the user
