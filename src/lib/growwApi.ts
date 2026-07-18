@@ -102,7 +102,7 @@ export function applyLiveData(
       ? 0
       : (liveData.marketCap && liveData.marketCap > 0
           ? toCrores(liveData.marketCap)
-          : stock.marketCap),
+          : (stock.marketCap > 0 ? stock.marketCap : 0)),
     pe: isIdx ? 0 : preferNonZero(liveData.pe, stock.pe),
     lastUpdated: new Date(),
   };
