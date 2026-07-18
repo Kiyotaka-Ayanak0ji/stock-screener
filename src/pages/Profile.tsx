@@ -99,7 +99,8 @@ const Profile = () => {
   };
 
   const handleLinkGoogle = async () => {
-    setLinkingProvider("google");
+    if (isLinkingGoogle || isUnlinkingGoogle) return;
+    setIsLinkingGoogle(true);
     // Snapshot current identity count so the post-redirect handler can verify
     // a new identity was actually attached, and can roll back UI state cleanly.
     sessionStorage.setItem("linking_google_pending", String(identities.length));
@@ -112,7 +113,7 @@ const Profile = () => {
     if (error) {
       // Rollback: drop pending marker so we don't show a bogus toast next mount
       sessionStorage.removeItem("linking_google_pending");
-      setLinkingProvider(null);
+      setIsLinkingGoogle(false);
       const msg = error.message?.toLowerCase() ?? "";
       if (msg.includes("manual linking") || msg.includes("not enabled")) {
         toast.error("Failed to link Google account", {
@@ -131,8 +132,8 @@ const Profile = () => {
     // If no redirect URL was returned, the link resolved inline — refresh + toast now.
     if (!data?.url) {
       sessionStorage.removeItem("linking_google_pending");
-      setLinkingProvider(null);
       await loadIdentities();
+      setIsLinkingGoogle(false);
       toast.success("Google account linked");
     }
     // Otherwise the browser is about to navigate to the provider; the
