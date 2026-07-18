@@ -49,7 +49,13 @@ const Auth = () => {
         setAccountExists(true);
         return;
       }
-      toast({ title: "Error", description: result.error, variant: "destructive" });
+      const raw = result.error.toLowerCase();
+      let friendly = result.error;
+      if (raw.includes("pwned") || raw.includes("compromised") || raw.includes("leaked") || raw.includes("weak") || (raw.includes("password") && raw.includes("known"))) {
+        friendly = "This password has appeared in a known data breach. Please choose a longer, unique password you haven't used elsewhere (avoid common patterns like 'test@2026' or 'password123').";
+      }
+      toast({ title: "Error", description: friendly, variant: "destructive" });
+
     } else {
       if (isLogin) {
         navigate("/dashboard");
