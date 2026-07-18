@@ -53,6 +53,57 @@ const Profile = () => {
       setEmailOptIn(data.email_opt_in ?? false);
     }
     setLoading(false);
+    loadIdentities();
+  };
+
+  const loadIdentities = async () => {
+    const { data, error } = await supabase.auth.getUserIdentities();
+    if (!error && data?.identities) {
+      setIdentities(data.identities as any);
+    }
+  };
+
+  const handleLinkGoogle = async () => {
+    setLinkingProvider("google");
+    const { data, error } = await supabase.auth.linkIdentity({
+      provider: "google",
+      options: { redirectTo: window.location.origin + "/profile" },
+    });
+    if (error) {
+      setLinkingProvider(null);
+      const msg = error.message?.toLowerCase() ?? "";
+      if (msg.includes("manual linking") || msg.includes("not enabled")) {
+        toast.error("Account linking not enabled", {
+          description: "Manual identity linking must be enabled in the auth settings.",
+        });
+      } else {
+        toast.error("Failed to start Google linking", { description: error.message });
+      }
+      return;
+    }
+    // Provider redirect flows away; nothing else to do here.
+    if (!data?.url) setLinkingProvider(null);
+  };
+
+  const handleUnlinkGoogle = async () => {
+    const google = identities.find((i) => i.provider === "google");
+    if (!google) return;
+    if (identities.length <= 1) {
+      toast.error("Cannot unlink your only sign-in method", {
+        description: "Set a password first so you can still sign in.",
+      });
+      return;
+    }
+    setLinkingProvider("google");
+    // Supabase expects the full identity object
+    const { error } = await supabase.auth.unlinkIdentity(google as any);
+    setLinkingProvider(null);
+    if (error) {
+      toast.error("Failed to unlink Google", { description: error.message });
+      return;
+    }
+    toast.success("Google account unlinked");
+    loadIdentities();
   };
 
   const handleSave = async () => {
