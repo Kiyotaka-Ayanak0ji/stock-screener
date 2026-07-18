@@ -372,8 +372,13 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // user click); the actual fetch/apply/cache logic is the same code path.
   const consecutiveFailuresRef = useRef(0);
   const MAX_FAILURES = 3;
+  const inFlightRef = useRef(false);
 
   const fetchAndApplyLive = useCallback(async (): Promise<boolean> => {
+    // Prevent overlapping fetches (auto + manual, or slow network re-entry).
+    if (inFlightRef.current) return false;
+    inFlightRef.current = true;
+    try {
     // Simulation fallback only kicks in during market hours after repeated
     // network failures, matching the original behavior.
     if (liveDataFailed.current && checkMarketOpen()) {
