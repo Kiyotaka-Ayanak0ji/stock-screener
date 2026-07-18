@@ -41,6 +41,40 @@ const Profile = () => {
     fetchProfileData();
   }, [user]);
 
+  // Handle post-redirect link result (OAuth flow returns to /profile)
+  useEffect(() => {
+    const pending = sessionStorage.getItem("linking_google_pending");
+    if (!pending) return;
+
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const search = new URLSearchParams(window.location.search);
+    const err = hash.get("error_description") || hash.get("error") || search.get("error_description") || search.get("error");
+
+    sessionStorage.removeItem("linking_google_pending");
+
+    if (err) {
+      toast.error("Failed to link Google account", { description: decodeURIComponent(err.replace(/\+/g, " ")) });
+      // Rollback: clear stray hash so a refresh doesn't repeat the toast
+      if (window.location.hash) window.history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+
+    // Verify link actually succeeded by re-reading identities
+    (async () => {
+      const { data } = await supabase.auth.getUserIdentities();
+      const list = (data?.identities ?? []) as any[];
+      const prevCount = Number(pending) || 0;
+      if (list.some((i) => i.provider === "google") && list.length > prevCount) {
+        toast.success("Google account linked", { description: "You can now sign in with Google." });
+      } else if (list.some((i) => i.provider === "google")) {
+        toast.success("Google account already linked");
+      } else {
+        toast.error("Google linking did not complete", { description: "Please try again." });
+      }
+      setIdentities(list);
+    })();
+  }, []);
+
   const fetchProfileData = async () => {
     if (!user) return;
     const { data } = await supabase
@@ -65,44 +99,72 @@ const Profile = () => {
 
   const handleLinkGoogle = async () => {
     setLinkingProvider("google");
+    // Snapshot current identity count so the post-redirect handler can verify
+    // a new identity was actually attached, and can roll back UI state cleanly.
+    sessionStorage.setItem("linking_google_pending", String(identities.length));
+
     const { data, error } = await supabase.auth.linkIdentity({
       provider: "google",
       options: { redirectTo: window.location.origin + "/profile" },
     });
+
     if (error) {
+      // Rollback: drop pending marker so we don't show a bogus toast next mount
+      sessionStorage.removeItem("linking_google_pending");
       setLinkingProvider(null);
       const msg = error.message?.toLowerCase() ?? "";
       if (msg.includes("manual linking") || msg.includes("not enabled")) {
-        toast.error("Account linking not enabled", {
-          description: "Manual identity linking must be enabled in the auth settings.",
+        toast.error("Failed to link Google account", {
+          description: "Manual identity linking is not enabled for this project.",
+        });
+      } else if (msg.includes("already") || msg.includes("exists")) {
+        toast.error("Failed to link Google account", {
+          description: "This Google account is already linked to another user.",
         });
       } else {
-        toast.error("Failed to start Google linking", { description: error.message });
+        toast.error("Failed to link Google account", { description: error.message });
       }
       return;
     }
-    // Provider redirect flows away; nothing else to do here.
-    if (!data?.url) setLinkingProvider(null);
+
+    // If no redirect URL was returned, the link resolved inline — refresh + toast now.
+    if (!data?.url) {
+      sessionStorage.removeItem("linking_google_pending");
+      setLinkingProvider(null);
+      await loadIdentities();
+      toast.success("Google account linked");
+    }
+    // Otherwise the browser is about to navigate to the provider; the
+    // post-redirect useEffect above will fire the success/error toast.
   };
 
   const handleUnlinkGoogle = async () => {
     const google = identities.find((i) => i.provider === "google");
     if (!google) return;
     if (identities.length <= 1) {
-      toast.error("Cannot unlink your only sign-in method", {
-        description: "Set a password first so you can still sign in.",
+      toast.error("Failed to unlink Google account", {
+        description: "This is your only sign-in method. Set a password first.",
       });
       return;
     }
     setLinkingProvider("google");
-    // Supabase expects the full identity object
+
+    // Optimistic update so the UI feels instant; rollback on failure.
+    const previous = identities;
+    setIdentities((prev) => prev.filter((i) => i.provider !== "google"));
+
     const { error } = await supabase.auth.unlinkIdentity(google as any);
     setLinkingProvider(null);
+
     if (error) {
-      toast.error("Failed to unlink Google", { description: error.message });
+      // Rollback optimistic removal
+      setIdentities(previous);
+      toast.error("Failed to unlink Google account", { description: error.message });
       return;
     }
-    toast.success("Google account unlinked");
+
+    toast.success("Google account unlinked", { description: "You can sign in again anytime by re-linking." });
+    // Re-sync from server to stay authoritative
     loadIdentities();
   };
 
