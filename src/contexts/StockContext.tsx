@@ -1094,7 +1094,23 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [stocks, prefsLoaded]);
 
-  const filteredStocks = stocks.filter(s => watchlist.includes(s.ticker));
+  // Build the display list by iterating the authoritative `watchlist` order,
+  // not by filtering `stocks`. Any ticker still awaiting its stock object
+  // (metadata/live-price resolution in progress) gets a lightweight placeholder
+  // so the displayed count always matches the watchlist size — this fixes the
+  // "watchlist shows N but only M rows render" mismatch. Deduping by ticker
+  // also prevents duplicate keys from silently dropping rows in React.
+  const stocksByTicker = new Map<string, Stock>();
+  for (const s of stocks) {
+    if (!stocksByTicker.has(s.ticker)) stocksByTicker.set(s.ticker, s);
+  }
+  const filteredStocks: Stock[] = watchlist.map(ticker => {
+    const existing = stocksByTicker.get(ticker);
+    if (existing) return existing;
+    const info = ALL_AVAILABLE_STOCKS.find(s => s.ticker === ticker);
+    const meta = tickerMetaRef.current[ticker] || {};
+    return generateStockData(ticker, info?.name || ticker, info?.exchange || "NSE", meta);
+  });
 
   return (
     <StockContext.Provider value={{
