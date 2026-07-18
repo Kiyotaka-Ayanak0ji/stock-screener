@@ -141,6 +141,7 @@ const Profile = () => {
   };
 
   const handleUnlinkGoogle = async () => {
+    if (isLinkingGoogle || isUnlinkingGoogle) return;
     const google = identities.find((i) => i.provider === "google");
     if (!google) return;
     if (identities.length <= 1) {
@@ -149,25 +150,26 @@ const Profile = () => {
       });
       return;
     }
-    setLinkingProvider("google");
+    setIsUnlinkingGoogle(true);
 
     // Optimistic update so the UI feels instant; rollback on failure.
     const previous = identities;
     setIdentities((prev) => prev.filter((i) => i.provider !== "google"));
 
     const { error } = await supabase.auth.unlinkIdentity(google as any);
-    setLinkingProvider(null);
 
     if (error) {
-      // Rollback optimistic removal
+      // Rollback optimistic removal and clear loading before showing the error.
       setIdentities(previous);
+      setIsUnlinkingGoogle(false);
       toast.error("Failed to unlink Google account", { description: error.message });
       return;
     }
 
     toast.success("Google account unlinked", { description: "You can sign in again anytime by re-linking." });
-    // Re-sync from server to stay authoritative
-    loadIdentities();
+    // Re-sync from server to stay authoritative, keeping the button disabled until we're done.
+    await loadIdentities();
+    setIsUnlinkingGoogle(false);
   };
 
   const handleSave = async () => {
