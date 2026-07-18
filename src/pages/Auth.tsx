@@ -73,7 +73,7 @@ const Auth = () => {
       } else {
         toast({
           title: "Account created!",
-          description: "Check your email to confirm your account, then log in.",
+          description: "Check your email to confirm your account, then log in. Can't find the email? Please check your spam or junk folder.",
         });
         setIsLogin(true);
       }
