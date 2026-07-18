@@ -464,20 +464,44 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [saveCachedPrices]);
 
-  // Auto-refresh: always do an initial live fetch on session start so the user
-  // never sees stale cached data, regardless of market hours. After that, only
-  // poll on a 5s interval while the market is open.
+  // Initial live fetch on session start so the user never sees stale cached
+  // data. This runs once per prefs-load regardless of subscription tier.
+  const initialFetchFiredRef = useRef(false);
   useEffect(() => {
     if (!prefsLoaded) return;
-
-    // Always fetch once on mount/prefsLoaded — matches manual Refresh Now.
+    if (initialFetchFiredRef.current) return;
+    initialFetchFiredRef.current = true;
     fetchAndApplyLive();
+  }, [prefsLoaded, fetchAndApplyLive]);
 
-    if (!isMarketOpen) return; // no interval polling outside market hours
+  // Periodic auto-refresh (every 5s) — Premium Plus users only, and only when
+  // they have explicitly enabled "Auto Refresh" in Profile. The interval is
+  // paused when the market is closed, when the tab is hidden, and torn down
+  // on unmount / logout to avoid leaks and duplicate requests.
+  useEffect(() => {
+    if (!prefsLoaded) return;
+    if (!user) return;                    // logged-out / guest: no polling
+    if (!isPremiumPlus) return;           // gated to Premium Plus
+    if (!autoRefreshOnLoad) return;       // user-controlled toggle
+    if (!isMarketOpen) return;            // no polling outside market hours
 
-    const interval = setInterval(() => { fetchAndApplyLive(); }, 5000);
-    return () => clearInterval(interval);
-  }, [isMarketOpen, prefsLoaded, fetchAndApplyLive]);
+    let inFlight = false;
+    const tick = async () => {
+      if (inFlight) return;               // skip if previous still pending → no dupes
+      if (typeof document !== "undefined" && document.hidden) return;
+      inFlight = true;
+      try { await fetchAndApplyLive(); } finally { inFlight = false; }
+    };
+
+    const interval = setInterval(tick, 5000);
+    const onVisibility = () => { if (!document.hidden) tick(); };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isMarketOpen, prefsLoaded, user, isPremiumPlus, autoRefreshOnLoad, fetchAndApplyLive]);
 
   // Sync active watchlist tickers → local watchlist state (for logged-in users)
   useEffect(() => {
