@@ -28,7 +28,8 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [identities, setIdentities] = useState<Array<{ id: string; identity_id?: string; provider: string; identity_data?: Record<string, unknown> }>>([]);
-  const [linkingProvider, setLinkingProvider] = useState<string | null>(null);
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
+  const [isUnlinkingGoogle, setIsUnlinkingGoogle] = useState(false);
   // Password change & reviews are now on dedicated subpages —
   // /profile/password and /profile/reviews. Subscription mgmt lives at
   // /profile/subscription. This page only handles core profile/preferences.
@@ -98,7 +99,8 @@ const Profile = () => {
   };
 
   const handleLinkGoogle = async () => {
-    setLinkingProvider("google");
+    if (isLinkingGoogle || isUnlinkingGoogle) return;
+    setIsLinkingGoogle(true);
     // Snapshot current identity count so the post-redirect handler can verify
     // a new identity was actually attached, and can roll back UI state cleanly.
     sessionStorage.setItem("linking_google_pending", String(identities.length));
@@ -111,7 +113,7 @@ const Profile = () => {
     if (error) {
       // Rollback: drop pending marker so we don't show a bogus toast next mount
       sessionStorage.removeItem("linking_google_pending");
-      setLinkingProvider(null);
+      setIsLinkingGoogle(false);
       const msg = error.message?.toLowerCase() ?? "";
       if (msg.includes("manual linking") || msg.includes("not enabled")) {
         toast.error("Failed to link Google account", {
@@ -130,8 +132,8 @@ const Profile = () => {
     // If no redirect URL was returned, the link resolved inline — refresh + toast now.
     if (!data?.url) {
       sessionStorage.removeItem("linking_google_pending");
-      setLinkingProvider(null);
       await loadIdentities();
+      setIsLinkingGoogle(false);
       toast.success("Google account linked");
     }
     // Otherwise the browser is about to navigate to the provider; the
@@ -139,6 +141,7 @@ const Profile = () => {
   };
 
   const handleUnlinkGoogle = async () => {
+    if (isLinkingGoogle || isUnlinkingGoogle) return;
     const google = identities.find((i) => i.provider === "google");
     if (!google) return;
     if (identities.length <= 1) {
@@ -147,25 +150,26 @@ const Profile = () => {
       });
       return;
     }
-    setLinkingProvider("google");
+    setIsUnlinkingGoogle(true);
 
     // Optimistic update so the UI feels instant; rollback on failure.
     const previous = identities;
     setIdentities((prev) => prev.filter((i) => i.provider !== "google"));
 
     const { error } = await supabase.auth.unlinkIdentity(google as any);
-    setLinkingProvider(null);
 
     if (error) {
-      // Rollback optimistic removal
+      // Rollback optimistic removal and clear loading before showing the error.
       setIdentities(previous);
+      setIsUnlinkingGoogle(false);
       toast.error("Failed to unlink Google account", { description: error.message });
       return;
     }
 
     toast.success("Google account unlinked", { description: "You can sign in again anytime by re-linking." });
-    // Re-sync from server to stay authoritative
-    loadIdentities();
+    // Re-sync from server to stay authoritative, keeping the button disabled until we're done.
+    await loadIdentities();
+    setIsUnlinkingGoogle(false);
   };
 
   const handleSave = async () => {
@@ -377,11 +381,15 @@ const Profile = () => {
                           variant="outline"
                           size="sm"
                           onClick={handleUnlinkGoogle}
-                          disabled={linkingProvider === "google" || identities.length <= 1}
-                          className="shrink-0"
+                          disabled={isUnlinkingGoogle || isLinkingGoogle || identities.length <= 1}
+                          aria-label={isUnlinkingGoogle ? "Unlinking Google account" : "Unlink Google account"}
+                          className="shrink-0 min-w-[100px]"
                         >
-                          {linkingProvider === "google" ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {isUnlinkingGoogle ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Unlinking...
+                            </>
                           ) : (
                             <><Unlink className="h-3.5 w-3.5 mr-1.5" />Unlink</>
                           )}
@@ -391,11 +399,15 @@ const Profile = () => {
                           variant="outline"
                           size="sm"
                           onClick={handleLinkGoogle}
-                          disabled={linkingProvider === "google"}
-                          className="shrink-0"
+                          disabled={isLinkingGoogle || isUnlinkingGoogle}
+                          aria-label={isLinkingGoogle ? "Linking Google account" : "Link Google account"}
+                          className="shrink-0 min-w-[100px]"
                         >
-                          {linkingProvider === "google" ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {isLinkingGoogle ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Linking...
+                            </>
                           ) : (
                             <><Link2 className="h-3.5 w-3.5 mr-1.5" />Link Google</>
                           )}
