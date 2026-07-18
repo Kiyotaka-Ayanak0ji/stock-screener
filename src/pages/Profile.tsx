@@ -381,11 +381,15 @@ const Profile = () => {
                           variant="outline"
                           size="sm"
                           onClick={handleUnlinkGoogle}
-                          disabled={linkingProvider === "google" || identities.length <= 1}
-                          className="shrink-0"
+                          disabled={isUnlinkingGoogle || isLinkingGoogle || identities.length <= 1}
+                          aria-label={isUnlinkingGoogle ? "Unlinking Google account" : "Unlink Google account"}
+                          className="shrink-0 min-w-[100px]"
                         >
-                          {linkingProvider === "google" ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {isUnlinkingGoogle ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Unlinking...
+                            </>
                           ) : (
                             <><Unlink className="h-3.5 w-3.5 mr-1.5" />Unlink</>
                           )}
@@ -395,11 +399,15 @@ const Profile = () => {
                           variant="outline"
                           size="sm"
                           onClick={handleLinkGoogle}
-                          disabled={linkingProvider === "google"}
-                          className="shrink-0"
+                          disabled={isLinkingGoogle || isUnlinkingGoogle}
+                          aria-label={isLinkingGoogle ? "Linking Google account" : "Link Google account"}
+                          className="shrink-0 min-w-[100px]"
                         >
-                          {linkingProvider === "google" ? (
-                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {isLinkingGoogle ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                              Linking...
+                            </>
                           ) : (
                             <><Link2 className="h-3.5 w-3.5 mr-1.5" />Link Google</>
                           )}
