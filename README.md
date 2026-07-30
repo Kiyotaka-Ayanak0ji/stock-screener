@@ -306,6 +306,10 @@ Lists, updates, or overrides user subscriptions.
 A full breakdown of every directory, route, table, and edge function —
 plus local setup and online hosting steps — lives in **[Setup.md](Setup.md)**.
 
+Per-endpoint API documentation — every table, RPC, and edge function with
+request/response examples and the frontend pages that use them — lives in
+**[API.md](API.md)**.
+
 ---
 
 ## 💻 Local Development
