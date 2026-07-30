@@ -295,9 +295,22 @@ Lists, updates, or overrides user subscriptions.
 
 ---
 
+## 🗂 Frontend / Backend Segregation
+
+| Layer | Location | Runs on |
+|---|---|---|
+| **Frontend** | `src/` (pages, components, contexts, hooks, lib), `public/`, `index.html`, `vite.config.ts`, `tailwind.config.ts` | The browser (Vite SPA / PWA) |
+| **Backend** | `supabase/migrations/` (schema, RLS, grants, SQL functions), `supabase/functions/` (Deno edge functions), `supabase/config.toml` | Supabase (Postgres + Deno) |
+| **Bridge** | `src/integrations/supabase/client.ts` + the three public `VITE_SUPABASE_*` env vars | Build-time inlined |
+
+A full breakdown of every directory, route, table, and edge function —
+plus local setup and online hosting steps — lives in **[Setup.md](Setup.md)**.
+
+---
+
 ## 💻 Local Development
 
-**Prerequisites:** Node.js 18+ and npm (install via [nvm](https://github.com/nvm-sh/nvm)).
+**Prerequisites:** Node.js 20+ and npm (or Bun 1.1+), plus a Supabase project.
 
 ```sh
 # 1. Clone the repository
@@ -307,11 +320,20 @@ cd <YOUR_PROJECT_NAME>
 # 2. Install dependencies
 npm install
 
-# 3. Start the dev server
+# 3. Configure the frontend env (see .env.example)
+#    VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY / VITE_SUPABASE_PROJECT_ID
+
+# 4. Apply the backend schema + deploy functions
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+npx supabase functions deploy
+
+# 5. Start the dev server
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080`. Backend (Supabase) runs in the cloud — no local DB needed.
+The app will be available at `http://localhost:8080`. The backend runs in Supabase — no local DB needed.
+
 
 ### Useful Scripts
 
