@@ -351,10 +351,21 @@ The app will be available at `http://localhost:8080`. The backend runs in Supaba
 
 ## 🚢 Deployment
 
-- **Web (Vercel):** Push to `main` — Vercel auto-deploys.
-- **Backend (Lovable Cloud):** Edge functions deploy automatically on save; migrations apply via the migration tool.
-- **Android (Capacitor):** `npx cap sync android && npx cap open android`.
-- **Desktop (Electron):** Run via `electron/main.cjs`.
+**Frontend (Vercel / Netlify / Cloudflare Pages)**
+- Framework preset **Vite**, build `npm run build`, output `dist`.
+- Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID` for Preview and Production (inlined at build time — rebuild after changes).
+- SPA deep links are handled by `vercel.json` (or an equivalent catch-all rewrite to `/index.html`).
+
+**Backend (Supabase)**
+- `npx supabase db push` applies `supabase/migrations/*` (schema, RLS, grants).
+- `npx supabase functions deploy` ships `supabase/functions/*`.
+- Set edge-function secrets (Razorpay, Resend, Groww) and the Auth Site URL / redirect URLs per environment.
+- Scheduled work (email queue pump) runs inside Postgres via `pg_cron`.
+
+**Mobile:** installable **PWA** only — no Electron or Capacitor build.
+
+See **[Setup.md](Setup.md)** for the step-by-step guide.
+
 
 ---
 
