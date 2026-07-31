@@ -53,6 +53,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
+        <FavouritesProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/dashboard" element={<WithStocks><Index /></WithStocks>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/favourites" element={<WithStocks><Favourites /></WithStocks>} />
                 <Route path="/profile" element={<WithStocks><Profile /></WithStocks>} />
                 <Route path="/profile/subscription" element={<ProfileSubscription />} />
                 <Route path="/profile/password" element={<ProfilePassword />} />
@@ -79,7 +81,9 @@ const App = () => (
             </Suspense>
           </BrowserRouter>
         </TooltipProvider>
+        </FavouritesProvider>
       </AuthProvider>
+
     </ThemeProvider>
   </QueryClientProvider>
 );
