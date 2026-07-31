@@ -3,7 +3,8 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
+import { useFavourites } from "@/contexts/FavouritesContext";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -35,6 +36,9 @@ const SWIPE_THRESHOLD = 90;
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
   const { priceTriggers, removeStock, addStock, setPriceTrigger, isMarketOpen } = useStocks();
   const { isPremium: isPremiumTier } = useSubscription();
+  const { isFavourite, toggleFavourite, pendingTickers } = useFavourites();
+  const favourite = isFavourite(stock.ticker);
+  const favPending = pendingTickers.has(stock.ticker);
   const isPremium = isPremiumTier;
 
   const [detailOpen, setDetailOpen] = useState(false);
