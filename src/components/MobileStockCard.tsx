@@ -230,6 +230,28 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 {trigger && (
                   <Bell className="h-3.5 w-3.5 text-primary animate-pulse" />
                 )}
+                <button
+                  type="button"
+                  data-tour={index === 0 ? "favourite" : undefined}
+                  disabled={favPending}
+                  aria-pressed={favourite}
+                  aria-label={favourite ? `Remove ${stock.ticker} from favourites` : `Add ${stock.ticker} to favourites`}
+                  onClick={(e) => {
+                    stop(e);
+                    void toggleFavourite({
+                      ticker: stock.ticker,
+                      name: stock.name,
+                      exchange: stock.exchange,
+                      isIndex: !!stock.isIndex,
+                      yahooSymbol: stock.yahooSymbol ?? null,
+                      screenerCode: stock.screenerCode ?? null,
+                    });
+                  }}
+                  className="p-0.5 -m-0.5 text-muted-foreground active:opacity-70 transition-opacity"
+                >
+                  <Star className={`h-4 w-4 ${favourite ? "text-amber-500 fill-amber-500" : ""}`} />
+                </button>
+
               </div>
               <p className="text-sm text-muted-foreground truncate mt-0.5">{stock.name}</p>
             </div>
