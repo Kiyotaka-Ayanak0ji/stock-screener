@@ -25,6 +25,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Favourites = lazy(() => import("./pages/Favourites"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Support = lazy(() => import("./pages/Support"));
