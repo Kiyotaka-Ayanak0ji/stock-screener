@@ -31,6 +31,7 @@ const BottomNav = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
+              data-tour={item.path === "/favourites" ? "favourites-nav-mobile" : undefined}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
               className={cn(

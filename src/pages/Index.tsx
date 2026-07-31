@@ -4,6 +4,7 @@ import EmailVerificationGate from "@/components/EmailVerificationGate";
 import ReviewDialog from "@/components/ReviewDialog";
 import SubscriptionGate from "@/components/SubscriptionGate";
 import BottomNav from "@/components/BottomNav";
+import OnboardingWalkthrough from "@/components/OnboardingWalkthrough";
 
 const Index = () => {
   return (
@@ -14,6 +15,7 @@ const Index = () => {
           <StockTable />
           <ReviewDialog />
           <BottomNav />
+          <OnboardingWalkthrough />
         </div>
       </EmailVerificationGate>
     </SubscriptionGate>
