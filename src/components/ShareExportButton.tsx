@@ -109,11 +109,6 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
   };
 
   const handleShareLink = () => {
-    if (isGuest) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Page link copied to clipboard!");
-      return;
-    }
     generateShareLink();
   };
 

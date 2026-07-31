@@ -6,7 +6,6 @@ import { toast } from "sonner";
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  isGuest: boolean;
   isLoading: boolean;
   profile: { display_name: string | null; avatar_url: string | null } | null;
   signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null }>;
@@ -114,10 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProfile(null);
   };
 
-  const isGuest = !user && !isLoading;
-
   return (
-    <AuthContext.Provider value={{ user, session, isGuest, isLoading, profile, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, isLoading, profile, signUp, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
