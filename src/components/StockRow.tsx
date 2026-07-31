@@ -29,9 +29,8 @@ const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", 
 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, isMarketOpen } = useStocks();
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
-  const isPremium = !isGuest && isPremiumTier;
+  const isPremium = isPremiumTier;
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");

@@ -16,7 +16,7 @@ import AlertsPanel from "@/components/AlertsPanel";
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const { isMarketOpen } = useStocks();
-  const { user, profile, signOut, isGuest } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const { isAdmin } = useAdminRole();
   const navigate = useNavigate();

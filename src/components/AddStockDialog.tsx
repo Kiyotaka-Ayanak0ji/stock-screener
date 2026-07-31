@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useStocks } from "@/contexts/StockContext";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { ALL_AVAILABLE_STOCKS } from "@/lib/stockData";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,11 +27,10 @@ const AddStockDialog = () => {
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [premiumFeature, setPremiumFeature] = useState("");
   const { watchlist, addStock } = useStocks();
-  const { isGuest } = useAuth();
   const { maxStocksPerWatchlist, isPro } = useSubscription();
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const stockLimit = isGuest ? 20 : maxStocksPerWatchlist;
+  const stockLimit = maxStocksPerWatchlist;
 
   const localFiltered = useMemo(() => {
     if (!search.trim()) return ALL_AVAILABLE_STOCKS.filter(s => !watchlist.includes(s.ticker)).slice(0, 50);
@@ -111,7 +109,7 @@ const AddStockDialog = () => {
             <DialogTitle>Add Stock to Watchlist</DialogTitle>
             <p className="text-xs text-muted-foreground">
               {watchlist.length}/{stockLimit} stocks used
-              {!isPro && !isGuest && " (upgrade for more)"}
+              {!isPro && " (upgrade for more)"}
             </p>
           </DialogHeader>
           <div className="relative">

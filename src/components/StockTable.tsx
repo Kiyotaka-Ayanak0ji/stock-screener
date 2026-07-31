@@ -1,5 +1,4 @@
 import { useState, useMemo, useRef } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Filter } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
@@ -32,10 +31,9 @@ type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "mar
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumSub } = useSubscription();
   const isMobile = useIsMobile();
-  const isPremium = !isGuest && isPremiumSub;
+  const isPremium = isPremiumSub;
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing, pricesLoaded, loadedTickers,

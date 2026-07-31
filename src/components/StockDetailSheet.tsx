@@ -62,9 +62,8 @@ const StockDetailSheet = ({ stock, open, onOpenChange }: StockDetailSheetProps) 
     setPriceTrigger,
     isMarketOpen,
   } = useStocks();
-  const { isGuest } = useAuth();
   const { subscription, isPremium: isPremiumTier } = useSubscription();
-  const isPremium = !isGuest && isPremiumTier;
+  const isPremium = isPremiumTier;
 
   const [noteValue, setNoteValue] = useState("");
   const [triggerValue, setTriggerValue] = useState("");

@@ -34,9 +34,8 @@ const SWIPE_THRESHOLD = 90;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
   const { priceTriggers, removeStock, addStock, setPriceTrigger, isMarketOpen } = useStocks();
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
-  const isPremium = !isGuest && isPremiumTier;
+  const isPremium = isPremiumTier;
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [triggerOpen, setTriggerOpen] = useState(false);
