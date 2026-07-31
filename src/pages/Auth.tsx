@@ -297,19 +297,7 @@ const Auth = () => {
               </button>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-border">
-              <Button
-                variant="ghost"
-                className="w-full gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => navigate("/dashboard")}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Continue as Guest
-              </Button>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Guest data is stored locally and won't sync across devices
-              </p>
-            </div>
+
           </CardContent>
         </Card>
       </motion.div>
