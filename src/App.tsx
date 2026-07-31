@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FavouritesProvider } from "@/contexts/FavouritesContext";
 import { StockProvider } from "@/contexts/StockContext";
 import SubscriptionGate from "@/components/SubscriptionGate";
 import { lazy, Suspense } from "react";
@@ -24,6 +25,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Unsubscribe = lazy(() => import("./pages/Unsubscribe"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
+const Favourites = lazy(() => import("./pages/Favourites"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Support = lazy(() => import("./pages/Support"));
@@ -51,6 +53,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <AuthProvider>
+        <FavouritesProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -62,6 +65,7 @@ const App = () => (
                 <Route path="/dashboard" element={<WithStocks><Index /></WithStocks>} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/subscribe" element={<Subscribe />} />
+                <Route path="/favourites" element={<WithStocks><Favourites /></WithStocks>} />
                 <Route path="/profile" element={<WithStocks><Profile /></WithStocks>} />
                 <Route path="/profile/subscription" element={<ProfileSubscription />} />
                 <Route path="/profile/password" element={<ProfilePassword />} />
@@ -77,7 +81,9 @@ const App = () => (
             </Suspense>
           </BrowserRouter>
         </TooltipProvider>
+        </FavouritesProvider>
       </AuthProvider>
+
     </ThemeProvider>
   </QueryClientProvider>
 );

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, ArrowLeft, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
+import { TrendingUp, Loader2, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable";
@@ -297,19 +297,7 @@ const Auth = () => {
               </button>
             </div>
 
-            <div className="mt-5 pt-4 border-t border-border">
-              <Button
-                variant="ghost"
-                className="w-full gap-2 text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => navigate("/dashboard")}
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Continue as Guest
-              </Button>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Guest data is stored locally and won't sync across devices
-              </p>
-            </div>
+
           </CardContent>
         </Card>
       </motion.div>

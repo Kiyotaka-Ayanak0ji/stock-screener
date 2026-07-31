@@ -3,7 +3,8 @@ import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import { ExternalLink, Bell, ChevronRight, Trash2, Crown } from "lucide-react";
+import { useFavourites } from "@/contexts/FavouritesContext";
+import { ExternalLink, Bell, ChevronRight, Trash2, Crown, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, useMotionValue, useTransform, animate, type PanInfo } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,9 +35,11 @@ const SWIPE_THRESHOLD = 90;
 
 const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) => {
   const { priceTriggers, removeStock, addStock, setPriceTrigger, isMarketOpen } = useStocks();
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
-  const isPremium = !isGuest && isPremiumTier;
+  const { isFavourite, toggleFavourite, pendingTickers } = useFavourites();
+  const favourite = isFavourite(stock.ticker);
+  const favPending = pendingTickers.has(stock.ticker);
+  const isPremium = isPremiumTier;
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [triggerOpen, setTriggerOpen] = useState(false);
@@ -231,6 +234,28 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
                 {trigger && (
                   <Bell className="h-3.5 w-3.5 text-primary animate-pulse" />
                 )}
+                <button
+                  type="button"
+                  data-tour={index === 0 ? "favourite" : undefined}
+                  disabled={favPending}
+                  aria-pressed={favourite}
+                  aria-label={favourite ? `Remove ${stock.ticker} from favourites` : `Add ${stock.ticker} to favourites`}
+                  onClick={(e) => {
+                    stop(e);
+                    void toggleFavourite({
+                      ticker: stock.ticker,
+                      name: stock.name,
+                      exchange: stock.exchange,
+                      isIndex: !!stock.isIndex,
+                      yahooSymbol: stock.yahooSymbol ?? null,
+                      screenerCode: stock.screenerCode ?? null,
+                    });
+                  }}
+                  className="p-0.5 -m-0.5 text-muted-foreground active:opacity-70 transition-opacity"
+                >
+                  <Star className={`h-4 w-4 ${favourite ? "text-amber-500 fill-amber-500" : ""}`} />
+                </button>
+
               </div>
               <p className="text-sm text-muted-foreground truncate mt-0.5">{stock.name}</p>
             </div>

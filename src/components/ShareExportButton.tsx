@@ -28,7 +28,7 @@ function generateToken(): string {
 }
 
 const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
   const { stocks, activeWatchlist } = useStocks();
   const { isPremium } = useSubscription();
   const [isExporting, setIsExporting] = useState(false);
@@ -109,11 +109,6 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
   };
 
   const handleShareLink = () => {
-    if (isGuest) {
-      navigator.clipboard.writeText(window.location.href);
-      toast.success("Page link copied to clipboard!");
-      return;
-    }
     generateShareLink();
   };
 
@@ -142,7 +137,7 @@ const ShareExportButton = ({ tableRef }: ShareExportButtonProps) => {
           <DropdownMenuItem onClick={handleShareLink} className="cursor-pointer gap-2">
             {linkCopied ? <Check className="h-4 w-4 text-gain" /> : <Link className="h-4 w-4" />}
             {linkCopied ? "Link Copied!" : "Copy Share Link"}
-            {showCrown && !isGuest && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
+            {showCrown && <Crown className="h-3 w-3 text-amber-500 ml-auto" />}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

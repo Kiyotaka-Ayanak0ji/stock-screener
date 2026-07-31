@@ -1,5 +1,4 @@
 import { useState, useMemo, useRef } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, Filter } from "lucide-react";
 import { useStocks } from "@/contexts/StockContext";
 import StockRow from "@/components/StockRow";
@@ -28,14 +27,15 @@ import { ArrowDownUp } from "lucide-react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useIsMobile } from "@/hooks/use-mobile";
 import PremiumDialog from "@/components/PremiumDialog";
+import { isCompleteData } from "@/lib/dataCompleteness";
+import { CheckCircle2, CircleDashed, Database } from "lucide-react";
 type SortKey = "ticker" | "price" | "change" | "changePercent" | "volume" | "marketCap" | "pe" | "event" | string;
 type SortDir = "asc" | "desc";
 
 const StockTable = () => {
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumSub } = useSubscription();
   const isMobile = useIsMobile();
-  const isPremium = !isGuest && isPremiumSub;
+  const isPremium = isPremiumSub;
   const {
     stocks, events, columnVisibility, customColumns, customColumnData,
     refreshPrices, isRefreshing, pricesLoaded, loadedTickers,
@@ -54,6 +54,8 @@ const StockTable = () => {
   const [mcapFilterMin, setMcapFilterMin] = useState<string>("");
   const [mcapFilterMax, setMcapFilterMax] = useState<string>("");
   const [premiumOpen, setPremiumOpen] = useState(false);
+  // Data completeness filter — available on every plan.
+  const [dataFilter, setDataFilter] = useState<"all" | "complete" | "partial">("all");
 
   const isVisible = (key: string) => columnVisibility[key] !== false;
 
@@ -72,6 +74,9 @@ const StockTable = () => {
 
   const filtered = useMemo(() => {
     let list = [...stocks];
+    if (dataFilter !== "all") {
+      list = list.filter(s => (dataFilter === "complete" ? isCompleteData(s) : !isCompleteData(s)));
+    }
     if (isPremium) {
       if (isVisible("pe") && (peFilterMin || peFilterMax)) {
         list = list.filter(s => s.pe > 0 && applyRange(s.pe, peFilterMin, peFilterMax));
@@ -87,7 +92,7 @@ const StockTable = () => {
       }
     }
     return list;
-  }, [stocks, isPremium, peFilterMin, peFilterMax, priceFilterMin, priceFilterMax, volumeFilterMin, volumeFilterMax, mcapFilterMin, mcapFilterMax, columnVisibility]);
+  }, [stocks, isPremium, dataFilter, peFilterMin, peFilterMax, priceFilterMin, priceFilterMax, volumeFilterMin, volumeFilterMax, mcapFilterMin, mcapFilterMax, columnVisibility]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -129,16 +134,17 @@ const StockTable = () => {
 
   const visibleCustomColumns = customColumns.filter(c => isVisible(`custom_${c.id}`));
 
-  const activeFilterCount = isPremium
+  const activeFilterCount = (dataFilter !== "all" ? 1 : 0) + (isPremium
     ? [
         peFilterMin || peFilterMax,
         priceFilterMin || priceFilterMax,
         volumeFilterMin || volumeFilterMax,
         mcapFilterMin || mcapFilterMax,
       ].filter(Boolean).length
-    : 0;
+    : 0);
 
   const clearAllFilters = () => {
+    setDataFilter("all");
     setPeFilterMin(""); setPeFilterMax("");
     setPriceFilterMin(""); setPriceFilterMax("");
     setVolumeFilterMin(""); setVolumeFilterMax("");
@@ -169,6 +175,39 @@ const StockTable = () => {
             <span className="text-loss">{stocks.filter(s => s.change < 0).length} ▼</span>
             <span className="text-muted-foreground">{stocks.filter(s => s.change === 0).length} —</span>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                data-tour="filter"
+                className="gap-1.5 text-xs px-3"
+                aria-label="Filter by data completeness"
+              >
+                <Database className={`h-3.5 w-3.5 ${dataFilter !== "all" ? "text-primary" : ""}`} />
+                {dataFilter === "all" ? "Data" : dataFilter === "complete" ? "Complete data" : "Partial data"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              <DropdownMenuLabel className="text-xs">Data completeness</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {([
+                { key: "all", label: "All stocks" },
+                { key: "complete", label: "Complete data" },
+                { key: "partial", label: "Partial data" },
+              ] as { key: "all" | "complete" | "partial"; label: string }[]).map(opt => (
+                <DropdownMenuItem
+                  key={opt.key}
+                  onClick={() => setDataFilter(opt.key)}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <span className={dataFilter === opt.key ? "font-semibold text-primary" : ""}>{opt.label}</span>
+                  {opt.key === "complete" && <CheckCircle2 className="h-3.5 w-3.5 opacity-60" />}
+                  {opt.key === "partial" && <CircleDashed className="h-3.5 w-3.5 opacity-60" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <WatchlistManager
             watchlists={userWatchlists}
             activeWatchlistId={activeWatchlistId}
@@ -228,6 +267,7 @@ const StockTable = () => {
               <Button
                 size="sm"
                 variant="outline"
+                data-tour="sort-mobile"
                 className="h-9 w-full relative gap-1.5 text-[11px] px-2"
                 aria-label="Sort"
               >
@@ -268,7 +308,7 @@ const StockTable = () => {
                 variant="outline"
                 className="h-9 w-full relative gap-1.5 text-[11px] px-2"
                 aria-label="Filters"
-                onClick={(e) => { if (!isPremium) { e.preventDefault(); setPremiumOpen(true); } }}
+                data-tour="filter-mobile"
               >
                 <Filter className={`h-3.5 w-3.5 ${activeFilterCount > 0 ? "text-primary" : ""}`} />
                 Filter
@@ -279,8 +319,7 @@ const StockTable = () => {
                 )}
               </Button>
             </PopoverTrigger>
-            {isPremium && (
-              <PopoverContent align="center" className="w-72 p-3 space-y-3">
+            <PopoverContent align="center" className="w-72 p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-semibold">Filters</p>
                   {activeFilterCount > 0 && (
@@ -289,7 +328,37 @@ const StockTable = () => {
                     </Button>
                   )}
                 </div>
-                {[
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-medium text-muted-foreground">Data completeness</p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {([
+                      { key: "all", label: "All" },
+                      { key: "complete", label: "Complete" },
+                      { key: "partial", label: "Partial" },
+                    ] as { key: "all" | "complete" | "partial"; label: string }[]).map(opt => (
+                      <Button
+                        key={opt.key}
+                        size="sm"
+                        variant={dataFilter === opt.key ? "default" : "outline"}
+                        className="h-8 text-[11px] px-1"
+                        onClick={() => setDataFilter(opt.key)}
+                      >
+                        {opt.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                {!isPremium && (
+                  <div className="rounded-md border border-border p-2.5 text-center">
+                    <p className="text-[11px] text-muted-foreground">
+                      Price, volume, market cap and P/E range filters are a premium feature.
+                    </p>
+                    <Button size="sm" className="mt-2 h-7 text-[11px]" onClick={() => setPremiumOpen(true)}>
+                      Upgrade
+                    </Button>
+                  </div>
+                )}
+                {isPremium && [
                   { label: "Price", min: priceFilterMin, max: priceFilterMax, setMin: setPriceFilterMin, setMax: setPriceFilterMax },
                   { label: "Volume", min: volumeFilterMin, max: volumeFilterMax, setMin: setVolumeFilterMin, setMax: setVolumeFilterMax },
                   { label: "Market Cap", min: mcapFilterMin, max: mcapFilterMax, setMin: setMcapFilterMin, setMax: setMcapFilterMax },
@@ -304,8 +373,7 @@ const StockTable = () => {
                     </div>
                   </div>
                 ))}
-              </PopoverContent>
-            )}
+            </PopoverContent>
           </Popover>
           <Button
             size="sm"
@@ -366,7 +434,7 @@ const StockTable = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-muted/50">
-                  <th className={headerClass} onClick={() => toggleSort("ticker")}>
+                  <th className={headerClass} data-tour="sort" onClick={() => toggleSort("ticker")}>
                     <div className="flex items-center gap-1">Ticker <SortIcon col="ticker" /></div>
                   </th>
                   {isVisible("exchange") && (

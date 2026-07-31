@@ -5,6 +5,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useStocks } from "@/contexts/StockContext";
 import { supabase } from "@/integrations/supabase/client";
+import { requestWalkthroughReplay } from "@/components/OnboardingWalkthrough";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -524,6 +525,23 @@ const Profile = () => {
                   }`}>
                     {user?.email_confirmed_at ? "Verified" : "Pending"}
                   </span>
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <div className="pr-3">
+                    <p className="text-sm font-medium text-foreground">Product walkthrough</p>
+                    <p className="text-xs text-muted-foreground">Replay the guided tour of search, filters, watchlists and favourites.</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="shrink-0 active:scale-95 transition-all h-10"
+                    onClick={() => {
+                      requestWalkthroughReplay(user?.id);
+                      toast.success("Walkthrough queued", { description: "Opening the dashboard to start the tour." });
+                      navigate("/dashboard");
+                    }}
+                  >
+                    Replay tour
+                  </Button>
                 </div>
                 <div className="pt-2 border-t border-border">
                   <Button variant="destructive" onClick={signOut} className="active:scale-95 transition-all h-10">

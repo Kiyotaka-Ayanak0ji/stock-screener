@@ -11,7 +11,6 @@ import PremiumDialog from "@/components/PremiumDialog";
 
 const ColumnVisibilityDropdown = () => {
   const { columnVisibility, toggleColumnVisibility, customColumns, addCustomColumn, removeCustomColumn } = useStocks();
-  const { isGuest } = useAuth();
   const [newColName, setNewColName] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
@@ -31,13 +30,11 @@ const ColumnVisibilityDropdown = () => {
   ];
 
   const handleToggle = (key: string) => {
-    if (isGuest) { setPremiumOpen(true); return; }
-    toggleColumnVisibility(key);
+        toggleColumnVisibility(key);
   };
 
   const handleAddColumn = () => {
-    if (isGuest) { setPremiumOpen(true); return; }
-    const name = newColName.trim();
+        const name = newColName.trim();
     if (!name) return;
     addCustomColumn(name);
     setNewColName("");
@@ -51,14 +48,14 @@ const ColumnVisibilityDropdown = () => {
           <Button size="sm" variant="outline" className="gap-2">
             <Columns3 className="h-4 w-4" />
             Columns
-            {isGuest && <Crown className="h-3 w-3 text-amber-500" />}
+            
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-64 p-0" align="end">
           <div className="p-3 pb-2">
             <p className="text-sm font-semibold">Toggle Columns</p>
             <p className="text-xs text-muted-foreground">
-              {isGuest ? "Sign up to customize columns" : "Show or hide table columns"}
+              "Show or hide table columns"
             </p>
           </div>
           <Separator />
@@ -118,7 +115,7 @@ const ColumnVisibilityDropdown = () => {
               </div>
             ) : (
               <Button size="sm" variant="ghost" className="w-full gap-2 text-xs justify-start"
-                onClick={() => isGuest ? setPremiumOpen(true) : setShowAddForm(true)}>
+                onClick={() => setShowAddForm(true)}>
                 <Plus className="h-3.5 w-3.5" />
                 Add Custom Column
               </Button>

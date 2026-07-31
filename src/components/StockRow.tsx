@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info } from "lucide-react";
+import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info, Star } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useFavourites } from "@/contexts/FavouritesContext";
 import { CustomColumn } from "@/contexts/StockContext";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -29,9 +30,11 @@ const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", 
 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, isMarketOpen } = useStocks();
-  const { isGuest } = useAuth();
   const { isPremium: isPremiumTier } = useSubscription();
-  const isPremium = !isGuest && isPremiumTier;
+  const { isFavourite, toggleFavourite, pendingTickers } = useFavourites();
+  const favourite = isFavourite(stock.ticker);
+  const favPending = pendingTickers.has(stock.ticker);
+  const isPremium = isPremiumTier;
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
   const [customTag, setCustomTag] = useState("");
@@ -404,10 +407,44 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
           </td>
         )}
         <td className="px-3 py-3">
-          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-loss" onClick={() => removeStock(stock.ticker)}>
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex items-center justify-end gap-0.5">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 text-muted-foreground hover:text-amber-500"
+                  disabled={favPending}
+                  data-tour={index === 0 ? "favourite" : undefined}
+                  aria-pressed={favourite}
+                  aria-label={favourite ? `Remove ${stock.ticker} from favourites` : `Add ${stock.ticker} to favourites`}
+                  onClick={() => void toggleFavourite({
+                    ticker: stock.ticker,
+                    name: stock.name,
+                    exchange: stock.exchange,
+                    isIndex: !!stock.isIndex,
+                    yahooSymbol: stock.yahooSymbol ?? null,
+                    screenerCode: stock.screenerCode ?? null,
+                  })}
+                >
+                  <Star className={`h-3.5 w-3.5 ${favourite ? "text-amber-500 fill-amber-500" : ""}`} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">{favourite ? "Remove from favourites" : "Add to favourites"}</TooltipContent>
+            </Tooltip>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 text-muted-foreground hover:text-loss"
+              data-tour={index === 0 ? "remove-stock" : undefined}
+              aria-label={`Remove ${stock.ticker} from watchlist`}
+              onClick={() => removeStock(stock.ticker)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </td>
+
       </motion.tr>
       <PremiumDialog open={premiumOpen} onOpenChange={setPremiumOpen} featureName={premiumFeature} />
       <StockDetailSheet stock={stock} open={detailOpen} onOpenChange={setDetailOpen} />

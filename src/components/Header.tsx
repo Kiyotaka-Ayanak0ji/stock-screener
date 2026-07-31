@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase, Shield, Menu, X } from "lucide-react";
+import { Moon, Sun, Activity, TrendingUp, LogIn, LogOut, User, Clock, Crown, Briefcase, Shield, Menu, X, Star } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +16,7 @@ import AlertsPanel from "@/components/AlertsPanel";
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
   const { isMarketOpen } = useStocks();
-  const { user, profile, signOut, isGuest } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { subscription, trialDaysLeft, isActive } = useSubscription();
   const { isAdmin } = useAdminRole();
   const navigate = useNavigate();
@@ -56,6 +56,20 @@ const Header = () => {
 
         {/* Desktop Nav */}
         <div className="hidden sm:flex items-center gap-2">
+          {user && (
+            <Button
+              variant="ghost"
+              size="sm"
+              data-tour="favourites-nav"
+              onClick={() => navigate("/favourites")}
+              className="gap-1.5 text-xs"
+              title="Favourite stocks"
+            >
+              <Star className="h-3.5 w-3.5" />
+              Favourites
+            </Button>
+          )}
+
           {hasActiveAccess && (
             <Button
               variant="ghost"
@@ -175,6 +189,16 @@ const Header = () => {
                           </Badge>
                         )}
                       </div>
+                    </button>
+                  )}
+
+                  {user && (
+                    <button
+                      onClick={() => { navigate("/favourites"); closeMobileMenu(); }}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg hover:bg-secondary transition-colors text-sm"
+                    >
+                      <Star className="h-4 w-4 text-amber-500" />
+                      Favourites
                     </button>
                   )}
 

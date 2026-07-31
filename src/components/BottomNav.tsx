@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Briefcase, User, Bell } from "lucide-react";
+import { LayoutDashboard, Briefcase, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard, requiresAuth: false },
+  { path: "/favourites", label: "Favourites", icon: Star, requiresAuth: true },
   { path: "/portfolio", label: "Portfolio", icon: Briefcase, requiresAuth: true },
   { path: "/profile", label: "Profile", icon: User, requiresAuth: true },
 ];
@@ -30,6 +31,7 @@ const BottomNav = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
+              data-tour={item.path === "/favourites" ? "favourites-nav-mobile" : undefined}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
               className={cn(

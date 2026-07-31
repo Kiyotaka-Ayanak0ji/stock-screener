@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
-  const { user, isGuest, isLoading, signOut } = useAuth();
+  const { user, isLoading, signOut } = useAuth();
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
   const { toast } = useToast();
@@ -17,7 +17,7 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
 
   // Auto-send verification email once when an unverified user is detected
   useEffect(() => {
-    if (!user?.email || isVerified || isLoading || isGuest) return;
+    if (!user?.email || isVerified || isLoading) return;
     // Only send once per user per session
     if (autoSentRef.current === user.id) return;
     autoSentRef.current = user.id;
@@ -29,10 +29,10 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
         toast({ title: "Verification email sent!", description: "Check your inbox and spam folder." });
       }
     });
-  }, [user, isVerified, isLoading, isGuest]);
+  }, [user, isVerified, isLoading]);
 
-  // Guest users or loading state — let them through
-  if (isLoading || isGuest) return <>{children}</>;
+  // Still resolving the session — let them through, the gate re-renders
+  if (isLoading || !user) return <>{children}</>;
 
   // Verified user — let them through
   if (isVerified) return <>{children}</>;

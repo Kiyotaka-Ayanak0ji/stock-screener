@@ -252,6 +252,7 @@ export type Database = {
           display_name: string | null
           email_opt_in: boolean
           id: string
+          onboarding_completed: boolean
           updated_at: string
           user_id: string
         }
@@ -261,6 +262,7 @@ export type Database = {
           display_name?: string | null
           email_opt_in?: boolean
           id?: string
+          onboarding_completed?: boolean
           updated_at?: string
           user_id: string
         }
@@ -270,6 +272,7 @@ export type Database = {
           display_name?: string | null
           email_opt_in?: boolean
           id?: string
+          onboarding_completed?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -455,6 +458,45 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      user_favourites: {
+        Row: {
+          created_at: string
+          exchange: string
+          id: string
+          is_index: boolean
+          name: string | null
+          screener_code: string | null
+          ticker: string
+          updated_at: string
+          user_id: string
+          yahoo_symbol: string | null
+        }
+        Insert: {
+          created_at?: string
+          exchange?: string
+          id?: string
+          is_index?: boolean
+          name?: string | null
+          screener_code?: string | null
+          ticker: string
+          updated_at?: string
+          user_id: string
+          yahoo_symbol?: string | null
+        }
+        Update: {
+          created_at?: string
+          exchange?: string
+          id?: string
+          is_index?: boolean
+          name?: string | null
+          screener_code?: string | null
+          ticker?: string
+          updated_at?: string
+          user_id?: string
+          yahoo_symbol?: string | null
         }
         Relationships: []
       }
