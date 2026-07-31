@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { FavouritesProvider } from "@/contexts/FavouritesContext";
 import { StockProvider } from "@/contexts/StockContext";
 import SubscriptionGate from "@/components/SubscriptionGate";
 import { lazy, Suspense } from "react";
