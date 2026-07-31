@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info } from "lucide-react";
+import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info, Star } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useFavourites } from "@/contexts/FavouritesContext";
 import { CustomColumn } from "@/contexts/StockContext";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,9 @@ const PRESET_TAGS = ["Earnings", "Dividend", "Split", "Bonus", "IPO", "Rights", 
 const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRowProps) => {
   const { notes, events, updateNote, updateEvent, removeStock, lastFlash, columnVisibility, customColumnData, updateCustomColumnData, priceTriggers, setPriceTrigger, isMarketOpen } = useStocks();
   const { isPremium: isPremiumTier } = useSubscription();
+  const { isFavourite, toggleFavourite, pendingTickers } = useFavourites();
+  const favourite = isFavourite(stock.ticker);
+  const favPending = pendingTickers.has(stock.ticker);
   const isPremium = isPremiumTier;
   const [editingNote, setEditingNote] = useState(false);
   const [noteValue, setNoteValue] = useState("");
