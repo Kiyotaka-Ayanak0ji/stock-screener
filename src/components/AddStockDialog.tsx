@@ -99,7 +99,7 @@ const AddStockDialog = () => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" className="gap-2">
+          <Button size="sm" className="gap-2" data-tour="add-stock">
             <Plus className="h-4 w-4" />
             Add Stock
           </Button>
@@ -115,6 +115,7 @@ const AddStockDialog = () => {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
+              data-tour="search-input"
               placeholder="Search by ticker or company name..."
               value={search}
               onChange={e => setSearch(e.target.value)}

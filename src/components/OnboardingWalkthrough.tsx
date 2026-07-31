@@ -6,44 +6,45 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Step {
-  selector: string;
+  /** Candidate selectors, first visible match wins (desktop vs mobile UI). */
+  selectors: string[];
   title: string;
   body: string;
 }
 
 const STEPS: Step[] = [
   {
-    selector: '[data-tour="search"]',
+    selectors: ['[data-tour="search-input"]', '[data-tour="add-stock"]'],
     title: "1. Search for stocks",
     body: "Open this panel to search any NSE or BSE listed company by ticker or name. Results come from your local universe plus a live Screener.in lookup.",
   },
   {
-    selector: '[data-tour="filter"]',
+    selectors: ['[data-tour="filter"]', '[data-tour="filter-mobile"]'],
     title: "2. Filter your list",
     body: "Narrow the table down by data completeness, price, volume, market cap or P/E. Filters stack with search and sorting.",
   },
   {
-    selector: '[data-tour="sort"]',
+    selectors: ['[data-tour="sort"]', '[data-tour="sort-mobile"]'],
     title: "3. Sort the table",
     body: "Click a column header (or the Sort menu on mobile) to order stocks by ticker, price, change, volume or market cap. Click again to flip the direction.",
   },
   {
-    selector: '[data-tour="add-stock"]',
+    selectors: ['[data-tour="add-stock"]'],
     title: "4. Add a stock",
     body: "Pick a result from the search panel and it is added to the active watchlist instantly, then priced on the next refresh.",
   },
   {
-    selector: '[data-tour="remove-stock"]',
+    selectors: ['[data-tour="remove-stock"]'],
     title: "5. Remove a stock",
     body: "Use the delete icon on a row (or swipe a card on mobile) to drop a stock from the current watchlist.",
   },
   {
-    selector: '[data-tour="favourite"]',
+    selectors: ['[data-tour="favourite"]'],
     title: "6. Mark a favourite",
     body: "Tap the star to keep a stock in your favourites. Favourites are saved to your account and follow you across devices.",
   },
   {
-    selector: '[data-tour="favourites-nav"]',
+    selectors: ['[data-tour="favourites-nav"]', '[data-tour="favourites-nav-mobile"]'],
     title: "7. Open Favourites",
     body: "All your starred stocks live on the Favourites page — available on every plan, free included.",
   },
@@ -55,6 +56,19 @@ const REPLAY_KEY = "eq_onboarding_replay";
 interface Rect { top: number; left: number; width: number; height: number }
 
 const PADDING = 8;
+
+/** Return the first selector match that is actually rendered and visible. */
+const findTarget = (step: Step): HTMLElement | null => {
+  for (const selector of step.selectors) {
+    const nodes = Array.from(document.querySelectorAll(selector)) as HTMLElement[];
+    const visible = nodes.find(node => {
+      const r = node.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    if (visible) return visible;
+  }
+  return null;
+};
 
 const OnboardingWalkthrough = () => {
   const { user, isLoading } = useAuth();
@@ -118,7 +132,7 @@ const OnboardingWalkthrough = () => {
   // Track the highlighted element.
   const measure = useCallback(() => {
     if (!active) return;
-    const el = document.querySelector(STEPS[stepIndex].selector) as HTMLElement | null;
+    const el = findTarget(STEPS[stepIndex]);
     if (!el) { setRect(null); return; }
     const r = el.getBoundingClientRect();
     if (r.width === 0 && r.height === 0) { setRect(null); return; }
@@ -127,7 +141,7 @@ const OnboardingWalkthrough = () => {
 
   useLayoutEffect(() => {
     if (!active) return;
-    const el = document.querySelector(STEPS[stepIndex].selector) as HTMLElement | null;
+    const el = findTarget(STEPS[stepIndex]);
     el?.scrollIntoView({ block: "center", behavior: "smooth" });
     measure();
     const t = setTimeout(measure, 350);
