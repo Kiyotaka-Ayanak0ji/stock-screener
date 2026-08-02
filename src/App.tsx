@@ -29,6 +29,7 @@ const Favourites = lazy(() => import("./pages/Favourites"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Support = lazy(() => import("./pages/Support"));
+const Documentation = lazy(() => import("./pages/Documentation"));
 const ProfileSubscription = lazy(() => import("./pages/ProfileSubscription"));
 const ProfilePassword = lazy(() => import("./pages/ProfilePassword"));
 const ProfileReviews = lazy(() => import("./pages/ProfileReviews"));
