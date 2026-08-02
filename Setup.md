@@ -152,7 +152,7 @@ are "public" still validate tokens in code where needed
 
 ## 4. Prerequisites
 
-- Node.js 20+ (or Bun 1.1+) and Git
+- Node.js 20+ (npm 10+) and Git — the project standardizes on npm/npx
 - A Supabase project (Supabase.com or self-hosted)
 - Supabase CLI via `npx supabase ...` (no global install needed) for migrations/functions
 - A Razorpay account (test mode works locally)
