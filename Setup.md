@@ -154,7 +154,7 @@ are "public" still validate tokens in code where needed
 
 - Node.js 20+ (or Bun 1.1+) and Git
 - A Supabase project (Supabase.com or self-hosted)
-- Supabase CLI (`npx supabase --help   # Supabase CLI via npx (no global install needed)`) for migrations/functions
+- Supabase CLI via `npx supabase ...` (no global install needed) for migrations/functions
 - A Razorpay account (test mode works locally)
 - Optional: Deno 1.45+ to run functions locally
 
@@ -206,7 +206,7 @@ Load `profiles` before any table referencing `user_id`.
 ### 5.3 Backend: secrets
 
 Set in Supabase → Project Settings → Edge Functions → Secrets, or
-`supabase secrets set NAME=value`:
+`npx supabase secrets set NAME=value`:
 
 | Secret | Purpose |
 | --- | --- |
