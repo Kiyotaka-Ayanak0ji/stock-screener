@@ -314,7 +314,7 @@ request/response examples and the frontend pages that use them — lives in
 
 ## 💻 Local Development
 
-**Prerequisites:** Node.js 20+ and npm (or Bun 1.1+), plus a Supabase project.
+**Prerequisites:** Node.js 20+ with npm 10+ (npx is used for CLI tooling), plus a Supabase project.
 
 ```sh
 # 1. Clone the repository
