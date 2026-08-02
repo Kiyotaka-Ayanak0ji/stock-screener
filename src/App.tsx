@@ -77,6 +77,8 @@ const App = () => (
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/docs" element={<Documentation />} />
+                <Route path="/documentation" element={<Documentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
