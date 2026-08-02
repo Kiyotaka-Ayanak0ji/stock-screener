@@ -207,6 +207,9 @@ const Landing = () => {
             >
               Pricing
             </Button>
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/docs")}>
+              Documentation
+            </Button>
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/faq")}>
               FAQ
             </Button>
@@ -875,6 +878,17 @@ const Landing = () => {
               Equity<span className="text-primary">IQ</span>
             </span>
           </div>
+          <nav className="flex items-center gap-4 text-xs text-muted-foreground">
+            <button onClick={() => navigate("/docs")} className="hover:text-foreground transition-colors">
+              Documentation
+            </button>
+            <button onClick={() => navigate("/faq")} className="hover:text-foreground transition-colors">
+              FAQ
+            </button>
+            <button onClick={() => navigate("/support")} className="hover:text-foreground transition-colors">
+              Support
+            </button>
+          </nav>
           <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EquityIQ. All rights reserved.</p>
         </div>
       </footer>

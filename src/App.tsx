@@ -29,6 +29,7 @@ const Favourites = lazy(() => import("./pages/Favourites"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Support = lazy(() => import("./pages/Support"));
+const Documentation = lazy(() => import("./pages/Documentation"));
 const ProfileSubscription = lazy(() => import("./pages/ProfileSubscription"));
 const ProfilePassword = lazy(() => import("./pages/ProfilePassword"));
 const ProfileReviews = lazy(() => import("./pages/ProfileReviews"));
@@ -76,6 +77,8 @@ const App = () => (
                 <Route path="/shared/:token" element={<SharedWatchlist />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/docs" element={<Documentation />} />
+                <Route path="/documentation" element={<Documentation />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

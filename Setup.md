@@ -152,9 +152,9 @@ are "public" still validate tokens in code where needed
 
 ## 4. Prerequisites
 
-- Node.js 20+ (or Bun 1.1+) and Git
+- Node.js 20+ (npm 10+) and Git — the project standardizes on npm/npx
 - A Supabase project (Supabase.com or self-hosted)
-- Supabase CLI (`npm i -g supabase`) for migrations/functions
+- Supabase CLI via `npx supabase ...` (no global install needed) for migrations/functions
 - A Razorpay account (test mode works locally)
 - Optional: Deno 1.45+ to run functions locally
 
@@ -185,9 +185,9 @@ The `service_role` key must never appear here.
 ### 5.2 Backend: database
 
 ```bash
-supabase login
-supabase link --project-ref <project-ref>
-supabase db push          # applies supabase/migrations/*
+npx supabase login
+npx supabase link --project-ref <project-ref>
+npx supabase db push          # applies supabase/migrations/*
 ```
 
 Restoring from the portable export bundle instead:
@@ -206,7 +206,7 @@ Load `profiles` before any table referencing `user_id`.
 ### 5.3 Backend: secrets
 
 Set in Supabase → Project Settings → Edge Functions → Secrets, or
-`supabase secrets set NAME=value`:
+`npx supabase secrets set NAME=value`:
 
 | Secret | Purpose |
 | --- | --- |
@@ -229,9 +229,9 @@ Supabase → Authentication:
 ### 5.5 Backend: edge functions
 
 ```bash
-supabase functions deploy                 # all
-supabase functions deploy stock-proxy     # one
-supabase functions serve stock-proxy      # run locally on :54321
+npx supabase functions deploy                 # all
+npx supabase functions deploy stock-proxy     # one
+npx supabase functions serve stock-proxy      # run locally on :54321
 ```
 
 ### 5.6 Run the frontend

@@ -44,10 +44,10 @@ You have two supported routes.
 ### Route A — Supabase CLI + migrations folder (recommended)
 
 ```bash
-npm i -g supabase
-supabase login
-supabase link --project-ref <NEW_PROJECT_REF>
-supabase db push        # replays /supabase/migrations/*
+npx supabase --help   # Supabase CLI via npx (no global install needed)
+npx supabase login
+npx supabase link --project-ref <NEW_PROJECT_REF>
+npx supabase db push        # replays /supabase/migrations/*
 ```
 
 ### Route B — Portable export bundle
@@ -84,13 +84,13 @@ watchlists.
 ## 4. Deploy edge functions
 
 ```bash
-supabase functions deploy --project-ref <NEW_PROJECT_REF>
+npx supabase functions deploy --project-ref <NEW_PROJECT_REF>
 ```
 
 Then set the secrets each function needs (once per project):
 
 ```bash
-supabase secrets set --project-ref <NEW_PROJECT_REF> \
+npx supabase secrets set --project-ref <NEW_PROJECT_REF> \
   RAZORPAY_KEY_ID=... \
   RAZORPAY_KEY_SECRET=... \
   GROWW_API_TOKEN=... \
