@@ -207,6 +207,9 @@ const Landing = () => {
             >
               Pricing
             </Button>
+            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/docs")}>
+              Documentation
+            </Button>
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" onClick={() => navigate("/faq")}>
               FAQ
             </Button>
