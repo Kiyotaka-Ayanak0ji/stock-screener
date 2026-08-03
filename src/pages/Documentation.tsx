@@ -104,10 +104,46 @@ const Callout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+const KIND_LABEL: Record<DocSearchEntry["kind"], string> = {
+  section: "Section",
+  step: "Guide",
+  command: "Command",
+  issue: "Fix",
+  limit: "Limits",
+};
+
 const Documentation = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [active, setActive] = useState(SECTIONS[0].id);
+  const [query, setQuery] = useState("");
+  const [openIssue, setOpenIssue] = useState<string | undefined>(undefined);
+  const [highlighted, setHighlighted] = useState(0);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const entries = useMemo(() => [...DOC_SEARCH_INDEX, ...buildTroubleshootingEntries(TROUBLESHOOTING)], []);
+  const results = useMemo(() => searchDocs(entries, query), [entries, query]);
+  const searching = query.trim().length >= 2;
+
+  useEffect(() => setHighlighted(0), [query]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typing = target && ["INPUT", "TEXTAREA"].includes(target.tagName);
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || (e.key === "/" && !typing)) {
+        e.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      }
+      if (e.key === "Escape" && typing) {
+        setQuery("");
+        searchRef.current?.blur();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -127,6 +163,29 @@ const Documentation = () => {
   }, []);
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+
+  const goToResult = (entry: DocSearchEntry) => {
+    if (entry.accordionValue) setOpenIssue(entry.accordionValue);
+    setQuery("");
+    searchRef.current?.blur();
+    window.setTimeout(() => scrollTo(entry.section), 60);
+  };
+
+  const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!results.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlighted((i) => (i + 1) % results.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlighted((i) => (i - 1 + results.length) % results.length);
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      goToResult(results[highlighted]);
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
