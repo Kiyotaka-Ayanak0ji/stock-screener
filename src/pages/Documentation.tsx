@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,9 +14,13 @@ import {
   Terminal,
   Info,
   LifeBuoy,
+  Search,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { DOC_SEARCH_INDEX, buildTroubleshootingEntries, searchDocs, type DocSearchEntry } from "@/lib/docsSearchIndex";
+
 
 const SECTIONS = [
   { id: "getting-started", label: "Getting started" },
