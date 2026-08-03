@@ -21,7 +21,6 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { DOC_SEARCH_INDEX, buildTroubleshootingEntries, searchDocs, type DocSearchEntry } from "@/lib/docsSearchIndex";
 
-
 const SECTIONS = [
   { id: "getting-started", label: "Getting started" },
   { id: "watchlists", label: "Watchlists & screener" },
@@ -39,7 +38,7 @@ const TROUBLESHOOTING = [
   },
   {
     q: "Prices look stale or a column shows “—”",
-    a: "Quotes only move while the Indian market is open (9:15–15:30 IST, Mon–Fri). Outside those hours the last traded values are shown. A “—” means the upstream feed does not publish that field for the instrument — indices, for example, have no volume or market cap.",
+    a: "Quotes only move while the Indian market is open (9:15–15:30 IST, Mon–Fri). Outside those hours the last traded values are shown. A “—” means the upstream feed does not publish that field for the instrument: indices, for example, have no volume or market cap.",
   },
   {
     q: "Auto-refresh isn’t running",
@@ -153,7 +152,7 @@ const Documentation = () => {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
         if (visible) setActive(visible.target.id);
       },
-      { rootMargin: "-120px 0px -65% 0px", threshold: 0 }
+      { rootMargin: "-120px 0px -65% 0px", threshold: 0 },
     );
     SECTIONS.forEach((s) => {
       const el = document.getElementById(s.id);
@@ -184,8 +183,6 @@ const Documentation = () => {
       goToResult(results[highlighted]);
     }
   };
-
-
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -362,7 +359,6 @@ const Documentation = () => {
             </div>
           </motion.header>
 
-
           <section>
             <SectionHeading
               id="getting-started"
@@ -374,7 +370,9 @@ const Documentation = () => {
             <ol className="mt-5 space-y-1">
               <Step n="01">Create an account with email and password, or continue with Google.</Step>
               <Step n="02">Confirm the verification email — check spam if it does not arrive within a minute.</Step>
-              <Step n="03">The guided walkthrough runs on first login and can be replayed from Profile at any time.</Step>
+              <Step n="03">
+                The guided walkthrough runs on first login and can be replayed from Profile at any time.
+              </Step>
               <Step n="04">Every new account starts on a 15-day trial with full Pro access.</Step>
             </ol>
           </section>
@@ -389,7 +387,9 @@ const Documentation = () => {
             />
             <ul className="mt-5 space-y-1">
               <Step n="•">Add stocks by NSE/BSE symbol; indices are supported alongside regular equities.</Step>
-              <Step n="•">Sort any column, and filter by sector, price band or data completeness (Complete vs Partial).</Step>
+              <Step n="•">
+                Sort any column, and filter by sector, price band or data completeness (Complete vs Partial).
+              </Step>
               <Step n="•">Choose which columns are visible — the layout is stored per user and encrypted.</Step>
               <Step n="•">
                 Use <strong className="text-foreground">Refresh Now</strong> for an on-demand update; Premium Plus can
@@ -423,7 +423,9 @@ const Documentation = () => {
               />
               <ul className="mt-5 space-y-1">
                 <Step n="•">Star any row to pin it across every watchlist.</Step>
-                <Step n="•">The Favourites page shows live prices for starred tickers and supports one-click removal.</Step>
+                <Step n="•">
+                  The Favourites page shows live prices for starred tickers and supports one-click removal.
+                </Step>
                 <Step n="•">Favourites sync to your account, so they follow you to any device.</Step>
               </ul>
             </div>
@@ -436,12 +438,16 @@ const Documentation = () => {
                 intro="Signals are deduplicated on purpose — you should hear from us only when something changes."
               />
               <ul className="mt-5 space-y-1">
-                <Step n="•">Price triggers fire when a stock crosses your upper or lower bound (Premium and above).</Step>
+                <Step n="•">
+                  Price triggers fire when a stock crosses your upper or lower bound (Premium and above).
+                </Step>
                 <Step n="•">
                   Smart Alerts flag 52-week breaks and volume spikes using rolling averages with cooldowns, so the same
                   signal is not repeated.
                 </Step>
-                <Step n="•">Digest emails respect the Email opt-in toggle in Profile — turning it off stops all digests.</Step>
+                <Step n="•">
+                  Digest emails respect the Email opt-in toggle in Profile — turning it off stops all digests.
+                </Step>
               </ul>
             </div>
           </section>
@@ -470,7 +476,7 @@ const Documentation = () => {
               intro="The project runs on Node.js 20+ with npm and npx — no other package manager is required."
             />
             <pre className="mt-5 rounded-xl border border-border bg-muted/60 p-4 text-xs overflow-x-auto font-mono leading-relaxed">
-{`npm install          # install dependencies
+              {`npm install          # install dependencies
 npm run dev          # local dev server on http://localhost:8080
 npm run build        # production bundle -> dist/
 npm run preview      # serve the production build
@@ -482,8 +488,9 @@ npx supabase db push
 npx supabase functions deploy`}
             </pre>
             <Callout>
-              Full architecture, environment variables and deployment steps live in <code className="font-mono text-primary">Setup.md</code>,
-              with the backend reference in <code className="font-mono text-primary">API.md</code>.
+              Full architecture, environment variables and deployment steps live in{" "}
+              <code className="font-mono text-primary">Setup.md</code>, with the backend reference in{" "}
+              <code className="font-mono text-primary">API.md</code>.
             </Callout>
           </section>
 
@@ -516,9 +523,7 @@ npx supabase functions deploy`}
           </section>
 
           <footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
-            <p className="text-sm text-muted-foreground">
-              Still stuck? A real person reads every support request.
-            </p>
+            <p className="text-sm text-muted-foreground">Still stuck? A real person reads every support request.</p>
             <Button onClick={() => navigate("/support")}>
               Contact support <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
