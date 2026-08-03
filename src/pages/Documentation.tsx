@@ -286,7 +286,7 @@ const Documentation = () => {
               <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 ref={searchRef}
-                type="search"
+                type="text"
                 role="searchbox"
                 aria-label="Search the documentation"
                 value={query}
