@@ -496,7 +496,13 @@ npx supabase functions deploy`}
               intro="The questions our inbox receives most, answered without hand-waving."
             />
             <div className="mt-5 rounded-2xl border border-border divide-y divide-border overflow-hidden bg-card/40">
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion
+                type="single"
+                collapsible
+                className="w-full"
+                value={openIssue}
+                onValueChange={(v) => setOpenIssue(v || undefined)}
+              >
                 {TROUBLESHOOTING.map((item, i) => (
                   <AccordionItem key={i} value={`t-${i}`} className="border-b-0 px-5">
                     <AccordionTrigger className="text-sm text-left hover:no-underline">{item.q}</AccordionTrigger>
