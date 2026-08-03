@@ -280,6 +280,79 @@ const Documentation = () => {
               A practical, written-by-the-team guide to the screener, watchlists, favourites, alerts and sharing — with
               honest fixes for the issues people actually hit.
             </p>
+
+            {/* Search */}
+            <div className="relative mt-6 max-w-xl">
+              <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input
+                ref={searchRef}
+                type="search"
+                role="searchbox"
+                aria-label="Search the documentation"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onSearchKeyDown}
+                placeholder="Search commands, errors and setup steps…"
+                className="w-full rounded-xl border border-border bg-card/60 py-3 pl-11 pr-24 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-colors"
+              />
+              {query ? (
+                <button
+                  onClick={() => {
+                    setQuery("");
+                    searchRef.current?.focus();
+                  }}
+                  aria-label="Clear search"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              ) : (
+                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-border bg-muted px-2 py-1 font-mono text-[10px] text-muted-foreground">
+                  ⌘K
+                </kbd>
+              )}
+
+              {searching && (
+                <div className="absolute z-40 mt-2 w-full overflow-hidden rounded-xl border border-border bg-popover shadow-xl">
+                  {results.length === 0 ? (
+                    <p className="px-4 py-5 text-sm text-muted-foreground">
+                      No matches for “{query.trim()}”. Try a command like <span className="font-mono">npm run dev</span>{" "}
+                      or a keyword like <span className="font-mono">verification</span>.
+                    </p>
+                  ) : (
+                    <ul className="max-h-[22rem] overflow-y-auto py-1">
+                      {results.map((r, i) => (
+                        <li key={`${r.section}-${r.title}`}>
+                          <button
+                            onMouseEnter={() => setHighlighted(i)}
+                            onClick={() => goToResult(r)}
+                            className={`w-full px-4 py-3 text-left transition-colors ${
+                              i === highlighted ? "bg-primary/10" : "hover:bg-muted/50"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="rounded border border-border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-primary">
+                                {KIND_LABEL[r.kind]}
+                              </span>
+                              <span
+                                className={`text-sm font-medium ${
+                                  r.kind === "command" ? "font-mono" : ""
+                                } text-foreground`}
+                              >
+                                {r.title}
+                              </span>
+                            </div>
+                            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{r.body}</p>
+                            <p className="mt-1 text-[11px] text-muted-foreground/70">{r.sectionLabel}</p>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="mt-5 flex flex-wrap gap-2 lg:hidden">
               {SECTIONS.map((s) => (
                 <Button key={s.id} variant="outline" size="sm" onClick={() => scrollTo(s.id)}>
@@ -288,6 +361,7 @@ const Documentation = () => {
               ))}
             </div>
           </motion.header>
+
 
           <section>
             <SectionHeading
