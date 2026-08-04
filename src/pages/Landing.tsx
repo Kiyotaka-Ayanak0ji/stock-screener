@@ -103,7 +103,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Smart Alerts",
     description:
-      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes — with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
+      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes, with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
     badge: "Pro",
   },
   {
@@ -273,7 +273,7 @@ const Landing = () => {
             custom={2}
           >
             EquityIQ is the smarter way to manage and track all your stocks. Set custom price triggers, tag events,
-            build watchlists, track your portfolio performance — all in one clean, powerful dashboard.
+            build watchlists, track your portfolio performance, all in one clean, powerful dashboard.
           </motion.p>
 
           <motion.div
@@ -417,7 +417,7 @@ const Landing = () => {
             </Badge>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Everything you need. Nothing you don't.</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
-              Switch between plans to see what's included — no scrolling required.
+              Switch between plans to see what's included, no scrolling required.
             </p>
           </div>
 
@@ -662,7 +662,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$4.17/mo — save $10/year
+                      ~$4.17/mo, save $10/year
                     </motion.p>
                   ) : (
                     <motion.p
@@ -746,7 +746,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$16.67/mo — save $40/year
+                      ~$16.67/mo, save $40/year
                     </motion.p>
                   ) : (
                     <motion.p
@@ -829,7 +829,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$33.33/mo — save $80/year
+                      ~$33.33/mo, save $80/year
                     </motion.p>
                   ) : (
                     <motion.p

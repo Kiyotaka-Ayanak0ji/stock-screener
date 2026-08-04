@@ -21,9 +21,9 @@ const Auth = () => {
 
   const passwordChecks = [
     { label: "At least 8 characters", ok: password.length >= 8 },
-    { label: "One uppercase letter (A–Z)", ok: /[A-Z]/.test(password) },
-    { label: "One lowercase letter (a–z)", ok: /[a-z]/.test(password) },
-    { label: "One number (0–9)", ok: /\d/.test(password) },
+    { label: "One uppercase letter (A to Z)", ok: /[A-Z]/.test(password) },
+    { label: "One lowercase letter (a to z)", ok: /[a-z]/.test(password) },
+    { label: "One number (0 to 9)", ok: /\d/.test(password) },
     { label: "One special character (e.g. ! @ # $)", ok: /[^A-Za-z0-9]/.test(password) },
     { label: "Not a common or breached password", ok: password.length > 0 && !/^(password|test@?\d{2,4}|qwerty|12345|abc123|letmein|admin)$/i.test(password) },
   ];

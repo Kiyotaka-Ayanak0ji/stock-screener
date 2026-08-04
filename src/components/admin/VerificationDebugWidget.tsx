@@ -45,7 +45,7 @@ function computeRefreshReasons(log: DebugLog): string[] {
   }
 
   if (!log.sources_used || log.sources_used.length === 0) {
-    reasons.push("No data source responded — Screener, BSE, Groww and Google all returned nothing.");
+    reasons.push("No data source responded, Screener, BSE, Groww and Google all returned nothing.");
   }
 
   if (log.primary_source === "none" || !log.primary_source) {
@@ -72,7 +72,7 @@ function computeRefreshReasons(log: DebugLog): string[] {
     reasons.push("BSE scrip code could not be resolved, so the BSE India intraday API was skipped.");
   }
   if (log.source_fields?.bse && log.source_fields.bse.missing.length > 0) {
-    reasons.push(`BSE India returned a partial quote — missing: ${log.source_fields.bse.missing.join(", ")}.`);
+    reasons.push(`BSE India returned a partial quote, missing: ${log.source_fields.bse.missing.join(", ")}.`);
   }
   if (log.source_fields?.groww && log.source_fields.groww.filled.length === 0) {
     reasons.push("Groww proxy responded but had no usable fields (often a 403 / rate limit).");
@@ -82,11 +82,11 @@ function computeRefreshReasons(log: DebugLog): string[] {
   }
 
   if (log.duration_ms != null && log.duration_ms > 8000) {
-    reasons.push(`Run was slow (${log.duration_ms}ms) — upstream sources may have been timing out.`);
+    reasons.push(`Run was slow (${log.duration_ms}ms), upstream sources may have been timing out.`);
   }
 
   if (reasons.length === 0) {
-    reasons.push("Refresh completed successfully — all required fields were populated.");
+    reasons.push("Refresh completed successfully, all required fields were populated.");
   }
   return reasons;
 }
@@ -216,7 +216,7 @@ export function VerificationDebugWidget() {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="text-xs text-muted-foreground">
             Showing latest {logs.length} run{logs.length === 1 ? "" : "s"}
-            {!enabled && " (debug mode is off — no new runs are being recorded)"}
+            {!enabled && " (debug mode is off, no new runs are being recorded)"}
           </div>
           <div className="flex items-center gap-2">
             <Button

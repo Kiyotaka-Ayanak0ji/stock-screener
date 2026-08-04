@@ -82,7 +82,7 @@ const EmailVerificationGate = ({ children }: { children: React.ReactNode }) => {
         <div className="flex flex-col gap-3 mt-2">
           <Button onClick={handleCheckVerification} disabled={checking} className="w-full gap-2">
             <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />
-            I've Verified — Check Now
+            I've Verified, Check Now
           </Button>
           <Button variant="outline" onClick={handleResendVerification} disabled={resending} className="w-full gap-2">
             <MailCheck className="h-4 w-4" />

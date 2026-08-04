@@ -28,20 +28,20 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
         <p>We offer three tiers:</p>
         <ul className="list-disc list-inside space-y-1.5 ml-1">
           <li>
-            <strong className="text-foreground">Guest (Free)</strong> — 1 watchlist with up to 20 stocks,
+            <strong className="text-foreground">Guest (Free)</strong>: 1 watchlist with up to 20 stocks,
             basic price data, light &amp; dark mode.
           </li>
           <li>
-            <strong className="text-foreground">Pro ($5/mo or $50/yr)</strong> — Up to 5 watchlists × 20
+            <strong className="text-foreground">Pro ($5/mo or $50/yr)</strong>: Up to 5 watchlists × 20
             stocks, column customization, real-time updates.
           </li>
           <li>
-            <strong className="text-foreground">Premium ($20/mo or $200/yr)</strong> — Up to 20 watchlists
+            <strong className="text-foreground">Premium ($20/mo or $200/yr)</strong>: Up to 20 watchlists
             × 50 stocks, price trigger alerts with email, event tags, notes, export/share, portfolio
             dashboard with sector analysis.
           </li>
           <li>
-            <strong className="text-foreground">Premium Plus ($40/mo or $400/yr)</strong> — Up to 50
+            <strong className="text-foreground">Premium Plus ($40/mo or $400/yr)</strong>: Up to 50
             watchlists × 100 stocks, unlimited price trigger alerts, auto-refresh on reload, and
             everything in Premium.
           </li>
@@ -55,31 +55,31 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "What's included in the Premium plan?",
-    a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard — complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
+    a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard, complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
   },
   {
     q: "Does the portfolio dashboard update in real time?",
-    a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments — all in real time.",
+    a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
   },
   {
     q: "Which stock exchanges are supported?",
-    a: "EquityIQ tracks stocks listed on both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities — including small-cap and micro-cap stocks.",
+    a: "EquityIQ tracks stocks listed on both NSE (National Stock Exchange) and BSE (Bombay Stock Exchange), covering 5,000+ Indian equities, including small-cap and micro-cap stocks.",
   },
   {
     q: "How do price triggers work?",
-    a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification — so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox. This feature is available on Premium and Premium Plus plans.",
+    a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification, so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox. This feature is available on Premium and Premium Plus plans.",
   },
   {
     q: "What are Smart Alerts?",
-    a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events — strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+    a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events, strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
   },
   {
     q: "Is there an option available to filter stocks?",
-    a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio — directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
+    a: "Yes. Premium and Premium Plus subscribers get advanced filtering with min/max range controls on Price, Volume, Market Cap, and P/E ratio, directly from the watchlist column headers. Combine filters to narrow down to exactly the setups you want.",
   },
   {
     q: "Is my data safe?",
-    a: "Absolutely. All your data: watchlists, notes, custom columns, and triggers — is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
+    a: "Absolutely. All your data: watchlists, notes, custom columns, and triggers, is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
   },
   {
     q: "Can I cancel my subscription anytime?",
@@ -91,7 +91,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "How does the interactive multi-day price chart work?",
-    a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts run on a clean, validated price history from 2025 onward — new points are recorded only during live market hours, so what you see reflects real market activity, not session-reset sparklines or stale data.",
+    a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts run on a clean, validated price history from 2025 onward, new points are recorded only during live market hours, so what you see reflects real market activity, not session-reset sparklines or stale data.",
   },
 ];
 

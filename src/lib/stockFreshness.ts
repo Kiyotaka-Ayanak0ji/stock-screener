@@ -89,7 +89,7 @@ export function getFreshness(
 ): FreshnessInfo {
   if (!lastUpdated) {
     return unknownInfo(
-      "This stock hasn't been refreshed yet. It's queued in the background cycle — click ↻ to verify against Screener now.",
+      "This stock hasn't been refreshed yet. It's queued in the background cycle, click ↻ to verify against Screener now.",
     );
   }
 
@@ -129,8 +129,8 @@ export function getFreshness(
       etaLabel,
       etaReason,
       tooltip: isMarketOpen
-        ? `Updated ${label} — older than 4h while the market is open. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`
-        : `Updated ${label} — older than 24h. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`,
+        ? `Updated ${label}, older than 4h while the market is open. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`
+        : `Updated ${label}, older than 24h. Next auto-refresh ${etaLabel}. Click ↻ to verify now.`,
     };
   }
 

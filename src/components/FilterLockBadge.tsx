@@ -12,7 +12,7 @@ const FilterLockBadge = ({ label, onClick }: FilterLockBadgeProps) => {
       <TooltipTrigger asChild>
         <button
           type="button"
-          aria-label={`${label} filter — Premium feature`}
+          aria-label={`${label} filter, Premium feature`}
           className="ml-0.5 inline-flex items-center justify-center rounded-sm p-0.5 text-muted-foreground/50 hover:text-primary hover:bg-primary/10 transition-colors"
           onClick={e => { e.stopPropagation(); e.preventDefault(); onClick(); }}
           onPointerDown={e => e.stopPropagation()}
@@ -21,7 +21,7 @@ const FilterLockBadge = ({ label, onClick }: FilterLockBadgeProps) => {
         </button>
       </TooltipTrigger>
       <TooltipContent side="top" className="text-xs">
-        Filter by {label} — Premium
+        Filter by {label}, Premium
       </TooltipContent>
     </Tooltip>
   );

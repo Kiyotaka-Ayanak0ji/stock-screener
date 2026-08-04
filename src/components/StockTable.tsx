@@ -158,7 +158,7 @@ const StockTable = () => {
       transition={{ duration: 0.5, delay: 0.2 }}
       className="container mx-auto px-2 sm:px-4 py-4 sm:py-6"
     >
-      {/* Title row — visible on all viewports */}
+      {/* Title row, visible on all viewports */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 sm:mb-4 gap-3">
         <div>
           <h2 className="text-base sm:text-lg font-bold leading-tight">
@@ -239,7 +239,7 @@ const StockTable = () => {
         </div>
       </div>
 
-      {/* Mobile sticky compact toolbar — two rows for clarity */}
+      {/* Mobile sticky compact toolbar, two rows for clarity */}
       <div className="sm:hidden sticky top-[49px] z-40 -mx-2 px-2 py-2 bg-background/95 backdrop-blur-md border-b border-border mb-3 space-y-2">
         {/* Row 1: market breadth + watchlist selector */}
         <div className="flex items-center gap-1.5">
