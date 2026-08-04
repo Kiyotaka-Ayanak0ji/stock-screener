@@ -312,6 +312,57 @@ request/response examples and the frontend pages that use them — lives in
 
 ---
 
+## 🗄 Database Migrations & Data Preservation
+
+The whole backend schema lives in a **single, replayable migration**:
+
+```
+supabase/migrations/00000000000000_production_baseline.sql
+```
+
+What it contains:
+
+- The `public` and `private` schemas and the `app_role` enum
+- All 20 application tables, primary keys, foreign keys, checks, indexes
+- Row Level Security enabled on every table, plus all 63 RLS policies
+- Every `GRANT` / `REVOKE` for `anon`, `authenticated`, and `service_role`
+- All SQL/PLpgSQL functions (`handle_new_user`, `enforce_watchlist_quota`,
+  `private.has_role`, the email queue pump, …) and their triggers
+- The `auth.users` signup triggers and the singleton rows the email
+  pipeline expects
+
+Properties that matter for redeployment:
+
+- **Idempotent.** Every statement is guarded (`IF NOT EXISTS`, `DROP … IF
+  EXISTS` before create, or a `DO` block that swallows "already exists").
+  Running it twice against the same database is a no-op, so it is safe to
+  apply on each deploy.
+- **Portable.** It creates the `anon` / `authenticated` / `service_role`
+  roles when they are absent, so it applies to a plain Postgres instance,
+  a self-hosted Supabase stack, or Supabase.com without edits.
+- **Non-destructive.** It never drops a table, column, or row. Existing
+  user data (watchlists, favourites, preferences, subscriptions,
+  portfolios, reviews) survives a re-apply untouched.
+
+Apply it:
+
+```sh
+npx supabase link --project-ref <project-ref>
+npx supabase db push          # replays supabase/migrations/*
+
+# or directly, on any Postgres instance
+psql "$DATABASE_URL" -f supabase/migrations/00000000000000_production_baseline.sql
+```
+
+**Row data is not in the migration.** The schema and the data move
+separately: apply the baseline first, then load the exported CSVs in
+dependency order. The full export/restore procedure, including moving to
+a different Supabase project or a self-hosted database, is documented in
+**[MIGRATION.md](MIGRATION.md)**.
+
+---
+
+
 ## 💻 Local Development
 
 **Prerequisites:** Node.js 20+ with npm 10+ (npx is used for CLI tooling), plus a Supabase project.
