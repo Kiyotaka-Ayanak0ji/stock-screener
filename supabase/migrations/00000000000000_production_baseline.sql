@@ -16,6 +16,9 @@
 -- MIGRATION.md, section "Restore data").
 -- =====================================================================
 
+-- Function bodies reference tables created later in this file.
+SET check_function_bodies = false;
+
 DO $do$ BEGIN CREATE SCHEMA IF NOT EXISTS private;
 EXCEPTION WHEN insufficient_privilege THEN NULL; WHEN duplicate_schema THEN NULL; END $do$;
 
