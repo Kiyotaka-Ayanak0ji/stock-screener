@@ -16,9 +16,11 @@
 -- MIGRATION.md, section "Restore data").
 -- =====================================================================
 
-CREATE SCHEMA IF NOT EXISTS private;
+DO $do$ BEGIN CREATE SCHEMA IF NOT EXISTS private;
+EXCEPTION WHEN insufficient_privilege THEN NULL; WHEN duplicate_schema THEN NULL; END $do$;
 
-CREATE SCHEMA IF NOT EXISTS public;
+DO $do$ BEGIN CREATE SCHEMA IF NOT EXISTS public;
+EXCEPTION WHEN insufficient_privilege THEN NULL; WHEN duplicate_schema THEN NULL; END $do$;
 
 DO $do$ BEGIN
 CREATE TYPE public.app_role AS ENUM (
