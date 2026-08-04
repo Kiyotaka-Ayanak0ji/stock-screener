@@ -60,7 +60,7 @@ export const DOC_SEARCH_INDEX: DocSearchEntry[] = [
     sectionLabel: "Self-hosting",
     kind: "section",
     title: "Self-hosting (Node.js)",
-    body: "Node.js 20+ with npm and npx — setup, build and deploy commands.",
+    body: "Node.js 20+ with npm and npx, setup, build and deploy commands.",
     keywords: "setup install deploy node npm npx supabase environment variables",
   },
 
@@ -78,7 +78,7 @@ export const DOC_SEARCH_INDEX: DocSearchEntry[] = [
     sectionLabel: "Getting started",
     kind: "step",
     title: "Confirm the verification email",
-    body: "Confirm the verification email — check spam if it does not arrive within a minute.",
+    body: "Confirm the verification email, check spam if it does not arrive within a minute.",
     keywords: "verify confirm spam junk",
   },
   {
@@ -120,7 +120,7 @@ export const DOC_SEARCH_INDEX: DocSearchEntry[] = [
     sectionLabel: "Watchlists & screener",
     kind: "step",
     title: "Column customisation",
-    body: "Choose which columns are visible — the layout is stored per user and encrypted.",
+    body: "Choose which columns are visible, the layout is stored per user and encrypted.",
     keywords: "columns layout customise encrypted",
   },
   {
@@ -188,7 +188,7 @@ export const DOC_SEARCH_INDEX: DocSearchEntry[] = [
     sectionLabel: "Alerts & email",
     kind: "step",
     title: "Email opt-in",
-    body: "Digest emails respect the Email opt-in toggle in Profile — turning it off stops all digests.",
+    body: "Digest emails respect the Email opt-in toggle in Profile, turning it off stops all digests.",
     keywords: "digest email opt-in unsubscribe",
   },
 
@@ -214,7 +214,7 @@ export const DOC_SEARCH_INDEX: DocSearchEntry[] = [
     sectionLabel: "Sharing & export",
     kind: "step",
     title: "Install as a PWA",
-    body: "Install the app to your home screen — it ships as a PWA on Android, iOS and desktop.",
+    body: "Install the app to your home screen, it ships as a PWA on Android, iOS and desktop.",
     keywords: "pwa install home screen mobile android ios",
   },
 

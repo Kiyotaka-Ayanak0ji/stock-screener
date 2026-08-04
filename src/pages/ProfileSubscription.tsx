@@ -143,7 +143,7 @@ const ProfileSubscription = () => {
               </CardTitle>
               <CardDescription className="text-xs">
                 {isLifetime
-                  ? "You have lifetime access — no further action needed."
+                  ? "You have lifetime access, no further action needed."
                   : isPremiumPlus
                   ? "You're on the highest tier. Renew or extend anytime."
                   : "Upgrade to unlock more watchlists, alerts, and Premium Plus features."}
@@ -160,7 +160,7 @@ const ProfileSubscription = () => {
                 Compare All Plans
               </Button>
               <p className="text-[11px] text-muted-foreground text-center pt-1">
-                Payments are processed securely via Razorpay. Subscriptions don't auto-renew — you choose when to extend.
+                Payments are processed securely via Razorpay. Subscriptions don't auto-renew, you choose when to extend.
               </p>
             </CardContent>
           </Card>

@@ -12,7 +12,7 @@ export interface Subscription {
 export type PlanTier = "free" | "pro" | "premium" | "premium_plus";
 
 const CACHE_KEY_PREFIX = "el_sub_cache_v1:";
-const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h — re-validated in background
+const CACHE_TTL_MS = 12 * 60 * 60 * 1000; // 12h, re-validated in background
 
 interface CachedEntry {
   subscription: Subscription | null;

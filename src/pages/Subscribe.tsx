@@ -223,7 +223,7 @@ const Subscribe = () => {
               <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
             {billingCycle === "yearly" && (
-              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$4.17/mo — save $10/year</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$4.17/mo, save $10/year</p>
             )}
             <ul className="space-y-1.5">
               {PRO_FEATURES.map((f) => (
@@ -261,7 +261,7 @@ const Subscribe = () => {
               <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
             {billingCycle === "yearly" && (
-              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$16.67/mo — save $40/year</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$16.67/mo, save $40/year</p>
             )}
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs">
@@ -300,7 +300,7 @@ const Subscribe = () => {
               <span className="text-muted-foreground text-sm">/{billingCycle === "yearly" ? "year" : "month"}</span>
             </div>
             {billingCycle === "yearly" && (
-              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$33.33/mo — save $80/year</p>
+              <p className="text-xs text-green-600 dark:text-green-400 mb-2">~$33.33/mo, save $80/year</p>
             )}
             <ul className="space-y-1.5">
               <li className="flex items-center gap-2 text-xs">

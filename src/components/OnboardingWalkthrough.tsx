@@ -46,7 +46,7 @@ const STEPS: Step[] = [
   {
     selectors: ['[data-tour="favourites-nav"]', '[data-tour="favourites-nav-mobile"]'],
     title: "7. Open Favourites",
-    body: "All your starred stocks live on the Favourites page — available on every plan, free included.",
+    body: "All your starred stocks live on the Favourites page, available on every plan, free included.",
   },
 ];
 

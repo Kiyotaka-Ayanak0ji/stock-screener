@@ -34,11 +34,11 @@ const SECTIONS = [
 const TROUBLESHOOTING = [
   {
     q: "My watchlist shows fewer stocks than I added",
-    a: "Check the active filters (Data completeness, sector, price range) in the toolbar — a filter can hide rows. Clear all filters, then press Refresh Now. Duplicate tickers are merged automatically.",
+    a: "Check the active filters (Data completeness, sector, price range) in the toolbar, a filter can hide rows. Clear all filters, then press Refresh Now. Duplicate tickers are merged automatically.",
   },
   {
     q: "Prices look stale or a column shows “—”",
-    a: "Quotes only move while the Indian market is open (9:15–15:30 IST, Mon–Fri). Outside those hours the last traded values are shown. A “—” means the upstream feed does not publish that field for the instrument: indices, for example, have no volume or market cap.",
+    a: "Quotes only move while the Indian market is open (9:15 to 15:30 IST, Monday to Friday). Outside those hours the last traded values are shown. A “—” means the upstream feed does not publish that field for the instrument: indices, for example, have no volume or market cap.",
   },
   {
     q: "Auto-refresh isn’t running",
@@ -50,7 +50,7 @@ const TROUBLESHOOTING = [
   },
   {
     q: "Sign-up rejects my password",
-    a: "Passwords are checked against known breach lists, so common passwords are blocked even when they look complex. Use at least 8 characters mixing upper case, lower case, a digit and a symbol — the live checklist on the sign-up form shows what is still missing.",
+    a: "Passwords are checked against known breach lists, so common passwords are blocked even when they look complex. Use at least 8 characters mixing upper case, lower case, a digit and a symbol, the live checklist on the sign-up form shows what is still missing.",
   },
   {
     q: "Google sign-in fails with “Unsupported provider”",
@@ -62,7 +62,7 @@ const TROUBLESHOOTING = [
   },
   {
     q: "The published app is blank",
-    a: "The frontend environment variables were missing at build time. Set them and rebuild — Vite inlines them into the bundle, so changing them requires a fresh build.",
+    a: "The frontend environment variables were missing at build time. Set them and rebuild, Vite inlines them into the bundle, so changing them requires a fresh build.",
   },
 ];
 
@@ -253,7 +253,7 @@ const Documentation = () => {
                 <LifeBuoy className="h-4 w-4 text-primary" /> Need a hand?
               </p>
               <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                If something here doesn’t match what you see in the app, tell us — we keep this page in sync with every
+                If something here doesn’t match what you see in the app, tell us, we keep this page in sync with every
                 release.
               </p>
               <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("/support")}>
@@ -274,7 +274,7 @@ const Documentation = () => {
             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">Documentation</p>
             <h1 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight">How to use EquityIQ</h1>
             <p className="mt-3 max-w-2xl text-base text-muted-foreground leading-relaxed">
-              A practical, written-by-the-team guide to the screener, watchlists, favourites, alerts and sharing — with
+              A practical, written-by-the-team guide to the screener, watchlists, favourites, alerts and sharing, with
               honest fixes for the issues people actually hit.
             </p>
 
@@ -363,13 +363,13 @@ const Documentation = () => {
             <SectionHeading
               id="getting-started"
               icon={Rocket}
-              eyebrow="01 — Setup"
+              eyebrow="01 / Setup"
               title="Getting started"
               intro="Four steps from a blank account to a live watchlist. It takes about two minutes."
             />
             <ol className="mt-5 space-y-1">
               <Step n="01">Create an account with email and password, or continue with Google.</Step>
-              <Step n="02">Confirm the verification email — check spam if it does not arrive within a minute.</Step>
+              <Step n="02">Confirm the verification email, check spam if it does not arrive within a minute.</Step>
               <Step n="03">
                 The guided walkthrough runs on first login and can be replayed from Profile at any time.
               </Step>
@@ -381,7 +381,7 @@ const Documentation = () => {
             <SectionHeading
               id="watchlists"
               icon={TrendingUp}
-              eyebrow="02 — Core"
+              eyebrow="02 / Core"
               title="Watchlists & screener"
               intro="The screener is the heart of the app: add instruments, shape the table, and refresh on your terms."
             />
@@ -390,7 +390,7 @@ const Documentation = () => {
               <Step n="•">
                 Sort any column, and filter by sector, price band or data completeness (Complete vs Partial).
               </Step>
-              <Step n="•">Choose which columns are visible — the layout is stored per user and encrypted.</Step>
+              <Step n="•">Choose which columns are visible, the layout is stored per user and encrypted.</Step>
               <Step n="•">
                 Use <strong className="text-foreground">Refresh Now</strong> for an on-demand update; Premium Plus can
                 enable a 5-second auto-refresh that pauses when the tab is hidden or the market is closed.
@@ -435,7 +435,7 @@ const Documentation = () => {
                 icon={Bell}
                 eyebrow="04"
                 title="Alerts & email"
-                intro="Signals are deduplicated on purpose — you should hear from us only when something changes."
+                intro="Signals are deduplicated on purpose, you should hear from us only when something changes."
               />
               <ul className="mt-5 space-y-1">
                 <Step n="•">
@@ -446,7 +446,7 @@ const Documentation = () => {
                   signal is not repeated.
                 </Step>
                 <Step n="•">
-                  Digest emails respect the Email opt-in toggle in Profile — turning it off stops all digests.
+                  Digest emails respect the Email opt-in toggle in Profile, turning it off stops all digests.
                 </Step>
               </ul>
             </div>
@@ -456,14 +456,14 @@ const Documentation = () => {
             <SectionHeading
               id="sharing"
               icon={Share2}
-              eyebrow="05 — Distribution"
+              eyebrow="05 / Distribution"
               title="Sharing & export"
               intro="Send a watchlist to someone who does not have an account, or keep it on your home screen."
             />
             <ul className="mt-5 space-y-1">
               <Step n="•">Export a watchlist as an image or PDF snapshot.</Step>
               <Step n="•">Generate a read-only share link that works without an account.</Step>
-              <Step n="•">Install the app to your home screen — it ships as a PWA on Android, iOS and desktop.</Step>
+              <Step n="•">Install the app to your home screen, it ships as a PWA on Android, iOS and desktop.</Step>
             </ul>
           </section>
 
@@ -471,9 +471,9 @@ const Documentation = () => {
             <SectionHeading
               id="self-hosting"
               icon={Terminal}
-              eyebrow="06 — Engineering"
+              eyebrow="06 / Engineering"
               title="Self-hosting (Node.js)"
-              intro="The project runs on Node.js 20+ with npm and npx — no other package manager is required."
+              intro="The project runs on Node.js 20+ with npm and npx, no other package manager is required."
             />
             <pre className="mt-5 rounded-xl border border-border bg-muted/60 p-4 text-xs overflow-x-auto font-mono leading-relaxed">
               {`npm install          # install dependencies
@@ -498,7 +498,7 @@ npx supabase functions deploy`}
             <SectionHeading
               id="troubleshooting"
               icon={Wrench}
-              eyebrow="07 — Support"
+              eyebrow="07 / Support"
               title="Troubleshooting"
               intro="The questions our inbox receives most, answered without hand-waving."
             />

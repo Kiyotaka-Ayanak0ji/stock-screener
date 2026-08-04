@@ -16,7 +16,7 @@ import {
   Lock,
   Shield,
   Smartphone,
-  Star,
+  
   TrendingUp,
   Check,
   Crown,
@@ -103,7 +103,7 @@ const FEATURES = [
     icon: Sparkles,
     title: "Smart Alerts",
     description:
-      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes — with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
+      "Precision anomaly detection across your watchlist during live market hours: strict session-high/low breaks and volume-flow spikes, with built-in cooldowns and per-day deduplication so you get one clean signal per event, never a noisy stream.",
     badge: "Pro",
   },
   {
@@ -243,16 +243,6 @@ const Landing = () => {
         </div>
 
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
-            <Badge
-              variant="secondary"
-              className="mb-5 sm:mb-6 px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs font-medium border border-primary/20 max-w-[92vw] whitespace-normal sm:whitespace-nowrap text-center leading-snug"
-            >
-              <Sparkles className="h-3 w-3 mr-1.5 text-primary shrink-0" />
-              <span>New · Improved stock coverage and data accuracy.</span>
-            </Badge>
-          </motion.div>
-
           <motion.h1
             className="text-[2rem] leading-[1.1] sm:text-5xl md:text-6xl font-extrabold tracking-tight"
             initial="hidden"
@@ -273,7 +263,7 @@ const Landing = () => {
             custom={2}
           >
             EquityIQ is the smarter way to manage and track all your stocks. Set custom price triggers, tag events,
-            build watchlists, track your portfolio performance — all in one clean, powerful dashboard.
+            build watchlists, track your portfolio performance, all in one clean, powerful dashboard.
           </motion.p>
 
           <motion.div
@@ -317,7 +307,7 @@ const Landing = () => {
             variants={fadeUp}
             custom={4}
           >
-            · User-friendly UI · Trusted by Indian retail investors
+            15 day free trial. No credit card required.
           </motion.p>
         </div>
       </section>
@@ -326,12 +316,9 @@ const Landing = () => {
       <section className="py-12 sm:py-14 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-10">
-            <Badge variant="secondary" className="mb-3">
-              <Sparkles className="h-3 w-3 mr-1 text-primary" /> Just shipped
-            </Badge>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Fresh from the lab</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">What's new</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
-              Latest upgrades to make EquityIQ faster, broader and more transparent.
+              Recent updates to coverage, data accuracy and speed.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -400,8 +387,7 @@ const Landing = () => {
             variants={fadeUp}
             custom={1}
           >
-            You check Groww for prices, set alarms in a notes app, maintain an Excel sheet for your watchlist, and
-            screenshot charts to share with friends. Sound familiar?{" "}
+            Prices in one app, alerts in a notes app, a spreadsheet for the watchlist and screenshots to share.{" "}
             <span className="text-foreground font-semibold">EquityIQ brings everything into one place</span>: so you
             spend less time managing tools and more time making decisions.
           </motion.p>
@@ -412,12 +398,9 @@ const Landing = () => {
       <section id="features" className="py-10 sm:py-14 px-4 sm:px-6 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-6 sm:mb-8">
-            <Badge variant="secondary" className="mb-2">
-              <Star className="h-3 w-3 mr-1 text-primary" /> Features
-            </Badge>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Everything you need. Nothing you don't.</h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-xl mx-auto px-2">
-              Switch between plans to see what's included — no scrolling required.
+              Switch between plans to see exactly what each one includes.
             </p>
           </div>
 
@@ -540,9 +523,6 @@ const Landing = () => {
       <section id="pricing" className="py-14 sm:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10 sm:mb-14">
-            <Badge variant="secondary" className="mb-3">
-              <Crown className="h-3 w-3 mr-1 text-primary" /> Pricing
-            </Badge>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
               Simple pricing. Serious value.
             </h2>
@@ -662,7 +642,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$4.17/mo — save $10/year
+                      ~$4.17/mo, save $10/year
                     </motion.p>
                   ) : (
                     <motion.p
@@ -746,7 +726,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$16.67/mo — save $40/year
+                      ~$16.67/mo, save $40/year
                     </motion.p>
                   ) : (
                     <motion.p
@@ -784,15 +764,8 @@ const Landing = () => {
 
             {/* Premium Plus */}
             <Card className="border-border relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs px-3">
-                  UNLIMITED
-                </Badge>
-              </div>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg flex items-center gap-1.5">
-                  Premium Plus <Sparkles className="h-4 w-4 text-orange-500" />
-                </h3>
+                <h3 className="font-semibold text-lg">Premium Plus</h3>
                 <div className="mt-3 flex items-baseline gap-1">
                   <AnimatePresence mode="wait">
                     <motion.span
@@ -829,7 +802,7 @@ const Landing = () => {
                       transition={{ duration: 0.2 }}
                       className="text-xs text-green-600 dark:text-green-400 mt-1"
                     >
-                      ~$33.33/mo — save $80/year
+                      ~$33.33/mo, save $80/year
                     </motion.p>
                   ) : (
                     <motion.p

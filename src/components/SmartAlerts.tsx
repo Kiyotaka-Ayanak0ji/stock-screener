@@ -144,7 +144,7 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
           type: "52w_high",
           ticker: stock.ticker,
           message: `${stock.ticker} broke session high`,
-          detail: `₹${stock.price.toFixed(2)} — prev high ₹${t.sessionHigh.toFixed(2)}`,
+          detail: `₹${stock.price.toFixed(2)}, prev high ₹${t.sessionHigh.toFixed(2)}`,
           timestamp: new Date(now),
         };
         onAlert(alert);
@@ -165,7 +165,7 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
           type: "52w_low",
           ticker: stock.ticker,
           message: `${stock.ticker} broke session low`,
-          detail: `₹${stock.price.toFixed(2)} — prev low ₹${t.sessionLow.toFixed(2)}`,
+          detail: `₹${stock.price.toFixed(2)}, prev low ₹${t.sessionLow.toFixed(2)}`,
           timestamp: new Date(now),
         };
         onAlert(alert);
@@ -191,7 +191,7 @@ export function useSmartAlerts(onAlert: (alert: SmartAlert) => void) {
               type: "volume_spike",
               ticker: stock.ticker,
               message: `${stock.ticker} volume spike`,
-              detail: `${multiplier}x recent flow — +${formatVolume(delta)} traded`,
+              detail: `${multiplier}x recent flow, +${formatVolume(delta)} traded`,
               timestamp: new Date(now),
             };
             onAlert(alert);

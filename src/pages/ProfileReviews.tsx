@@ -72,7 +72,7 @@ const ProfileReviews = () => {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <div className="mb-5">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Your Review</h1>
-            <p className="text-muted-foreground text-sm">Share your experience with EquityIQ — approved reviews appear on the landing page</p>
+            <p className="text-muted-foreground text-sm">Share your experience with EquityIQ, approved reviews appear on the landing page</p>
           </div>
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-3">

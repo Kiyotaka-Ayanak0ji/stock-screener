@@ -296,7 +296,7 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          {/* Live Data — Premium Plus auto-refresh-on-load */}
+          {/* Live Data, Premium Plus auto-refresh-on-load */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
             <Card className={`shadow-sm hover:shadow-md transition-shadow ${isPremiumPlus ? "border-primary/30 bg-gradient-to-br from-primary/5 to-orange-500/5" : "border-border"}`}>
               <CardHeader className="pb-3">
@@ -311,7 +311,7 @@ const Profile = () => {
                 </CardTitle>
                 <CardDescription className="text-xs">
                   {isPremiumPlus
-                    ? "Automatically pull a fresh quote for every stock the moment the dashboard loads or cached prices are re-read from memory — on top of the normal background polling."
+                    ? "Automatically pull a fresh quote for every stock the moment the dashboard loads or cached prices are re-read from memory, on top of the normal background polling."
                     : "Upgrade to Premium Plus to auto-refresh every stock price the moment the dashboard reloads or pulls from cache."}
                 </CardDescription>
               </CardHeader>
@@ -426,7 +426,7 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          {/* Quick links — subscription, password, reviews live on dedicated pages */}
+          {/* Quick links, subscription, password, reviews live on dedicated pages */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <Card className="border-border shadow-sm">
               <CardHeader className="pb-3">
@@ -552,7 +552,7 @@ const Profile = () => {
             </Card>
           </motion.div>
 
-          {/* Desktop save button — sticky version is rendered separately for mobile */}
+          {/* Desktop save button, sticky version is rendered separately for mobile */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="hidden sm:block">
             <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -562,7 +562,7 @@ const Profile = () => {
         </motion.div>
       </div>
 
-      {/* Sticky bottom save bar — mobile only */}
+      {/* Sticky bottom save bar, mobile only */}
       <div className="sticky-bottom-action">
         <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
           {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

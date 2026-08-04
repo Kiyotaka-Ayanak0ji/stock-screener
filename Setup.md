@@ -124,6 +124,45 @@ to avoid recursion. `authenticated` needs `USAGE` on `private` and
 Every table has RLS enabled with per-user policies plus explicit `GRANT`s.
 Never disable RLS in production.
 
+### Schema migration (`supabase/migrations/`)
+
+The entire backend schema is defined by one consolidated file:
+
+```
+supabase/migrations/00000000000000_production_baseline.sql
+```
+
+It recreates the `public` + `private` schemas, the `app_role` enum, all 20
+tables with their constraints and indexes, RLS plus all 63 policies, every
+grant, all functions and triggers, the `auth.users` signup hooks, and the
+singleton rows (`email_send_state`, `seed_job_progress`) the email pipeline
+needs.
+
+The file is **idempotent** and **non-destructive**: every statement is
+guarded, nothing is ever dropped, and re-running it against a live database
+leaves existing user rows untouched. That is what makes redeploying the app
+against a different database instance safe — apply the baseline, restore the
+data, and every user keeps their watchlists, favourites, preferences,
+subscription, and portfolio.
+
+It is also portable: if the `anon` / `authenticated` / `service_role` roles
+do not exist (plain Postgres, self-hosted Supabase), the migration creates
+them before granting.
+
+```sh
+# Supabase-managed
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+
+# Any Postgres instance
+psql "$DATABASE_URL" -f supabase/migrations/00000000000000_production_baseline.sql
+```
+
+Row data is intentionally excluded; export and import it separately as
+described in `MIGRATION.md`.
+
+
+
 ### Edge functions (`supabase/functions/*`, Deno)
 
 | Function | JWT | Role |

@@ -39,9 +39,16 @@ identical — it's what unlocks `user_watchlists.tickers` and
 
 ## 2. Apply the schema
 
-You have two supported routes.
+The whole backend schema is one consolidated, idempotent migration:
+`supabase/migrations/00000000000000_production_baseline.sql`. It creates the
+`public` + `private` schemas, the `app_role` enum, all tables, constraints,
+indexes, RLS policies, grants, functions, triggers, and the `auth.users`
+signup hooks. Nothing in it drops data, and re-running it is a no-op, so it
+is safe to apply on every deploy. If the `anon` / `authenticated` /
+`service_role` roles are missing (plain Postgres or self-hosted), it creates
+them first.
 
-### Route A — Supabase CLI + migrations folder (recommended)
+### Route A, Supabase CLI + migrations folder (recommended)
 
 ```bash
 npx supabase --help   # Supabase CLI via npx (no global install needed)
@@ -50,30 +57,39 @@ npx supabase link --project-ref <NEW_PROJECT_REF>
 npx supabase db push        # replays /supabase/migrations/*
 ```
 
-### Route B — Portable export bundle
-
-If you already have `equityiq-db-export.zip` from a previous export:
+### Route B, psql against any Postgres instance
 
 ```bash
-unzip equityiq-db-export.zip -d dump
 psql "postgres://postgres:<password>@db.<NEW_PROJECT_REF>.supabase.co:5432/postgres" \
-     -f dump/schema.sql
+     -f supabase/migrations/00000000000000_production_baseline.sql
 ```
+
+Route B is also how you target a self-hosted Supabase stack, a managed
+Postgres box, or a local instance: same file, different connection string.
 
 ## 3. Restore data
 
-From the export bundle, load CSVs in dependency order (`profiles` first):
+The migration carries schema only. Load the exported CSVs in dependency
+order (`profiles` first, because other tables reference the user id):
 
 ```bash
 DBURL="postgres://postgres:<password>@db.<NEW_PROJECT_REF>.supabase.co:5432/postgres"
 
 for t in profiles user_preferences user_subscriptions user_roles \
-         user_watchlists portfolio_holdings shared_watchlists \
+         user_watchlists user_favourites portfolio_holdings shared_watchlists \
          app_reviews suppressed_emails email_unsubscribe_tokens \
          stock_universe cached_stock_prices sector_cache; do
   psql "$DBURL" -c "\copy public.$t FROM 'dump/$t.csv' WITH CSV HEADER"
 done
 ```
+
+Sequence-backed tables (`stock_universe`) need their sequence bumped after a
+CSV load:
+
+```bash
+psql "$DBURL" -c "SELECT setval(pg_get_serial_sequence('public.stock_universe','id'), COALESCE(MAX(id),1)) FROM public.stock_universe;"
+```
+
 
 If `auth.users` rows aren't restorable (Supabase.com doesn't allow arbitrary
 inserts into `auth.users` via SQL), have users sign in once with the same

@@ -719,11 +719,11 @@ const Portfolio = () => {
                                     <Tooltip>
                                       <TooltipTrigger asChild>
                                         <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-muted/80 text-muted-foreground border border-border/50 px-2 py-0.5 rounded-md cursor-default">
-                                          ₹{h.low.toLocaleString("en-IN")}–{h.high.toLocaleString("en-IN")}
+                                          ₹{h.low.toLocaleString("en-IN")} to {h.high.toLocaleString("en-IN")}
                                         </span>
                                       </TooltipTrigger>
                                       <TooltipContent className="text-xs">
-                                        Day Range — Low: ₹{h.low.toLocaleString("en-IN")} · High: ₹{h.high.toLocaleString("en-IN")}
+                                        Day Range, Low: ₹{h.low.toLocaleString("en-IN")} · High: ₹{h.high.toLocaleString("en-IN")}
                                       </TooltipContent>
                                     </Tooltip>
                                   ) : null}
@@ -790,7 +790,7 @@ const Portfolio = () => {
         </motion.div>
       </div>
 
-      {/* Sticky bottom Add Holding CTA — mobile only */}
+      {/* Sticky bottom Add Holding CTA, mobile only */}
       <div className="sticky-bottom-action">
         <Button onClick={() => setAddOpen(true)} className="w-full h-11 gap-1.5" size="lg">
           <Plus className="h-4 w-4" /> Add Holding

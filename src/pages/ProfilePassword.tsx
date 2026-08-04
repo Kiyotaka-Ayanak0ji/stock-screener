@@ -50,7 +50,7 @@ const ProfilePassword = () => {
                 <div className="p-1.5 rounded-lg bg-primary/10"><Lock className="h-4 w-4 text-primary" /></div>
                 New Password
               </CardTitle>
-              <CardDescription className="text-xs">Choose a strong password — at least 6 characters</CardDescription>
+              <CardDescription className="text-xs">Choose a strong password, at least 6 characters</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
