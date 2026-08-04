@@ -28,6 +28,7 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon NOLOGIN NOINHERIT; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN NOINHERIT; END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'supabase_admin') THEN CREATE ROLE supabase_admin NOLOGIN NOINHERIT; END IF;
 EXCEPTION WHEN insufficient_privilege THEN NULL;
 END $do$;
 
@@ -508,152 +509,152 @@ ALTER TABLE ONLY public.stock_universe ALTER COLUMN id SET DEFAULT nextval('publ
 DO $do$ BEGIN
 ALTER TABLE ONLY public.app_reviews
     ADD CONSTRAINT app_reviews_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.app_settings
     ADD CONSTRAINT app_settings_pkey PRIMARY KEY (key);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.cached_stock_prices
     ADD CONSTRAINT cached_stock_prices_pkey PRIMARY KEY (ticker, exchange);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.email_send_log
     ADD CONSTRAINT email_send_log_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.email_send_state
     ADD CONSTRAINT email_send_state_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.email_unsubscribe_tokens
     ADD CONSTRAINT email_unsubscribe_tokens_email_key UNIQUE (email);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.email_unsubscribe_tokens
     ADD CONSTRAINT email_unsubscribe_tokens_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.email_unsubscribe_tokens
     ADD CONSTRAINT email_unsubscribe_tokens_token_key UNIQUE (token);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.portfolio_holdings
     ADD CONSTRAINT portfolio_holdings_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.profiles
     ADD CONSTRAINT profiles_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.profiles
     ADD CONSTRAINT profiles_user_id_key UNIQUE (user_id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.sector_cache
     ADD CONSTRAINT sector_cache_pkey PRIMARY KEY (ticker);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.seed_job_progress
     ADD CONSTRAINT seed_job_progress_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.shared_watchlists
     ADD CONSTRAINT shared_watchlists_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.shared_watchlists
     ADD CONSTRAINT shared_watchlists_share_token_key UNIQUE (share_token);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.stock_price_history
     ADD CONSTRAINT stock_price_history_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.stock_universe
     ADD CONSTRAINT stock_universe_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.stock_universe
     ADD CONSTRAINT stock_universe_ticker_exchange_key UNIQUE (ticker, exchange);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.suppressed_emails
     ADD CONSTRAINT suppressed_emails_email_key UNIQUE (email);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.suppressed_emails
     ADD CONSTRAINT suppressed_emails_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_favourites
     ADD CONSTRAINT user_favourites_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_favourites
     ADD CONSTRAINT user_favourites_user_id_ticker_key UNIQUE (user_id, ticker);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_preferences
     ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_preferences
     ADD CONSTRAINT user_preferences_user_id_key UNIQUE (user_id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_roles
     ADD CONSTRAINT user_roles_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_roles
     ADD CONSTRAINT user_roles_user_id_role_key UNIQUE (user_id, role);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_subscriptions
     ADD CONSTRAINT user_subscriptions_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_subscriptions
     ADD CONSTRAINT user_subscriptions_user_id_key UNIQUE (user_id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_watchlists
     ADD CONSTRAINT user_watchlists_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.verification_debug_logs
     ADD CONSTRAINT verification_debug_logs_pkey PRIMARY KEY (id);
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 CREATE INDEX IF NOT EXISTS idx_email_send_log_created ON public.email_send_log USING btree (created_at DESC);
 
@@ -708,32 +709,32 @@ CREATE TRIGGER update_user_watchlists_updated_at BEFORE UPDATE ON public.user_wa
 DO $do$ BEGIN
 ALTER TABLE ONLY public.profiles
     ADD CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.shared_watchlists
     ADD CONSTRAINT shared_watchlists_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_preferences
     ADD CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_roles
     ADD CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_subscriptions
     ADD CONSTRAINT user_subscriptions_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DO $do$ BEGIN
 ALTER TABLE ONLY public.user_watchlists
     ADD CONSTRAINT user_watchlists_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
-EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; END $do$;
+EXCEPTION WHEN duplicate_object THEN NULL; WHEN duplicate_table THEN NULL; WHEN invalid_table_definition THEN NULL; END $do$;
 
 DROP POLICY IF EXISTS "Admins can delete verification debug logs" ON public.verification_debug_logs;
 CREATE POLICY "Admins can delete verification debug logs" ON public.verification_debug_logs FOR DELETE TO authenticated USING (private.has_role(auth.uid(), 'admin'::public.app_role));
