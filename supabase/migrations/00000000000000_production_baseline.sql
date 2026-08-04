@@ -19,6 +19,18 @@
 -- Function bodies reference tables created later in this file.
 SET check_function_bodies = false;
 
+-- ---------------------------------------------------------------------
+-- Supabase API roles. Present on Supabase; created here so the file also
+-- applies cleanly to a plain Postgres instance.
+-- ---------------------------------------------------------------------
+DO $do$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN CREATE ROLE anon NOLOGIN NOINHERIT; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN CREATE ROLE authenticated NOLOGIN NOINHERIT; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN CREATE ROLE service_role NOLOGIN NOINHERIT BYPASSRLS; END IF;
+EXCEPTION WHEN insufficient_privilege THEN NULL;
+END $do$;
+
 DO $do$ BEGIN CREATE SCHEMA IF NOT EXISTS private;
 EXCEPTION WHEN insufficient_privilege THEN NULL; WHEN duplicate_schema THEN NULL; END $do$;
 
@@ -962,10 +974,6 @@ GRANT USAGE ON SCHEMA public TO authenticated;
 
 GRANT USAGE ON SCHEMA public TO service_role;
 
-GRANT USAGE ON SCHEMA public TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT USAGE ON SCHEMA public TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION private.has_role(_user_id uuid, _role public.app_role) FROM PUBLIC;
 
 GRANT ALL ON FUNCTION private.has_role(_user_id uuid, _role public.app_role) TO service_role;
@@ -976,81 +984,41 @@ REVOKE ALL ON FUNCTION public.delete_email(queue_name text, message_id bigint) F
 
 GRANT ALL ON FUNCTION public.delete_email(queue_name text, message_id bigint) TO service_role;
 
-GRANT ALL ON FUNCTION public.delete_email(queue_name text, message_id bigint) TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.delete_email(queue_name text, message_id bigint) TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION public.email_queue_dispatch() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.email_queue_dispatch() TO service_role;
-
-GRANT ALL ON FUNCTION public.email_queue_dispatch() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.email_queue_dispatch() TO sandbox_exec;
 
 REVOKE ALL ON FUNCTION public.email_queue_wake() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.email_queue_wake() TO service_role;
 
-GRANT ALL ON FUNCTION public.email_queue_wake() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.email_queue_wake() TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION public.enforce_watchlist_quota() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.enforce_watchlist_quota() TO service_role;
-
-GRANT ALL ON FUNCTION public.enforce_watchlist_quota() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.enforce_watchlist_quota() TO sandbox_exec;
 
 REVOKE ALL ON FUNCTION public.enqueue_email(queue_name text, payload jsonb) FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.enqueue_email(queue_name text, payload jsonb) TO service_role;
 
-GRANT ALL ON FUNCTION public.enqueue_email(queue_name text, payload jsonb) TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.enqueue_email(queue_name text, payload jsonb) TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION public.handle_new_subscription() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.handle_new_subscription() TO service_role;
-
-GRANT ALL ON FUNCTION public.handle_new_subscription() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.handle_new_subscription() TO sandbox_exec;
 
 REVOKE ALL ON FUNCTION public.handle_new_user() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.handle_new_user() TO service_role;
 
-GRANT ALL ON FUNCTION public.handle_new_user() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.handle_new_user() TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION public.move_to_dlq(source_queue text, dlq_name text, message_id bigint, payload jsonb) FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.move_to_dlq(source_queue text, dlq_name text, message_id bigint, payload jsonb) TO service_role;
-
-GRANT ALL ON FUNCTION public.move_to_dlq(source_queue text, dlq_name text, message_id bigint, payload jsonb) TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.move_to_dlq(source_queue text, dlq_name text, message_id bigint, payload jsonb) TO sandbox_exec;
 
 REVOKE ALL ON FUNCTION public.read_email_batch(queue_name text, batch_size integer, vt integer) FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.read_email_batch(queue_name text, batch_size integer, vt integer) TO service_role;
 
-GRANT ALL ON FUNCTION public.read_email_batch(queue_name text, batch_size integer, vt integer) TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.read_email_batch(queue_name text, batch_size integer, vt integer) TO sandbox_exec;
-
 REVOKE ALL ON FUNCTION public.update_updated_at_column() FROM PUBLIC;
 
 GRANT ALL ON FUNCTION public.update_updated_at_column() TO service_role;
-
-GRANT ALL ON FUNCTION public.update_updated_at_column() TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT ALL ON FUNCTION public.update_updated_at_column() TO sandbox_exec;
 
 GRANT ALL ON TABLE public.app_reviews TO anon;
 
@@ -1058,19 +1026,11 @@ GRANT ALL ON TABLE public.app_reviews TO authenticated;
 
 GRANT ALL ON TABLE public.app_reviews TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.app_reviews TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.app_reviews TO sandbox_exec;
-
 GRANT ALL ON TABLE public.app_settings TO anon;
 
 GRANT ALL ON TABLE public.app_settings TO authenticated;
 
 GRANT ALL ON TABLE public.app_settings TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.app_settings TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.app_settings TO sandbox_exec;
 
 GRANT ALL ON TABLE public.cached_stock_prices TO anon;
 
@@ -1078,19 +1038,11 @@ GRANT ALL ON TABLE public.cached_stock_prices TO authenticated;
 
 GRANT ALL ON TABLE public.cached_stock_prices TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.cached_stock_prices TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.cached_stock_prices TO sandbox_exec;
-
 GRANT ALL ON TABLE public.email_send_log TO anon;
 
 GRANT ALL ON TABLE public.email_send_log TO authenticated;
 
 GRANT ALL ON TABLE public.email_send_log TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.email_send_log TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.email_send_log TO sandbox_exec;
 
 GRANT ALL ON TABLE public.email_send_state TO anon;
 
@@ -1098,19 +1050,11 @@ GRANT ALL ON TABLE public.email_send_state TO authenticated;
 
 GRANT ALL ON TABLE public.email_send_state TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.email_send_state TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.email_send_state TO sandbox_exec;
-
 GRANT ALL ON TABLE public.email_unsubscribe_tokens TO anon;
 
 GRANT ALL ON TABLE public.email_unsubscribe_tokens TO authenticated;
 
 GRANT ALL ON TABLE public.email_unsubscribe_tokens TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.email_unsubscribe_tokens TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.email_unsubscribe_tokens TO sandbox_exec;
 
 GRANT ALL ON TABLE public.portfolio_holdings TO anon;
 
@@ -1118,19 +1062,11 @@ GRANT ALL ON TABLE public.portfolio_holdings TO authenticated;
 
 GRANT ALL ON TABLE public.portfolio_holdings TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.portfolio_holdings TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.portfolio_holdings TO sandbox_exec;
-
 GRANT ALL ON TABLE public.profiles TO anon;
 
 GRANT ALL ON TABLE public.profiles TO authenticated;
 
 GRANT ALL ON TABLE public.profiles TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.profiles TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.profiles TO sandbox_exec;
 
 GRANT ALL ON TABLE public.sector_cache TO anon;
 
@@ -1138,19 +1074,11 @@ GRANT ALL ON TABLE public.sector_cache TO authenticated;
 
 GRANT ALL ON TABLE public.sector_cache TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.sector_cache TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.sector_cache TO sandbox_exec;
-
 GRANT ALL ON TABLE public.seed_job_progress TO anon;
 
 GRANT ALL ON TABLE public.seed_job_progress TO authenticated;
 
 GRANT ALL ON TABLE public.seed_job_progress TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.seed_job_progress TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.seed_job_progress TO sandbox_exec;
 
 GRANT ALL ON TABLE public.shared_watchlists TO anon;
 
@@ -1158,19 +1086,11 @@ GRANT ALL ON TABLE public.shared_watchlists TO authenticated;
 
 GRANT ALL ON TABLE public.shared_watchlists TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.shared_watchlists TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.shared_watchlists TO sandbox_exec;
-
 GRANT ALL ON TABLE public.stock_price_history TO anon;
 
 GRANT ALL ON TABLE public.stock_price_history TO authenticated;
 
 GRANT ALL ON TABLE public.stock_price_history TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.stock_price_history TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.stock_price_history TO sandbox_exec;
 
 GRANT ALL ON SEQUENCE public.stock_price_history_id_seq TO anon;
 
@@ -1178,19 +1098,11 @@ GRANT ALL ON SEQUENCE public.stock_price_history_id_seq TO authenticated;
 
 GRANT ALL ON SEQUENCE public.stock_price_history_id_seq TO service_role;
 
-GRANT SELECT,USAGE ON SEQUENCE public.stock_price_history_id_seq TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,USAGE ON SEQUENCE public.stock_price_history_id_seq TO sandbox_exec;
-
 GRANT ALL ON TABLE public.stock_universe TO anon;
 
 GRANT ALL ON TABLE public.stock_universe TO authenticated;
 
 GRANT ALL ON TABLE public.stock_universe TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.stock_universe TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.stock_universe TO sandbox_exec;
 
 GRANT ALL ON SEQUENCE public.stock_universe_id_seq TO anon;
 
@@ -1198,19 +1110,11 @@ GRANT ALL ON SEQUENCE public.stock_universe_id_seq TO authenticated;
 
 GRANT ALL ON SEQUENCE public.stock_universe_id_seq TO service_role;
 
-GRANT SELECT,USAGE ON SEQUENCE public.stock_universe_id_seq TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,USAGE ON SEQUENCE public.stock_universe_id_seq TO sandbox_exec;
-
 GRANT ALL ON TABLE public.suppressed_emails TO anon;
 
 GRANT ALL ON TABLE public.suppressed_emails TO authenticated;
 
 GRANT ALL ON TABLE public.suppressed_emails TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.suppressed_emails TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.suppressed_emails TO sandbox_exec;
 
 GRANT ALL ON TABLE public.user_favourites TO anon;
 
@@ -1218,19 +1122,11 @@ GRANT ALL ON TABLE public.user_favourites TO authenticated;
 
 GRANT ALL ON TABLE public.user_favourites TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.user_favourites TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.user_favourites TO sandbox_exec;
-
 GRANT ALL ON TABLE public.user_preferences TO anon;
 
 GRANT ALL ON TABLE public.user_preferences TO authenticated;
 
 GRANT ALL ON TABLE public.user_preferences TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.user_preferences TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.user_preferences TO sandbox_exec;
 
 GRANT ALL ON TABLE public.user_roles TO anon;
 
@@ -1238,19 +1134,11 @@ GRANT ALL ON TABLE public.user_roles TO authenticated;
 
 GRANT ALL ON TABLE public.user_roles TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.user_roles TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.user_roles TO sandbox_exec;
-
 GRANT ALL ON TABLE public.user_subscriptions TO anon;
 
 GRANT ALL ON TABLE public.user_subscriptions TO authenticated;
 
 GRANT ALL ON TABLE public.user_subscriptions TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.user_subscriptions TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.user_subscriptions TO sandbox_exec;
 
 GRANT ALL ON TABLE public.user_watchlists TO anon;
 
@@ -1258,19 +1146,11 @@ GRANT ALL ON TABLE public.user_watchlists TO authenticated;
 
 GRANT ALL ON TABLE public.user_watchlists TO service_role;
 
-GRANT SELECT,INSERT ON TABLE public.user_watchlists TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.user_watchlists TO sandbox_exec;
-
 GRANT ALL ON TABLE public.verification_debug_logs TO anon;
 
 GRANT ALL ON TABLE public.verification_debug_logs TO authenticated;
 
 GRANT ALL ON TABLE public.verification_debug_logs TO service_role;
-
-GRANT SELECT,INSERT ON TABLE public.verification_debug_logs TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-GRANT SELECT,INSERT ON TABLE public.verification_debug_logs TO sandbox_exec;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres;
 
@@ -1279,10 +1159,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON SEQUENC
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON SEQUENCES TO authenticated;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,USAGE ON SEQUENCES TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,USAGE ON SEQUENCES TO sandbox_exec;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres;
 
@@ -1300,10 +1176,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON FUNCTIO
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON FUNCTIONS TO service_role;
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON FUNCTIONS TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON FUNCTIONS TO sandbox_exec;
-
 ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON FUNCTIONS TO anon;
@@ -1319,10 +1191,6 @@ ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO authenticated;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT ALL ON TABLES TO service_role;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT ON TABLES TO sandbox_exec_szkezahvdumeiqmnlugj;
-
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public GRANT SELECT,INSERT ON TABLES TO sandbox_exec;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE supabase_admin IN SCHEMA public GRANT ALL ON TABLES TO postgres;
 
