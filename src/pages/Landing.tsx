@@ -16,7 +16,7 @@ import {
   Lock,
   Shield,
   Smartphone,
-  Star,
+  
   TrendingUp,
   Check,
   Crown,
