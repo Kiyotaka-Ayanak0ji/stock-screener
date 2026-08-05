@@ -69,19 +69,16 @@ const TROUBLESHOOTING = [
 const SectionHeading = ({
   id,
   icon: Icon,
-  eyebrow,
   title,
   intro,
 }: {
   id: string;
   icon: React.ElementType;
-  eyebrow: string;
   title: string;
   intro: string;
 }) => (
   <div id={id} className="scroll-mt-28">
-    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
-    <h2 className="mt-2 flex items-center gap-2.5 text-2xl font-semibold tracking-tight">
+    <h2 className="flex items-center gap-2.5 text-xl font-semibold tracking-tight">
       <Icon className="h-5 w-5 text-primary" />
       {title}
     </h2>
@@ -193,8 +190,8 @@ const Documentation = () => {
             <span className="text-base sm:text-lg font-bold tracking-tight">
               Equity<span className="text-primary">IQ</span>
             </span>
-            <span className="hidden sm:inline ml-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground border-l border-border pl-2">
-              Docs
+            <span className="hidden sm:inline ml-2 text-sm text-muted-foreground border-l border-border pl-2">
+              Documentation
             </span>
           </button>
           <div className="flex items-center gap-1 sm:gap-3">
@@ -248,13 +245,12 @@ const Documentation = () => {
               </nav>
             </div>
 
-            <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 to-transparent p-4">
+            <div className="rounded-xl border border-border p-4">
               <p className="flex items-center gap-2 text-sm font-medium">
-                <LifeBuoy className="h-4 w-4 text-primary" /> Need a hand?
+                <LifeBuoy className="h-4 w-4 text-primary" /> Support
               </p>
-              <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-                If something here doesn’t match what you see in the app, tell us, we keep this page in sync with every
-                release.
+              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                Something here out of date? Report it and we will correct the page.
               </p>
               <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("/support")}>
                 Contact support
@@ -271,11 +267,10 @@ const Documentation = () => {
             transition={{ duration: 0.45 }}
             className="border-b border-border pb-8"
           >
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">Documentation</p>
-            <h1 className="mt-3 text-3xl sm:text-4xl font-bold tracking-tight">How to use EquityIQ</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">EquityIQ documentation</h1>
             <p className="mt-3 max-w-2xl text-base text-muted-foreground leading-relaxed">
-              A practical, written-by-the-team guide to the screener, watchlists, favourites, alerts and sharing, with
-              honest fixes for the issues people actually hit.
+              Reference for the screener, watchlists, favourites, alerts, sharing and self-hosting, plus fixes for
+              common issues.
             </p>
 
             {/* Search */}
@@ -289,7 +284,7 @@ const Documentation = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onSearchKeyDown}
-                placeholder="Search commands, errors and setup steps…"
+                placeholder="Search commands, errors and setup steps"
                 className="w-full rounded-xl border border-border bg-card/60 py-3 pl-11 pr-24 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/40 transition-colors"
               />
               {query ? (
@@ -363,9 +358,8 @@ const Documentation = () => {
             <SectionHeading
               id="getting-started"
               icon={Rocket}
-              eyebrow="01 / Setup"
               title="Getting started"
-              intro="Four steps from a blank account to a live watchlist. It takes about two minutes."
+              intro="Four steps from a new account to a live watchlist."
             />
             <ol className="mt-5 space-y-1">
               <Step n="01">Create an account with email and password, or continue with Google.</Step>
@@ -381,9 +375,8 @@ const Documentation = () => {
             <SectionHeading
               id="watchlists"
               icon={TrendingUp}
-              eyebrow="02 / Core"
               title="Watchlists & screener"
-              intro="The screener is the heart of the app: add instruments, shape the table, and refresh on your terms."
+              intro="Add instruments, shape the table, and control when data refreshes."
             />
             <ul className="mt-5 space-y-1">
               <Step n="•">Add stocks by NSE/BSE symbol; indices are supported alongside regular equities.</Step>
@@ -417,9 +410,8 @@ const Documentation = () => {
               <SectionHeading
                 id="favourites"
                 icon={Star}
-                eyebrow="03"
                 title="Favourites"
-                intro="A single starred set that cuts across every watchlist you own."
+                intro="One starred set shared across every watchlist."
               />
               <ul className="mt-5 space-y-1">
                 <Step n="•">Star any row to pin it across every watchlist.</Step>
@@ -433,9 +425,8 @@ const Documentation = () => {
               <SectionHeading
                 id="alerts"
                 icon={Bell}
-                eyebrow="04"
                 title="Alerts & email"
-                intro="Signals are deduplicated on purpose, you should hear from us only when something changes."
+                intro="Signals are deduplicated, so each condition notifies you once."
               />
               <ul className="mt-5 space-y-1">
                 <Step n="•">
@@ -456,9 +447,8 @@ const Documentation = () => {
             <SectionHeading
               id="sharing"
               icon={Share2}
-              eyebrow="05 / Distribution"
               title="Sharing & export"
-              intro="Send a watchlist to someone who does not have an account, or keep it on your home screen."
+              intro="Share a watchlist without requiring an account, or install the app locally."
             />
             <ul className="mt-5 space-y-1">
               <Step n="•">Export a watchlist as an image or PDF snapshot.</Step>
@@ -471,9 +461,8 @@ const Documentation = () => {
             <SectionHeading
               id="self-hosting"
               icon={Terminal}
-              eyebrow="06 / Engineering"
               title="Self-hosting (Node.js)"
-              intro="The project runs on Node.js 20+ with npm and npx, no other package manager is required."
+              intro="Node.js 20 or later with npm and npx. No other package manager is required."
             />
             <pre className="mt-5 rounded-xl border border-border bg-muted/60 p-4 text-xs overflow-x-auto font-mono leading-relaxed">
               {`npm install          # install dependencies
@@ -498,9 +487,8 @@ npx supabase functions deploy`}
             <SectionHeading
               id="troubleshooting"
               icon={Wrench}
-              eyebrow="07 / Support"
               title="Troubleshooting"
-              intro="The questions our inbox receives most, answered without hand-waving."
+              intro="The most frequently reported issues and their resolutions."
             />
             <div className="mt-5 rounded-2xl border border-border divide-y divide-border overflow-hidden bg-card/40">
               <Accordion
@@ -523,7 +511,7 @@ npx supabase functions deploy`}
           </section>
 
           <footer className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-border pt-8">
-            <p className="text-sm text-muted-foreground">Still stuck? A real person reads every support request.</p>
+            <p className="text-sm text-muted-foreground">Issue not covered here? Send us the details.</p>
             <Button onClick={() => navigate("/support")}>
               Contact support <ArrowRight className="h-4 w-4 ml-1" />
             </Button>

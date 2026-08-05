@@ -29,7 +29,7 @@ export const InviteEmail = ({
 }: InviteEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>You've been invited to join EquityIQ</Preview>
+    <Preview>You have been invited to join EquityIQ</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -38,22 +38,22 @@ export const InviteEmail = ({
           </Text>
         </Section>
 
-        <Heading style={h1}>You're invited! 🎉</Heading>
+        <Heading style={h1}>You have been invited to EquityIQ</Heading>
         <Text style={text}>
-          You've been invited to join{' '}
+          You have been invited to join{' '}
           <Link href={siteUrl} style={link}><strong>EquityIQ</strong></Link>.
-          Click below to accept the invitation and create your account.
+          Accept the invitation below to create your account.
         </Text>
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={confirmationUrl}>
-            Accept Invitation →
+            Accept invitation
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you weren't expecting this invitation, you can safely ignore this email.
+          If you were not expecting this invitation, you can ignore this email.
         </Text>
       </Container>
     </Body>

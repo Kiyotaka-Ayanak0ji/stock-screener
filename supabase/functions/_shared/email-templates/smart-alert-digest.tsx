@@ -50,7 +50,7 @@ export const SmartAlertDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      ⚡ {alerts.length} smart alert{alerts.length > 1 ? 's' : ''} detected on EquityIQ
+      {alerts.length} smart alert{alerts.length > 1 ? 's' : ''} on your EquityIQ watchlist
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -64,17 +64,17 @@ export const SmartAlertDigestEmail = ({
                 </Text>
               </td>
               <td style={{ textAlign: 'right' as const }}>
-                <Text style={badgeStyle}>⚡ Smart Alerts</Text>
+                <Text style={badgeStyle}>Smart alerts</Text>
               </td>
             </tr>
           </table>
         </Section>
 
         <Heading style={h1}>
-          Smart Alert Digest
+          Smart alert digest
         </Heading>
         <Text style={text}>
-          Hey {displayName}, here's what our system detected in your watchlist:
+          Hello {displayName}, the following movements were detected in your watchlist.
         </Text>
 
         {/* Alert Cards */}
