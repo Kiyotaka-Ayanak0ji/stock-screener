@@ -254,7 +254,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-bottom-nav-with-action sm:pb-bottom-nav">
+    <div className="min-h-screen bg-background pb-bottom-nav">
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
         <Button
           variant="ghost"
@@ -262,7 +262,7 @@ const Profile = () => {
           className="mb-4 sm:mb-6 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          Back to dashboard
         </Button>
 
         <motion.div
@@ -271,9 +271,18 @@ const Profile = () => {
           transition={{ duration: 0.4 }}
           className="space-y-5"
         >
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Profile Settings</h1>
-            <p className="text-muted-foreground text-sm">Manage your personal information and preferences</p>
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Profile</h1>
+              <p className="text-muted-foreground text-sm">Changes save automatically.</p>
+            </div>
+            <div aria-live="polite" className="text-xs text-muted-foreground shrink-0 pb-1 min-h-[1rem]">
+              {saving ? (
+                <span className="inline-flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" />Saving</span>
+              ) : savedAt ? (
+                <span className="inline-flex items-center gap-1.5 text-primary"><Check className="h-3 w-3" />Saved</span>
+              ) : null}
+            </div>
           </div>
 
           {/* Personal Information */}
@@ -282,18 +291,18 @@ const Profile = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground text-base">
                   <div className="p-1.5 rounded-lg bg-primary/10"><User className="h-4 w-4 text-primary" /></div>
-                  Personal Information
+                  Account details
                 </CardTitle>
-                <CardDescription className="text-xs">Update your display name and view your account details</CardDescription>
+                <CardDescription className="text-xs">Your display name is used across the app.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-muted-foreground text-xs">Email</Label>
                   <Input id="email" value={user?.email || ""} disabled className="bg-muted text-muted-foreground" />
-                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
+                  <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-xs">Display Name</Label>
+                  <Label htmlFor="displayName" className="text-xs">Display name</Label>
                   <Input id="displayName" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Enter your display name" maxLength={100} />
                 </div>
               </CardContent>
@@ -306,15 +315,15 @@ const Profile = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground text-base">
                   <div className="p-1.5 rounded-lg bg-primary/10"><Bell className="h-4 w-4 text-primary" /></div>
-                  Email Preferences
+                  Email
                 </CardTitle>
-                <CardDescription className="text-xs">Choose which emails you'd like to receive</CardDescription>
+                <CardDescription className="text-xs">Controls all digests and alert emails.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-opt-in" className="text-sm font-medium">Email Updates</Label>
-                    <p className="text-xs text-muted-foreground">Receive price alerts, watchlist notifications, and product updates</p>
+                    <Label htmlFor="email-opt-in" className="text-sm font-medium">Email updates</Label>
+                    <p className="text-xs text-muted-foreground">Price alerts, watchlist digests and product updates.</p>
                   </div>
                   <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
                 </div>
@@ -324,29 +333,27 @@ const Profile = () => {
 
           {/* Live Data, Premium Plus auto-refresh-on-load */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-            <Card className={`shadow-sm hover:shadow-md transition-shadow ${isPremiumPlus ? "border-primary/30 bg-gradient-to-br from-primary/5 to-orange-500/5" : "border-border"}`}>
+            <Card className={`shadow-sm hover:shadow-md transition-shadow ${isPremiumPlus ? "border-primary/30" : "border-border"}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground text-base">
-                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
-                    <Zap className="h-4 w-4 text-orange-500" />
-                  </div>
-                  Live Data
-                  <span className="ml-auto inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-                    <Sparkles className="h-3 w-3" /> Premium Plus
+                  <div className="p-1.5 rounded-lg bg-primary/10"><Zap className="h-4 w-4 text-primary" /></div>
+                  Live data
+                  <span className="ml-auto rounded-full border border-primary/40 px-2 py-0.5 text-[10px] font-medium text-primary">
+                    Premium Plus
                   </span>
                 </CardTitle>
                 <CardDescription className="text-xs">
                   {isPremiumPlus
-                    ? "Automatically pull a fresh quote for every stock the moment the dashboard loads or cached prices are re-read from memory, on top of the normal background polling."
-                    : "Upgrade to Premium Plus to auto-refresh every stock price the moment the dashboard reloads or pulls from cache."}
+                    ? "Fetches a fresh quote for every stock when the dashboard loads or cached prices are read."
+                    : "Available on Premium Plus. Fetches fresh quotes whenever the dashboard loads."}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
                   <div className="space-y-0.5 pr-3">
-                    <Label htmlFor="auto-refresh" className="text-sm font-medium">Auto-refresh on reload</Label>
+                    <Label htmlFor="auto-refresh" className="text-sm font-medium">Auto refresh on load</Label>
                     <p className="text-xs text-muted-foreground">
-                      Forces an immediate live fetch on every page load and watchlist switch.
+                      Runs on every page load and watchlist switch.
                     </p>
                   </div>
                   <Switch
@@ -363,8 +370,7 @@ const Profile = () => {
                     className="w-full mt-3 active:scale-[0.98] transition-all"
                     onClick={() => navigate("/subscribe")}
                   >
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5 text-orange-500" />
-                    Unlock with Premium Plus
+                    Upgrade to Premium Plus
                   </Button>
                 )}
               </CardContent>
@@ -377,10 +383,10 @@ const Profile = () => {
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-foreground text-base">
                   <div className="p-1.5 rounded-lg bg-primary/10"><Link2 className="h-4 w-4 text-primary" /></div>
-                  Linked Accounts
+                  Sign-in methods
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Link a Google account to sign in either with your password or with Google. Accounts sharing a verified email are linked automatically on first Google sign-in.
+                  Link Google to sign in with either your password or Google. Accounts with the same verified email link automatically.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -445,7 +451,7 @@ const Profile = () => {
                 })()}
                 {identities.length <= 1 && identities.some((i) => i.provider === "google") && (
                   <p className="text-[11px] text-muted-foreground px-1">
-                    Google is currently your only sign-in method. Set a password first before unlinking.
+                    Google is your only sign-in method. Set a password before unlinking.
                   </p>
                 )}
               </CardContent>
@@ -456,8 +462,8 @@ const Profile = () => {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
             <Card className="border-border shadow-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="text-foreground text-base">Account & Activity</CardTitle>
-                <CardDescription className="text-xs">Manage subscription, security and reviews on their own pages</CardDescription>
+                <CardTitle className="text-foreground text-base">Manage</CardTitle>
+                
               </CardHeader>
               <CardContent className="space-y-2">
                 <button
@@ -468,8 +474,8 @@ const Profile = () => {
                     <CreditCard className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">My Subscription</p>
-                    <p className="text-xs text-muted-foreground">View current plan, billing dates and manage your subscription</p>
+                    <p className="text-sm font-medium text-foreground">Subscription</p>
+                    <p className="text-xs text-muted-foreground">Current plan and billing dates.</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
@@ -482,8 +488,8 @@ const Profile = () => {
                     <Lock className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">Change Password</p>
-                    <p className="text-xs text-muted-foreground">Update your account password</p>
+                    <p className="text-sm font-medium text-foreground">Password</p>
+                    <p className="text-xs text-muted-foreground">Change your account password.</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </button>
@@ -498,9 +504,9 @@ const Profile = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground flex items-center gap-1.5">
-                        Your Review <Star className="h-3 w-3 text-primary" />
+                        Review <Star className="h-3 w-3 text-primary" />
                       </p>
-                      <p className="text-xs text-muted-foreground">Leave or update your review on EquityIQ</p>
+                      <p className="text-xs text-muted-foreground">Leave or update your review.</p>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </button>
@@ -515,13 +521,13 @@ const Profile = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-foreground text-base">
                     <div className="p-1.5 rounded-lg bg-primary/15"><Shield className="h-4 w-4 text-primary" /></div>
-                    Admin Panel
+                    Administration
                   </CardTitle>
-                  <CardDescription className="text-xs">You have administrator access</CardDescription>
+                  <CardDescription className="text-xs">You have administrator access.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button onClick={() => navigate("/admin")} className="w-full active:scale-[0.98] transition-all">
-                    <Shield className="mr-2 h-4 w-4" /> View & Manage All Users
+                    <Shield className="mr-2 h-4 w-4" /> Manage users
                   </Button>
                 </CardContent>
               </Card>
@@ -539,9 +545,9 @@ const Profile = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-foreground">Email Verified</p>
+                    <p className="text-sm font-medium text-foreground">Email verification</p>
                     <p className="text-xs text-muted-foreground">
-                      {user?.email_confirmed_at ? "Your email is verified" : "Please verify your email"}
+                      {user?.email_confirmed_at ? "Your email address is confirmed." : "Confirm your email to unlock all features."}
                     </p>
                   </div>
                   <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
@@ -554,47 +560,33 @@ const Profile = () => {
                 </div>
                 <div className="flex items-center justify-between pt-2 border-t border-border">
                   <div className="pr-3">
-                    <p className="text-sm font-medium text-foreground">Product walkthrough</p>
-                    <p className="text-xs text-muted-foreground">Replay the guided tour of search, filters, watchlists and favourites.</p>
+                    <p className="text-sm font-medium text-foreground">Guided tour</p>
+                    <p className="text-xs text-muted-foreground">Replay the walkthrough of search, filters, watchlists and favourites.</p>
                   </div>
                   <Button
                     variant="outline"
                     className="shrink-0 active:scale-95 transition-all h-10"
                     onClick={() => {
                       requestWalkthroughReplay(user?.id);
-                      toast.success("Walkthrough queued", { description: "Opening the dashboard to start the tour." });
+                      toast.success("Starting the tour", { description: "Opening your dashboard." });
                       navigate("/dashboard");
                     }}
                   >
-                    Replay tour
+                    Replay
                   </Button>
                 </div>
                 <div className="pt-2 border-t border-border">
                   <Button variant="destructive" onClick={signOut} className="active:scale-95 transition-all h-10">
-                    Sign Out
+                    Sign out
                   </Button>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Desktop save button, sticky version is rendered separately for mobile */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="hidden sm:block">
-            <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
-              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save Changes
-            </Button>
-          </motion.div>
         </motion.div>
       </div>
 
-      {/* Sticky bottom save bar, mobile only */}
-      <div className="sticky-bottom-action">
-        <Button onClick={handleSave} disabled={saving} className="w-full h-11 active:scale-[0.98] transition-all" size="lg">
-          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-          Save Changes
-        </Button>
-      </div>
       <BottomNav />
     </div>
   );
