@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Save, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles, CreditCard, ChevronRight, Link2, Unlink } from "lucide-react";
+import { ArrowLeft, Check, User, Mail, Bell, Loader2, Lock, Shield, Star, MessageSquare, Zap, Sparkles, CreditCard, ChevronRight, Link2, Unlink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -27,7 +27,12 @@ const Profile = () => {
   const [displayName, setDisplayName] = useState("");
   const [emailOptIn, setEmailOptIn] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  // Autosave bookkeeping: the last values persisted to the server, and the
+  // pending 2s debounce timer for the current edit.
+  const lastSavedRef = useRef<{ displayName: string; emailOptIn: boolean } | null>(null);
+  const saveTimerRef = useRef<number | null>(null);
   const [identities, setIdentities] = useState<Array<{ id: string; identity_id?: string; provider: string; identity_data?: Record<string, unknown> }>>([]);
   const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
   const [isUnlinkingGoogle, setIsUnlinkingGoogle] = useState(false);
@@ -87,6 +92,7 @@ const Profile = () => {
     if (data) {
       setDisplayName(data.display_name || "");
       setEmailOptIn(data.email_opt_in ?? false);
+      lastSavedRef.current = { displayName: data.display_name || "", emailOptIn: data.email_opt_in ?? false };
     }
     setLoading(false);
     loadIdentities();
@@ -173,35 +179,55 @@ const Profile = () => {
     setIsUnlinkingGoogle(false);
   };
 
-  const handleSave = async () => {
-    if (!user) return;
-    setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: displayName.trim(), email_opt_in: emailOptIn })
-      .eq("user_id", user.id);
+  const persistProfile = useCallback(
+    async (name: string, optIn: boolean) => {
+      if (!user) return;
+      setSaving(true);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ display_name: name.trim(), email_opt_in: optIn })
+        .eq("user_id", user.id);
 
-    // If user re-enabled email opt-in, also remove from suppression list
-    if (!error && emailOptIn) {
-      await supabase.functions.invoke("handle-email-unsubscribe", {
-        body: { action: "resubscribe", user_id: user.id },
-      });
-    }
+      // Re-enabling email updates also clears the address from suppression.
+      if (!error && optIn) {
+        await supabase.functions.invoke("handle-email-unsubscribe", {
+          body: { action: "resubscribe", user_id: user.id },
+        });
+      }
 
-    setSaving(false);
-    if (error) {
-      toast.error("Failed to save profile");
-    } else {
-      toast.success("Profile updated successfully");
-    }
-  };
+      setSaving(false);
+      if (error) {
+        toast.error("Could not save changes");
+      } else {
+        lastSavedRef.current = { displayName: name, emailOptIn: optIn };
+        setSavedAt(Date.now());
+      }
+    },
+    [user],
+  );
+
+  // Autosave: persist 2 seconds after the last edit, skipping no-op writes.
+  useEffect(() => {
+    if (loading || !user) return;
+    const last = lastSavedRef.current;
+    if (last && last.displayName === displayName && last.emailOptIn === emailOptIn) return;
+
+    if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      void persistProfile(displayName, emailOptIn);
+    }, 2000);
+
+    return () => {
+      if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
+    };
+  }, [displayName, emailOptIn, loading, user, persistProfile]);
 
   // Password change moved to /profile/password
 
   const handleToggleAutoRefresh = async (enabled: boolean) => {
     if (!isPremiumPlus) {
-      toast.error("Auto-refresh on reload is a Premium Plus feature", {
-        description: "Upgrade to Premium Plus to unlock this setting.",
+      toast.error("Auto-refresh is a Premium Plus feature", {
+        description: "Upgrade to enable it.",
         action: { label: "Upgrade", onClick: () => navigate("/subscribe") },
       });
       return;
@@ -211,7 +237,7 @@ const Profile = () => {
       await setAutoRefreshOnLoad(enabled);
       toast.success(enabled ? "Auto-refresh enabled" : "Auto-refresh disabled");
     } catch {
-      toast.error("Failed to update preference");
+      toast.error("Could not update this setting");
     } finally {
       setSavingAutoRefresh(false);
     }
