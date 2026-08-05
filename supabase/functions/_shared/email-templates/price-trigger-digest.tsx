@@ -31,7 +31,7 @@ export const PriceTriggerDigestEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      🔔 {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on EquityIQ
+      {alerts.length} price trigger{alerts.length > 1 ? 's' : ''} hit on your EquityIQ watchlist
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -44,17 +44,17 @@ export const PriceTriggerDigestEmail = ({
                 </Text>
               </td>
               <td style={{ textAlign: 'right' as const }}>
-                <Text style={badgeStyle}>🔔 Price Alerts</Text>
+                <Text style={badgeStyle}>Price alerts</Text>
               </td>
             </tr>
           </table>
         </Section>
 
         <Heading style={h1}>
-          Price Trigger Alert
+          Price triggers hit
         </Heading>
         <Text style={text}>
-          Hey {displayName}, your price triggers have been hit!
+          Hello {displayName}, the following price targets were reached.
         </Text>
 
         {alerts.map((alert, i) => (
@@ -81,7 +81,7 @@ export const PriceTriggerDigestEmail = ({
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you set price triggers on EquityIQ.
+          You are receiving this because you set price triggers on EquityIQ.
         </Text>
       </Container>
     </Body>

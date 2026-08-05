@@ -40,13 +40,13 @@ export const SignupEmail = ({
           </Text>
         </Section>
 
-        <Heading style={h1}>Verify your email 📧</Heading>
+        <Heading style={h1}>Confirm your email address</Heading>
         <Text style={text}>
-          Thanks for signing up! You're one step away from tracking your
-          favorite stocks in real time.
+          Thanks for signing up. One step remains before you can start tracking
+          stocks in real time.
         </Text>
         <Text style={text}>
-          Please confirm your email address (
+          Confirm your email address (
           <Link href={`mailto:${recipient}`} style={link}>
             {recipient}
           </Link>
@@ -55,13 +55,13 @@ export const SignupEmail = ({
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={confirmationUrl}>
-            Verify Email →
+            Confirm email
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you didn't create an account on EquityIQ, you can safely ignore this email.
+          If you did not create an EquityIQ account, you can ignore this email.
         </Text>
       </Container>
     </Body>

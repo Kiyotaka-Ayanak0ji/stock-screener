@@ -26,7 +26,7 @@ export const MagicLinkEmail = ({
 }: MagicLinkEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your EquityIQ login link</Preview>
+    <Preview>Your EquityIQ sign-in link</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -35,21 +35,21 @@ export const MagicLinkEmail = ({
           </Text>
         </Section>
 
-        <Heading style={h1}>Your login link 🔗</Heading>
+        <Heading style={h1}>Sign in to EquityIQ</Heading>
         <Text style={text}>
-          Click the button below to log in to EquityIQ. This link will expire
+          Use the button below to sign in. This link can be used once and expires
           shortly.
         </Text>
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={confirmationUrl}>
-            Log In →
+            Sign in
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you didn't request this link, you can safely ignore this email.
+          If you did not request this link, you can ignore this email.
         </Text>
       </Container>
     </Body>

@@ -48,7 +48,7 @@ export const DailySummaryEmail = ({
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>
-      📊 Your EquityIQ daily summary for {date}
+      Your EquityIQ watchlist summary for {date}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -68,9 +68,9 @@ export const DailySummaryEmail = ({
           </table>
         </Section>
 
-        <Heading style={h1}>Daily Summary</Heading>
+        <Heading style={h1}>Daily summary</Heading>
         <Text style={text}>
-          Hey {displayName}, here's how your watchlist performed today:
+          Hello {displayName}, here is how your watchlist closed today.
         </Text>
 
         {/* Stats Row */}

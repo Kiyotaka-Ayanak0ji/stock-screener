@@ -30,8 +30,8 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
           </Text>
         </Section>
 
-        <Heading style={h1}>Verification code 🔑</Heading>
-        <Text style={text}>Use the code below to confirm your identity:</Text>
+        <Heading style={h1}>Your verification code</Heading>
+        <Text style={text}>Enter the code below to confirm your identity.</Text>
 
         <Section style={codeSection}>
           <Text style={codeStyle}>{token}</Text>
@@ -39,8 +39,8 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
 
         <Hr style={hr} />
         <Text style={footer}>
-          This code will expire shortly. If you didn't request this, you can
-          safely ignore this email.
+          This code expires shortly. If you did not request it, you can ignore
+          this email.
         </Text>
       </Container>
     </Body>

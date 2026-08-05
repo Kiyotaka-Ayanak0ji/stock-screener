@@ -26,7 +26,7 @@ export const WelcomeEmail = ({
 }: WelcomeEmailProps) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Welcome to EquityIQ — your stock watchlist is ready!</Preview>
+    <Preview>Your EquityIQ account is ready</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={headerSection}>
@@ -36,13 +36,13 @@ export const WelcomeEmail = ({
         </Section>
 
         <Heading style={h1}>
-          Welcome aboard! 📈
+          Welcome to EquityIQ
         </Heading>
         <Text style={text}>
-          Hey {displayName}! 👋
+          Hello {displayName},
         </Text>
         <Text style={text}>
-          Thanks for joining EquityIQ. Your account is set up and ready to go.
+          Your account is active. Here is what you can do from your dashboard.
         </Text>
 
         <Section style={featuresGrid}>
@@ -50,14 +50,14 @@ export const WelcomeEmail = ({
             <tr>
               <td style={featureCard}>
                 <Text style={featureEmoji}>📊</Text>
-                <Text style={featureTitle}>Real-time Tracking</Text>
-                <Text style={featureDesc}>NSE & BSE stocks, live</Text>
+                <Text style={featureTitle}>Live tracking</Text>
+                <Text style={featureDesc}>NSE and BSE quotes</Text>
               </td>
               <td style={{ width: '10px' }} />
               <td style={featureCard}>
                 <Text style={featureEmoji}>🔔</Text>
-                <Text style={featureTitle}>Price Triggers</Text>
-                <Text style={featureDesc}>Get notified at target</Text>
+                <Text style={featureTitle}>Price triggers</Text>
+                <Text style={featureDesc}>Alerts at your target</Text>
               </td>
             </tr>
             <tr><td style={{ height: '10px' }} /><td /><td /></tr>
@@ -65,13 +65,13 @@ export const WelcomeEmail = ({
               <td style={featureCard}>
                 <Text style={featureEmoji}>📋</Text>
                 <Text style={featureTitle}>Watchlists</Text>
-                <Text style={featureDesc}>Organize into groups</Text>
+                <Text style={featureDesc}>Group your holdings</Text>
               </td>
               <td style={{ width: '10px' }} />
               <td style={featureCard}>
                 <Text style={featureEmoji}>⚡</Text>
-                <Text style={featureTitle}>Smart Alerts</Text>
-                <Text style={featureDesc}>Auto-detect anomalies</Text>
+                <Text style={featureTitle}>Smart alerts</Text>
+                <Text style={featureDesc}>Unusual moves, detected</Text>
               </td>
             </tr>
           </table>
@@ -79,14 +79,14 @@ export const WelcomeEmail = ({
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={siteUrl}>
-            Open Your Dashboard →
+            Open dashboard
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          You're receiving this because you signed up on EquityIQ.
-          If you didn't create this account, please ignore this email.
+          You are receiving this because you signed up on EquityIQ.
+          If you did not create this account, you can ignore this email.
         </Text>
       </Container>
     </Body>

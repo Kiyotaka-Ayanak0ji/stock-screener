@@ -35,22 +35,22 @@ export const RecoveryEmail = ({
           </Text>
         </Section>
 
-        <Heading style={h1}>Reset your password 🔐</Heading>
+        <Heading style={h1}>Reset your password</Heading>
         <Text style={text}>
-          We received a request to reset your EquityIQ password. Click
-          the button below to choose a new password.
+          We received a request to reset the password for your EquityIQ account.
+          Use the button below to choose a new one. The link expires in 60 minutes.
         </Text>
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={confirmationUrl}>
-            Reset Password →
+            Reset password
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you didn't request a password reset, you can safely ignore this
-          email. Your password will not be changed.
+          If you did not request this, you can ignore this email. Your password
+          will remain unchanged.
         </Text>
       </Container>
     </Body>

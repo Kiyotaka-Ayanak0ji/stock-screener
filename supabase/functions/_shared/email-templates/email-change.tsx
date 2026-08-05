@@ -40,9 +40,9 @@ export const EmailChangeEmail = ({
           </Text>
         </Section>
 
-        <Heading style={h1}>Confirm email change ✉️</Heading>
+        <Heading style={h1}>Confirm your new email address</Heading>
         <Text style={text}>
-          You requested to change your EquityIQ email from{' '}
+          A request was made to change the email address on your EquityIQ account from{' '}
           <Link href={`mailto:${email}`} style={link}>{email}</Link>{' '}
           to{' '}
           <Link href={`mailto:${newEmail}`} style={link}>{newEmail}</Link>.
@@ -50,14 +50,14 @@ export const EmailChangeEmail = ({
 
         <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
           <Button style={button} href={confirmationUrl}>
-            Confirm Email Change →
+            Confirm change
           </Button>
         </Section>
 
         <Hr style={hr} />
         <Text style={footer}>
-          If you didn't request this change, please secure your account
-          immediately.
+          If you did not request this change, reset your password immediately to
+          secure your account.
         </Text>
       </Container>
     </Body>
