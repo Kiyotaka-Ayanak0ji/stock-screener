@@ -26,12 +26,13 @@ const Profile = () => {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState("");
   const [emailOptIn, setEmailOptIn] = useState(false);
+  const [monthlyReportOptIn, setMonthlyReportOptIn] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   // Autosave bookkeeping: the last values persisted to the server, and the
   // pending 2s debounce timer for the current edit.
-  const lastSavedRef = useRef<{ displayName: string; emailOptIn: boolean } | null>(null);
+  const lastSavedRef = useRef<{ displayName: string; emailOptIn: boolean; monthlyReportOptIn: boolean } | null>(null);
   const saveTimerRef = useRef<number | null>(null);
   const [identities, setIdentities] = useState<Array<{ id: string; identity_id?: string; provider: string; identity_data?: Record<string, unknown> }>>([]);
   const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
@@ -86,13 +87,18 @@ const Profile = () => {
     if (!user) return;
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, email_opt_in")
+      .select("display_name, email_opt_in, monthly_report_opt_in")
       .eq("user_id", user.id)
       .single();
     if (data) {
       setDisplayName(data.display_name || "");
       setEmailOptIn(data.email_opt_in ?? false);
-      lastSavedRef.current = { displayName: data.display_name || "", emailOptIn: data.email_opt_in ?? false };
+      setMonthlyReportOptIn(data.monthly_report_opt_in ?? true);
+      lastSavedRef.current = {
+        displayName: data.display_name || "",
+        emailOptIn: data.email_opt_in ?? false,
+        monthlyReportOptIn: data.monthly_report_opt_in ?? true,
+      };
     }
     setLoading(false);
     loadIdentities();
@@ -180,12 +186,12 @@ const Profile = () => {
   };
 
   const persistProfile = useCallback(
-    async (name: string, optIn: boolean) => {
+    async (name: string, optIn: boolean, monthlyOptIn: boolean) => {
       if (!user) return;
       setSaving(true);
       const { error } = await supabase
         .from("profiles")
-        .update({ display_name: name.trim(), email_opt_in: optIn })
+        .update({ display_name: name.trim(), email_opt_in: optIn, monthly_report_opt_in: monthlyOptIn })
         .eq("user_id", user.id);
 
       // Re-enabling email updates also clears the address from suppression.
@@ -199,7 +205,7 @@ const Profile = () => {
       if (error) {
         toast.error("Could not save changes");
       } else {
-        lastSavedRef.current = { displayName: name, emailOptIn: optIn };
+        lastSavedRef.current = { displayName: name, emailOptIn: optIn, monthlyReportOptIn: monthlyOptIn };
         setSavedAt(Date.now());
       }
     },
@@ -210,17 +216,23 @@ const Profile = () => {
   useEffect(() => {
     if (loading || !user) return;
     const last = lastSavedRef.current;
-    if (last && last.displayName === displayName && last.emailOptIn === emailOptIn) return;
+    if (
+      last &&
+      last.displayName === displayName &&
+      last.emailOptIn === emailOptIn &&
+      last.monthlyReportOptIn === monthlyReportOptIn
+    )
+      return;
 
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(() => {
-      void persistProfile(displayName, emailOptIn);
+      void persistProfile(displayName, emailOptIn, monthlyReportOptIn);
     }, 2000);
 
     return () => {
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     };
-  }, [displayName, emailOptIn, loading, user, persistProfile]);
+  }, [displayName, emailOptIn, monthlyReportOptIn, loading, user, persistProfile]);
 
   // Password change moved to /profile/password
 
@@ -326,6 +338,23 @@ const Profile = () => {
                     <p className="text-xs text-muted-foreground">Price alerts, watchlist digests and product updates.</p>
                   </div>
                   <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
+                </div>
+
+                <div className="mt-3 flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="monthly-report-opt-in" className="text-sm font-medium">
+                      Monthly activity report
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      One email at the start of each month with your watchlists, favourites and alerts.
+                    </p>
+                  </div>
+                  <Switch
+                    id="monthly-report-opt-in"
+                    checked={emailOptIn && monthlyReportOptIn}
+                    disabled={!emailOptIn}
+                    onCheckedChange={setMonthlyReportOptIn}
+                  />
                 </div>
               </CardContent>
             </Card>
