@@ -405,43 +405,43 @@ const Documentation = () => {
             <Callout>Limits read as watchlists × stocks per watchlist.</Callout>
           </section>
 
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div>
-              <SectionHeading
-                id="favourites"
-                icon={Star}
-                title="Favourites"
-                intro="One starred set shared across every watchlist."
-              />
-              <ul className="mt-5 space-y-1">
-                <Step n="•">Star any row to pin it across every watchlist.</Step>
-                <Step n="•">
-                  The Favourites page shows live prices for starred tickers and supports one-click removal.
-                </Step>
-                <Step n="•">Favourites sync to your account, so they follow you to any device.</Step>
-              </ul>
-            </div>
-            <div>
-              <SectionHeading
-                id="alerts"
-                icon={Bell}
-                title="Alerts & email"
-                intro="Signals are deduplicated, so each condition notifies you once."
-              />
-              <ul className="mt-5 space-y-1">
-                <Step n="•">
-                  Price triggers fire when a stock crosses your upper or lower bound (Premium and above).
-                </Step>
-                <Step n="•">
-                  Smart Alerts flag 52-week breaks and volume spikes using rolling averages with cooldowns, so the same
-                  signal is not repeated.
-                </Step>
-                <Step n="•">
-                  Digest emails respect the Email opt-in toggle in Profile, turning it off stops all digests.
-                </Step>
-              </ul>
-            </div>
+          <section>
+            <SectionHeading
+              id="favourites"
+              icon={Star}
+              title="Favourites"
+              intro="One starred set shared across every watchlist."
+            />
+            <ul className="mt-5 space-y-1">
+              <Step n="•">Star any row to pin it across every watchlist.</Step>
+              <Step n="•">
+                The Favourites page shows live prices for starred tickers and supports one-click removal.
+              </Step>
+              <Step n="•">Favourites sync to your account, so they follow you to any device.</Step>
+            </ul>
           </section>
+
+          <section>
+            <SectionHeading
+              id="alerts"
+              icon={Bell}
+              title="Alerts & email"
+              intro="Signals are deduplicated, so each condition notifies you once."
+            />
+            <ul className="mt-5 space-y-1">
+              <Step n="•">
+                Price triggers fire when a stock crosses your upper or lower bound (Premium and above).
+              </Step>
+              <Step n="•">
+                Smart Alerts flag 52-week breaks and volume spikes using rolling averages with cooldowns, so the same
+                signal is not repeated.
+              </Step>
+              <Step n="•">
+                Digest emails respect the Email opt-in toggle in Profile, turning it off stops all digests.
+              </Step>
+            </ul>
+          </section>
+
 
           <section>
             <SectionHeading
