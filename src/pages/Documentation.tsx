@@ -20,6 +20,8 @@ import {
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { DOC_SEARCH_INDEX, buildTroubleshootingEntries, searchDocs, type DocSearchEntry } from "@/lib/docsSearchIndex";
+import { CodeBlock } from "@/components/docs/CodeBlock";
+
 
 const SECTIONS = [
   { id: "getting-started", label: "Getting started" },
