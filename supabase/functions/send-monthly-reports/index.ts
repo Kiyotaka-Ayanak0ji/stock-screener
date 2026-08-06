@@ -40,23 +40,29 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const admin = createClient(supabaseUrl, serviceKey)
 
-  // Only the service role (cron) or an admin user may trigger this job.
-  const authHeader = req.headers.get('Authorization') || ''
-  const token = authHeader.replace('Bearer ', '').trim()
-  if (!token) {
-    return json({ error: 'Unauthorized' }, 401)
+  // Access: the scheduled cron job (shared secret header), the service role,
+  // or a signed in admin user. Everything else is rejected.
+  const cronSecret = Deno.env.get('MONTHLY_REPORT_CRON_SECRET') || ''
+  const providedSecret = req.headers.get('x-cron-secret') || ''
+  const isCron = cronSecret.length > 0 && providedSecret === cronSecret
+
+  if (!isCron) {
+    const authHeader = req.headers.get('Authorization') || ''
+    const token = authHeader.replace('Bearer ', '').trim()
+    if (!token) return json({ error: 'Unauthorized' }, 401)
+    if (token !== serviceKey) {
+      const { data: { user } } = await admin.auth.getUser(token)
+      if (!user) return json({ error: 'Unauthorized' }, 401)
+      const { data: roles } = await admin
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle()
+      if (!roles) return json({ error: 'Forbidden' }, 403)
+    }
   }
-  if (token !== serviceKey) {
-    const { data: { user } } = await admin.auth.getUser(token)
-    if (!user) return json({ error: 'Unauthorized' }, 401)
-    const { data: roles } = await admin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle()
-    if (!roles) return json({ error: 'Forbidden' }, 403)
-  }
+
 
   const now = new Date()
   const previous = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
