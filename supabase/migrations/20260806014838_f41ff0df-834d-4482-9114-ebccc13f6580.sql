@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS monthly_report_opt_in boolean NOT NULL DEFAULT true;
