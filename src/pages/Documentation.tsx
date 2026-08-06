@@ -20,6 +20,8 @@ import {
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { DOC_SEARCH_INDEX, buildTroubleshootingEntries, searchDocs, type DocSearchEntry } from "@/lib/docsSearchIndex";
+import { CodeBlock } from "@/components/docs/CodeBlock";
+
 
 const SECTIONS = [
   { id: "getting-started", label: "Getting started" },
@@ -464,18 +466,22 @@ const Documentation = () => {
               title="Self-hosting (Node.js)"
               intro="Node.js 20 or later with npm and npx. No other package manager is required."
             />
-            <pre className="mt-5 rounded-xl border border-border bg-muted/60 p-4 text-xs overflow-x-auto font-mono leading-relaxed">
-              {`npm install          # install dependencies
+            <CodeBlock
+              label="Local setup"
+              code={`npm install          # install dependencies
 npm run dev          # local dev server on http://localhost:8080
 npm run build        # production bundle -> dist/
 npm run preview      # serve the production build
 npm run lint         # eslint
-npm run test         # vitest
-
-npx supabase link --project-ref <project-ref>
+npm run test         # vitest`}
+            />
+            <CodeBlock
+              label="Backend deploy"
+              code={`npx supabase link --project-ref <project-ref>
 npx supabase db push
 npx supabase functions deploy`}
-            </pre>
+            />
+
             <Callout>
               Full architecture, environment variables and deployment steps live in{" "}
               <code className="font-mono text-primary">Setup.md</code>, with the backend reference in{" "}

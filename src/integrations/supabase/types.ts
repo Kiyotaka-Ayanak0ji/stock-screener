@@ -252,6 +252,7 @@ export type Database = {
           display_name: string | null
           email_opt_in: boolean
           id: string
+          monthly_report_opt_in: boolean
           onboarding_completed: boolean
           updated_at: string
           user_id: string
@@ -262,6 +263,7 @@ export type Database = {
           display_name?: string | null
           email_opt_in?: boolean
           id?: string
+          monthly_report_opt_in?: boolean
           onboarding_completed?: boolean
           updated_at?: string
           user_id: string
@@ -272,6 +274,7 @@ export type Database = {
           display_name?: string | null
           email_opt_in?: boolean
           id?: string
+          monthly_report_opt_in?: boolean
           onboarding_completed?: boolean
           updated_at?: string
           user_id?: string

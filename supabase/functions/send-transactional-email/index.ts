@@ -5,6 +5,7 @@ import { WelcomeEmail } from '../_shared/email-templates/welcome.tsx'
 import { PriceTriggerDigestEmail } from '../_shared/email-templates/price-trigger-digest.tsx'
 import { SmartAlertDigestEmail } from '../_shared/email-templates/smart-alert-digest.tsx'
 import { DailySummaryEmail } from '../_shared/email-templates/daily-summary.tsx'
+import { MonthlyActivityReportEmail } from '../_shared/email-templates/monthly-activity-report.tsx'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,6 +36,10 @@ const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; sub
   daily_summary: {
     component: DailySummaryEmail,
     subject: (props: any) => `📊 Daily Summary — ${props.date || 'Today'}`,
+  },
+  monthly_activity_report: {
+    component: MonthlyActivityReportEmail,
+    subject: (props: any) => `Your EquityIQ activity report, ${props.period || 'last month'}`,
   },
 }
 
@@ -109,7 +114,7 @@ Deno.serve(async (req) => {
   }
 
   // For non-critical templates (e.g. price alerts, digests), respect email_opt_in preference
-  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest', 'smart_alert_digest', 'daily_summary']
+  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest', 'smart_alert_digest', 'daily_summary', 'monthly_activity_report']
   if (NON_CRITICAL_TEMPLATES.includes(template)) {
     // Find the user by email and check their opt-in preference
     const { data: authUsers } = await supabaseAuth.auth.admin.listUsers()
