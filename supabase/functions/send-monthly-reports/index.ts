@@ -42,9 +42,17 @@ Deno.serve(async (req) => {
 
   // Access: the scheduled cron job (shared secret header), the service role,
   // or a signed in admin user. Everything else is rejected.
-  const cronSecret = Deno.env.get('MONTHLY_REPORT_CRON_SECRET') || ''
   const providedSecret = req.headers.get('x-cron-secret') || ''
-  const isCron = cronSecret.length > 0 && providedSecret === cronSecret
+  let isCron = false
+  if (providedSecret) {
+    const { data: secretRow } = await admin
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'monthly_report_cron_secret')
+      .maybeSingle()
+    const expected = typeof secretRow?.value === 'string' ? secretRow.value : ''
+    isCron = expected.length > 0 && providedSecret === expected
+  }
 
   if (!isCron) {
     const authHeader = req.headers.get('Authorization') || ''
