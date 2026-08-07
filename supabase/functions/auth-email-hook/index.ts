@@ -1,7 +1,7 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { SITE_NAME, SITE_URL, SENDER_DOMAIN, ROOT_DOMAIN, FROM_HEADER } from '../_shared/site-config.ts'
+import { SITE_NAME, SITE_URL, SENDER_DOMAIN, FROM_HEADER } from '../_shared/site-config.ts'
 import { verifyAuthHookRequest } from '../_shared/auth-hook-verify.ts'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
@@ -192,7 +192,7 @@ async function handleWebhook(req: Request): Promise<Response> {
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
-    siteUrl: `https://${ROOT_DOMAIN}`,
+    siteUrl: SITE_URL,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
     token: payload.data.token,
