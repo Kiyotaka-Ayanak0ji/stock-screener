@@ -113,19 +113,24 @@ Deno.serve(async (req) => {
     })
   }
 
-  // For non-critical templates (e.g. price alerts, digests), respect email_opt_in preference
-  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest', 'smart_alert_digest', 'daily_summary', 'monthly_activity_report']
-  if (NON_CRITICAL_TEMPLATES.includes(template)) {
-    // Find the user by email and check their opt-in preference
+  // Opt-in gating.
+  // `monthly_activity_report` is governed by its own independent flag
+  // (`monthly_report_opt_in`) and is NOT affected by the general email switch.
+  // Every other non-critical template respects `email_opt_in`.
+  const NON_CRITICAL_TEMPLATES = ['price_trigger_digest', 'smart_alert_digest', 'daily_summary']
+  const INDEPENDENT_TEMPLATES: Record<string, string> = { monthly_activity_report: 'monthly_report_opt_in' }
+  const prefColumn = INDEPENDENT_TEMPLATES[template] ?? (NON_CRITICAL_TEMPLATES.includes(template) ? 'email_opt_in' : null)
+  if (prefColumn) {
+    // Find the user by email and check the relevant preference
     const { data: authUsers } = await supabaseAuth.auth.admin.listUsers()
     const matchingUser = authUsers?.users?.find((u: any) => u.email === recipientEmail)
     if (matchingUser) {
       const { data: profileData } = await supabaseAuth
         .from('profiles')
-        .select('email_opt_in')
+        .select(prefColumn)
         .eq('user_id', matchingUser.id)
         .maybeSingle()
-      if (profileData && profileData.email_opt_in === false) {
+      if (profileData && (profileData as Record<string, unknown>)[prefColumn] === false) {
         return new Response(JSON.stringify({ skipped: true, reason: 'opted_out' }), {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
