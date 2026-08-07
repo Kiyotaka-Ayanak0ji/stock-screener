@@ -4,6 +4,8 @@ Everything you need to understand the codebase (frontend vs backend),
 run it locally, and host it online.
 
 - App type: Vite + React SPA (installable PWA)
+- Runs fully self hosted: no Lovable cloud service is required at runtime
+- Service map and deployment paths: [ARCHITECTURE.md](./ARCHITECTURE.md), [DEPLOYMENT.md](./DEPLOYMENT.md)
 - Backend: Supabase (Postgres + Auth + Storage + Deno Edge Functions)
 - No Electron, no Capacitor, no service worker
 
@@ -161,6 +163,20 @@ psql "$DATABASE_URL" -f supabase/migrations/00000000000000_production_baseline.s
 Row data is intentionally excluded; export and import it separately as
 described in `MIGRATION.md`.
 
+Versioned upgrades on top of the baseline live in `db/migrations/`, with
+rollback scripts in `db/migrations/rollback/` and bookkeeping in
+`public.schema_migrations`:
+
+```sh
+./scripts/migrate.sh status
+./scripts/migrate.sh up
+./scripts/migrate.sh down <version>
+```
+
+They are idempotent and never drop user preference columns, so existing
+accounts, settings and report configuration survive redeploys onto a different
+database instance.
+
 
 
 ### Edge functions (`supabase/functions/*`, Deno)
@@ -253,8 +269,13 @@ Set in Supabase → Project Settings → Edge Functions → Secrets, or
 | `SUPABASE_SERVICE_ROLE_KEY` | Auto-populated; admin functions only |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | Payments |
 | `GROWW_API_TOKEN` | Optional live-quote provider |
-| `LOVABLE_API_KEY` | Only if AI features are enabled |
-| `RESEND_API_KEY` | Transactional email delivery |
+| `EMAIL_PROVIDER` | `smtp` (default, offline capable), `resend`, `http`, or `lovable` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_TLS` | SMTP transport |
+| `RESEND_API_KEY` | Only when `EMAIL_PROVIDER=resend` |
+| `EMAIL_HTTP_URL` / `EMAIL_HTTP_TOKEN` | Only when `EMAIL_PROVIDER=http` |
+| `SITE_NAME` / `SITE_URL` / `MAIL_FROM_DOMAIN` / `MAIL_SENDER_DOMAIN` / `MAIL_FROM_ADDRESS` | Branding and sender identity |
+| `SEND_EMAIL_HOOK_SECRET` | Standard Webhooks secret for the Supabase Send Email auth hook |
+| `MONTHLY_REPORT_CRON_SECRET` | Guards the monthly report trigger |
 
 ### 5.4 Backend: auth providers
 
@@ -343,5 +364,6 @@ on next launch; iOS caches `start_url`/`scope`/`display` at install time.
 | Google sign-in "Unsupported provider" | Provider not enabled in Supabase Auth |
 | OAuth redirects to the wrong origin | Add the origin to Supabase redirect URLs and Google authorized origins |
 | Quotes empty for a ticker/index | Check `stock-proxy` logs; verify via the admin Stock Debug Panel |
-| Emails not arriving | User has `email_opt_in` off, or `RESEND_API_KEY` unset; check `process-email-queue` logs |
+| Emails not arriving | Recipient opted out, or no transport configured (`EMAIL_PROVIDER` / `SMTP_HOST`); check `process-email-queue` logs |
+| Monthly report not sent | `monthly_report_opt_in` is off for that user; it is independent of `email_opt_in` |
 | Install prompt never appears | Needs HTTPS, valid manifest, 192+512 icons, one prior visit |
