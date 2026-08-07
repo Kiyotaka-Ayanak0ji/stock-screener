@@ -50,7 +50,7 @@ The app supports only **Authenticated Mode** (cloud-synced) workflow, with subsc
 - **react-hook-form** + **Zod** — form handling and validation
 - **html2canvas** + **jsPDF** — image and PDF exports
 
-### Backend (Lovable Cloud / Supabase)
+### Backend (self-hosted Supabase, or any compatible instance)
 - **PostgreSQL** — primary datastore with **Row Level Security (RLS)**
 - **Supabase Auth** — email + Google OAuth, email verification
 - **Supabase Edge Functions** (Deno) — serverless compute
@@ -59,18 +59,20 @@ The app supports only **Authenticated Mode** (cloud-synced) workflow, with subsc
 
 ### Integrations
 - **Razorpay** — payment gateway for subscriptions (UPI, cards, net banking)
-- **Resend** — transactional email delivery
+- **Pluggable email transport** — SMTP (fully offline), Resend, or any HTTP endpoint
 - **Groww / Screener.in proxies** — stock data sources
-- **Lovable AI Gateway** — for AI-driven features (no API key required)
 
 ### Cross-Platform
-- **Capacitor** — Android packaging
-- **Electron** — desktop builds
 - **PWA** — installable mobile/desktop progressive web app
 
 ### Hosting
-- **Vercel** — frontend hosting
-- **Lovable Cloud** — backend, database, edge functions
+- Any static host or Docker/nginx image for the frontend
+- Self-hosted Supabase (Docker Compose, VPS, Kubernetes) for the backend
+
+The application runs entirely without Lovable cloud services. Every endpoint,
+secret and sender identity is configured through environment variables; see
+[`.env.example`](.env.example), [ARCHITECTURE.md](ARCHITECTURE.md) and
+[DEPLOYMENT.md](DEPLOYMENT.md).
 
 ---
 
@@ -305,6 +307,9 @@ Lists, updates, or overrides user subscriptions.
 
 A full breakdown of every directory, route, table, and edge function —
 plus local setup and online hosting steps — lives in **[Setup.md](Setup.md)**.
+The microservice view (responsibilities, communication flow, health checks,
+startup order, scaling) is in **[ARCHITECTURE.md](ARCHITECTURE.md)**, and every
+deployment path is in **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
 Per-endpoint API documentation — every table, RPC, and edge function with
 request/response examples and the frontend pages that use them — lives in
@@ -359,6 +364,20 @@ separately: apply the baseline first, then load the exported CSVs in
 dependency order. The full export/restore procedure, including moving to
 a different Supabase project or a self-hosted database, is documented in
 **[MIGRATION.md](MIGRATION.md)**.
+
+Versioned upgrades live in `db/migrations/` with matching rollback scripts in
+`db/migrations/rollback/`, tracked in the `public.schema_migrations` table and
+applied with:
+
+```sh
+./scripts/migrate.sh status
+./scripts/migrate.sh up
+./scripts/migrate.sh down <version>
+```
+
+Migrations are idempotent and never drop columns holding user preferences, so
+accounts, settings, feature flags and report configuration survive every
+upgrade, rollback and redeploy. Release notes: **[CHANGELOG.md](CHANGELOG.md)**.
 
 ---
 
@@ -419,6 +438,9 @@ The app will be available at `http://localhost:8080`. The backend runs in Supaba
 
 **Mobile:** installable **PWA** only — no Electron or Capacitor build.
 
+**Containers:** `docker compose up -d --build` brings up Postgres, a local SMTP
+sink and the nginx-served frontend; see [DEPLOYMENT.md](DEPLOYMENT.md).
+
 See **[Setup.md](Setup.md)** for the step-by-step guide.
 
 
@@ -443,4 +465,4 @@ See **[Setup.md](Setup.md)** for the step-by-step guide.
 
 ---
 
-_Built with ❤️ using [Lovable](https://lovable.dev), React, TypeScript, Tailwind CSS, and Lovable Cloud (Supabase)._
+_Built with React, TypeScript, Tailwind CSS and Supabase. Fully self-hostable._
