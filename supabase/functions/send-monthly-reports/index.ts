@@ -76,10 +76,11 @@ Deno.serve(async (req) => {
   const previous = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
   const period = previous.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
+  // The monthly report is governed solely by `monthly_report_opt_in`; it is
+  // independent of the general `email_opt_in` switch and of every other digest.
   const { data: profiles, error: profileError } = await admin
     .from('profiles')
     .select('user_id, display_name, email_opt_in, monthly_report_opt_in')
-    .eq('email_opt_in', true)
     .eq('monthly_report_opt_in', true)
 
   if (profileError) {
