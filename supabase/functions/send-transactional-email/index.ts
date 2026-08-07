@@ -6,6 +6,7 @@ import { PriceTriggerDigestEmail } from '../_shared/email-templates/price-trigge
 import { SmartAlertDigestEmail } from '../_shared/email-templates/smart-alert-digest.tsx'
 import { DailySummaryEmail } from '../_shared/email-templates/daily-summary.tsx'
 import { MonthlyActivityReportEmail } from '../_shared/email-templates/monthly-activity-report.tsx'
+import { SITE_NAME, SITE_URL, SENDER_DOMAIN, FROM_DOMAIN, FROM_HEADER } from '../_shared/site-config.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,10 +14,6 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
-const SITE_NAME = 'EquityIQ'
-const SENDER_DOMAIN = 'notify.stockscreener.sbs'
-const FROM_DOMAIN = 'stockscreener.sbs'
-const SITE_URL = 'https://calm-white-cloud.lovable.app'
 
 const EMAIL_TEMPLATES: Record<string, { component: React.ComponentType<any>; subject: (props: any) => string }> = {
   welcome: {
@@ -184,7 +181,7 @@ Deno.serve(async (req) => {
     payload: {
       message_id: messageId,
       to: recipientEmail,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: FROM_HEADER,
       sender_domain: SENDER_DOMAIN,
       subject,
       html,
