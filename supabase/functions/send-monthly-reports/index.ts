@@ -1,7 +1,7 @@
 // Monthly activity report job.
 //
 // Runs on the first day of each month (pg_cron) with the service role key.
-// For every user who has both `email_opt_in` and `monthly_report_opt_in`
+// For every user who has `monthly_report_opt_in` enabled (independent flag)
 // enabled it builds a personal account summary and enqueues one email.
 // Nothing is sent to users who opted out or whose address is suppressed.
 
@@ -9,16 +9,13 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import { MonthlyActivityReportEmail } from '../_shared/email-templates/monthly-activity-report.tsx'
+import { SITE_NAME, SITE_URL, SENDER_DOMAIN, FROM_DOMAIN, FROM_HEADER } from '../_shared/site-config.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SITE_NAME = 'EquityIQ'
-const SENDER_DOMAIN = 'notify.stockscreener.sbs'
-const FROM_DOMAIN = 'stockscreener.sbs'
-const SITE_URL = 'https://calm-white-cloud.lovable.app'
 
 const PLAN_LABELS: Record<string, string> = {
   free: 'Free',
@@ -76,10 +73,11 @@ Deno.serve(async (req) => {
   const previous = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1))
   const period = previous.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
+  // The monthly report is governed solely by `monthly_report_opt_in`; it is
+  // independent of the general `email_opt_in` switch and of every other digest.
   const { data: profiles, error: profileError } = await admin
     .from('profiles')
     .select('user_id, display_name, email_opt_in, monthly_report_opt_in')
-    .eq('email_opt_in', true)
     .eq('monthly_report_opt_in', true)
 
   if (profileError) {
@@ -192,7 +190,7 @@ Deno.serve(async (req) => {
       payload: {
         message_id: messageId,
         to: email,
-        from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+        from: FROM_HEADER,
         sender_domain: SENDER_DOMAIN,
         subject: `Your EquityIQ activity report, ${period}`,
         html,

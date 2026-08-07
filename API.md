@@ -6,7 +6,7 @@ examples and the frontend pages/hooks that consume them.
 
 - **Frontend:** `src/` (React + Vite + Tailwind)
 - **Backend:** `supabase/` (Postgres schema, RLS, RPCs, Edge Functions)
-- Setup and deployment: see [`Setup.md`](./Setup.md)
+- Setup and deployment: see [`Setup.md`](./Setup.md), [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`DEPLOYMENT.md`](./DEPLOYMENT.md)
 
 Client used everywhere in the frontend:
 
@@ -962,7 +962,7 @@ Drains `auth_emails` then `transactional_emails`: leases with
 `delete_email`s on success, and `move_to_dlq`s on TTL expiry or retry exhaustion.
 Backs off by writing `email_send_state.retry_after_until` on provider `429`s.
 
-**Request:** `POST {}` with the service-role bearer and `Lovable-Context: cron`.
+**Request:** `POST {}` with the service-role bearer, or with the `MONTHLY_REPORT_CRON_SECRET` when triggered by `pg_cron`. Recipients are selected on `profiles.monthly_report_opt_in` alone; the general `email_opt_in` switch does not affect it.
 
 **Response**
 

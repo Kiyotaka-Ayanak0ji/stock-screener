@@ -1,8 +1,8 @@
 import * as React from 'npm:react@18.3.1'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import { parseEmailWebhookPayload } from 'npm:@lovable.dev/email-js'
-import { WebhookError, verifyWebhookRequest } from 'npm:@lovable.dev/webhooks-js'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { SITE_NAME, SITE_URL, SENDER_DOMAIN, FROM_HEADER } from '../_shared/site-config.ts'
+import { verifyAuthHookRequest } from '../_shared/auth-hook-verify.ts'
 import { SignupEmail } from '../_shared/email-templates/signup.tsx'
 import { InviteEmail } from '../_shared/email-templates/invite.tsx'
 import { MagicLinkEmail } from '../_shared/email-templates/magic-link.tsx'
@@ -36,17 +36,13 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "EquityIQ"
-const SENDER_DOMAIN = "notify.stockscreener.sbs"
-const ROOT_DOMAIN = "stockscreener.sbs"
-const FROM_DOMAIN = "stockscreener.sbs" // Domain shown in From address (may be root or sender subdomain)
 
 // Sample data for preview mode ONLY (not used in actual email sending).
 // URLs are baked in at scaffold time from the project's real data.
 // The sample email uses a fixed placeholder (RFC 6761 .test TLD) so the Go backend
 // can always find-and-replace it with the actual recipient when sending test emails,
 // even if the project's domain has changed since the template was scaffolded.
-const SAMPLE_PROJECT_URL = "https://calm-white-cloud.lovable.app"
+const SAMPLE_PROJECT_URL = SITE_URL
 const SAMPLE_EMAIL = "user@example.test"
 const SAMPLE_DATA: Record<string, object> = {
   signup: {
@@ -90,7 +86,7 @@ async function handlePreview(req: Request): Promise<Response> {
     return new Response(null, { headers: previewCorsHeaders })
   }
 
-  const apiKey = Deno.env.get('LOVABLE_API_KEY')
+  const apiKey = Deno.env.get('PREVIEW_API_KEY') ?? Deno.env.get('LOVABLE_API_KEY')
   const authHeader = req.headers.get('Authorization')
 
   if (!apiKey || authHeader !== `Bearer ${apiKey}`) {
@@ -131,54 +127,30 @@ async function handlePreview(req: Request): Promise<Response> {
 
 // Webhook handler - verifies signature and sends email
 async function handleWebhook(req: Request): Promise<Response> {
-  const apiKey = Deno.env.get('LOVABLE_API_KEY')
-
-  if (!apiKey) {
-    console.error('LOVABLE_API_KEY not configured')
+  if (!Deno.env.get('SEND_EMAIL_HOOK_SECRET') && !Deno.env.get('LOVABLE_API_KEY')) {
+    console.error('No auth hook secret configured (SEND_EMAIL_HOOK_SECRET)')
     return new Response(
       JSON.stringify({ error: 'Server configuration error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 
-  // Verify signature + timestamp, then parse payload.
+  // Verify the request and normalise the payload.
+  // Self hosted: standard webhook signature using SEND_EMAIL_HOOK_SECRET.
+  // Legacy Lovable cloud: signed webhook using LOVABLE_API_KEY.
   let payload: any
   let run_id = ''
   try {
-    const verified = await verifyWebhookRequest({
-      req,
-      secret: apiKey,
-      parser: parseEmailWebhookPayload,
-    })
-    payload = verified.payload
+    payload = await verifyAuthHookRequest(req)
     run_id = payload.run_id
   } catch (error) {
-    if (error instanceof WebhookError) {
-      switch (error.code) {
-        case 'invalid_signature':
-        case 'missing_timestamp':
-        case 'invalid_timestamp':
-        case 'stale_timestamp':
-          console.error('Invalid webhook signature', { error: error.message })
-          return new Response(JSON.stringify({ error: 'Invalid signature' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          })
-        case 'invalid_payload':
-        case 'invalid_json':
-          console.error('Invalid webhook payload', { error: error.message })
-          return new Response(
-            JSON.stringify({ error: 'Invalid webhook payload' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-      }
-    }
-
     console.error('Webhook verification failed', { error })
-    return new Response(
-      JSON.stringify({ error: 'Invalid webhook payload' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    const message = error instanceof Error ? error.message : 'Invalid webhook payload'
+    const unauthorized = message.toLowerCase().includes('signature') || message.toLowerCase().includes('timestamp')
+    return new Response(JSON.stringify({ error: unauthorized ? 'Invalid signature' : 'Invalid webhook payload' }), {
+      status: unauthorized ? 401 : 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 
   if (!run_id) {
@@ -220,7 +192,7 @@ async function handleWebhook(req: Request): Promise<Response> {
   // Build template props from payload.data (HookData structure)
   const templateProps = {
     siteName: SITE_NAME,
-    siteUrl: `https://${ROOT_DOMAIN}`,
+    siteUrl: SITE_URL,
     recipient: payload.data.email,
     confirmationUrl: payload.data.url,
     token: payload.data.token,
@@ -256,7 +228,7 @@ async function handleWebhook(req: Request): Promise<Response> {
       run_id,
       message_id: messageId,
       to: payload.data.email,
-      from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+      from: FROM_HEADER,
       sender_domain: SENDER_DOMAIN,
       subject: EMAIL_SUBJECTS[emailType] || 'Notification',
       html,

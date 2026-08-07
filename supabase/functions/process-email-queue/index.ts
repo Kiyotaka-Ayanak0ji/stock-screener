@@ -1,4 +1,4 @@
-import { sendLovableEmail } from 'npm:@lovable.dev/email-js'
+import { sendEmail, isEmailConfigured, EmailSendError } from '../_shared/mailer.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const MAX_RETRIES = 5
@@ -11,6 +11,9 @@ const DEFAULT_TRANSACTIONAL_TTL_MINUTES = 60
 // Uses EmailAPIError.status when available (email-js >=0.x with structured errors),
 // falls back to parsing the error message for older versions.
 function isRateLimited(error: unknown): boolean {
+  if (error instanceof EmailSendError) {
+    return error.status === 429
+  }
   if (error && typeof error === 'object' && 'status' in error) {
     return (error as { status: number }).status === 429
   }
@@ -44,11 +47,10 @@ function parseJwtClaims(token: string): Record<string, unknown> | null {
 }
 
 Deno.serve(async (req) => {
-  const apiKey = Deno.env.get('LOVABLE_API_KEY')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-  if (!apiKey || !supabaseUrl || !supabaseServiceKey) {
+  if (!isEmailConfigured() || !supabaseUrl || !supabaseServiceKey) {
     console.error('Missing required environment variables')
     return new Response(
       JSON.stringify({ error: 'Server configuration error' }),
@@ -261,13 +263,7 @@ Deno.serve(async (req) => {
           emailPayload.run_id = payload.run_id
         }
 
-        await sendLovableEmail(
-          emailPayload as any,
-          // sendUrl is optional — when LOVABLE_SEND_URL is not set, the library
-          // falls back to the default Lovable API endpoint (https://api.lovable.dev).
-          // Set LOVABLE_SEND_URL as a Supabase secret to override (e.g. for local dev).
-          { apiKey, sendUrl: Deno.env.get('LOVABLE_SEND_URL') }
-        )
+        await sendEmail(emailPayload as never)
 
         // Log success
         await supabase.from('email_send_log').insert({

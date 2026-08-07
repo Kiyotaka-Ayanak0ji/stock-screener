@@ -1,7 +1,8 @@
-# Migrating off Lovable Cloud to Supabase.com
+# Migrating the backend to a self hosted or standalone Supabase instance
 
-This guide moves the EquityIQ backend from the Lovable-Cloud–managed Supabase
-instance to a **standalone Supabase.com project** that you own and host.
+This guide moves the EquityIQ backend to a **standalone Supabase project or a
+self hosted Supabase stack** that you own and host. The application itself has
+no runtime dependency on Lovable cloud services.
 The frontend code is unchanged — it already reads its backend URL and anon
 key from environment variables, so migration is a matter of standing up the
 new project, replaying schema + data + functions, and swapping the env vars.
@@ -18,7 +19,7 @@ the steps below are identical, only the "create the project" step differs.
 | --- | --- |
 | All `public.*` tables, RLS policies, functions, triggers | Auth users (or migrate via `auth.users` dump if you have DB owner access) |
 | All row data (`profiles`, `user_watchlists`, `user_subscriptions`, etc.) | OAuth provider credentials (Google client id/secret) |
-| Edge function source (`supabase/functions/*`) | Edge function secrets (`RAZORPAY_*`, `GROWW_API_TOKEN`, `LOVABLE_API_KEY`, …) |
+| Edge function source (`supabase/functions/*`) | Edge function secrets (`RAZORPAY_*`, `GROWW_API_TOKEN`, `SMTP_*`, …) |
 | Storage bucket definitions | Storage bucket **contents** (re-upload) |
 | `supabase/migrations/*` history | `pg_cron` schedules (re-create after DB restore) |
 
@@ -110,7 +111,10 @@ npx supabase secrets set --project-ref <NEW_PROJECT_REF> \
   RAZORPAY_KEY_ID=... \
   RAZORPAY_KEY_SECRET=... \
   GROWW_API_TOKEN=... \
-  LOVABLE_API_KEY=...
+  EMAIL_PROVIDER=smtp SMTP_HOST=... SMTP_PORT=587 SMTP_USER=... SMTP_PASSWORD=... \
+  SITE_NAME=EquityIQ SITE_URL=https://example.com \
+  MAIL_FROM_DOMAIN=example.com MAIL_SENDER_DOMAIN=notify.example.com \
+  SEND_EMAIL_HOOK_SECRET=v1,whsec_...
 ```
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and
@@ -169,18 +173,17 @@ npm run build
 
 ---
 
-## Notes on the old Lovable-Cloud backend
+## Applying versioned upgrades after the restore
 
-Lovable Cloud stays attached to this Lovable project at the platform level
-and cannot be detached from inside a chat. Once the new project is live and
-verified, you can:
+```bash
+DATABASE_URL=postgres://... ./scripts/migrate.sh up
+```
 
-- **Pause** the old Cloud backend (Cloud settings) so it stops accruing
-  usage. It won't be reachable, but the schema is preserved if you ever
-  need to re-export.
-- Leave `src/integrations/supabase/client.ts` as-is — it always reads from
-  `.env`, so as long as `.env` points at the new project, the old Cloud
-  URL/key are never used by the running app.
+The runner applies the idempotent baseline, then every pending file in
+`db/migrations/`, recording each in `public.schema_migrations`. Databases
+created before that table existed are detected and backfilled automatically, so
+no migration is applied twice and no data is lost. Roll a single version back
+with `./scripts/migrate.sh down <version>`.
 
 ## Self-hosting on Render / a VPS (optional)
 

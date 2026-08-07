@@ -329,13 +329,13 @@ const Profile = () => {
                   <div className="p-1.5 rounded-lg bg-primary/10"><Bell className="h-4 w-4 text-primary" /></div>
                   Email
                 </CardTitle>
-                <CardDescription className="text-xs">Controls all digests and alert emails.</CardDescription>
+                <CardDescription className="text-xs">Each switch is independent.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
                   <div className="space-y-0.5">
                     <Label htmlFor="email-opt-in" className="text-sm font-medium">Email updates</Label>
-                    <p className="text-xs text-muted-foreground">Price alerts, watchlist digests and product updates.</p>
+                    <p className="text-xs text-muted-foreground">Price alerts and watchlist digests. Does not affect the monthly report.</p>
                   </div>
                   <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
                 </div>
@@ -351,8 +351,7 @@ const Profile = () => {
                   </div>
                   <Switch
                     id="monthly-report-opt-in"
-                    checked={emailOptIn && monthlyReportOptIn}
-                    disabled={!emailOptIn}
+                    checked={monthlyReportOptIn}
                     onCheckedChange={setMonthlyReportOptIn}
                   />
                 </div>

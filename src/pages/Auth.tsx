@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TrendingUp, Loader2, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -264,16 +264,14 @@ const Auth = () => {
               disabled={loading}
               onClick={async () => {
                 setLoading(true);
-                const result = await lovable.auth.signInWithOAuth("google", {
-                  redirect_uri: window.location.origin,
+                const { error } = await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: { redirectTo: `${window.location.origin}/dashboard` },
                 });
-                if (result.error) {
-                  toast({ title: "Google sign-in failed", description: result.error.message ?? "Please try again.", variant: "destructive" });
+                if (error) {
+                  toast({ title: "Google sign-in failed", description: error.message ?? "Please try again.", variant: "destructive" });
                   setLoading(false);
-                  return;
                 }
-                if (result.redirected) return;
-                navigate("/dashboard");
               }}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
