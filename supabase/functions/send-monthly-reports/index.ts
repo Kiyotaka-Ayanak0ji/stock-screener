@@ -1,7 +1,7 @@
 // Monthly activity report job.
 //
 // Runs on the first day of each month (pg_cron) with the service role key.
-// For every user who has both `email_opt_in` and `monthly_report_opt_in`
+// For every user who has `monthly_report_opt_in` enabled (independent flag)
 // enabled it builds a personal account summary and enqueues one email.
 // Nothing is sent to users who opted out or whose address is suppressed.
 
