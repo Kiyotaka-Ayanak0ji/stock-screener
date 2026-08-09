@@ -134,7 +134,7 @@ const Subscribe = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a {tierLabel} Member!</CardTitle>
+            <CardTitle>You're a {tierLabel} member</CardTitle>
             <CardDescription>
               Your {tierLabel} plan is active
               {subscription.subscription_ends_at && (
@@ -287,7 +287,7 @@ const Subscribe = () => {
             }`}
           >
             <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
-              50 × 100
+              50 lists · 100 stocks
             </Badge>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
