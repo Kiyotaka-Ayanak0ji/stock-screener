@@ -192,8 +192,8 @@ export function VerificationDebugWidget() {
               Verification Debug Mode
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm mt-1">
-              Track which source (Screener, BSE, Groww, Google) supplied each field for every
-              "Verify against Screener.in" run. Visible to admins only.
+              Shows which source (Screener, BSE, Groww, Google) supplied each field on every
+              verification run. Visible to admins only.
             </CardDescription>
           </div>
           <div className="flex items-center gap-2 shrink-0">

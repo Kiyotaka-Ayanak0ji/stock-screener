@@ -210,7 +210,7 @@ export const SeedUniverseWidget = () => {
               <span className="truncate">Stock Universe Seeding</span>
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
-              Bulk-seeds NSE + BSE + SME tickers into the price cache over a 24-hour cycle
+              Loads all NSE, BSE and SME tickers into the price cache over 24 hours
             </CardDescription>
           </div>
           <Badge
@@ -296,8 +296,8 @@ export const SeedUniverseWidget = () => {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          A scheduled task runs every ~10 minutes to spread the full universe across the day.
-          Use "Refresh ticker list" weekly to ingest new listings from NSE + BSE.
+          An automatic job runs every 10 minutes and spreads the full ticker list across the day.
+          Use Refresh ticker list weekly to pick up new NSE and BSE listings.
         </p>
       </CardContent>
 

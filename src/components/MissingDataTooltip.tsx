@@ -47,8 +47,8 @@ const MissingDataTooltip = ({
       <TooltipContent side={side} className="max-w-[240px] text-xs">
         <p className="font-medium">{label} data unavailable</p>
         <p className="mt-1 opacity-90">
-          We couldn’t fetch {label.toLowerCase()} from the upstream provider. Showing
-          a placeholder. Try the verify button (↻) to refresh from Screener.
+          We couldn’t get {label.toLowerCase()} for this stock right now. Use the refresh
+          button (↻) to try again.
           {hint ? ` ${hint}` : ""}
         </p>
       </TooltipContent>

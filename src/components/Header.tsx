@@ -63,7 +63,7 @@ const Header = () => {
               data-tour="favourites-nav"
               onClick={() => navigate("/favourites")}
               className="gap-1.5 text-xs"
-              title="Favourite stocks"
+              title="Favourites"
             >
               <Star className="h-3.5 w-3.5" />
               Favourites
@@ -76,7 +76,7 @@ const Header = () => {
               size="sm"
               onClick={() => navigate("/portfolio")}
               className="gap-1.5 text-xs"
-              title="Portfolio Dashboard"
+              title="Portfolio"
             >
               <Briefcase className="h-3.5 w-3.5" />
               Portfolio
@@ -93,7 +93,7 @@ const Header = () => {
               }`}
             >
               <Clock className="h-3 w-3" />
-              {trialDaysLeft > 0 ? `${trialDaysLeft}d trial left` : "Trial expired"}
+              {trialDaysLeft > 0 ? `${trialDaysLeft} days left in trial` : "Trial expired"}
             </button>
           )}
 
@@ -220,7 +220,7 @@ const Header = () => {
                       }`}
                     >
                       <Clock className="h-4 w-4" />
-                      {trialDaysLeft > 0 ? `${trialDaysLeft} days trial left` : "Trial expired"}
+                      {trialDaysLeft > 0 ? `${trialDaysLeft} days left in trial` : "Trial expired"}
                     </button>
                   )}
 
