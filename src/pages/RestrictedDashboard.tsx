@@ -99,7 +99,7 @@ const RestrictedDashboard = () => {
                 <CreditCard className="h-5 w-5 text-primary" />
               </div>
               <span className="text-sm font-medium text-foreground">Subscribe</span>
-              <span className="text-xs text-muted-foreground text-center">View plans & pricing</span>
+              <span className="text-xs text-muted-foreground text-center">View plans and pricing</span>
             </CardContent>
           </Card>
 
@@ -124,8 +124,8 @@ const RestrictedDashboard = () => {
               <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
                 <LogOut className="h-5 w-5 text-destructive" />
               </div>
-              <span className="text-sm font-medium text-foreground">Log Out</span>
-              <span className="text-xs text-muted-foreground text-center">Sign out of your account</span>
+              <span className="text-sm font-medium text-foreground">Sign out</span>
+              <span className="text-xs text-muted-foreground text-center">End this session</span>
             </CardContent>
           </Card>
         </motion.div>

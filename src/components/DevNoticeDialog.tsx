@@ -30,7 +30,7 @@ const DevNoticeDialog = () => {
             Under Development
           </AlertDialogTitle>
           <AlertDialogDescription>
-            The App is Under Development, Expect crashes and Bugs ahead.
+            This app is under active development. You may encounter bugs.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

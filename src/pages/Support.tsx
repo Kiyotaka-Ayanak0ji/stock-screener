@@ -50,7 +50,7 @@ const Support = () => {
             <Badge variant="secondary" className="mb-3">
               <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
             </Badge>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Need a hand?</h1>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Contact support</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
               Questions about features, pricing, billing, or anything else? Reach out and we'll get back to you as soon
               as possible.

@@ -90,7 +90,7 @@ const SharedWatchlist = () => {
         <p className="text-muted-foreground">{error}</p>
         <Button variant="outline" onClick={() => navigate("/dashboard")} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
-          Go Home
+          Go to dashboard
         </Button>
       </div>
     );

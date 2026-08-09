@@ -109,7 +109,7 @@ const AddStockDialog = () => {
             <DialogTitle>Add Stock to Watchlist</DialogTitle>
             <p className="text-xs text-muted-foreground">
               {watchlist.length}/{stockLimit} stocks used
-              {!isPro && " (upgrade for more)"}
+              {!isPro && ""}
             </p>
           </DialogHeader>
           <div className="relative">
@@ -154,7 +154,7 @@ const AddStockDialog = () => {
           </div>
           {search.trim().length >= 2 && (
             <p className="text-xs text-muted-foreground text-center">
-              Powered by Screener.in • Showing all NSE & BSE stocks
+              Search covers all NSE and BSE stocks
             </p>
           )}
         </DialogContent>

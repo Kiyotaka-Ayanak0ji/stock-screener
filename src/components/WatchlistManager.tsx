@@ -101,7 +101,7 @@ const WatchlistManager = ({
         <DropdownMenuContent align="end" className="w-64">
           {watchlists.length === 0 && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              No watchlists yet. Create one!
+              No watchlists yet.
             </div>
           )}
           {watchlists.map(wl => (

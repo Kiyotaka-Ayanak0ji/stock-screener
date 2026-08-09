@@ -96,7 +96,7 @@ const ReviewDialog = () => {
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>How's your experience?</DialogTitle>
+          <DialogTitle>Rate your experience</DialogTitle>
           <DialogDescription>
             We'd love to hear your feedback! Your review helps other investors discover EquityIQ.
           </DialogDescription>
@@ -167,7 +167,7 @@ const ReviewDialog = () => {
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="ghost" onClick={handleClose}>Maybe Later</Button>
+          <Button variant="ghost" onClick={handleClose}>Maybe later</Button>
           <Button onClick={handleSubmit} disabled={submitting || rating === 0 || !review.trim()}>
             {submitting ? "Submitting..." : "Submit Review"}
           </Button>

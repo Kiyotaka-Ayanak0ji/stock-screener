@@ -59,7 +59,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "Does the portfolio dashboard update in real time?",
-    a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
+    a: "The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
   },
   {
     q: "Which stock exchanges are supported?",
@@ -79,7 +79,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "Is my data safe?",
-    a: "Absolutely. All your data: watchlists, notes, custom columns, and triggers, is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
+    a: "All your data: watchlists, notes, custom columns, and triggers, is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
   },
   {
     q: "Can I cancel my subscription anytime?",

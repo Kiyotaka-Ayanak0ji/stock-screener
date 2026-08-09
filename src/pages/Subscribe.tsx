@@ -144,7 +144,7 @@ const Subscribe = () => {
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back to dashboard
             </Button>
           </CardContent>
         </Card>
@@ -168,7 +168,7 @@ const Subscribe = () => {
           </div>
           <Crown className="h-9 w-9 text-amber-500 mx-auto mb-2" />
           <h1 className="text-2xl font-bold">Choose Your Plan</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pick the plan that matches your investment style</p>
+          <p className="text-sm text-muted-foreground mt-1">Compare Pro, Premium and Premium Plus</p>
           {trialDaysLeft > 0 && (
             <Badge variant="secondary" className="mt-2">
               {trialDaysLeft} days left in your free trial
@@ -339,7 +339,7 @@ const Subscribe = () => {
               onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {isActive ? "Back to Dashboard" : "Continue with limited access"}
+              {isActive ? "Back to dashboard" : "Continue with limited access"}
             </Button>
           </CardContent>
         </Card>

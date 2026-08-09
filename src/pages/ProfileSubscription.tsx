@@ -93,7 +93,7 @@ const ProfileSubscription = () => {
             <CardContent className="space-y-4">
               <div className="flex items-baseline justify-between">
                 <span className="text-2xl font-bold text-foreground">{planLabel}</span>
-                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{planTier.replace("_", " ")}</span>
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{planTier.replace(/_/g, " ")}</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
@@ -146,7 +146,7 @@ const ProfileSubscription = () => {
                   ? "You have lifetime access, no further action needed."
                   : isPremiumPlus
                   ? "You're on the highest tier. Renew or extend anytime."
-                  : "Upgrade to unlock more watchlists, alerts, and Premium Plus features."}
+                  : "Upgrade for more watchlists, price alerts and auto-refresh."}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-2.5">
@@ -157,10 +157,10 @@ const ProfileSubscription = () => {
                 </Button>
               )}
               <Button variant="outline" onClick={() => navigate("/subscribe")} className="w-full active:scale-[0.98] transition-all">
-                Compare All Plans
+                Compare all plans
               </Button>
               <p className="text-[11px] text-muted-foreground text-center pt-1">
-                Payments are processed securely via Razorpay. Subscriptions don't auto-renew, you choose when to extend.
+                Payments are processed securely via Razorpay. Subscriptions don't auto-renew — you choose when to extend.
               </p>
             </CardContent>
           </Card>

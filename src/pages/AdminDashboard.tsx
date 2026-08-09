@@ -252,7 +252,7 @@ const AdminDashboard = () => {
             <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-primary shrink-0" />
             <h1 className="text-xl sm:text-3xl font-bold text-foreground">Admin Dashboard</h1>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8">Manage all registered users and view platform statistics</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-6 sm:mb-8">Manage users and subscriptions</p>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
