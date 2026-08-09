@@ -80,7 +80,23 @@ Deno.serve(async (req) => {
   }
 
   const { template, props, to } = body
-  const recipientEmail = to || user.email
+
+  // Only trusted server-side callers (service role key as bearer token) may
+  // choose an arbitrary recipient. Self-service calls from signed-in users are
+  // always delivered to their own account email, never to a client-supplied
+  // address — otherwise this endpoint becomes an open relay for phishing.
+  const isServiceRoleCaller = token === supabaseServiceKey
+  const requestedTo = typeof to === 'string' ? to.trim().toLowerCase() : ''
+  const ownEmail = (user.email || '').toLowerCase()
+
+  if (!isServiceRoleCaller && requestedTo && requestedTo !== ownEmail) {
+    return new Response(JSON.stringify({ error: 'Recipient not allowed' }), {
+      status: 403,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  const recipientEmail = isServiceRoleCaller ? (requestedTo || user.email) : user.email
 
   if (!template || !EMAIL_TEMPLATES[template]) {
     return new Response(JSON.stringify({ error: `Unknown template: ${template}` }), {
