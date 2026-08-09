@@ -45,10 +45,11 @@ serve(async (req) => {
       });
     }
 
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan, amount_usd, amount_inr, payment_method, is_test } = await req.json();
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, payment_method, is_test } = await req.json();
 
+    const RAZORPAY_KEY_ID = Deno.env.get('RAZORPAY_KEY_ID');
     const RAZORPAY_KEY_SECRET = Deno.env.get('RAZORPAY_KEY_SECRET');
-    if (!RAZORPAY_KEY_SECRET) {
+    if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
       return new Response(JSON.stringify({ error: 'Razorpay not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -61,6 +62,47 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    // Never trust plan/amount from the client. Fetch the real order from
+    // Razorpay and derive everything from its server-stored notes/amount.
+    const orderRes = await fetch(`https://api.razorpay.com/v1/orders/${encodeURIComponent(razorpay_order_id)}`, {
+      headers: { 'Authorization': 'Basic ' + btoa(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`) },
+    });
+    const order = await orderRes.json();
+    if (!orderRes.ok || !order?.id) {
+      console.error('Razorpay order lookup failed');
+      return new Response(JSON.stringify({ error: 'Order verification failed' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (order.status !== 'paid') {
+      return new Response(JSON.stringify({ error: 'Order not paid' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const notes = order.notes || {};
+    if (notes.user_id && notes.user_id !== user.id) {
+      return new Response(JSON.stringify({ error: 'Order does not belong to this user' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const VALID_PLANS = [
+      'monthly', 'yearly',
+      'premium_monthly', 'premium_yearly',
+      'premium_plus_monthly', 'premium_plus_yearly',
+    ];
+    const plan = String(notes.plan || '');
+    if (!VALID_PLANS.includes(plan)) {
+      return new Response(JSON.stringify({ error: 'Order plan could not be verified' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    const amount_usd = Number(notes.amount_usd) || null;
+    const amount_inr = typeof order.amount === 'number' ? order.amount : null;
 
     // Use service role to update subscription
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
