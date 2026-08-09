@@ -551,7 +551,7 @@ const Profile = () => {
                     <div className="p-1.5 rounded-lg bg-primary/15"><Shield className="h-4 w-4 text-primary" /></div>
                     Administration
                   </CardTitle>
-                  <CardDescription className="text-xs">You have administrator access.</CardDescription>
+                  <CardDescription className="text-xs">You can manage users and subscriptions.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button onClick={() => navigate("/admin")} className="w-full active:scale-[0.98] transition-all">
@@ -589,7 +589,7 @@ const Profile = () => {
                 <div className="flex items-center justify-between pt-2 border-t border-border">
                   <div className="pr-3">
                     <p className="text-sm font-medium text-foreground">Guided tour</p>
-                    <p className="text-xs text-muted-foreground">Replay the walkthrough of search, filters, watchlists and favourites.</p>
+                    <p className="text-xs text-muted-foreground">Replay the tour of search, filters, watchlists and favourites.</p>
                   </div>
                   <Button
                     variant="outline"
@@ -600,7 +600,7 @@ const Profile = () => {
                       navigate("/dashboard");
                     }}
                   >
-                    Replay
+                    Replay tour
                   </Button>
                 </div>
                 <div className="pt-2 border-t border-border">

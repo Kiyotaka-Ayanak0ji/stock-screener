@@ -42,15 +42,14 @@ const ProfilePassword = () => {
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <div className="mb-5">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">Change Password</h1>
-            <p className="text-muted-foreground text-sm">Update your account password</p>
-          </div>
+                      </div>
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-foreground text-base">
                 <div className="p-1.5 rounded-lg bg-primary/10"><Lock className="h-4 w-4 text-primary" /></div>
                 New Password
               </CardTitle>
-              <CardDescription className="text-xs">Choose a strong password, at least 6 characters</CardDescription>
+              <CardDescription className="text-xs">At least 6 characters. Avoid words or dates you use elsewhere.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

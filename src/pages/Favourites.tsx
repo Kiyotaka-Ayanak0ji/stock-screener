@@ -79,7 +79,7 @@ const Favourites = () => {
                 Favourites
               </h1>
               <p className="text-xs text-muted-foreground">
-                {favourites.length} saved {favourites.length === 1 ? "stock" : "stocks"} · synced to your account
+                {favourites.length} saved {favourites.length === 1 ? "stock" : "stocks"}
               </p>
             </div>
           </div>

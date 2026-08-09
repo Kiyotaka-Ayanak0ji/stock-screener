@@ -59,7 +59,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "Does the portfolio dashboard update in real time?",
-    a: "Absolutely. The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
+    a: "The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
   },
   {
     q: "Which stock exchanges are supported?",
@@ -67,7 +67,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "How do price triggers work?",
-    a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification, so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox. This feature is available on Premium and Premium Plus plans.",
+    a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification, so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox.",
   },
   {
     q: "What are Smart Alerts?",
@@ -79,7 +79,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "Is my data safe?",
-    a: "Absolutely. All your data: watchlists, notes, custom columns, and triggers, is encrypted and stored securely. We follow industry-standard security practices, and your data is never shared with third parties.",
+    a: "Yes. Your watchlists, notes, custom columns and price triggers are encrypted before they are stored. Your data is never shared with third parties.",
   },
   {
     q: "Can I cancel my subscription anytime?",

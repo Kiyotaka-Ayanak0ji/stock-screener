@@ -134,7 +134,7 @@ const Subscribe = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Crown className="h-12 w-12 text-amber-500 mx-auto mb-2" />
-            <CardTitle>You're a {tierLabel} Member!</CardTitle>
+            <CardTitle>You're a {tierLabel} member</CardTitle>
             <CardDescription>
               Your {tierLabel} plan is active
               {subscription.subscription_ends_at && (
@@ -144,7 +144,7 @@ const Subscribe = () => {
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
+              <ArrowLeft className="h-4 w-4 mr-2" /> Back to dashboard
             </Button>
           </CardContent>
         </Card>
@@ -168,7 +168,7 @@ const Subscribe = () => {
           </div>
           <Crown className="h-9 w-9 text-amber-500 mx-auto mb-2" />
           <h1 className="text-2xl font-bold">Choose Your Plan</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pick the plan that matches your investment style</p>
+          <p className="text-sm text-muted-foreground mt-1">Compare Pro, Premium and Premium Plus</p>
           {trialDaysLeft > 0 && (
             <Badge variant="secondary" className="mt-2">
               {trialDaysLeft} days left in your free trial
@@ -287,7 +287,7 @@ const Subscribe = () => {
             }`}
           >
             <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
-              50 × 100
+              50 lists · 100 stocks
             </Badge>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
@@ -339,7 +339,7 @@ const Subscribe = () => {
               onClick={() => navigate("/dashboard")}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {isActive ? "Back to Dashboard" : "Continue with limited access"}
+              {isActive ? "Back to dashboard" : "Continue with limited access"}
             </Button>
           </CardContent>
         </Card>
