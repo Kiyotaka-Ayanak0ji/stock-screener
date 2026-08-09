@@ -8,14 +8,14 @@
 //                     cached_stock_prices, updates progress + last_status.
 //
 // Designed to be invoked by pg_cron every ~5 min to spread ~7500 tickers across 24h.
-// Public endpoint — input is a fixed action keyword, no untrusted SQL.
+// Restricted endpoint — requires an admin JWT, the service role key, or the cron secret.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+    "authorization, x-cron-secret, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 const CHUNK_SIZE = 40;            // tickers per invocation (Yahoo batch sweet-spot)
@@ -269,10 +269,42 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   const action = url.searchParams.get("action") || "process";
 
-  const sb = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  );
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, serviceKey);
+
+  // Authorization: only an admin user JWT, the service role key, or the cron
+  // shared secret may trigger these expensive ingestion jobs.
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+  const cronSecret = Deno.env.get("MONTHLY_REPORT_CRON_SECRET") || "";
+  const headerSecret = req.headers.get("x-cron-secret") || "";
+
+  let authorized = false;
+  if (token && token === serviceKey) {
+    authorized = true;
+  } else if (cronSecret && headerSecret && headerSecret === cronSecret) {
+    authorized = true;
+  } else if (token) {
+    const { data: userData } = await sb.auth.getUser(token);
+    const uid = userData?.user?.id;
+    if (uid) {
+      const { data: roleRow } = await sb
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", uid)
+        .eq("role", "admin")
+        .maybeSingle();
+      authorized = !!roleRow;
+    }
+  }
+
+  if (!authorized) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     if (action === "ingest") {
