@@ -49,7 +49,7 @@ const ProfilePassword = () => {
                 <div className="p-1.5 rounded-lg bg-primary/10"><Lock className="h-4 w-4 text-primary" /></div>
                 New Password
               </CardTitle>
-              <CardDescription className="text-xs">At least 8 characters with upper and lower case, a number and a symbol</CardDescription>
+              <CardDescription className="text-xs">At least 6 characters. Avoid words or dates you use elsewhere.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
