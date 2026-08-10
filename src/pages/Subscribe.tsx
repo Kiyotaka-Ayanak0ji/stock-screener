@@ -5,9 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Crown, CreditCard, Loader2, ArrowLeft, Zap, X, TrendingUp } from "lucide-react";
+import { Check, Crown, Loader2, ArrowLeft, Zap, X, TrendingUp } from "lucide-react";
 
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -154,11 +153,7 @@ const Subscribe = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-3xl"
-      >
+      <div className="w-full max-w-3xl">
         <div className="text-center mb-6">
           <div className="flex items-center justify-center gap-2 mb-3">
             <TrendingUp className="h-6 w-6 text-primary" />
@@ -166,7 +161,6 @@ const Subscribe = () => {
               Equity<span className="text-primary">IQ</span>
             </span>
           </div>
-          <Crown className="h-9 w-9 text-amber-500 mx-auto mb-2" />
           <h1 className="text-2xl font-bold">Choose Your Plan</h1>
           <p className="text-sm text-muted-foreground mt-1">Compare Pro, Premium and Premium Plus</p>
           {trialDaysLeft > 0 && (
@@ -286,9 +280,6 @@ const Subscribe = () => {
                 : "border-border hover:border-primary/40"
             }`}
           >
-            <Badge className="absolute -top-2.5 right-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-[10px]">
-              50 lists · 100 stocks
-            </Badge>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-lg flex items-center gap-1.5">
                 Premium Plus <Zap className="h-4 w-4 text-orange-500" />
@@ -343,7 +334,7 @@ const Subscribe = () => {
             </Button>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 };
