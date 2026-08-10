@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
   TrendingUp,
-  ArrowLeft,
   ArrowRight,
   Rocket,
   Star,
@@ -13,11 +12,9 @@ import {
   Wrench,
   Terminal,
   Info,
-  LifeBuoy,
   Search,
   X,
 } from "lucide-react";
-import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { DOC_SEARCH_INDEX, buildTroubleshootingEntries, searchDocs, type DocSearchEntry } from "@/lib/docsSearchIndex";
 import { CodeBlock } from "@/components/docs/CodeBlock";
@@ -197,9 +194,6 @@ const Documentation = () => {
             </span>
           </button>
           <div className="flex items-center gap-1 sm:gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5">
-              <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Home</span>
-            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/faq")} className="hidden sm:inline-flex">
               FAQ
             </Button>
@@ -247,26 +241,12 @@ const Documentation = () => {
               </nav>
             </div>
 
-            <div className="rounded-xl border border-border p-4">
-              <p className="flex items-center gap-2 text-sm font-medium">
-                <LifeBuoy className="h-4 w-4 text-primary" /> Support
-              </p>
-              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                Something here out of date? Report it and we will correct the page.
-              </p>
-              <Button variant="outline" size="sm" className="mt-3 w-full" onClick={() => navigate("/support")}>
-                Contact support
-              </Button>
-            </div>
           </div>
         </aside>
 
         {/* Content */}
         <main className="lg:col-span-9 space-y-14">
-          <motion.header
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
+          <header
             className="border-b border-border pb-8"
           >
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">EquityIQ documentation</h1>
@@ -354,7 +334,7 @@ const Documentation = () => {
                 </Button>
               ))}
             </div>
-          </motion.header>
+          </header>
 
           <section>
             <SectionHeading
