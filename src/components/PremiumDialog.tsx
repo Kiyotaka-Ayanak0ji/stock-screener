@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Crown, Check, Sparkles, Zap } from "lucide-react";
+import { Crown, Check, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   PRO_FEATURES,
@@ -102,13 +102,12 @@ const PremiumDialog = ({
 
         <div className="flex flex-col gap-2 mt-4">
           <Button
-            className="w-full gap-2"
+            className="w-full"
             onClick={() => {
               onOpenChange(false);
               navigate("/subscribe");
             }}
           >
-            <Sparkles className="h-4 w-4" />
             {copy.cta}
           </Button>
           <Button

@@ -95,7 +95,6 @@ const StockFreshnessBadge = ({
               "inline-block h-1.5 w-1.5 rounded-full ring-2 ring-offset-0 shrink-0",
               styles.dot,
               styles.ring,
-              (info.state === "stale" || info.state === "very-stale") && "animate-pulse",
             )}
           />
           {showEta && (
