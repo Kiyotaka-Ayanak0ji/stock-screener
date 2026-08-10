@@ -83,16 +83,10 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-md"
       >
         <div
           className="flex items-center justify-center gap-2 mb-8"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
         >
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
@@ -103,10 +97,6 @@ const Auth = () => {
         <Card className="shadow-lg border-border/60 overflow-hidden">
           <CardHeader className="pb-4">
               <div
-                initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
-                transition={{ duration: 0.2 }}
               >
                 <CardTitle className="text-xl">{isLogin ? "Welcome back" : "Create account"}</CardTitle>
                 <CardDescription className="mt-1">
@@ -120,9 +110,6 @@ const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 {accountExists && !isLogin && (
                   <div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
                     className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm"
                     role="alert"
                   >
@@ -145,10 +132,6 @@ const Auth = () => {
                 )}
                 {!isLogin && (
                   <div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
                     className="space-y-2 overflow-hidden"
                   >
                     <Label htmlFor="displayName">Display Name</Label>
