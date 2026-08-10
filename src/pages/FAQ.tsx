@@ -1,19 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { HelpCircle, TrendingUp, ArrowLeft, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { TrendingUp, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.08, duration: 0.45, ease: "easeOut" as const },
-  }),
-};
 
 const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactNode }> = [
   {
@@ -51,15 +40,15 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "What do I get during the 15-day free trial?",
-    a: "During your trial, you unlock full Pro access: multiple watchlists, column customization, real-time price updates, Smart Alerts, and mobile swipe gestures with Undo. Premium features like the interactive stock detail sheet, multi-day charts, price triggers, event tags, notes, sharing, and portfolio analytics remain exclusive to Premium subscribers.",
+    a: "During your trial, you unlock full Pro access: multiple watchlists, column customization, real-time price updates, Smart Alerts, and mobile swipe gestures with Undo. Premium features like the stock detail sheet, price triggers, event tags, notes, sharing, and portfolio analytics remain exclusive to Premium subscribers.",
   },
   {
     q: "What's included in the Premium plan?",
-    a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet with multi-day price charts (1D / 1W / 1M / All), price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard, complete with real-time P&L tracking, sector allocation charts, and diversity scoring.",
+    a: "Premium unlocks the full EquityIQ experience: the interactive stock detail sheet, price trigger alerts with email notifications, event tagging & tracking, personal notes on every stock, export as image or PDF, shareable watchlist links, and the Portfolio Dashboard with real-time P&L tracking, sector allocation charts, and diversity scoring.",
   },
   {
     q: "Does the portfolio dashboard update in real time?",
-    a: "The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments, all in real time.",
+    a: "The Portfolio Dashboard includes a 'Refresh All' button that fetches live prices and re-enriches sector data for all your holdings instantly. You get updated P&L figures, sector allocation recalculation, and diversity score adjustments.",
   },
   {
     q: "Which stock exchanges are supported?",
@@ -67,11 +56,11 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "How do price triggers work?",
-    a: "Set a target price on any stock. When the market price crosses your threshold (up or down), you receive an instant email notification, so you never miss a buy or sell opportunity. Email notifications respect the Email Opt-In toggle in your Profile, so you stay in control of what lands in your inbox.",
+    a: "Set a target price on any stock. When the market price crosses your threshold, you receive an email notification. Email notifications respect the Email Opt-In toggle in your Profile.",
   },
   {
     q: "What are Smart Alerts?",
-    a: "Smart Alerts automatically scan your watchlist during live market hours for meaningful events, strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker (with built-in cooldowns) so your inbox and notifications stay signal, not noise. Email digests respect the Email Opt-In toggle in your Profile and update in real time when you change it. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
+    a: "Smart Alerts scan your watchlist during live market hours for meaningful events, strict session-high and session-low breaks, and unusual volume-flow spikes. Each event fires once per day per ticker with built-in cooldowns so your inbox stays signal, not noise. Email digests respect the Email Opt-In toggle in your Profile. Smart Alerts are included with Pro, Premium, and Premium Plus plans.",
   },
   {
     q: "Is there an option available to filter stocks?",
@@ -87,11 +76,7 @@ const FAQ_ITEMS: Array<{ q: string; a?: string | null; richAnswer?: React.ReactN
   },
   {
     q: "Does EquityIQ work on mobile?",
-    a: "Yes, EquityIQ is a mobile-first PWA that works seamlessly on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support, portrait-locked layout, and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to instantly set a price trigger.",
-  },
-  {
-    q: "How does the interactive multi-day price chart work?",
-    a: "Tap any stock (or click the info icon on desktop) to open the detail sheet with a full interactive chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, and hover or touch the chart to see exact prices and dates with crosshair tooltips. Charts run on a clean, validated price history from 2025 onward, new points are recorded only during live market hours, so what you see reflects real market activity, not session-reset sparklines or stale data.",
+    a: "Yes, EquityIQ is a mobile-first PWA that works on any device. Open it in your phone's browser and tap 'Add to Home Screen' to install it like a native app, with offline support and fast loads. On mobile, swipe left on any card to remove it (with a 5-second Undo), and swipe right to set a price trigger.",
   },
 ];
 
@@ -110,9 +95,6 @@ const FAQ = () => {
             </span>
           </button>
           <div className="flex items-center gap-1 sm:gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5">
-              <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Home</span>
-            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/support")} className="hidden sm:inline-flex">
               Support
             </Button>
@@ -132,33 +114,25 @@ const FAQ = () => {
       <section className="pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-10 sm:mb-14">
-            <Badge variant="secondary" className="mb-3">
-              <HelpCircle className="h-3 w-3 mr-1 text-primary" /> FAQ
-            </Badge>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Frequently Asked Questions</h1>
-            <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">
-              Everything you need to know before getting started
-            </p>
           </div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
-            <Accordion type="single" collapsible className="space-y-3">
-              {FAQ_ITEMS.map((faq, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`faq-${i}`}
-                  className="border border-border rounded-lg px-4 data-[state=open]:bg-background data-[state=open]:shadow-sm transition-shadow"
-                >
-                  <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
-                    {faq.richAnswer || faq.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </motion.div>
+          <Accordion type="single" collapsible className="space-y-3">
+            {FAQ_ITEMS.map((faq, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="border border-border rounded-lg px-4 data-[state=open]:bg-background data-[state=open]:shadow-sm transition-shadow"
+              >
+                <AccordionTrigger className="text-left text-sm font-medium hover:no-underline py-4">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line pb-4">
+                  {faq.richAnswer || faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
     </div>

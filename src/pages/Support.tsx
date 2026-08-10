@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { LifeBuoy, TrendingUp, ArrowLeft, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { TrendingUp, ArrowLeft, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Support = () => {
@@ -20,9 +18,6 @@ const Support = () => {
             </span>
           </button>
           <div className="flex items-center gap-1 sm:gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-1.5">
-              <ArrowLeft className="h-4 w-4" /> <span className="hidden sm:inline">Home</span>
-            </Button>
             <Button variant="ghost" size="sm" onClick={() => navigate("/faq")} className="hidden sm:inline-flex">
               FAQ
             </Button>
@@ -41,24 +36,14 @@ const Support = () => {
 
       <section className="pt-24 sm:pt-32 pb-14 sm:pb-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <Badge variant="secondary" className="mb-3">
-              <LifeBuoy className="h-3 w-3 mr-1 text-primary" /> Support
-            </Badge>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Contact support</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
-              Questions about features, pricing or billing? Email us using the address below.
-            </p>
-            <p className="mt-6 text-lg sm:text-xl font-semibold text-primary break-all">support@equityiq.in</p>
-            <p className="text-xs text-muted-foreground mt-4">
-              Typical response time: within 24 hours on business days.
-            </p>
-          </motion.div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Contact support</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-3 max-w-xl mx-auto px-2">
+            Questions about features, pricing or billing? Email us below.
+          </p>
+          <p className="mt-6 text-lg sm:text-xl font-semibold text-primary break-all">support@equityiq.in</p>
+          <p className="text-xs text-muted-foreground mt-4">
+            Typical response time: within 24 hours on business days.
+          </p>
         </div>
       </section>
     </div>
