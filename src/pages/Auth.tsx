@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Loader2, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -83,13 +82,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <motion.div
+      <div
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
         className="w-full max-w-md"
       >
-        <motion.div
+        <div
           className="flex items-center justify-center gap-2 mb-8"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -99,13 +98,11 @@ const Auth = () => {
           <h1 className="text-2xl font-bold">
             Equity<span className="text-primary">IQ</span>
           </h1>
-        </motion.div>
+        </div>
 
         <Card className="shadow-lg border-border/60 overflow-hidden">
           <CardHeader className="pb-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={isLogin ? "login" : "signup"}
+              <div
                 initial={{ opacity: 0, x: isLogin ? -20 : 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: isLogin ? 20 : -20 }}
@@ -117,14 +114,12 @@ const Auth = () => {
                     ? "Sign in to sync your watchlist across devices"
                     : "Sign up to save your preferences securely"}
                 </CardDescription>
-              </motion.div>
-            </AnimatePresence>
+              </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <AnimatePresence>
                 {accountExists && !isLogin && (
-                  <motion.div
+                  <div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
@@ -146,12 +141,10 @@ const Auth = () => {
                         .
                       </p>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
-              <AnimatePresence>
                 {!isLogin && (
-                  <motion.div
+                  <div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -171,9 +164,8 @@ const Auth = () => {
                         className="pl-9"
                       />
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -298,7 +290,7 @@ const Auth = () => {
 
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     </div>
   );
 };
