@@ -429,7 +429,6 @@ const FreshnessPanel = ({
               "inline-block h-2 w-2 rounded-full ring-2 shrink-0",
               styles.dot,
               styles.ring,
-              (info.state === "stale" || info.state === "very-stale") && "animate-pulse",
             )}
           />
           <h3 className="text-sm font-semibold">Data freshness</h3>

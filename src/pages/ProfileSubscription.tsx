@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Crown, Calendar, CreditCard, Loader2, Sparkles, CheckCircle2, Clock, AlertTriangle, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, Crown, Calendar, CreditCard, Loader2, CheckCircle2, Clock, AlertTriangle, ArrowUpRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
@@ -138,7 +138,6 @@ const ProfileSubscription = () => {
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-foreground text-base">
-                <div className="p-1.5 rounded-lg bg-primary/10"><Sparkles className="h-4 w-4 text-primary" /></div>
                 Manage Subscription
               </CardTitle>
               <CardDescription className="text-xs">

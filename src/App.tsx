@@ -11,8 +11,6 @@ import SubscriptionGate from "@/components/SubscriptionGate";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import DevNoticeDialog from "./components/DevNoticeDialog";
-
 // Lazy-loaded routes — keeps the initial bundle small for fast first paint.
 // Landing is also lazy because it's a 1000+ line marketing page that should
 // not block /auth, /subscribe, or other lightweight routes.
@@ -58,7 +56,6 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <DevNoticeDialog />
           <BrowserRouter>
             <Suspense fallback={<RouteFallback />}>
               <Routes>

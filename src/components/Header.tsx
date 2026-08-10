@@ -47,7 +47,7 @@ const Header = () => {
             </h1>
           </button>
           <div className="hidden sm:flex items-center gap-1.5 ml-4 px-3 py-1 rounded-full bg-secondary text-xs font-medium">
-            <Activity className={`h-3 w-3 ${isMarketOpen ? "text-gain animate-pulse" : "text-loss"}`} />
+            <Activity className={`h-3 w-3 ${isMarketOpen ? "text-gain" : "text-loss"}`} />
             <span className="text-secondary-foreground">
               {isMarketOpen ? "Market Open" : "Market Closed"}
             </span>
@@ -88,7 +88,7 @@ const Header = () => {
               onClick={() => navigate("/subscribe")}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 trialDaysLeft <= 3
-                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20 animate-pulse"
+                  ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
                   : "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20"
               }`}
             >
