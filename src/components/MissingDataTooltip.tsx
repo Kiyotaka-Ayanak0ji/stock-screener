@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, memo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertCircle } from "lucide-react";
 
@@ -56,4 +56,4 @@ const MissingDataTooltip = ({
   );
 };
 
-export default MissingDataTooltip;
+export default memo(MissingDataTooltip);

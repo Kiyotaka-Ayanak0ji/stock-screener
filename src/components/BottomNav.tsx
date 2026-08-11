@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Briefcase, User, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,4 +53,4 @@ const BottomNav = () => {
   );
 };
 
-export default BottomNav;
+export default memo(BottomNav);

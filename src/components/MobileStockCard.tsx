@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import { Stock, getStockUrl } from "@/lib/stockData";
 import { useStocks } from "@/contexts/StockContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -396,4 +396,4 @@ const MobileStockCard = ({ stock, index, priceLoading }: MobileStockCardProps) =
   );
 };
 
-export default MobileStockCard;
+export default memo(MobileStockCard);

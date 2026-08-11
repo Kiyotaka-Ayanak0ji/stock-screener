@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Loader2, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X } from "lucide-react";
+import { TrendingUp, Loader2, Mail, Lock as LockIcon, UserPlus, AlertCircle, Eye, EyeOff, Check, X, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -85,14 +86,25 @@ const Auth = () => {
       <div
         className="w-full max-w-md"
       >
-        <div
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
+
+        <Link
+          to="/"
           className="flex items-center justify-center gap-2 mb-8"
+          aria-label="EquityIQ home"
         >
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
             Equity<span className="text-primary">IQ</span>
           </h1>
-        </div>
+        </Link>
+
 
         <Card className="shadow-lg border-border/60 overflow-hidden">
           <CardHeader className="pb-4">
