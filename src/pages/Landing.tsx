@@ -127,12 +127,37 @@ const FEATURES = [
     badge: "Premium Plus",
   },
   {
+    icon: Star,
+    title: "Favourites",
+    description:
+      "Star the stocks you care about most and open them from a dedicated Favourites page, saved to your account across devices.",
+  },
+  {
+    icon: Compass,
+    title: "Guided Onboarding",
+    description:
+      "A short interactive walkthrough shows you how to build a watchlist, add stocks and use filters. Replay it any time from your Profile.",
+  },
+  {
+    icon: Mail,
+    title: "Monthly Activity Report",
+    description:
+      "An optional monthly email summarising your watchlist activity, triggered alerts and portfolio movement. Toggle it independently from other emails.",
+  },
+  {
+    icon: Lock,
+    title: "Google Sign-In & Account Security",
+    description:
+      "Sign in with Google or email, link and unlink providers from your Profile, and verify your email before any data leaves your account.",
+  },
+  {
     icon: Smartphone,
     title: "Mobile PWA  (Install to home screen)",
     description:
       "Install EquityIQ to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
 ];
+
 
 const STATS = [
   { value: "7,500+", label: "NSE + BSE + SME tickers" },
