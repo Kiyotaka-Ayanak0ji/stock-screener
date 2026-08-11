@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getFreshness, type FreshnessState } from "@/lib/stockFreshness";
 import { cn } from "@/lib/utils";
@@ -117,4 +118,4 @@ const StockFreshnessBadge = ({
   );
 };
 
-export default StockFreshnessBadge;
+export default memo(StockFreshnessBadge);

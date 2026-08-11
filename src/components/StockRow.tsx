@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, MessageSquare, Check, X, ExternalLink, Plus, Tag, Bell, BellOff, Crown, Info, Star } from "lucide-react";
 import { Stock, getStockUrl } from "@/lib/stockData";
@@ -452,4 +452,4 @@ const StockRow = ({ stock, index, visibleCustomColumns, priceLoading }: StockRow
   );
 };
 
-export default StockRow;
+export default memo(StockRow);

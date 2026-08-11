@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -27,4 +28,4 @@ const FilterLockBadge = ({ label, onClick }: FilterLockBadgeProps) => {
   );
 };
 
-export default FilterLockBadge;
+export default memo(FilterLockBadge);

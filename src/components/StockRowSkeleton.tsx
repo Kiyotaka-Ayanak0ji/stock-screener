@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 
@@ -104,4 +105,4 @@ const StockRowSkeleton = ({ index, columnVisibility, customColumnCount }: StockR
   );
 };
 
-export default StockRowSkeleton;
+export default memo(StockRowSkeleton);
