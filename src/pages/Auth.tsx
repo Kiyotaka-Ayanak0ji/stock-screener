@@ -86,14 +86,25 @@ const Auth = () => {
       <div
         className="w-full max-w-md"
       >
-        <div
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to home
+        </Link>
+
+        <Link
+          to="/"
           className="flex items-center justify-center gap-2 mb-8"
+          aria-label="EquityIQ home"
         >
           <TrendingUp className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold">
             Equity<span className="text-primary">IQ</span>
           </h1>
-        </div>
+        </Link>
+
 
         <Card className="shadow-lg border-border/60 overflow-hidden">
           <CardHeader className="pb-4">
