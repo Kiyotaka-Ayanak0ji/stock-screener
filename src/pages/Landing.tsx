@@ -32,6 +32,10 @@ import {
   Undo2,
   Activity,
   Zap,
+  Star,
+  Compass,
+  Mail,
+
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
