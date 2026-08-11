@@ -52,12 +52,12 @@ const FEATURES = [
       "Watch your stocks move in real time with live price updates, change percentages, and volume data across NSE & BSE.",
   },
   {
-    icon: Activity,
-    title: "Interactive Multi-Day Charts",
+    icon: Shield,
+    title: "Automatic Data Verification",
     description:
-      "Tap any stock to open a rich detail sheet with an interactive price chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch. Built on a clean, validated price history from 2025 onward.",
-    badge: "Premium",
+      "Every stock is cross-checked once per session against Yahoo Finance, Groww and Screener, so prices, volume, market cap and P/E stay accurate: no manual verification needed.",
   },
+
   {
     icon: Bell,
     title: "Custom Price Triggers",
