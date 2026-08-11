@@ -173,19 +173,20 @@ const STATS = [
 const WHATS_NEW = [
   {
     icon: Activity,
-    title: "Verify against Screener",
-    desc: "One-click sanity check on any ticker. Cross-references Yahoo + Screener + Groww and rewrites stale prices instantly.",
+    title: "Automatic price tallying",
+    desc: "Prices are reconciled across Yahoo Finance, Groww and Screener once per session and cached: no manual verification step.",
   },
   {
-    icon: Layers,
-    title: "Full universe coverage",
-    desc: "We continuously seed all NSE, BSE and SME tickers (~7,500) every 24 hours so even illiquid micro-caps stay fresh.",
+    icon: Star,
+    title: "Favourites & guided tour",
+    desc: "Star your key stocks for a dedicated page, and use the interactive walkthrough to get productive in minutes.",
   },
   {
-    icon: Sparkles,
-    title: "Smart anomaly alerts",
-    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist:  No manual setup, ever.",
+    icon: Zap,
+    title: "Auto-refresh on reload",
+    desc: "Premium Plus members can force a live fetch on every page reload and watchlist switch, toggled from Profile.",
   },
+
   {
     icon: Shield,
     title: "Transparent missing data",
