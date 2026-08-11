@@ -29,7 +29,8 @@ export const GUEST_LOCKED = [
   "Advanced filters (Price, Volume, P/E, Market Cap)",
   "Price triggers & email alerts",
   "Event tags & notes",
-  "Stock detail sheet with multi-day chart",
+  "Stock detail sheet with fundamentals",
+  "Favourites page",
   "Export & sharing",
   "Portfolio dashboard",
 ] as const;
@@ -41,6 +42,7 @@ export const PRO_FEATURES = [
   "Column visibility customization",
   "Smart Alerts (session high/low breaks & volume spikes, with cooldowns)",
   "Mobile swipe gestures with Undo",
+  "Favourites page & guided walkthrough",
 ] as const;
 
 // Features Pro does NOT have — Premium-gated (used for cross-out on Pro card).
@@ -48,7 +50,7 @@ export const PRO_LOCKED = [
   "Advanced filters (Price, Volume, Market Cap, P/E)",
   "Price triggers with email alerts",
   "Event tags & personal notes",
-  "Stock detail sheet with multi-day interactive chart",
+  "Stock detail sheet with fundamentals & notes",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Portfolio dashboard with sector analysis",
@@ -61,7 +63,7 @@ export const PREMIUM_EXTRAS = [
   "Price trigger alerts with email",
   "Event tagging & tracking",
   "Notes on stocks",
-  "Stock detail sheet with interactive multi-day chart (1D/1W/1M/All)",
+  "Stock detail sheet with fundamentals, notes & event tags",
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Portfolio dashboard",
@@ -74,6 +76,7 @@ export const PREMIUM_PLUS_EXTRAS = [
   "Unlimited price trigger alerts",
   "Auto-refresh prices on reload (toggle in Profile)",
   "Beta access to new features",
+  "Monthly activity report email",
   "Priority customer support",
 ] as const;
 
