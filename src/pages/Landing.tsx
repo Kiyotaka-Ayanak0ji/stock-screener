@@ -32,6 +32,10 @@ import {
   Undo2,
   Activity,
   Zap,
+  Star,
+  Compass,
+  Mail,
+
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -52,12 +56,12 @@ const FEATURES = [
       "Watch your stocks move in real time with live price updates, change percentages, and volume data across NSE & BSE.",
   },
   {
-    icon: Activity,
-    title: "Interactive Multi-Day Charts",
+    icon: Shield,
+    title: "Automatic Data Verification",
     description:
-      "Tap any stock to open a rich detail sheet with an interactive price chart. Switch between line and candlestick modes across 1D, 1W, 1M, and All-time ranges, with crosshair tooltips on hover and touch. Built on a clean, validated price history from 2025 onward.",
-    badge: "Premium",
+      "Every stock is cross-checked once per session against Yahoo Finance, Groww and Screener, so prices, volume, market cap and P/E stay accurate: no manual verification needed.",
   },
+
   {
     icon: Bell,
     title: "Custom Price Triggers",
@@ -127,12 +131,37 @@ const FEATURES = [
     badge: "Premium Plus",
   },
   {
+    icon: Star,
+    title: "Favourites",
+    description:
+      "Star the stocks you care about most and open them from a dedicated Favourites page, saved to your account across devices.",
+  },
+  {
+    icon: Compass,
+    title: "Guided Onboarding",
+    description:
+      "A short interactive walkthrough shows you how to build a watchlist, add stocks and use filters. Replay it any time from your Profile.",
+  },
+  {
+    icon: Mail,
+    title: "Monthly Activity Report",
+    description:
+      "An optional monthly email summarising your watchlist activity, triggered alerts and portfolio movement. Toggle it independently from other emails.",
+  },
+  {
+    icon: Lock,
+    title: "Google Sign-In & Account Security",
+    description:
+      "Sign in with Google or email, link and unlink providers from your Profile, and verify your email before any data leaves your account.",
+  },
+  {
     icon: Smartphone,
     title: "Mobile PWA  (Install to home screen)",
     description:
       "Install EquityIQ to your home screen for a native-app feel. Locked to portrait orientation, fast loads, and works offline for your last-known prices.",
   },
 ];
+
 
 const STATS = [
   { value: "7,500+", label: "NSE + BSE + SME tickers" },
@@ -144,19 +173,20 @@ const STATS = [
 const WHATS_NEW = [
   {
     icon: Activity,
-    title: "Verify against Screener",
-    desc: "One-click sanity check on any ticker. Cross-references Yahoo + Screener + Groww and rewrites stale prices instantly.",
+    title: "Automatic price tallying",
+    desc: "Prices are reconciled across Yahoo Finance, Groww and Screener once per session and cached: no manual verification step.",
   },
   {
-    icon: Layers,
-    title: "Full universe coverage",
-    desc: "We continuously seed all NSE, BSE and SME tickers (~7,500) every 24 hours so even illiquid micro-caps stay fresh.",
+    icon: Star,
+    title: "Favourites & guided tour",
+    desc: "Star your key stocks for a dedicated page, and use the interactive walkthrough to get productive in minutes.",
   },
   {
-    icon: Sparkles,
-    title: "Smart anomaly alerts",
-    desc: "Auto-flagged 52-week breakouts and unusual volume spikes across your watchlist:  No manual setup, ever.",
+    icon: Zap,
+    title: "Auto-refresh on reload",
+    desc: "Premium Plus members can force a live fetch on every page reload and watchlist switch, toggled from Profile.",
   },
+
   {
     icon: Shield,
     title: "Transparent missing data",
