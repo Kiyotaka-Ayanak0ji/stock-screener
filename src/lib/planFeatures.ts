@@ -18,6 +18,10 @@ export const PLAN_PRICING = {
 export const GUEST_FEATURES = [
   "Up to 20 stocks in 1 watchlist",
   "Basic price data (NSE & BSE)",
+  "Automatic data verification (cross-checked once per session)",
+  "Transparent missing-data indicators — never a silent zero",
+  "Filter stocks by data completeness",
+  "Sign in with Google or email",
   "Light & dark mode",
   "Mobile PWA  (Install to home screen)",
 ] as const;
