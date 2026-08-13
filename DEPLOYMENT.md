@@ -2,38 +2,10 @@
 
 Covers local development, Docker Compose, production Docker, a plain VPS,
 reverse proxying, HTTPS, backups, migrations, upgrades and rollback.
+No Lovable cloud service is required at any point.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the service map and startup order,
 and [MIGRATION.md](./MIGRATION.md) for moving an existing database.
-
-## 0. Two supported backends
-
-The app talks to its backend only through three environment variables, so the
-same codebase runs against either target without any code change:
-
-| Mode | `VITE_SUPABASE_URL` | Managed by |
-| --- | --- | --- |
-| Hosted (Lovable Cloud) | the hosted project URL written into `.env` by the Cloud connection | Lovable Cloud |
-| Fully local / self hosted | `http://localhost:54321` (or your own host) | you, via `npx supabase start` or the Docker stack |
-
-Rules that keep both modes working:
-
-- Never hardcode a URL or key in source. `src/integrations/supabase/client.ts`
-  reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` only.
-- The hosted `.env` is generated; keep a copy of your local values in
-  `.env.local` (git-ignored) and switch by swapping the two variables.
-- Schema parity comes from the same SQL: the baseline in
-  `supabase/migrations/00000000000000_production_baseline.sql` plus everything
-  in `db/migrations/`, applied by `./scripts/migrate.sh up`. The hosted project
-  runs the identical files, so a local instance is a faithful replica.
-- Edge functions in `supabase/functions/` are plain Deno HTTP handlers. Hosted
-  deploys happen automatically; locally they are served by
-  `npx supabase functions serve`.
-- Every integration has an offline substitute: SMTP/Mailpit instead of a hosted
-  mailer, and Razorpay/Groww keys are optional — those features simply stay off
-  when the variables are unset.
-
-
 
 ## 1. Local development
 
