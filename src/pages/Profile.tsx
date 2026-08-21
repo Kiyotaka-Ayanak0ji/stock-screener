@@ -20,7 +20,7 @@ import { motion } from "framer-motion";
 const Profile = () => {
   const { user, profile, signOut } = useAuth();
   const { isAdmin } = useAdminRole();
-  const { isPremiumPlus } = useSubscription();
+  const { isPremiumPlus, isPremium } = useSubscription();
   const { autoRefreshOnLoad, setAutoRefreshOnLoad } = useStocks();
   const [savingAutoRefresh, setSavingAutoRefresh] = useState(false);
   const navigate = useNavigate();
@@ -340,18 +340,24 @@ const Profile = () => {
                   <Switch id="email-opt-in" checked={emailOptIn} onCheckedChange={setEmailOptIn} />
                 </div>
 
-                <div className="mt-3 flex items-center justify-between rounded-lg border border-border p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                <div className={`mt-3 flex items-center justify-between rounded-lg border p-3 sm:p-4 transition-colors ${isPremium ? "border-border hover:bg-muted/30" : "border-border opacity-70"}`}>
                   <div className="space-y-0.5">
-                    <Label htmlFor="monthly-report-opt-in" className="text-sm font-medium">
+                    <Label htmlFor="monthly-report-opt-in" className="text-sm font-medium flex items-center gap-2">
                       Monthly activity report
+                      <span className="rounded-full border border-primary/40 px-2 py-0.5 text-[10px] font-medium text-primary">
+                        Premium
+                      </span>
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      One email at the start of each month with your watchlists, favourites and alerts.
+                      {isPremium
+                        ? "One email at the start of each month with your watchlists, favourites and alerts."
+                        : "Available on Premium and Premium Plus plans."}
                     </p>
                   </div>
                   <Switch
                     id="monthly-report-opt-in"
-                    checked={monthlyReportOptIn}
+                    checked={isPremium && monthlyReportOptIn}
+                    disabled={!isPremium}
                     onCheckedChange={setMonthlyReportOptIn}
                   />
                 </div>
