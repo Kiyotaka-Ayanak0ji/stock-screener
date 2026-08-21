@@ -37,6 +37,7 @@ export const GUEST_LOCKED = [
   "Favourites page",
   "Export & sharing",
   "Portfolio dashboard",
+  "Monthly activity report email",
 ] as const;
 
 // Pro tier — what's included.
@@ -58,6 +59,7 @@ export const PRO_LOCKED = [
   "Export as Image & PDF",
   "Shareable watchlist links",
   "Portfolio dashboard with sector analysis",
+  "Monthly activity report email",
 ] as const;
 
 // Premium tier — everything in Pro plus these.
@@ -72,6 +74,7 @@ export const PREMIUM_EXTRAS = [
   "Shareable watchlist links",
   "Portfolio dashboard",
   "Sector allocation & diversity score",
+  "Monthly activity report email (toggle in Profile)",
 ] as const;
 
 // Premium Plus tier — everything in Premium plus these.
@@ -80,7 +83,6 @@ export const PREMIUM_PLUS_EXTRAS = [
   "Unlimited price trigger alerts",
   "Auto-refresh prices on reload (toggle in Profile)",
   "Beta access to new features",
-  "Monthly activity report email",
   "Priority customer support",
 ] as const;
 

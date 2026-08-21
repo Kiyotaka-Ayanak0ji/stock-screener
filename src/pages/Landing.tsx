@@ -147,6 +147,7 @@ const FEATURES = [
     title: "Monthly Activity Report",
     description:
       "An optional monthly email summarising your watchlist activity, triggered alerts and portfolio movement. Toggle it independently from other emails.",
+    badge: "Premium",
   },
   {
     icon: Lock,

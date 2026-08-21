@@ -111,10 +111,17 @@ Deno.serve(async (req) => {
       admin.from('user_preferences').select('price_triggers').eq('user_id', profile.user_id).maybeSingle(),
       admin
         .from('user_subscriptions')
-        .select('plan, status')
+        .select('plan, status, subscription_ends_at')
         .eq('user_id', profile.user_id)
         .maybeSingle(),
     ])
+
+    // Premium and above only.
+    if (!isPremiumOrAbove(subscription.data)) {
+      skipped++
+      continue
+    }
+
 
     const tickerSet = new Set<string>()
     for (const w of watchlists.data ?? []) {
@@ -221,4 +228,26 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
+}
+
+const PREMIUM_PLANS = new Set([
+  'premium_monthly',
+  'premium_yearly',
+  'yearly',
+  'annual',
+  'premium_plus_monthly',
+  'premium_plus_yearly',
+  'lifetime',
+])
+
+// Monthly reports are a Premium (and above) feature.
+function isPremiumOrAbove(
+  sub: { plan?: string | null; status?: string | null; subscription_ends_at?: string | null } | null,
+): boolean {
+  if (!sub) return false
+  if (!PREMIUM_PLANS.has(sub.plan ?? '')) return false
+  if (sub.plan === 'lifetime' || sub.status === 'lifetime') return true
+  if (sub.status !== 'active') return false
+  if (!sub.subscription_ends_at) return true
+  return new Date(sub.subscription_ends_at) > new Date()
 }
