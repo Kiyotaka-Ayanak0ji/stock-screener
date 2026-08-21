@@ -111,10 +111,17 @@ Deno.serve(async (req) => {
       admin.from('user_preferences').select('price_triggers').eq('user_id', profile.user_id).maybeSingle(),
       admin
         .from('user_subscriptions')
-        .select('plan, status')
+        .select('plan, status, subscription_ends_at')
         .eq('user_id', profile.user_id)
         .maybeSingle(),
     ])
+
+    // Premium and above only.
+    if (!isPremiumOrAbove(subscription.data)) {
+      skipped++
+      continue
+    }
+
 
     const tickerSet = new Set<string>()
     for (const w of watchlists.data ?? []) {
